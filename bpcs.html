@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biophysical Chemistry Research Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            height: fit-content;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .simulation-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .control-group input[type="number"],
+        .control-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .control-group input[type="number"]:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .value-display {
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        button.export {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        canvas {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: #fafafa;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .info-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+        }
+
+        .info-panel h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-panel p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Biophysical Chemistry Research Simulator</h1>
+            <p class="subtitle">Advanced Molecular Simulations for Research & Education</p>
+        </header>
+
+        <div class="main-content">
+            <div class="control-panel">
+                <div class="tab-container">
+                    <button class="tab active" onclick="switchSimulation('enzymeKinetics')">Enzyme Kinetics</button>
+                    <button class="tab" onclick="switchSimulation('proteinFolding')">Protein Folding</button>
+                    <button class="tab" onclick="switchSimulation('ligandBinding')">Ligand Binding</button>
+                    <button class="tab" onclick="switchSimulation('membraneTransport')">Membrane Transport</button>
+                    <button class="tab" onclick="switchSimulation('molecularDynamics')">MD Simulation</button>
+                </div>
+
+                <div id="enzymeKineticsControls" class="controls">
+                    <div class="control-group">
+                        <label>Substrate Concentration (mM)</label>
+                        <input type="range" id="substrateConc" min="0" max="100" value="50" step="1">
+                        <div class="value-display">Value: <span id="substrateConcValue">50</span> mM</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Enzyme Concentration (μM)</label>
+                        <input type="range" id="enzymeConc" min="0.1" max="10" value="1" step="0.1">
+                        <div class="value-display">Value: <span id="enzymeConcValue">1</span> μM</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Vmax (μmol/min)</label>
+                        <input type="number" id="vmax" value="100" min="1" max="500">
+                    </div>
+                    <div class="control-group">
+                        <label>Km (mM)</label>
+                        <input type="number" id="km" value="10" min="0.1" max="100">
+                    </div>
+                    <div class="control-group">
+                        <label>Inhibitor Type</label>
+                        <select id="inhibitorType">
+                            <option value="none">None</option>
+                            <option value="competitive">Competitive</option>
+                            <option value="noncompetitive">Non-competitive</option>
+                            <option value="uncompetitive">Uncompetitive</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Inhibitor Concentration (μM)</label>
+                        <input type="range" id="inhibitorConc" min="0" max="50" value="0" step="0.5">
+                        <div class="value-display">Value: <span id="inhibitorConcValue">0</span> μM</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Temperature (°C)</label>
+                        <input type="range" id="temperature" min="0" max="100" value="37" step="1">
+                        <div class="value-display">Value: <span id="temperatureValue">37</span> °C</div>
+                    </div>
+                    <div class="control-group">
+                        <label>pH</label>
+                        <input type="range" id="pH" min="4" max="10" value="7" step="0.1">
+                        <div class="value-display">Value: <span id="pHValue">7</span></div>
+                    </div>
+                </div>
+
+                <div id="proteinFoldingControls" class="controls" style="display:none;">
+                    <div class="control-group">
+                        <label>Chain Length</label>
+                        <input type="range" id="chainLength" min="10" max="100" value="50" step="1">
+                        <div class="value-display">Value: <span id="chainLengthValue">50</span> residues</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Temperature (K)</label>
+                        <input type="range" id="foldingTemp" min="250" max="400" value="300" step="5">
+                        <div class="value-display">Value: <span id="foldingTempValue">300</span> K</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Hydrophobic Ratio</label>
+                        <input type="range" id="hydrophobicRatio" min="0" max="1" value="0.5" step="0.05">
+                        <div class="value-display">Value: <span id="hydrophobicRatioValue">0.5</span></div>
+                    </div>
+                    <div class="control-group">
+                        <label>Chaperone Activity</label>
+                        <select id="chaperoneActivity">
+                            <option value="none">None</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="ligandBindingControls" class="controls" style="display:none;">
+                    <div class="control-group">
+                        <label>Ligand Concentration (μM)</label>
+                        <input type="range" id="ligandConc" min="0" max="100" value="10" step="1">
+                        <div class="value-display">Value: <span id="ligandConcValue">10</span> μM</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Kd (μM)</label>
+                        <input type="number" id="kd" value="5" min="0.01" max="100" step="0.01">
+                    </div>
+                    <div class="control-group">
+                        <label>Number of Binding Sites</label>
+                        <input type="number" id="bindingSites" value="1" min="1" max="4" step="1">
+                    </div>
+                    <div class="control-group">
+                        <label>Cooperativity (Hill Coefficient)</label>
+                        <input type="range" id="hillCoeff" min="0.5" max="4" value="1" step="0.1">
+                        <div class="value-display">Value: <span id="hillCoeffValue">1</span></div>
+                    </div>
+                </div>
+
+                <div id="membraneTransportControls" class="controls" style="display:none;">
+                    <div class="control-group">
+                        <label>Transport Type</label>
+                        <select id="transportType">
+                            <option value="passive">Passive Diffusion</option>
+                            <option value="facilitated">Facilitated Diffusion</option>
+                            <option value="active">Active Transport</option>
+                            <option value="cotransport">Cotransport</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Concentration Gradient (mM)</label>
+                        <input type="range" id="concGradient" min="0" max="100" value="50" step="1">
+                        <div class="value-display">Value: <span id="concGradientValue">50</span> mM</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Membrane Permeability</label>
+                        <input type="range" id="permeability" min="0" max="1" value="0.5" step="0.01">
+                        <div class="value-display">Value: <span id="permeabilityValue">0.5</span></div>
+                    </div>
+                    <div class="control-group">
+                        <label>ATP Availability (%)</label>
+                        <input type="range" id="atpLevel" min="0" max="100" value="100" step="5">
+                        <div class="value-display">Value: <span id="atpLevelValue">100</span>%</div>
+                    </div>
+                </div>
+
+                <div id="molecularDynamicsControls" class="controls" style="display:none;">
+                    <div class="control-group">
+                        <label>Number of Atoms</label>
+                        <input type="range" id="numAtoms" min="10" max="200" value="50" step="10">
+                        <div class="value-display">Value: <span id="numAtomsValue">50</span></div>
+                    </div>
+                    <div class="control-group">
+                        <label>Simulation Temperature (K)</label>
+                        <input type="range" id="mdTemp" min="100" max="500" value="300" step="10">
+                        <div class="value-display">Value: <span id="mdTempValue">300</span> K</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Time Step (fs)</label>
+                        <input type="number" id="timeStep" value="1" min="0.1" max="5" step="0.1">
+                    </div>
+                    <div class="control-group">
+                        <label>Force Field</label>
+                        <select id="forceField">
+                            <option value="amber">AMBER</option>
+                            <option value="charmm">CHARMM</option>
+                            <option value="gromos">GROMOS</option>
+                            <option value="opls">OPLS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="startSimulation()">Start Simulation</button>
+                    <button class="stop" onclick="stopSimulation()">Stop</button>
+                    <button class="export" onclick="exportData()">Export Data</button>
+                </div>
+
+                <div class="info-panel">
+                    <h3>Current Model</h3>
+                    <p id="modelInfo">Michaelis-Menten Enzyme Kinetics</p>
+                    <div class="formula" id="formulaDisplay">v = (Vmax × [S]) / (Km + [S])</div>
+                </div>
+            </div>
+
+            <div class="simulation-area">
+                <canvas id="simulationCanvas"></canvas>
+                
+                <div class="stats-panel">
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat1Value">0</div>
+                        <div class="stat-label" id="stat1Label">Reaction Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat2Value">0</div>
+                        <div class="stat-label" id="stat2Label">Product Formed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat3Value">0</div>
+                        <div class="stat-label" id="stat3Label">Efficiency</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat4Value">0</div>
+                        <div class="stat-label" id="stat4Label">Time (s)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let canvas, ctx;
+        let animationId;
+        let currentSimulation = 'enzymeKinetics';
+        let simulationData = [];
+        let time = 0;
+        let isRunning = false;
+
+        // Particle system for molecular dynamics
+        let particles = [];
+        let bonds = [];
+
+        // Initialize canvas
+        window.onload = function() {
+            canvas = document.getElementById('simulationCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            initializeControls();
+        };
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+
+        function initializeControls() {
+            // Add event listeners for all range inputs
+            document.querySelectorAll('input[type="range"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const displayId = this.id + 'Value';
+                    const display = document.getElementById(displayId);
+                    if (display) {
+                        display.textContent = this.value;
+                    }
+                });
+            });
+        }
+
+        function switchSimulation(type) {
+            currentSimulation = type;
+            stopSimulation();
+            
+            // Hide all control panels
+            document.querySelectorAll('.controls').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            
+            // Show selected control panel
+            document.getElementById(type + 'Controls').style.display = 'block';
+            
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update model info
+            updateModelInfo(type);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function updateModelInfo(type) {
+            const modelInfo = document.getElementById('modelInfo');
+            const formulaDisplay = document.getElementById('formulaDisplay');
+            
+            const models = {
+                enzymeKinetics: {
+                    name: 'Michaelis-Menten Enzyme Kinetics',
+                    formula: 'v = (Vmax × [S]) / (Km + [S])'
+                },
+                proteinFolding: {
+                    name: 'Protein Folding Energy Landscape',
+                    formula: 'ΔG = ΔH - TΔS'
+                },
+                ligandBinding: {
+                    name: 'Ligand-Receptor Binding',
+                    formula: 'θ = [L]ⁿ / (Kd + [L]ⁿ)'
+                },
+                membraneTransport: {
+                    name: 'Membrane Transport Kinetics',
+                    formula: 'J = -P × A × (C₂ - C₁)'
+                },
+                molecularDynamics: {
+                    name: 'Molecular Dynamics Simulation',
+                    formula: 'F = ma = -∇U(r)'
+                }
+            };
+            
+            modelInfo.textContent = models[type].name;
+            formulaDisplay.textContent = models[type].formula;
+        }
+
+        function startSimulation() {
+            if (isRunning) return;
+            isRunning = true;
+            time = 0;
+            simulationData = [];
+            
+            switch(currentSimulation) {
+                case 'enzymeKinetics':
+                    runEnzymeKinetics();
+                    break;
+                case 'proteinFolding':
+                    runProteinFolding();
+                    break;
+                case 'ligandBinding':
+                    runLigandBinding();
+                    break;
+                case 'membraneTransport':
+                    runMembraneTransport();
+                    break;
+                case 'molecularDynamics':
+                    runMolecularDynamics();
+                    break;
+            }
+        }
+
+        function stopSimulation() {
+            isRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function runEnzymeKinetics() {
+            const substrateConc = parseFloat(document.getElementById('substrateConc').value);
+            const enzymeConc = parseFloat(document.getElementById('enzymeConc').value);
+            const vmax = parseFloat(document.getElementById('vmax').value);
+            const km = parseFloat(document.getElementById('km').value);
+            const inhibitorType = document.getElementById('inhibitorType').value;
+            const inhibitorConc = parseFloat(document.getElementById('inhibitorConc').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const pH = parseFloat(document.getElementById('pH').value);
+            
+            let substrate = substrateConc;
+            let product = 0;
+            const dataPoints = [];
+            
+            function animate() {
+                if (!isRunning) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Calculate reaction rate with inhibitor effects
+                let effectiveKm = km;
+                let effectiveVmax = vmax;
+                
+                if (inhibitorType === 'competitive' && inhibitorConc > 0) {
+                    effectiveKm = km * (1 + inhibitorConc / 10);
+                } else if (inhibitorType === 'noncompetitive' && inhibitorConc > 0) {
+                    effectiveVmax = vmax / (1 + inhibitorConc / 10);
+                } else if (inhibitorType === 'uncompetitive' && inhibitorConc > 0) {
+                    effectiveKm = km / (1 + inhibitorConc / 10);
+                    effectiveVmax = vmax / (1 + inhibitorConc / 10);
+                }
+                
+                // Temperature effect
+                const tempFactor = Math.exp(-(temperature - 37) * 0.01);
+                effectiveVmax *= tempFactor;
+                
+                // pH effect
+                const pHFactor = Math.exp(-Math.pow(pH - 7, 2) * 0.5);
+                effectiveVmax *= pHFactor;
+                
+                const reactionRate = (effectiveVmax * substrate) / (effectiveKm + substrate);
+                
+                // Update concentrations
+                const dt = 0.01;
+                substrate -= reactionRate * dt * enzymeConc;
+                product += reactionRate * dt * enzymeConc;
+                
+                if (substrate < 0) substrate = 0;
+                
+                // Store data point
+                dataPoints.push({time: time, substrate: substrate, product: product, rate: reactionRate});
+                if (dataPoints.length > 300) dataPoints.shift();
+                
+                // Draw axes
+                ctx.strokeStyle = '#ddd';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(50, canvas.height - 50);
+                ctx.lineTo(canvas.width - 50, canvas.height - 50);
+                ctx.moveTo(50, 50);
+                ctx.lineTo(50, canvas.height - 50);
+                ctx.stroke();
+                
+                // Draw substrate concentration
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                dataPoints.forEach((point, i) => {
+                    const x = 50 + (i / 300) * (canvas.width - 100);
+                    const y = canvas.height - 50 - (point.substrate / substrateConc) * (canvas.height - 100);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+                
+                // Draw product concentration
+                ctx.strokeStyle = '#f093fb';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                dataPoints.forEach((point, i) => {
+                    const x = 50 + (i / 300) * (canvas.width - 100);
+                    const y = canvas.height - 50 - (point.product / substrateConc) * (canvas.height - 100);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+                
+                // Draw legend
+                ctx.fillStyle = '#667eea';
+                ctx.fillRect(canvas.width - 200, 20, 20, 20);
+                ctx.fillStyle = '#333';
+                ctx.font = '14px sans-serif';
+                ctx.fillText('Substrate', canvas.width - 170, 35);
+                
+                ctx.fillStyle = '#f093fb';
+                ctx.fillRect(canvas.width - 200, 50, 20, 20);
+                ctx.fillStyle = '#333';
+                ctx.fillText('Product', canvas.width - 170, 65);
+                
+                // Update stats
+                document.getElementById('stat1Value').textContent = reactionRate.toFixed(2);
+                document.getElementById('stat1Label').textContent = 'Rate (μM/min)';
+                document.getElementById('stat2Value').textContent = product.toFixed(2);
+                document.getElementById('stat2Label').textContent = 'Product (mM)';
+                document.getElementById('stat3Value').textContent = (reactionRate / effectiveVmax * 100).toFixed(1) + '%';
+                document.getElementById('stat3Label').textContent = 'Efficiency';
+                document.getElementById('stat4Value').textContent = time.toFixed(1);
+                
+                time += dt;
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function runProteinFolding() {
+            const chainLength = parseInt(document.getElementById('chainLength').value);
+            const temperature = parseFloat(document.getElementById('foldingTemp').value);
+            const hydrophobicRatio = parseFloat(document.getElementById('hydrophobicRatio').value);
+            const chaperoneActivity = document.getElementById('chaperoneActivity').value;
+            
+            // Initialize protein chain
+            const chain = [];
+            for (let i = 0; i < chainLength; i++) {
+                chain.push({
+                    x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+                    y: canvas.height / 2 + (Math.random() - 0.5) * 200,
+                    vx: 0,
+                    vy: 0,
+                    hydrophobic: Math.random() < hydrophobicRatio
+                });
+            }
+            
+            let foldingProgress = 0;
+            let nativeContacts = 0;
+            
+            function animate() {
+                if (!isRunning) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Calculate forces
+                const kT = temperature * 0.0083;
+                const chaperoneForce = chaperoneActivity === 'high' ? 2 : chaperoneActivity === 'medium' ? 1 : chaperoneActivity === 'low' ? 0.5 : 0;
+                
+                chain.forEach((residue, i) => {
+                    // Random thermal motion
+                    residue.vx += (Math.random() - 0.5) * kT;
+                    residue.vy += (Math.random() - 0.5) * kT;
+                    
+                    // Chain connectivity
+                    if (i > 0) {
+                        const prev = chain[i - 1];
+                        const dx = prev.x - residue.x;
+                        const dy = prev.y - residue.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist > 20) {
+                            residue.vx += dx * 0.01;
+                            residue.vy += dy * 0.01;
+                        }
+                    }
+                    
+                    // Hydrophobic interactions
+                    if (residue.hydrophobic) {
+                        chain.forEach((other, j) => {
+                            if (i !== j && other.hydrophobic) {
+                                const dx = other.x - residue.x;
+                                const dy = other.y - residue.y;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist < 100 && dist > 20) {
+                                    residue.vx += dx * 0.001 * (1 + chaperoneForce);
+                                    residue.vy += dy * 0.001 * (1 + chaperoneForce);
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Apply velocity with damping
+                    residue.x += residue.vx;
+                    residue.y += residue.vy;
+                    residue.vx *= 0.95;
+                    residue.vy *= 0.95;
+                    
+                    // Keep in bounds
+                    if (residue.x < 50) residue.x = 50;
+                    if (residue.x > canvas.width - 50) residue.x = canvas.width - 50;
+                    if (residue.y < 50) residue.y = 50;
+                    if (residue.y > canvas.height - 50) residue.y = canvas.height - 50;
+                });
+                
+                // Draw protein chain
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                chain.forEach((residue, i) => {
+                    if (i === 0) ctx.moveTo(residue.x, residue.y);
+                    else ctx.lineTo(residue.x, residue.y);
+                });
+                ctx.stroke();
+                
+                // Draw residues
+                chain.forEach(residue => {
+                    ctx.beginPath();
+                    ctx.arc(residue.x, residue.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = residue.hydrophobic ? '#f093fb' : '#4facfe';
+                    ctx.fill();
+                });
+                
+                // Calculate folding metrics
+                let totalDist = 0;
+                let contacts = 0;
+                for (let i = 0; i < chain.length - 1; i++) {
+                    for (let j = i + 2; j < chain.length; j++) {
+                        const dx = chain[i].x - chain[j].x;
+                        const dy = chain[i].y - chain[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        totalDist += dist;
+                        if (dist < 30) contacts++;
+                    }
+                }
+                
+                const compactness = 1000 / totalDist;
+                foldingProgress = Math.min(100, foldingProgress + compactness * 0.1);
+                nativeContacts = contacts;
+                
+                // Update stats
+                document.getElementById('stat1Value').textContent = foldingProgress.toFixed(1) + '%';
+                document.getElementById('stat1Label').textContent = 'Folding Progress';
+                document.getElementById('stat2Value').textContent = nativeContacts;
+                document.getElementById('stat2Label').textContent = 'Native Contacts';
+                document.getElementById('stat3Value').textContent = compactness.toFixed(2);
+                document.getElementById('stat3Label').textContent = 'Compactness';
+                document.getElementById('stat4Value').textContent = time.toFixed(1);
+                
+                time += 0.01;
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function runLigandBinding() {
+            const ligandConc = parseFloat(document.getElementById('ligandConc').value);
+            const kd = parseFloat(document.getElementById('kd').value);
+            const bindingSites = parseInt(document.getElementById('bindingSites').value);
+            const hillCoeff = parseFloat(document.getElementById('hillCoeff').value);
+            
+            const dataPoints = [];
+            const receptors = [];
+            
+            // Initialize receptors
+            for (let i = 0; i < 10; i++) {
+                receptors.push({
+                    x: 100 + (i % 5) * 150,
+                    y: 150 + Math.floor(i / 5) * 200,
+                    sites: Array(bindingSites).fill(false),
+                    saturation: 0
+                });
+            }
+            
+            function animate() {
+                if (!isRunning) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Calculate binding using Hill equation
+                const theta = Math.pow(ligandConc, hillCoeff) / (Math.pow(kd, hillCoeff) + Math.pow(ligandConc, hillCoeff));
+                
+                // Update receptor binding states
+                receptors.forEach(receptor => {
+                    receptor.saturation = theta;
+                    for (let i = 0; i < bindingSites; i++) {
+                        receptor.sites[i] = Math.random() < theta;
+                    }
+                });
+                
+                // Store data
+                dataPoints.push({conc: ligandConc, binding: theta * 100});
+                if (dataPoints.length > 100) dataPoints.shift();
+                
+                // Draw binding curve
+                ctx.strokeStyle = '#ddd';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(50, canvas.height - 50);
+                ctx.lineTo(canvas.width - 50, canvas.height - 50);
+                ctx.moveTo(50, 50);
+                ctx.lineTo(50, canvas.height - 50);
+                ctx.stroke();
+                
+                // Draw theoretical curve
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let c = 0; c <= 100; c++) {
+                    const x = 50 + (c / 100) * (canvas.width - 100);
+                    const binding = Math.pow(c, hillCoeff) / (Math.pow(kd, hillCoeff) + Math.pow(c, hillCoeff));
+                    const y = canvas.height - 50 - binding * (canvas.height - 100);
+                    if (c === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                
+                // Draw current point
+                const currentX = 50 + (ligandConc / 100) * (canvas.width - 100);
+                const currentY = canvas.height - 50 - theta * (canvas.height - 100);
+                ctx.fillStyle = '#f093fb';
+                ctx.beginPath();
+                ctx.arc(currentX, currentY, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw receptors
+                receptors.forEach(receptor => {
+                    // Draw receptor body
+                    ctx.fillStyle = '#e0e0e0';
+                    ctx.fillRect(receptor.x - 40, receptor.y - 20, 80, 40);
+                    
+                    // Draw binding sites
+                    receptor.sites.forEach((bound, i) => {
+                        const siteX = receptor.x - 30 + i * 20;
+                        ctx.beginPath();
+                        ctx.arc(siteX, receptor.y, 8, 0, Math.PI * 2);
+                        ctx.fillStyle = bound ? '#667eea' : '#fff';
+                        ctx.fill();
+                        ctx.strokeStyle = '#333';
+                        ctx.stroke();
+                    });
+                });
+                
+                // Draw axis labels
+                ctx.fillStyle = '#333';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('[Ligand] (μM)', canvas.width / 2 - 30, canvas.height - 20);
+                ctx.save();
+                ctx.translate(20, canvas.height / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('Binding (%)', 0, 0);
+                ctx.restore();
+                
+                // Update stats
+                const boundSites = receptors.reduce((sum, r) => sum + r.sites.filter(s => s).length, 0);
+                const totalSites = receptors.length * bindingSites;
+                
+                document.getElementById('stat1Value').textContent = (theta * 100).toFixed(1) + '%';
+                document.getElementById('stat1Label').textContent = 'Saturation';
+                document.getElementById('stat2Value').textContent = boundSites + '/' + totalSites;
+                document.getElementById('stat2Label').textContent = 'Bound Sites';
+                document.getElementById('stat3Value').textContent = hillCoeff.toFixed(2);
+                document.getElementById('stat3Label').textContent = 'Hill Coefficient';
+                document.getElementById('stat4Value').textContent = kd.toFixed(2);
+                document.getElementById('stat4Label').textContent = 'Kd (μM)';
+                
+                time += 0.01;
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function runMembraneTransport() {
+            const transportType = document.getElementById('transportType').value;
+            const concGradient = parseFloat(document.getElementById('concGradient').value);
+            const permeability = parseFloat(document.getElementById('permeability').value);
+            const atpLevel = parseFloat(document.getElementById('atpLevel').value);
+            
+            let insideConc = 10;
+            let outsideConc = concGradient;
+            const molecules = [];
+            
+            // Initialize molecules
+            for (let i = 0; i < 100; i++) {
+                molecules.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    side: Math.random() > 0.5 ? 'outside' : 'inside'
+                });
+            }
+            
+            function animate() {
+                if (!isRunning) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw membrane
+                const membraneY = canvas.height / 2;
+                ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+                ctx.fillRect(0, membraneY - 20, canvas.width, 40);
+                
+                // Draw lipid bilayer
+                for (let x = 0; x < canvas.width; x += 20) {
+                    ctx.fillStyle = '#667eea';
+                    ctx.beginPath();
+                    ctx.arc(x + 10, membraneY - 10, 5, 0, Math.PI * 2);
+                    ctx.arc(x + 10, membraneY + 10, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#667eea';
+                    ctx.beginPath();
+                    ctx.moveTo(x + 10, membraneY - 5);
+                    ctx.lineTo(x + 10, membraneY + 5);
+                    ctx.stroke();
+                }
+                
+                // Transport logic
+                let flux = 0;
+                const gradient = outsideConc - insideConc;
+                
+                switch(transportType) {
+                    case 'passive':
+                        flux = permeability * gradient * 0.01;
+                        break;
+                    case 'facilitated':
+                        flux = permeability * gradient * 0.02 / (1 + Math.abs(gradient) / 50);
+                        break;
+                    case 'active':
+                        flux = -permeability * atpLevel / 100 * 0.02;
+                        break;
+                    case 'cotransport':
+                        flux = permeability * gradient * 0.015 * (1 + atpLevel / 200);
+                        break;
+                }
+                
+                insideConc += flux;
+                outsideConc -= flux;
+                
+                // Update molecules
+                molecules.forEach(molecule => {
+                    molecule.x += molecule.vx;
+                    molecule.y += molecule.vy;
+                    
+                    // Bounce off walls
+                    if (molecule.x < 0 || molecule.x > canvas.width) molecule.vx *= -1;
+                    if (molecule.y < 0 || molecule.y > canvas.height) molecule.vy *= -1;
+                    
+                    // Transport through membrane
+                    if (Math.abs(molecule.y - membraneY) < 20) {
+                        const transportProb = Math.abs(flux) * 0.01;
+                        if (Math.random() < transportProb) {
+                            if (flux > 0 && molecule.side === 'outside') {
+                                molecule.side = 'inside';
+                                molecule.y = membraneY + 25;
+                            } else if (flux < 0 && molecule.side === 'inside') {
+                                molecule.side = 'outside';
+                                molecule.y = membraneY - 25;
+                            }
+                        } else if (transportType !== 'passive') {
+                            molecule.vy *= -1;
+                        }
+                    }
+                    
+                    // Update position based on side
+                    if (molecule.side === 'outside' && molecule.y > membraneY - 20) {
+                        molecule.y = membraneY - 25;
+                        molecule.vy = -Math.abs(molecule.vy);
+                    } else if (molecule.side === 'inside' && molecule.y < membraneY + 20) {
+                        molecule.y = membraneY + 25;
+                        molecule.vy = Math.abs(molecule.vy);
+                    }
+                });
+                
+                // Draw molecules
+                molecules.forEach(molecule => {
+                    ctx.beginPath();
+                    ctx.arc(molecule.x, molecule.y, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = molecule.side === 'outside' ? '#f093fb' : '#4facfe';
+                    ctx.fill();
+                });
+                
+                // Draw concentration bars
+                const barWidth = 60;
+                const maxHeight = 150;
+                
+                ctx.fillStyle = '#f093fb';
+                ctx.fillRect(50, membraneY - 20 - (outsideConc / 100) * maxHeight, barWidth, (outsideConc / 100) * maxHeight);
+                ctx.fillStyle = '#333';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('Outside', 55, membraneY - 30 - (outsideConc / 100) * maxHeight);
+                ctx.fillText(outsideConc.toFixed(1) + ' mM', 55, membraneY - 10 - (outsideConc / 100) * maxHeight);
+                
+                ctx.fillStyle = '#4facfe';
+                ctx.fillRect(50, membraneY + 20, barWidth, (insideConc / 100) * maxHeight);
+                ctx.fillText('Inside', 55, membraneY + 30 + (insideConc / 100) * maxHeight);
+                ctx.fillText(insideConc.toFixed(1) + ' mM', 55, membraneY + 10 + (insideConc / 100) * maxHeight);
+                
+                // Update stats
+                document.getElementById('stat1Value').textContent = flux.toFixed(3);
+                document.getElementById('stat1Label').textContent = 'Flux (mM/s)';
+                document.getElementById('stat2Value').textContent = gradient.toFixed(1);
+                document.getElementById('stat2Label').textContent = 'Gradient (mM)';
+                document.getElementById('stat3Value').textContent = (insideConc / outsideConc).toFixed(2);
+                document.getElementById('stat3Label').textContent = 'Ratio (In/Out)';
+                document.getElementById('stat4Value').textContent = time.toFixed(1);
+                
+                time += 0.01;
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function runMolecularDynamics() {
+            const numAtoms = parseInt(document.getElementById('numAtoms').value);
+            const temperature = parseFloat(document.getElementById('mdTemp').value);
+            const timeStep = parseFloat(document.getElementById('timeStep').value);
+            const forceField = document.getElementById('forceField').value;
+            
+            // Initialize atoms
+            particles = [];
+            bonds = [];
+            
+            for (let i = 0; i < numAtoms; i++) {
+                particles.push({
+                    x: canvas.width / 2 + (Math.random() - 0.5) * 300,
+                    y: canvas.height / 2 + (Math.random() - 0.5) * 300,
+                    vx: (Math.random() - 0.5) * temperature / 100,
+                    vy: (Math.random() - 0.5) * temperature / 100,
+                    ax: 0,
+                    ay: 0,
+                    type: Math.random() > 0.5 ? 'A' : 'B',
+                    radius: 8
+                });
+            }
+            
+            // Create some random bonds
+            for (let i = 0; i < numAtoms / 2; i++) {
+                const a = Math.floor(Math.random() * numAtoms);
+                const b = Math.floor(Math.random() * numAtoms);
+                if (a !== b) {
+                    bonds.push({a: a, b: b, length: 50});
+                }
+            }
+            
+            let kineticEnergy = 0;
+            let potentialEnergy = 0;
+            
+            function animate() {
+                if (!isRunning) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Reset accelerations
+                particles.forEach(p => {
+                    p.ax = 0;
+                    p.ay = 0;
+                });
+                
+                // Calculate forces
+                potentialEnergy = 0;
+                
+                // Lennard-Jones potential
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p1 = particles[i];
+                        const p2 = particles[j];
+                        const dx = p2.x - p1.x;
+                        const dy = p2.y - p1.y;
+                        const r = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (r < 100) {
+                            const sigma = 20;
+                            const epsilon = 1;
+                            const r6 = Math.pow(sigma / r, 6);
+                            const force = 24 * epsilon * r6 * (2 * r6 - 1) / r;
+                            
+                            p1.ax += force * dx / r;
+                            p1.ay += force * dy / r;
+                            p2.ax -= force * dx / r;
+                            p2.ay -= force * dy / r;
+                            
+                            potentialEnergy += 4 * epsilon * r6 * (r6 - 1);
+                        }
+                    }
+                }
+                
+                // Bond forces
+                bonds.forEach(bond => {
+                    const p1 = particles[bond.a];
+                    const p2 = particles[bond.b];
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const r = Math.sqrt(dx * dx + dy * dy);
+                    const force = 0.1 * (r - bond.length);
+                    
+                    p1.ax += force * dx / r;
+                    p1.ay += force * dy / r;
+                    p2.ax -= force * dx / r;
+                    p2.ay -= force * dy / r;
+                    
+                    potentialEnergy += 0.5 * 0.1 * Math.pow(r - bond.length, 2);
+                });
+                
+                // Update velocities and positions
+                kineticEnergy = 0;
+                particles.forEach(p => {
+                    // Velocity Verlet integration
+                    p.vx += p.ax * timeStep * 0.001;
+                    p.vy += p.ay * timeStep * 0.001;
+                    p.x += p.vx * timeStep;
+                    p.y += p.vy * timeStep;
+                    
+                    // Thermostat (Berendsen)
+                    const targetKE = temperature * 0.01;
+                    const currentKE = 0.5 * (p.vx * p.vx + p.vy * p.vy);
+                    const scaling = Math.sqrt(1 + 0.01 * (targetKE / currentKE - 1));
+                    p.vx *= scaling;
+                    p.vy *= scaling;
+                    
+                    kineticEnergy += 0.5 * (p.vx * p.vx + p.vy * p.vy);
+                    
+                    // Boundary conditions
+                    if (p.x < 50) { p.x = 50; p.vx = Math.abs(p.vx); }
+                    if (p.x > canvas.width - 50) { p.x = canvas.width - 50; p.vx = -Math.abs(p.vx); }
+                    if (p.y < 50) { p.y = 50; p.vy = Math.abs(p.vy); }
+                    if (p.y > canvas.height - 50) { p.y = canvas.height - 50; p.vy = -Math.abs(p.vy); }
+                });
+                
+                // Draw bonds
+                ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
+                ctx.lineWidth = 2;
+                bonds.forEach(bond => {
+                    const p1 = particles[bond.a];
+                    const p2 = particles[bond.b];
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                });
+                
+                // Draw particles
+                particles.forEach(p => {
+                    // Draw velocity vector
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x + p.vx * 5, p.y + p.vy * 5);
+                    ctx.stroke();
+                    
+                    // Draw particle
+                    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+                    if (p.type === 'A') {
+                        gradient.addColorStop(0, '#667eea');
+                        gradient.addColorStop(1, '#4c5fd8');
+                    } else {
+                        gradient.addColorStop(0, '#f093fb');
+                        gradient.addColorStop(1, '#d074e0');
+                    }
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                });
+                
+                // Calculate temperature from kinetic energy
+                const currentTemp = kineticEnergy / numAtoms * 100;
+                const totalEnergy = kineticEnergy + potentialEnergy;
+                
+                // Update stats
+                document.getElementById('stat1Value').textContent = currentTemp.toFixed(1);
+                document.getElementById('stat1Label').textContent = 'Temperature (K)';
+                document.getElementById('stat2Value').textContent = kineticEnergy.toFixed(1);
+                document.getElementById('stat2Label').textContent = 'Kinetic E';
+                document.getElementById('stat3Value').textContent = potentialEnergy.toFixed(1);
+                document.getElementById('stat3Label').textContent = 'Potential E';
+                document.getElementById('stat4Value').textContent = totalEnergy.toFixed(1);
+                document.getElementById('stat4Label').textContent = 'Total Energy';
+                
+                time += timeStep * 0.001;
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function exportData() {
+            const data = {
+                simulation: currentSimulation,
+                timestamp: new Date().toISOString(),
+                parameters: {},
+                results: simulationData
+            };
+            
+            // Collect current parameters
+            const controls = document.getElementById(currentSimulation + 'Controls');
+            controls.querySelectorAll('input, select').forEach(input => {
+                data.parameters[input.id] = input.value;
+            });
+            
+            // Create downloadable file
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentSimulation}_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
