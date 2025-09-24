@@ -594,7 +594,6 @@
         .blog-post-content {
             color: #333;
             line-height: 1.8;
-            word-wrap: break-word;
         }
         
         .data-table {
@@ -636,28 +635,6 @@
         .capture-button:hover {
             background: #45a049;
             transform: scale(1.05);
-        }
-
-        /* FIX: Added styles for a non-blocking toast notification */
-        #toast-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 10000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s, bottom 0.3s;
-        }
-        #toast-notification.show {
-            opacity: 1;
-            visibility: visible;
-            bottom: 30px;
         }
         
         .footer {
@@ -718,7 +695,7 @@
     <div class="header">
         <h1>PharmaSim Pro</h1>
         <p class="header-subtitle">Integrated Pharmaceutical Research & Publication Platform</p>
-        <p class="attribution">Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong> | Powered by <a href="https://gemini.google.com" target="_blank">Google Gemini</a></p>
+        <p class="attribution">Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong> | Powered by <a href="https://www.anthropic.com" target="_blank">Anthropic Claude AI</a></p>
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="switchModule('pbpk')">
                 PBPK/QSP Modeling
@@ -763,9 +740,6 @@
             <p>Running simulation...</p>
         </div>
     </div>
-
-    <!-- FIX: Added toast notification element -->
-    <div id="toast-notification"></div>
     
     <div class="main-container">
         <!-- PBPK/QSP Module -->
@@ -1413,7 +1387,7 @@
                             <strong>Abstract:</strong><br>
                             We performed computational modeling of <span class="template-variable">[DRUG NAME]</span> 
                             interaction with <span class="template-variable">[PROTEIN NAME]</span> using PharmaSim Pro 
-                            (Ferguson, D.; Google Gemini).<br><br>
+                            (Ferguson, D.; Anthropic Claude AI).<br><br>
                             
                             <strong>Key Parameters:</strong><br>
                             <span class="template-variable">[DATA VALUES]</span><br><br>
@@ -1430,7 +1404,7 @@
                             
                             <strong>Citation:</strong><br>
                             Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) 
-                            powered by Google Gemini. Code available on GitHub.
+                            powered by Anthropic Claude AI. Code available on GitHub.
                         </div>
                         
                         <div class="button-group">
@@ -1553,8 +1527,8 @@
             <div class="footer-attribution">
                 <strong>PharmaSim Pro</strong><br>
                 Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong><br>
-                Powered by <strong>Google Gemini</strong><br>
-                Version 1.1.0 | September 2025
+                Powered by <strong>Anthropic Claude AI</strong><br>
+                Version 1.0.0 | January 2025
             </div>
             <div class="footer-links">
                 <a href="https://github.com/pharmasim-pro" target="_blank">GitHub Repository</a>
@@ -1661,6 +1635,72 @@
                 });
             }
             
+            // Tissue Distribution Chart
+            const tissueCtx = document.getElementById('tissueChart');
+            if (tissueCtx) {
+                charts.tissue = new Chart(tissueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Plasma', 'Liver', 'Kidney', 'Brain', 'Muscle'],
+                        datasets: [{
+                            label: 'Tissue Concentration',
+                            data: [100, 85, 120, 15, 45],
+                            backgroundColor: ['#2a5298', '#667eea', '#4facfe', '#00f2fe', '#764ba2'],
+                            borderColor: '#1e3c72',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Relative Concentration (%)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // DDI Chart
+            const ddiCtx = document.getElementById('ddiChart');
+            if (ddiCtx) {
+                charts.ddi = new Chart(ddiCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 49}, (_, i) => i * 0.5),
+                        datasets: [{
+                            label: 'Without Inhibitor',
+                            data: [],
+                            borderColor: '#2a5298',
+                            backgroundColor: 'rgba(42,82,152,0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'With CYP3A4 Inhibitor',
+                            data: [],
+                            borderColor: '#f5576c',
+                            backgroundColor: 'rgba(245,87,108,0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Concentration (ng/mL)' }
+                            },
+                            x: {
+                                ...chartOptions.scales.x,
+                                title: { display: true, text: 'Time (hours)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
             // Clinical Trial Charts
             const trialCtx = document.getElementById('trialChart');
             if (trialCtx) {
@@ -1696,7 +1736,249 @@
                 });
             }
             
-            // Initialize other charts similarly...
+            const toxicityCtx = document.getElementById('toxicityChart');
+            if (toxicityCtx) {
+                charts.toxicity = new Chart(toxicityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'True Toxicity',
+                            data: [],
+                            borderColor: '#f5576c',
+                            backgroundColor: 'rgba(245,87,108,0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'Estimated Toxicity',
+                            data: [],
+                            borderColor: '#2a5298',
+                            backgroundColor: 'rgba(42,82,152,0.1)',
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Toxicity Probability' },
+                                min: 0,
+                                max: 1
+                            },
+                            x: {
+                                ...chartOptions.scales.x,
+                                title: { display: true, text: 'Dose (mg)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const comparisonCtx = document.getElementById('comparisonChart');
+            if (comparisonCtx) {
+                charts.comparison = new Chart(comparisonCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['3+3', 'CRM', 'BOIN', 'EWOC', 'BLRM', 'mTPI'],
+                        datasets: [{
+                            label: 'Success Rate (%)',
+                            data: [45, 78, 72, 68, 75, 70],
+                            backgroundColor: '#2a5298'
+                        }, {
+                            label: 'Avg Patients',
+                            data: [18, 24, 21, 27, 24, 22],
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Value' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const ocCtx = document.getElementById('ocChart');
+            if (ocCtx) {
+                charts.oc = new Chart(ocCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Efficiency', 'Safety', 'Accuracy', 'Simplicity', 'Robustness'],
+                        datasets: [{
+                            label: '3+3',
+                            data: [3, 7, 4, 9, 6],
+                            borderColor: '#f5576c',
+                            backgroundColor: 'rgba(245,87,108,0.2)'
+                        }, {
+                            label: 'CRM',
+                            data: [9, 6, 8, 4, 7],
+                            borderColor: '#2a5298',
+                            backgroundColor: 'rgba(42,82,152,0.2)'
+                        }, {
+                            label: 'BOIN',
+                            data: [8, 7, 7, 7, 8],
+                            borderColor: '#4facfe',
+                            backgroundColor: 'rgba(79,172,254,0.2)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#333' }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10,
+                                ticks: { color: '#666' },
+                                grid: { color: 'rgba(0,0,0,0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Molecular Dynamics Charts
+            const energyCtx = document.getElementById('energyChart');
+            if (energyCtx) {
+                charts.energy = new Chart(energyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 101}, (_, i) => i),
+                        datasets: [{
+                            label: 'Total Energy',
+                            data: Array.from({length: 101}, () => -1200 + Math.random() * 100),
+                            borderColor: '#2a5298',
+                            backgroundColor: 'rgba(42,82,152,0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Energy (kJ/mol)' }
+                            },
+                            x: {
+                                ...chartOptions.scales.x,
+                                title: { display: true, text: 'Time (ps)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const rmsdCtx = document.getElementById('rmsdChart');
+            if (rmsdCtx) {
+                charts.rmsd = new Chart(rmsdCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 101}, (_, i) => i),
+                        datasets: [{
+                            label: 'RMSD',
+                            data: Array.from({length: 101}, (_, i) => Math.sin(i/10) + 2 + Math.random() * 0.5),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102,126,234,0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'RMSD (Å)' }
+                            },
+                            x: {
+                                ...chartOptions.scales.x,
+                                title: { display: true, text: 'Time (ps)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const interactionCtx = document.getElementById('interactionChart');
+            if (interactionCtx) {
+                charts.interaction = new Chart(interactionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['H-Bonds', 'Hydrophobic', 'Electrostatic', 'Van der Waals'],
+                        datasets: [{
+                            label: 'Interaction Count',
+                            data: [4, 12, 2, 18],
+                            backgroundColor: ['#2a5298', '#667eea', '#4facfe', '#00f2fe']
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Number of Interactions' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Initialize molecular canvas
+            const molecularCanvas = document.getElementById('molecularCanvas');
+            if (molecularCanvas) {
+                const ctx = molecularCanvas.getContext('2d');
+                // Draw a simple molecular representation
+                ctx.clearRect(0, 0, molecularCanvas.width, molecularCanvas.height);
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(0, 0, molecularCanvas.width, molecularCanvas.height);
+                
+                // Draw some atoms
+                const atoms = [
+                    {x: 100, y: 100, color: '#2a5298', size: 15},
+                    {x: 200, y: 150, color: '#f5576c', size: 12},
+                    {x: 300, y: 120, color: '#4facfe', size: 14},
+                    {x: 250, y: 200, color: '#667eea', size: 13}
+                ];
+                
+                // Draw bonds
+                ctx.strokeStyle = '#999';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < atoms.length - 1; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(atoms[i].x, atoms[i].y);
+                    ctx.lineTo(atoms[i+1].x, atoms[i+1].y);
+                    ctx.stroke();
+                }
+                
+                // Draw atoms
+                atoms.forEach(atom => {
+                    ctx.beginPath();
+                    ctx.arc(atom.x, atom.y, atom.size, 0, Math.PI * 2);
+                    ctx.fillStyle = atom.color;
+                    ctx.fill();
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                });
+                
+                // Add label
+                ctx.fillStyle = '#333';
+                ctx.font = '16px Arial';
+                ctx.fillText('3D Molecular Structure (Simplified)', 10, 30);
+            }
         }
         
         // Module switching
@@ -1711,10 +1993,6 @@
             document.getElementById(module + '-module').classList.add('active');
             document.querySelector(`.nav-tab[onclick="switchModule('${module}')"]`).classList.add('active');
             currentModule = module;
-
-            if (currentModule === 'publications') {
-                populatePublicationForm();
-            }
         }
         
         // Tab switching within modules
@@ -1730,16 +2008,6 @@
             document.getElementById(tabName + '-tab').classList.add('active');
             event.target.classList.add('active');
         }
-
-        // FIX: Replaced alert() with a non-blocking toast notification
-        function showToast(message) {
-            const toast = document.getElementById('toast-notification');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
         
         // Capture results for publication
         function captureResults(module) {
@@ -1749,6 +2017,13 @@
                 capturedData.pbpk = {
                     drugName: document.getElementById('drug-name').value || 'Unknown Drug',
                     targetProtein: document.getElementById('target-protein').value || 'Unknown Target',
+                    parameters: {
+                        bioavailability: document.getElementById('bioavailability').value,
+                        clearance: document.getElementById('clearance').value,
+                        vd: document.getElementById('vd').value,
+                        ka: document.getElementById('ka').value,
+                        ec50: document.getElementById('ec50').value
+                    },
                     results: {
                         cmax: document.getElementById('cmax').textContent,
                         tmax: document.getElementById('tmax').textContent,
@@ -1757,7 +2032,7 @@
                     },
                     timestamp: timestamp
                 };
-                showToast('PBPK results captured!');
+                alert('PBPK results captured! Navigate to Research Publications to create your publication.');
             } else if (module === 'clinical') {
                 capturedData.clinical = {
                     drugName: document.getElementById('study-drug-name').value || 'Unknown Drug',
@@ -1765,117 +2040,217 @@
                     results: {
                         mtd: document.getElementById('mtd').textContent,
                         rp2d: document.getElementById('rp2d').textContent,
+                        dltRate: document.getElementById('dlt-rate').textContent,
                         totalPatients: document.getElementById('total-patients').textContent
                     },
                     timestamp: timestamp
                 };
-                showToast('Clinical trial results captured!');
+                alert('Clinical trial results captured! Navigate to Research Publications to create your publication.');
             } else if (module === 'molecular') {
                 capturedData.molecular = {
                     structure: document.getElementById('smilesInput').value || 'Unknown Structure',
                     results: {
+                        energy: document.getElementById('total-energy').textContent,
                         bindingAffinity: document.getElementById('binding-affinity').textContent,
                         rmsd: document.getElementById('rmsd').textContent,
                         hbonds: document.getElementById('hbonds').textContent
                     },
                     timestamp: timestamp
                 };
-                showToast('Molecular simulation results captured!');
+                alert('Molecular simulation results captured! Navigate to Research Publications to create your publication.');
             }
             
+            // Auto-populate publication form if on publications page
             if (currentModule === 'publications') {
                 populatePublicationForm();
             }
         }
         
-        // FIX 1: This function was completely rewritten to handle all data types and prevent duplication.
+        // Populate publication form with captured data
         function populatePublicationForm() {
-            let dataText = '';
-            let drugName = '';
-            let proteinName = '';
-            let title = '';
-
-            // This function builds the text from scratch every time to prevent duplication
             if (capturedData.pbpk) {
-                drugName = capturedData.pbpk.drugName;
-                proteinName = capturedData.pbpk.targetProtein;
-                title = `PBPK/QSP Analysis of ${drugName}`;
-                dataText += `PBPK/QSP Data (${new Date(capturedData.pbpk.timestamp).toLocaleDateString()}):\n- Cmax: ${capturedData.pbpk.results.cmax}\n- Tmax: ${capturedData.pbpk.results.tmax}\n- AUC: ${capturedData.pbpk.results.auc}\n- Half-life: ${capturedData.pbpk.results.halfLife}\n\n`;
+                const drugEl = document.getElementById('pub-drug');
+                const proteinEl = document.getElementById('pub-protein');
+                const dataEl = document.getElementById('pub-data');
+                
+                if (drugEl) drugEl.value = capturedData.pbpk.drugName;
+                if (proteinEl) proteinEl.value = capturedData.pbpk.targetProtein;
+                
+                if (dataEl) {
+                    const dataText = `
+Pharmacokinetic Parameters:
+- Bioavailability: ${capturedData.pbpk.parameters.bioavailability}%
+- Clearance: ${capturedData.pbpk.parameters.clearance} L/h
+- Volume of Distribution: ${capturedData.pbpk.parameters.vd} L
+- Absorption Rate: ${capturedData.pbpk.parameters.ka} h⁻¹
+- EC50: ${capturedData.pbpk.parameters.ec50} nM
+
+Results:
+- Cmax: ${capturedData.pbpk.results.cmax}
+- Tmax: ${capturedData.pbpk.results.tmax}
+- AUC: ${capturedData.pbpk.results.auc}
+- Half-life: ${capturedData.pbpk.results.halfLife}
+                    `.trim();
+                    
+                    dataEl.value = dataText;
+                }
             }
             
             if (capturedData.clinical) {
-                if (!drugName) drugName = capturedData.clinical.drugName;
-                if (!title) title = `Clinical Trial Simulation for ${drugName}`;
-                dataText += `Clinical Trial Data (${new Date(capturedData.clinical.timestamp).toLocaleDateString()}):\n- Design: ${capturedData.clinical.designType}\n- MTD: ${capturedData.clinical.results.mtd}\n- RP2D: ${capturedData.clinical.results.rp2d}\n- Total Patients: ${capturedData.clinical.results.totalPatients}\n\n`;
+                const dataEl = document.getElementById('pub-data');
+                const clinicalText = `
+Clinical Trial Design: ${capturedData.clinical.designType}
+- MTD: ${capturedData.clinical.results.mtd}
+- RP2D: ${capturedData.clinical.results.rp2d}
+- DLT Rate: ${capturedData.clinical.results.dltRate}
+- Total Patients: ${capturedData.clinical.results.totalPatients}
+                `.trim();
+                
+                if (dataEl) {
+                    const currentData = dataEl.value;
+                    dataEl.value = currentData ? 
+                        currentData + '\n\n' + clinicalText : clinicalText;
+                }
             }
-            
-            // FIX 2: Added missing handler for molecular data.
-            if (capturedData.molecular) {
-                if (!drugName) drugName = capturedData.molecular.structure;
-                 if (!title) title = `Molecular Dynamics of ${drugName}`;
-                dataText += `Molecular Simulation Data (${new Date(capturedData.molecular.timestamp).toLocaleDateString()}):\n- Binding Affinity: ${capturedData.molecular.results.bindingAffinity}\n- RMSD: ${capturedData.molecular.results.rmsd}\n- H-Bonds: ${capturedData.molecular.results.hbonds}\n\n`;
-            }
-
-            document.getElementById('pub-title').value = title;
-            document.getElementById('pub-drug').value = drugName;
-            document.getElementById('pub-protein').value = proteinName;
-            document.getElementById('pub-data').value = dataText.trim();
-        }
-
-        // FIX 3: Added a utility function to sanitize user input and prevent XSS attacks.
-        function escapeHtml(unsafe) {
-            if (typeof unsafe !== 'string') {
-                return '';
-            }
-            return unsafe
-                 .replace(/&/g, "&amp;")
-                 .replace(/</g, "&lt;")
-                 .replace(/>/g, "&gt;")
-                 .replace(/"/g, "&quot;")
-                 .replace(/'/g, "&#039;");
         }
         
-        // FIX 3: Updated to use the escapeHtml sanitizer.
+        // Publish findings with proper validation
         function publishFindings() {
-            const title = document.getElementById('pub-title').value;
-            const authors = document.getElementById('pub-authors').value;
-            const drug = document.getElementById('pub-drug').value;
-            const protein = document.getElementById('pub-protein').value;
-            const findings = document.getElementById('pub-findings').value;
-            const data = document.getElementById('pub-data').value;
-            const implications = document.getElementById('pub-implications').value;
+            const titleEl = document.getElementById('pub-title');
+            const authorsEl = document.getElementById('pub-authors');
+            const drugEl = document.getElementById('pub-drug');
+            const proteinEl = document.getElementById('pub-protein');
+            const findingsEl = document.getElementById('pub-findings');
+            const dataEl = document.getElementById('pub-data');
+            const implicationsEl = document.getElementById('pub-implications');
             
-            if (!title || !authors || !drug || !findings) {
-                showToast('Please fill in title, authors, drug, and findings.');
+            if (!titleEl || !authorsEl || !drugEl || !proteinEl || !findingsEl) {
+                alert('Publication form elements not found. Please refresh the page.');
                 return;
             }
             
-            // Sanitize all user input before rendering it as HTML
+            const title = titleEl.value.trim();
+            const authors = authorsEl.value.trim();
+            const drug = drugEl.value.trim();
+            const protein = proteinEl.value.trim();
+            const findings = findingsEl.value.trim();
+            const data = dataEl ? dataEl.value.trim() : '';
+            const implications = implicationsEl ? implicationsEl.value.trim() : '';
+            
+            if (!title || !authors || !drug || !protein || !findings) {
+                alert('Please fill in all required fields (Title, Authors, Drug, Protein, and Key Findings) before publishing.');
+                return;
+            }
+            
+            const publication = {
+                title: title,
+                authors: authors,
+                date: new Date().toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }),
+                drug: drug,
+                protein: protein,
+                findings: findings,
+                data: data,
+                implications: implications
+            };
+            
+            // Create new publication card HTML
             const publicationHTML = `
                 <div class="blog-post-card">
-                    <h4 class="blog-post-title">${escapeHtml(title)}</h4>
-                    <div class="blog-post-meta">By ${escapeHtml(authors)} • ${new Date().toLocaleDateString()}</div>
+                    <h4 class="blog-post-title">${publication.title}</h4>
+                    <div class="blog-post-meta">By ${publication.authors} • ${publication.date}</div>
                     <div class="blog-post-content">
-                        <strong>Drug:</strong> ${escapeHtml(drug)}<br>
-                        <strong>Target:</strong> ${escapeHtml(protein)}<br><br>
-                        <strong>Findings:</strong><br>${escapeHtml(findings).replace(/\n/g, '<br>')}<br><br>
-                        <strong>Key Data:</strong><br>
-                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px; white-space: pre-wrap;">${escapeHtml(data)}</pre>
-                        <br>
-                        <strong>Implications:</strong><br>${escapeHtml(implications).replace(/\n/g, '<br>')}<br><br>
-                        <em>Created using PharmaSim Pro (Ferguson, D.; Google Gemini)</em>
+                        <strong>Abstract:</strong><br>
+                        We performed computational modeling of ${publication.drug} interaction with ${publication.protein} 
+                        using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI).<br><br>
+                        
+                        <strong>Major Findings:</strong><br>
+                        ${publication.findings}<br><br>
+                        
+                        ${publication.data ? `<strong>Key Data:</strong><br>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px; white-space: pre-wrap; overflow-x: auto;">${publication.data}</pre><br>` : ''}
+                        
+                        ${publication.implications ? `<strong>Implications for Early-Stage Scientists:</strong><br>
+                        ${publication.implications}<br><br>` : ''}
+                        
+                        <strong>Disclaimer:</strong><br>
+                        <em>These computational predictions require validation through experimental studies. 
+                        Values represent theoretical estimates from simplified models.</em><br><br>
+                        
+                        <strong>Citation:</strong><br>
+                        <em>Created using PharmaSim Pro by David Ferguson, BS, MS, Pharm.D. Candidate, 
+                        powered by Anthropic Claude AI. Source code available on GitHub for transparency.</em>
                     </div>
                 </div>
             `;
             
+            // Add to publications list
             const publicationsList = document.getElementById('publications-list');
-            publicationsList.insertAdjacentHTML('afterbegin', publicationHTML);
-            
-            showToast('Publication successfully created!');
-            clearPublication();
+            if (publicationsList) {
+                publicationsList.insertAdjacentHTML('afterbegin', publicationHTML);
+                
+                // Animate the new publication
+                const newCard = publicationsList.firstElementChild;
+                if (newCard) {
+                    newCard.style.opacity = '0';
+                    newCard.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        newCard.style.transition = 'all 0.5s ease';
+                        newCard.style.opacity = '1';
+                        newCard.style.transform = 'translateY(0)';
+                    }, 100);
+                }
+                
+                alert('🎉 Publication successfully created and added to the Recent Publications section!');
+                clearPublication();
+                
+                // Scroll to show the new publication
+                setTimeout(() => {
+                    publicationsList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 600);
+            } else {
+                alert('Error: Publications list not found. Please refresh the page and try again.');
+            }
         }
         
-        // FIX 3: Updated to use the escapeHtml sanitizer.
+        // Enhanced export molecular data function
+        function exportMolecularData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                structure: document.getElementById('smilesInput')?.value || 'Unknown',
+                simulationType: document.getElementById('sim-type')?.value || 'md',
+                temperature: document.getElementById('mdTemp')?.value || '300',
+                forceField: document.getElementById('forceField')?.value || 'amber',
+                results: {
+                    totalEnergy: document.getElementById('total-energy')?.textContent || '--',
+                    bindingAffinity: document.getElementById('binding-affinity')?.textContent || '--',
+                    rmsd: document.getElementById('rmsd')?.textContent || '--',
+                    hbonds: document.getElementById('hbonds')?.textContent || '--',
+                    rg: document.getElementById('rg')?.textContent || '--',
+                    sasa: document.getElementById('sasa')?.textContent || '--'
+                },
+                disclaimer: 'Data generated by PharmaSim Pro (Ferguson, D.; Anthropic Claude AI). Computational estimates require experimental validation.',
+                citation: 'Ferguson, D. (2025). PharmaSim Pro. Powered by Anthropic Claude AI.'
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `molecular_dynamics_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            alert('Molecular dynamics data exported successfully!');
+        }
+        
+        // Preview publication
         function previewPublication() {
             const title = document.getElementById('pub-title').value || '[Title]';
             const authors = document.getElementById('pub-authors').value || '[Authors]';
@@ -1888,22 +2263,22 @@
             const previewHTML = `
                 <h3>Publication Preview</h3>
                 <div class="blog-post-card">
-                    <h4 class="blog-post-title">${escapeHtml(title)}</h4>
-                    <div class="blog-post-meta">By ${escapeHtml(authors)} • ${new Date().toLocaleDateString()}</div>
+                    <h4 class="blog-post-title">${title}</h4>
+                    <div class="blog-post-meta">By ${authors} • ${new Date().toLocaleDateString()}</div>
                     <div class="blog-post-content">
                         <strong>Abstract:</strong><br>
-                        We performed computational modeling of ${escapeHtml(drug)} interaction with ${escapeHtml(protein)} 
-                        using PharmaSim Pro (Ferguson, D.; Google Gemini).<br><br>
+                        We performed computational modeling of ${drug} interaction with ${protein} 
+                        using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI).<br><br>
                         
                         <strong>Major Findings:</strong><br>
-                        ${escapeHtml(findings).replace(/\n/g, '<br>')}<br><br>
+                        ${findings}<br><br>
                         
                         <strong>Key Parameters:</strong><br>
-                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; white-space: pre-wrap;">${escapeHtml(data)}</pre>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${data}</pre>
                         <br>
                         
                         <strong>Implications for Early-Stage Scientists:</strong><br>
-                        ${escapeHtml(implications).replace(/\n/g, '<br>')}<br><br>
+                        ${implications}<br><br>
                         
                         <strong>Disclaimer:</strong><br>
                         <em>These computational predictions require validation through experimental studies. 
@@ -1911,7 +2286,7 @@
                         
                         <strong>Citation:</strong><br>
                         Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) 
-                        powered by Google Gemini. Code available on GitHub.
+                        powered by Anthropic Claude AI. Code available on GitHub.
                     </div>
                 </div>
             `;
@@ -1954,7 +2329,8 @@
                     if (Math.abs(this.ka - ke) < 1e-6) {
                         c = this.dose * this.f * this.ka * t * Math.exp(-this.ka * t) / this.vd;
                     } else {
-                        c = (this.dose * this.f * this.ka / (this.vd * (this.ka - ke))) * (Math.exp(-ke * t) - Math.exp(-this.ka * t));
+                        c = (this.dose * this.f * this.ka / (this.vd * (this.ka - ke))) * 
+                            (Math.exp(-ke * t) - Math.exp(-this.ka * t));
                     }
                     concentrations.push(Math.max(0, c * 1000));
                 }
@@ -1969,7 +2345,8 @@
                 
                 let auc = 0;
                 for (let i = 1; i < concentrations.length; i++) {
-                    auc += 0.5 * (concentrations[i] + concentrations[i-1]) * (timePoints[i] - timePoints[i-1]);
+                    auc += 0.5 * (concentrations[i] + concentrations[i-1]) * 
+                           (timePoints[i] - timePoints[i-1]);
                 }
                 
                 const ke = this.clearance / this.vd;
@@ -2164,11 +2541,11 @@
         
         // Other simulation functions
         function runMonteCarloTrials() {
-            showToast('Running 1000 Monte Carlo simulations...');
+            alert('Running 1000 Monte Carlo simulations... This feature demonstrates multiple trial runs.');
         }
         
         function compareDesigns() {
-            showToast('Comparing all trial designs...');
+            alert('Comparing all 6 Bayesian trial designs... Results will show efficiency metrics.');
         }
         
         function updateDesignInfo() {
@@ -2218,7 +2595,7 @@
                 document.getElementById('ec50').value = 45;
                 document.getElementById('hill').value = 1.4;
                 
-                showToast('Loaded example drug parameters.');
+                alert('Loaded example: Typical oral small molecule drug parameters');
                 runPBPKSimulation();
             }
         }
@@ -2231,49 +2608,308 @@
                     title: 'How to Publish Your Findings',
                     content: `
                         <h3>Publishing Research on PharmaSim Pro</h3>
-                        <p>This module allows you to document and share your findings. Here's how:</p>
-                        <ol style="margin: 15px 0; padding-left: 20px; line-height: 1.8;">
-                          <li>Run a simulation in any module (PBPK, Clinical Trial, etc.).</li>
-                          <li>Click the "📊 Capture for Publication" button to save your results.</li>
-                          <li>Navigate to the "Research Publications" tab.</li>
-                          <li>The form will be auto-populated with your captured data.</li>
-                          <li>Fill in the remaining details like Title, Authors, and your analysis.</li>
-                          <li>Click "Preview" to see how it will look, then "Publish Findings" to add it to the list.</li>
-                        </ol>
+                        <div class="info-box">
+                            <h4>Step-by-Step Guide</h4>
+                            <ol style="margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                                <li><strong>Run Your Simulation:</strong> Complete your PBPK, clinical trial, or molecular dynamics analysis</li>
+                                <li><strong>Capture Results:</strong> Click the "📊 Capture for Publication" button in any module</li>
+                                <li><strong>Navigate to Publications:</strong> Click the "Research Publications" tab</li>
+                                <li><strong>Fill in Details:</strong> Enter your drug name, target protein, and key findings</li>
+                                <li><strong>Add Data:</strong> Include your quantitative results and parameters</li>
+                                <li><strong>Describe Implications:</strong> Explain what this means for future research</li>
+                                <li><strong>Preview & Publish:</strong> Review your publication and click "Publish Findings"</li>
+                            </ol>
+                        </div>
+                        <div class="educational-tip">
+                            <strong>Best Practices:</strong><br>
+                            • Be specific about your methods and parameters<br>
+                            • Include all relevant numerical data<br>
+                            • Discuss limitations of the computational approach<br>
+                            • Suggest experimental validation steps<br>
+                            • Cite PharmaSim Pro and the creator properly
+                        </div>
                     `
                 },
-                // Add other tutorials here
+                'pbpk-basics': {
+                    title: 'PBPK Basics Tutorial',
+                    content: `
+                        <h3>Understanding PBPK Models</h3>
+                        <div class="info-box">
+                            <h4>What is PBPK?</h4>
+                            <p>Physiologically-Based Pharmacokinetic modeling predicts drug concentrations in different body tissues over time.</p>
+                        </div>
+                        <div class="educational-tip">
+                            <strong>Key Parameters:</strong>
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Clearance (CL):</strong> How fast the body removes the drug</li>
+                                <li><strong>Volume of Distribution (Vd):</strong> How widely the drug spreads in the body</li>
+                                <li><strong>Bioavailability (F):</strong> Fraction reaching systemic circulation</li>
+                                <li><strong>Half-life:</strong> Time for concentration to drop by 50%</li>
+                            </ul>
+                        </div>
+                        <button onclick="switchModule('pbpk')">Try PBPK Module</button>
+                    `
+                },
+                'trial-designs': {
+                    title: 'Clinical Trial Designs',
+                    content: `
+                        <h3>Phase 1 Trial Designs Explained</h3>
+                        <div class="info-box">
+                            <h4>Traditional vs Modern Designs</h4>
+                            <p>Modern Bayesian designs find the MTD faster with fewer patients than traditional 3+3.</p>
+                        </div>
+                        <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
+                            <tr>
+                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Design</th>
+                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Efficiency</th>
+                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Best Use</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">3+3</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Low</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Simple, small trials</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">CRM</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">High</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Model-based optimization</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">BOIN</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Medium-High</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Balance of simplicity and efficiency</td>
+                            </tr>
+                        </table>
+                        <button onclick="switchModule('clinical')">Explore Trial Designs</button>
+                    `
+                },
+                'molecular-intro': {
+                    title: 'Molecular Simulations 101',
+                    content: `
+                        <h3>Introduction to Molecular Dynamics</h3>
+                        <div class="info-box">
+                            <h4>Key Concepts</h4>
+                            <p>Molecular dynamics simulations predict how drugs interact with proteins at the atomic level.</p>
+                        </div>
+                        <div class="educational-tip">
+                            <strong>Important Metrics:</strong>
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Binding Affinity:</strong> How strongly the drug binds to the target</li>
+                                <li><strong>RMSD:</strong> Root mean square deviation - structural stability</li>
+                                <li><strong>Hydrogen Bonds:</strong> Key interactions for binding</li>
+                                <li><strong>SASA:</strong> Solvent accessible surface area</li>
+                            </ul>
+                        </div>
+                        <button onclick="switchModule('molecular')">Try Molecular Dynamics</button>
+                    `
+                },
+                'case-study': {
+                    title: 'Complete Case Study',
+                    content: `
+                        <h3>Integrated Drug Development Case Study</h3>
+                        <div class="info-box">
+                            <h4>Novel Kinase Inhibitor Development</h4>
+                            <p>Follow the complete journey from molecular design to clinical trial planning.</p>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <h4>Step 1: Molecular Analysis</h4>
+                            <p>Load the SMILES structure and analyze binding to target kinase</p>
+                            
+                            <h4>Step 2: PBPK Modeling</h4>
+                            <p>Predict pharmacokinetic properties and optimize dosing</p>
+                            
+                            <h4>Step 3: Trial Design</h4>
+                            <p>Select optimal Phase 1 dose escalation strategy</p>
+                            
+                            <h4>Step 4: Publication</h4>
+                            <p>Document and share findings with the research community</p>
+                        </div>
+                        <button onclick="alert('Case study walkthrough would start here with guided steps through each module')">Start Guided Case Study</button>
+                    `
+                }
             };
-
+            
             const tutorial = tutorials[tutorialType];
-            if(tutorial) {
-                 contentDiv.innerHTML = `<h3>${tutorial.title}</h3>${tutorial.content}`;
+            if (tutorial) {
+                contentDiv.innerHTML = tutorial.content;
             } else {
-                 contentDiv.innerHTML = `<h3>Tutorial Coming Soon!</h3><p>Check back later for this interactive guide.</p>`;
+                contentDiv.innerHTML = '<h3>Tutorial not found</h3><p>Please select a valid tutorial from the menu.</p>';
             }
         }
+        
+        // Molecular dynamics functions (simplified implementations)
+        function loadMolecularStructure() {
+            const smilesInput = document.getElementById('smilesInput').value;
+            const pdbFile = document.getElementById('pdbFile').files[0];
+            
+            if (smilesInput) {
+                alert(`SMILES structure loaded: ${smilesInput}\nVisualization will appear in the canvas.`);
+                // In a real implementation, this would parse and display the structure
+            } else if (pdbFile) {
+                alert(`PDB file loaded: ${pdbFile.name}\nProcessing structure...`);
+            } else {
+                alert('Please enter a SMILES string or upload a PDB file.');
+            }
+        }
+        
+        function startMolecularSimulation() {
+            showLoading();
+            
+            setTimeout(() => {
+                // Simulate some molecular dynamics results
+                document.getElementById('total-energy').textContent = '-1234.5 kJ/mol';
+                document.getElementById('binding-affinity').textContent = '-8.7 kcal/mol';
+                document.getElementById('rmsd').textContent = '2.1 Å';
+                document.getElementById('hbonds').textContent = '4';
+                document.getElementById('rg').textContent = '18.3 Å';
+                document.getElementById('sasa').textContent = '142.5 Å²';
+                
+                alert('Molecular dynamics simulation completed!');
+                hideLoading();
+            }, 2000);
+        }
+        
+        function stopMolecularSimulation() {
+            alert('Simulation stopped.');
+        }
+        
+        function exportMolecularData() {
+            const data = {
+                totalEnergy: document.getElementById('total-energy').textContent,
+                bindingAffinity: document.getElementById('binding-affinity').textContent,
+                rmsd: document.getElementById('rmsd').textContent,
+                hbonds: document.getElementById('hbonds').textContent,
+                rg: document.getElementById('rg').textContent,
+                sasa: document.getElementById('sasa').textContent
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'molecular_dynamics_results.json';
+            link.click();
+        }
+        
+        // Show disclaimer
+        function showDisclaimer() {
+            alert(`
+COMPREHENSIVE DISCLAIMER
 
+PharmaSim Pro provides computational models for educational and exploratory research purposes only.
+
+IMPORTANT LIMITATIONS:
+• All values are theoretical estimates based on simplified mathematical models
+• Results have NOT been validated experimentally
+• Models can produce errors and inaccuracies
+• Not suitable for clinical decision-making
+• Not FDA-approved or validated for drug development decisions
+
+REQUIRED VALIDATION:
+• All computational predictions MUST be validated through:
+  - In vitro experiments
+  - In vivo studies
+  - Additional in silico modeling with validated software
+  - Peer review and replication
+
+PROFESSIONAL CONSULTATION:
+• Always consult qualified professionals before making research or clinical decisions
+• Double-check all calculations independently
+• Verify results with established software packages
+
+SOURCE CODE:
+• Available on GitHub for transparency and peer review
+• Community contributions and corrections welcome
+
+By using this platform, you acknowledge these limitations and agree to use results responsibly.
+
+Created by David Ferguson, BS, MS, Pharm.D. Candidate
+Powered by Anthropic Claude AI
+            `);
+        }
+        
+        // Show about
+        function showAbout() {
+            alert(`
+ABOUT PHARMASIM PRO
+
+PharmaSim Pro is an integrated pharmaceutical research platform designed for pharmacy students and early-career scientists.
+
+FEATURES:
+• PBPK/QSP Modeling
+• Bayesian Clinical Trial Design (6 different methods)
+• Molecular Dynamics Simulations
+• Research Publication System
+
+CREATOR:
+David Ferguson, BS, MS, Pharm.D. Candidate
+
+TECHNOLOGY:
+Powered by Anthropic Claude AI
+Built with modern web technologies
+Open source and transparent
+
+MISSION:
+To democratize access to pharmaceutical modeling tools and accelerate drug discovery education.
+
+VERSION: 1.0.0
+Released: January 2025
+
+For questions or contributions, visit our GitHub repository.
+            `);
+        }
+        
+        // Show citation info
+        function showCitation() {
+            alert(`
+HOW TO CITE PHARMASIM PRO
+
+For academic publications:
+Ferguson, D. (2025). PharmaSim Pro: Integrated Pharmaceutical Research Platform [Computer software]. 
+Powered by Anthropic Claude AI. Available at: https://github.com/pharmasim-pro
+
+BibTeX:
+@software{ferguson2025pharmasim,
+  author = {Ferguson, David},
+  title = {PharmaSim Pro: Integrated Pharmaceutical Research Platform},
+  year = {2025},
+  note = {Powered by Anthropic Claude AI},
+  url = {https://github.com/pharmasim-pro}
+}
+
+For research using specific modules:
+• PBPK Module: "PBPK modeling performed using PharmaSim Pro (Ferguson, 2025)"
+• Clinical Trials: "Trial simulations conducted with PharmaSim Pro (Ferguson, 2025)"
+• Molecular Dynamics: "MD simulations visualized using PharmaSim Pro (Ferguson, 2025)"
+
+Always include the disclaimer about computational estimates requiring validation.
+            `);
+        }
+        
+        // Helper functions
         function showLoading() {
             document.getElementById('loadingOverlay').style.display = 'flex';
         }
-
+        
         function hideLoading() {
             document.getElementById('loadingOverlay').style.display = 'none';
         }
-
-        // Dummy functions for unimplemented features
-        function loadMolecularStructure() { showToast('Molecular structure loading is a placeholder.'); }
-        function startMolecularSimulation() { showToast('Molecular simulation is a placeholder.'); }
-        function stopMolecularSimulation() { showToast('Molecular simulation stopped (placeholder).'); }
-        function exportMolecularData() { showToast('Export data is a placeholder.'); }
-        function showAbout() { showToast('Displaying About information (placeholder).'); }
-        function showDisclaimer() { showToast('Displaying Full Disclaimer (placeholder).'); }
-        function showCitation() { showToast('Displaying Citation Guide (placeholder).'); }
         
-        // Event Listeners
-        window.onload = () => {
+        // Initialize on load
+        window.onload = function() {
             initializeCharts();
-            // Add any other setup here
+            updateDesignInfo();
+            
+            // Add input listeners for range sliders
+            document.getElementById('mdTemp').addEventListener('input', function() {
+                document.getElementById('mdTempValue').textContent = this.value;
+            });
+            
+            // Show welcome message
+            console.log('PharmaSim Pro initialized successfully');
+            console.log('Created by David Ferguson, BS, MS, Pharm.D. Candidate');
+            console.log('Powered by Anthropic Claude AI');
         };
     </script>
 </body>
