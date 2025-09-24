@@ -763,6 +763,17 @@
                         </div>
                         <div class="control-group">
                             <label>
+                                Dose (mg)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Amount of drug administered. Higher doses lead to proportionally higher concentrations.
+                                </div>
+                            </label>
+                            <input type="number" id="dose" value="100" min="1" max="1000" step="10">
+                            <div class="value-display">100 mg dose</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
                                 Bioavailability (F)
                                 <span class="help-icon">?</span>
                                 <div class="help-text">
@@ -782,7 +793,7 @@
                                     Typical range: 0.5-3.0 h⁻¹
                                 </div>
                             </label>
-                            <input type="number" id="ka" value="1.5" step="0.1">
+                            <input type="number" id="ka" value="1.5" step="0.1" min="0.1" max="5">
                             <div class="value-display">1.5 h⁻¹</div>
                         </div>
                         <div class="control-group">
@@ -805,6 +816,17 @@
                     <div class="tab-content" id="distribution-tab">
                         <div class="control-group">
                             <label>
+                                Molecular Weight (Da)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Affects tissue penetration. Large molecules (>500 Da) have limited distribution.
+                                </div>
+                            </label>
+                            <input type="number" id="mw" value="350" step="10" min="100" max="2000">
+                            <div class="value-display">350 Da</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
                                 Volume of Distribution (Vd)
                                 <span class="help-icon">?</span>
                                 <div class="help-text">
@@ -812,7 +834,7 @@
                                     Water-soluble drugs: ~40L, Lipophilic drugs: >100L
                                 </div>
                             </label>
-                            <input type="number" id="vd" value="70" step="5">
+                            <input type="number" id="vd" value="70" step="5" min="10" max="500">
                             <div class="value-display">70 L</div>
                         </div>
                         <div class="control-group">
@@ -824,7 +846,7 @@
                                     Only unbound drug is pharmacologically active.
                                 </div>
                             </label>
-                            <input type="number" id="protein-binding" value="90" min="0" max="100">
+                            <input type="number" id="protein-binding" value="90" min="0" max="99" step="1">
                             <div class="value-display">90% bound, 10% free</div>
                         </div>
                         <div class="control-group">
@@ -833,10 +855,11 @@
                                 <span class="help-icon">?</span>
                                 <div class="help-text">
                                     Partition coefficient - measure of lipophilicity.
-                                    LogP < 0: Hydrophilic, LogP > 3: Lipophilic
+                                    LogP < 0: Hydrophilic, LogP 1-3: Drug-like, LogP > 5: Very lipophilic
                                 </div>
                             </label>
-                            <input type="number" id="logp" value="2.5" step="0.1">
+                            <input type="number" id="logp" value="2.5" step="0.1" min="-2" max="8">
+                            <div class="value-display">2.5 (moderately lipophilic)</div>
                         </div>
                     </div>
                     
@@ -936,11 +959,21 @@
                     
                     <div class="button-group">
                         <button onclick="runPBPKSimulation()">Run PBPK Simulation</button>
-                        <button class="secondary" onclick="loadPreset('pbpk')">Load Example</button>
+                        <button class="secondary" onclick="loadPreset('pbpk')">Random Example</button>
+                    </div>
+                    
+                    <div class="info-box" style="margin-top: 15px;">
+                        <h4>🎯 Quick Drug Comparisons</h4>
+                        <p style="margin-bottom: 10px;">Try these different drug types to see how parameters affect PK:</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="loadSpecificDrug('hydrophilic')" style="flex: 1; padding: 8px; font-size: 12px;">Hydrophilic</button>
+                            <button onclick="loadSpecificDrug('lipophilic')" style="flex: 1; padding: 8px; font-size: 12px;">Lipophilic</button>
+                            <button onclick="loadSpecificDrug('high-clearance')" style="flex: 1; padding: 8px; font-size: 12px;">High Clearance</button>
+                        </div>
                     </div>
                     
                     <div class="educational-tip">
-                        <strong>💡 Learning Tip:</strong> Start with the example preset to see typical drug parameters, then modify one parameter at a time to understand its effect on the PK profile.
+                        <strong>💡 Learning Tip:</strong> Each drug type shows dramatically different PK profiles. Compare a hydrophilic vs lipophilic drug to see how LogP affects tissue distribution!
                     </div>
                 </div>
                 
@@ -2309,56 +2342,212 @@ Clinical Trial Design: ${capturedData.clinical.designType}
             document.getElementById('publication-preview').style.display = 'none';
         }
         
-        // PBPK Simulation
+        // Completely rewritten PBPK Model with parameter-dependent outputs
         class PBPKModel {
             constructor(params) {
-                this.clearance = params.clearance;
-                this.vd = params.vd;
-                this.ka = params.ka;
-                this.f = params.bioavailability / 100;
-                this.dose = params.dose || 100;
-                this.proteinBinding = params.proteinBinding / 100;
+                // Store all parameters
+                this.dose = parseFloat(params.dose) || 100;
+                this.bioavailability = parseFloat(params.bioavailability) || 80;
+                this.ka = parseFloat(params.ka) || 1.5;
+                this.clearance = parseFloat(params.clearance) || 1.2;
+                this.vd = parseFloat(params.vd) || 70;
+                this.proteinBinding = parseFloat(params.proteinBinding) || 90;
+                this.logp = parseFloat(params.logp) || 2.5;
+                this.mw = parseFloat(params.mw) || 350;
+                this.formulation = params.formulation || 'immediate';
+                this.enzyme = params.enzyme || 'cyp3a4';
+                this.renalFunction = params.renalFunction || 'normal';
+                
+                // Calculate derived parameters
+                this.f = this.bioavailability / 100;
+                this.fu = (100 - this.proteinBinding) / 100; // Free fraction
+                this.ke = this.clearance / this.vd; // Elimination rate constant
+                
+                console.log('PBPK Model Parameters:', {
+                    dose: this.dose,
+                    bioavailability: this.bioavailability,
+                    ka: this.ka,
+                    clearance: this.clearance,
+                    vd: this.vd,
+                    logp: this.logp,
+                    mw: this.mw
+                });
             }
             
             simulate(timePoints) {
-                const ke = this.clearance / this.vd;
                 const concentrations = [];
                 
+                // Adjust absorption based on formulation
+                let adjustedKa = this.ka;
+                let lagTime = 0;
+                let bioMod = 1.0;
+                
+                switch(this.formulation) {
+                    case 'extended':
+                        adjustedKa = this.ka * 0.2; // Much slower release
+                        break;
+                    case 'enteric':
+                        lagTime = 1.5; // Delay for gastric emptying
+                        adjustedKa = this.ka * 0.8;
+                        break;
+                    case 'sublingual':
+                        adjustedKa = this.ka * 4; // Rapid absorption
+                        bioMod = 1.3; // Bypass first-pass
+                        break;
+                }
+                
+                const effectiveBio = Math.min(this.f * bioMod, 1.0);
+                const adjustedDose = this.dose * effectiveBio;
+                
                 for (let t of timePoints) {
-                    let c;
-                    if (Math.abs(this.ka - ke) < 1e-6) {
-                        c = this.dose * this.f * this.ka * t * Math.exp(-this.ka * t) / this.vd;
-                    } else {
-                        c = (this.dose * this.f * this.ka / (this.vd * (this.ka - ke))) * 
-                            (Math.exp(-ke * t) - Math.exp(-this.ka * t));
+                    let concentration = 0;
+                    const effectiveTime = Math.max(0, t - lagTime);
+                    
+                    if (effectiveTime > 0) {
+                        // One-compartment model with first-order absorption
+                        if (Math.abs(adjustedKa - this.ke) < 1e-6) {
+                            // Special case when ka ≈ ke
+                            concentration = (adjustedDose / this.vd) * adjustedKa * effectiveTime * Math.exp(-this.ke * effectiveTime);
+                        } else {
+                            // General case
+                            const A = adjustedDose * adjustedKa / (this.vd * (adjustedKa - this.ke));
+                            concentration = A * (Math.exp(-this.ke * effectiveTime) - Math.exp(-adjustedKa * effectiveTime));
+                        }
                     }
-                    concentrations.push(Math.max(0, c * 1000));
+                    
+                    // Convert to ng/mL and ensure non-negative
+                    concentrations.push(Math.max(0, concentration * 1000));
                 }
                 
                 return concentrations;
             }
             
+            calculateTissueDistribution(plasmaConc) {
+                // Tissue:plasma ratios based on physicochemical properties
+                const ratios = {};
+                
+                // Brain: heavily dependent on LogP, MW, and protein binding
+                if (this.mw > 1000) {
+                    ratios.brain = 0.01; // Large molecules don't cross BBB
+                } else if (this.logp < 0) {
+                    ratios.brain = 0.05 + (this.logp * 0.01); // Hydrophilic
+                } else {
+                    ratios.brain = 0.1 + (this.logp * 0.2) * this.fu; // Free drug crosses BBB
+                }
+                ratios.brain = Math.max(0.01, Math.min(ratios.brain, 2.0));
+                
+                // Liver: depends on clearance (metabolism) and lipophilicity
+                ratios.liver = 1.0 + (this.clearance * 0.5) + (this.logp * 0.3);
+                if (this.enzyme === 'cyp3a4') ratios.liver *= 1.2; // High hepatic metabolism
+                
+                // Kidney: affected by protein binding (filtration) and MW
+                ratios.kidney = 1.5 * this.fu + 0.3; // Free drug filtered
+                if (this.mw > 500) ratios.kidney *= 0.7; // Large molecules filtered less
+                
+                // Muscle: moderate distribution, affected by lipophilicity
+                ratios.muscle = 0.4 + (this.logp * 0.15) + (this.vd / 500);
+                
+                // Fat: highly dependent on lipophilicity
+                ratios.fat = 0.1 + Math.max(0, this.logp) * 1.2;
+                if (this.logp > 3) ratios.fat += 2.0; // Very lipophilic drugs
+                
+                // Heart: moderate, similar to muscle but higher perfusion
+                ratios.heart = 0.6 + (this.logp * 0.2) + (this.clearance * 0.1);
+                
+                // Bone: low for most drugs unless specific affinity
+                ratios.bone = 0.1 + (this.mw < 200 ? 0.2 : 0);
+                
+                // Calculate absolute concentrations
+                const tissueConcs = {};
+                Object.keys(ratios).forEach(tissue => {
+                    tissueConcs[tissue] = plasmaConc * ratios[tissue];
+                });
+                
+                return tissueConcs;
+            }
+            
+            calculateTargetOccupancy(concentrations, ec50, hill) {
+                return concentrations.map(totalConc => {
+                    // Only free drug binds to target
+                    const freeConc = totalConc * this.fu;
+                    // Hill equation for target occupancy
+                    const occupancy = (Math.pow(freeConc, hill) / (Math.pow(ec50, hill) + Math.pow(freeConc, hill))) * 100;
+                    return Math.min(100, Math.max(0, occupancy));
+                });
+            }
+            
+            simulateWithInhibitor() {
+                // Different enzymes have different inhibition potential
+                const inhibitionFactors = {
+                    'cyp3a4': 0.15,  // 85% inhibition
+                    'cyp2d6': 0.30,  // 70% inhibition  
+                    'cyp2c9': 0.25,  // 75% inhibition
+                    'cyp1a2': 0.45,  // 55% inhibition
+                    'cyp2c19': 0.35, // 65% inhibition
+                    'ugt': 0.60      // 40% inhibition
+                };
+                
+                const inhibitedClearance = this.clearance * (inhibitionFactors[this.enzyme] || 0.5);
+                
+                // Create new model with reduced clearance
+                const inhibitedModel = new PBPKModel({
+                    ...this.getAllParams(),
+                    clearance: inhibitedClearance
+                });
+                
+                return inhibitedModel;
+            }
+            
+            getAllParams() {
+                return {
+                    dose: this.dose,
+                    bioavailability: this.bioavailability,
+                    ka: this.ka,
+                    clearance: this.clearance,
+                    vd: this.vd,
+                    proteinBinding: this.proteinBinding,
+                    logp: this.logp,
+                    mw: this.mw,
+                    formulation: this.formulation,
+                    enzyme: this.enzyme,
+                    renalFunction: this.renalFunction
+                };
+            }
+            
             calculateMetrics(concentrations, timePoints) {
                 const cmax = Math.max(...concentrations);
-                const tmaxIndex = concentrations.indexOf(cmax);
-                const tmax = timePoints[tmaxIndex];
+                const cmaxIndex = concentrations.indexOf(cmax);
+                const tmax = timePoints[cmaxIndex];
                 
+                // AUC calculation using trapezoidal rule
                 let auc = 0;
                 for (let i = 1; i < concentrations.length; i++) {
-                    auc += 0.5 * (concentrations[i] + concentrations[i-1]) * 
-                           (timePoints[i] - timePoints[i-1]);
+                    const dt = timePoints[i] - timePoints[i-1];
+                    const avgConc = (concentrations[i] + concentrations[i-1]) / 2;
+                    auc += avgConc * dt;
                 }
                 
-                const ke = this.clearance / this.vd;
-                const halfLife = 0.693 / ke;
+                // Half-life calculation (accounting for renal function)
+                let halfLife = 0.693 / this.ke;
+                const renalMultipliers = {
+                    'normal': 1.0,
+                    'mild': 1.3,
+                    'moderate': 2.0,
+                    'severe': 4.0
+                };
+                halfLife *= renalMultipliers[this.renalFunction];
                 
-                return { 
+                // Steady-state volume
+                const vss = this.vd * (1 + Math.max(0, this.logp) * 0.3);
+                
+                return {
                     cmax: cmax.toFixed(1),
-                    tmax: tmax.toFixed(1),
+                    tmax: tmax.toFixed(1), 
                     auc: auc.toFixed(0),
                     halfLife: halfLife.toFixed(1),
                     clearance: this.clearance.toFixed(2),
-                    vss: (this.vd * 0.8).toFixed(1)
+                    vss: vss.toFixed(1),
+                    freeConc: (cmax * this.fu).toFixed(1)
                 };
             }
         }
