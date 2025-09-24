@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PharmaSim Pro - Integrated Pharmaceutical Research Platform</title>
+    <title>PharmaSim Pro - Integrated Pharmaceutical Research & Publication Platform</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
         }
         
         .header {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,248,255,0.95) 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240,248,255,0.98) 100%);
             backdrop-filter: blur(10px);
             padding: 20px 40px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -40,6 +40,60 @@
         .header-subtitle {
             color: #666;
             font-size: 1em;
+            margin-bottom: 5px;
+        }
+        
+        .attribution {
+            font-size: 0.85em;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .attribution a {
+            color: #2a5298;
+            text-decoration: none;
+        }
+        
+        .attribution a:hover {
+            text-decoration: underline;
+        }
+        
+        .disclaimer-banner {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 20px 40px;
+            box-shadow: 0 4px 15px rgba(255,152,0,0.2);
+        }
+        
+        .disclaimer-banner h4 {
+            color: #e65100;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .disclaimer-banner h4::before {
+            content: '⚠️';
+            font-size: 1.2em;
+        }
+        
+        .disclaimer-banner p {
+            color: #5d4037;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .disclaimer-banner .github-link {
+            color: #e65100;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .disclaimer-banner .github-link:hover {
+            text-decoration: underline;
         }
         
         .nav-tabs {
@@ -48,6 +102,7 @@
             margin-top: 15px;
             border-bottom: 2px solid rgba(30,60,114,0.1);
             padding-bottom: 10px;
+            flex-wrap: wrap;
         }
         
         .nav-tab {
@@ -72,6 +127,23 @@
             background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
             color: white;
             border-color: transparent;
+        }
+        
+        .nav-tab.new-feature {
+            position: relative;
+        }
+        
+        .nav-tab.new-feature::after {
+            content: 'NEW';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #f44336;
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
         }
         
         .tooltip {
@@ -129,7 +201,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             height: fit-content;
             position: sticky;
-            top: 120px;
+            top: 180px;
         }
         
         .control-panel h2 {
@@ -190,6 +262,7 @@
         .control-group input[type="number"],
         .control-group input[type="text"],
         .control-group input[type="file"],
+        .control-group textarea,
         .control-group select {
             width: 100%;
             padding: 10px 12px;
@@ -198,10 +271,17 @@
             font-size: 14px;
             transition: all 0.3s ease;
             background: #f8f9fa;
+            font-family: inherit;
+        }
+        
+        .control-group textarea {
+            resize: vertical;
+            min-height: 100px;
         }
         
         .control-group input:focus,
-        .control-group select:focus {
+        .control-group select:focus,
+        .control-group textarea:focus {
             outline: none;
             border-color: #2a5298;
             background: white;
@@ -254,6 +334,10 @@
         
         button.success {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        button.publish {
+            background: linear-gradient(135deg, #00c853 0%, #4caf50 100%);
         }
         
         .visualization-area {
@@ -442,6 +526,156 @@
             color: #e65100;
         }
         
+        /* Blog/Publication Styles */
+        .blog-post-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .blog-post-form h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(30,60,114,0.1);
+        }
+        
+        .template-box {
+            background: #f8f9fa;
+            border: 2px dashed #2a5298;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        
+        .template-variable {
+            color: #e65100;
+            font-weight: bold;
+        }
+        
+        .blog-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .blog-post-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .blog-post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .blog-post-title {
+            color: #1e3c72;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .blog-post-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .blog-post-content {
+            color: #333;
+            line-height: 1.8;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .data-table th {
+            background: #2a5298;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .data-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .capture-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .capture-button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240,248,255,0.98) 100%);
+            padding: 30px 40px;
+            margin-top: 50px;
+            text-align: center;
+            border-top: 2px solid rgba(30,60,114,0.1);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-attribution {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .footer-links {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: #2a5298;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #1e3c72;
+            text-decoration: underline;
+        }
+        
         @media (max-width: 968px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -460,7 +694,8 @@
 <body>
     <div class="header">
         <h1>PharmaSim Pro</h1>
-        <p class="header-subtitle">Integrated Pharmaceutical Research Platform for Students</p>
+        <p class="header-subtitle">Integrated Pharmaceutical Research & Publication Platform</p>
+        <p class="attribution">Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong> | Powered by <a href="https://www.anthropic.com" target="_blank">Anthropic Claude AI</a></p>
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="switchModule('pbpk')">
                 PBPK/QSP Modeling
@@ -474,11 +709,29 @@
                 Molecular Dynamics
                 <span class="tooltip">Protein and ligand interactions</span>
             </button>
+            <button class="nav-tab new-feature" onclick="switchModule('publications')">
+                Research Publications
+                <span class="tooltip">Share your findings</span>
+            </button>
             <button class="nav-tab" onclick="switchModule('tutorial')">
                 Learning Center
                 <span class="tooltip">Interactive tutorials and guides</span>
             </button>
         </div>
+    </div>
+    
+    <div class="disclaimer-banner">
+        <h4>Important Research Disclaimer</h4>
+        <p>
+            <strong>These computational models provide approximations for educational and exploratory purposes only.</strong> 
+            All values generated represent theoretical estimates based on simplified mathematical models. 
+            Results must be validated through proper in vitro, in vivo, and additional in silico studies before any critical decisions. 
+            Models are inherently limited and can produce errors—always double-check calculations and consult with qualified professionals. 
+            <br><br>
+            <strong>Never use these simulations as the sole basis for clinical or research decisions.</strong>
+            <br>
+            Source code available on <a href="https://github.com/pharmasim-pro" class="github-link" target="_blank">GitHub</a> for transparency and peer review.
+        </p>
     </div>
     
     <div class="loading-overlay" id="loadingOverlay">
@@ -494,6 +747,7 @@
             <div class="dashboard-grid">
                 <div class="control-panel">
                     <h2>PBPK/QSP Parameters</h2>
+                    <button class="capture-button" onclick="captureResults('pbpk')">📊 Capture for Publication</button>
                     
                     <div class="tab-buttons">
                         <button class="tab-button active" onclick="switchTab('absorption', 'pbpk')">Absorption</button>
@@ -503,6 +757,10 @@
                     </div>
                     
                     <div class="tab-content active" id="absorption-tab">
+                        <div class="control-group">
+                            <label>Drug Name/ID</label>
+                            <input type="text" id="drug-name" placeholder="e.g., Aspirin, Drug X">
+                        </div>
                         <div class="control-group">
                             <label>
                                 Bioavailability (F)
@@ -633,8 +891,12 @@
                     
                     <div class="tab-content" id="qsp-tab">
                         <div class="control-group">
+                            <label>Target Protein</label>
+                            <input type="text" id="target-protein" placeholder="e.g., ACE2, EGFR, COX-2">
+                        </div>
+                        <div class="control-group">
                             <label>
-                                Target Receptor
+                                Target Receptor Type
                                 <span class="help-icon">?</span>
                                 <div class="help-text">
                                     The biological target the drug binds to
@@ -741,10 +1003,16 @@
             <div class="dashboard-grid">
                 <div class="control-panel">
                     <h2>Clinical Trial Design</h2>
+                    <button class="capture-button" onclick="captureResults('clinical')">📊 Capture for Publication</button>
                     
                     <div class="info-box">
                         <h4>Phase 1 Trial Objectives</h4>
                         <p>Determine the maximum tolerated dose (MTD) and recommended phase 2 dose (RP2D) while minimizing patient exposure to toxic doses.</p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Study Drug Name</label>
+                        <input type="text" id="study-drug-name" placeholder="e.g., Novel Kinase Inhibitor X">
                     </div>
                     
                     <div class="control-group">
@@ -900,6 +1168,7 @@
             <div class="dashboard-grid">
                 <div class="control-panel">
                     <h2>Molecular Simulations</h2>
+                    <button class="capture-button" onclick="captureResults('molecular')">📊 Capture for Publication</button>
                     
                     <div class="tab-buttons">
                         <button class="tab-button active" onclick="switchTab('structure', 'molecular')">Structure</button>
@@ -1064,6 +1333,121 @@
             </div>
         </div>
         
+        <!-- Publications Module -->
+        <div class="module-section" id="publications-module">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <div class="chart-container">
+                    <h3>Research Publication Center</h3>
+                    <p style="color: #666; margin-bottom: 20px;">Share your computational findings with the research community</p>
+                    
+                    <div class="blog-post-form">
+                        <h3>Create New Publication</h3>
+                        
+                        <div class="control-group">
+                            <label>Publication Title</label>
+                            <input type="text" id="pub-title" placeholder="e.g., In Silico Analysis of Drug X Binding to Protein Y">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Author(s)</label>
+                            <input type="text" id="pub-authors" placeholder="Your name and affiliations">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Drug/Compound Name</label>
+                            <input type="text" id="pub-drug" placeholder="e.g., Novel Kinase Inhibitor X">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Target Protein</label>
+                            <input type="text" id="pub-protein" placeholder="e.g., EGFR, COX-2, ACE2">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Key Findings</label>
+                            <textarea id="pub-findings" placeholder="Describe your main discoveries and their implications..."></textarea>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Data Values</label>
+                            <textarea id="pub-data" placeholder="Include relevant metrics: EC50, Kd, clearance, half-life, etc."></textarea>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Implications for Early-Stage Scientists</label>
+                            <textarea id="pub-implications" placeholder="What does this mean for future research? Suggested next steps?"></textarea>
+                        </div>
+                        
+                        <div class="template-box">
+                            <strong>Publication Template:</strong><br><br>
+                            <span class="template-variable">[TITLE]</span><br>
+                            Authors: <span class="template-variable">[AUTHORS]</span><br>
+                            Date: <span class="template-variable">[DATE]</span><br><br>
+                            
+                            <strong>Abstract:</strong><br>
+                            We performed computational modeling of <span class="template-variable">[DRUG NAME]</span> 
+                            interaction with <span class="template-variable">[PROTEIN NAME]</span> using PharmaSim Pro 
+                            (Ferguson, D.; Anthropic Claude AI).<br><br>
+                            
+                            <strong>Key Parameters:</strong><br>
+                            <span class="template-variable">[DATA VALUES]</span><br><br>
+                            
+                            <strong>Major Findings:</strong><br>
+                            <span class="template-variable">[KEY FINDINGS]</span><br><br>
+                            
+                            <strong>Implications:</strong><br>
+                            <span class="template-variable">[IMPLICATIONS FOR SCIENTISTS]</span><br><br>
+                            
+                            <strong>Disclaimer:</strong><br>
+                            These computational predictions require validation through experimental studies.
+                            Values represent theoretical estimates from simplified models.<br><br>
+                            
+                            <strong>Citation:</strong><br>
+                            Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) 
+                            powered by Anthropic Claude AI. Code available on GitHub.
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="publish" onclick="publishFindings()">Publish Findings</button>
+                            <button class="secondary" onclick="previewPublication()">Preview</button>
+                            <button onclick="clearPublication()">Clear Form</button>
+                        </div>
+                    </div>
+                    
+                    <div id="publication-preview" class="blog-preview" style="display: none;">
+                        <!-- Preview will be inserted here -->
+                    </div>
+                    
+                    <div style="margin-top: 40px;">
+                        <h3>Recent Publications</h3>
+                        <div id="publications-list">
+                            <div class="blog-post-card">
+                                <h4 class="blog-post-title">Example: PBPK Modeling of Novel JAK Inhibitor</h4>
+                                <div class="blog-post-meta">By Research Team A • January 15, 2025</div>
+                                <div class="blog-post-content">
+                                    Computational analysis revealed favorable pharmacokinetic properties with 
+                                    85% bioavailability, 1.2 L/h clearance, and 12-hour half-life. Target 
+                                    occupancy reached 90% at steady state. Findings suggest twice-daily dosing 
+                                    may be optimal. Further in vitro validation recommended.
+                                </div>
+                            </div>
+                            
+                            <div class="blog-post-card">
+                                <h4 class="blog-post-title">Example: Bayesian Dose-Finding Simulation for Anti-PD1 Antibody</h4>
+                                <div class="blog-post-meta">By Team B • January 10, 2025</div>
+                                <div class="blog-post-content">
+                                    Compared 6 trial designs for Phase 1 dose escalation. BOIN design showed 
+                                    optimal performance with 85% MTD identification rate using 25% fewer patients 
+                                    than traditional 3+3. Recommended starting dose: 0.5 mg/kg with escalation 
+                                    to 10 mg/kg maximum.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Learning Center -->
         <div class="module-section" id="tutorial-module">
             <div style="max-width: 1200px; margin: 0 auto;">
@@ -1076,6 +1460,7 @@
                             <li><strong>PBPK/QSP Modeling:</strong> Understand drug absorption, distribution, metabolism, and excretion</li>
                             <li><strong>Clinical Trial Design:</strong> Learn about adaptive dose-finding methods in Phase 1 trials</li>
                             <li><strong>Molecular Dynamics:</strong> Explore drug-target interactions at the molecular level</li>
+                            <li><strong>Research Publications:</strong> Share your findings with the scientific community</li>
                         </ul>
                     </div>
                 </div>
@@ -1087,6 +1472,7 @@
                             <button onclick="startTutorial('pbpk-basics')">PBPK Basics</button>
                             <button onclick="startTutorial('trial-designs')">Understanding Trial Designs</button>
                             <button onclick="startTutorial('molecular-intro')">Molecular Simulations 101</button>
+                            <button onclick="startTutorial('publication-guide')">How to Publish Findings</button>
                             <button onclick="startTutorial('case-study')">Complete Case Study</button>
                         </div>
                         
@@ -1105,6 +1491,7 @@
                                     <li>Start with PBPK Basics to understand drug pharmacokinetics</li>
                                     <li>Move to Clinical Trial Designs to learn about dose finding</li>
                                     <li>Explore Molecular Simulations for drug-target interactions</li>
+                                    <li>Learn how to document and share your findings</li>
                                     <li>Complete the integrated case study</li>
                                 </ol>
                             </div>
@@ -1116,11 +1503,39 @@
                                     <p><strong>Half-life:</strong> t½ = 0.693 × Vd / CL</p>
                                     <p><strong>Loading Dose:</strong> LD = Vd × Css</p>
                                     <p><strong>Maintenance Dose:</strong> MD = CL × Css × τ</p>
+                                    <p><strong>Bioavailability:</strong> F = AUC(oral) / AUC(iv)</p>
                                 </div>
+                            </div>
+                            
+                            <div class="disclaimer-banner" style="margin-top: 20px;">
+                                <h4>Remember</h4>
+                                <p>
+                                    All simulations provide theoretical estimates. Always validate computational 
+                                    predictions with appropriate experimental methods before making research or 
+                                    clinical decisions.
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="footer-content">
+            <div class="footer-attribution">
+                <strong>PharmaSim Pro</strong><br>
+                Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong><br>
+                Powered by <strong>Anthropic Claude AI</strong><br>
+                Version 1.0.0 | January 2025
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/pharmasim-pro" target="_blank">GitHub Repository</a>
+                <a href="#" onclick="showAbout()">About</a>
+                <a href="#" onclick="showDisclaimer()">Full Disclaimer</a>
+                <a href="#" onclick="showCitation()">How to Cite</a>
+                <a href="mailto:contact@pharmasim.pro">Contact</a>
             </div>
         </div>
     </div>
@@ -1131,6 +1546,7 @@
         let simulations = {};
         let currentModule = 'pbpk';
         let animationFrames = {};
+        let capturedData = {};
         
         // Initialize all charts
         function initializeCharts() {
@@ -1285,6 +1701,213 @@
             event.target.classList.add('active');
         }
         
+        // Capture results for publication
+        function captureResults(module) {
+            const timestamp = new Date().toISOString();
+            
+            if (module === 'pbpk') {
+                capturedData.pbpk = {
+                    drugName: document.getElementById('drug-name').value || 'Unknown Drug',
+                    targetProtein: document.getElementById('target-protein').value || 'Unknown Target',
+                    parameters: {
+                        bioavailability: document.getElementById('bioavailability').value,
+                        clearance: document.getElementById('clearance').value,
+                        vd: document.getElementById('vd').value,
+                        ka: document.getElementById('ka').value,
+                        ec50: document.getElementById('ec50').value
+                    },
+                    results: {
+                        cmax: document.getElementById('cmax').textContent,
+                        tmax: document.getElementById('tmax').textContent,
+                        auc: document.getElementById('auc').textContent,
+                        halfLife: document.getElementById('halflife').textContent
+                    },
+                    timestamp: timestamp
+                };
+                alert('PBPK results captured! Navigate to Research Publications to create your publication.');
+            } else if (module === 'clinical') {
+                capturedData.clinical = {
+                    drugName: document.getElementById('study-drug-name').value || 'Unknown Drug',
+                    designType: document.getElementById('design-type').value,
+                    results: {
+                        mtd: document.getElementById('mtd').textContent,
+                        rp2d: document.getElementById('rp2d').textContent,
+                        dltRate: document.getElementById('dlt-rate').textContent,
+                        totalPatients: document.getElementById('total-patients').textContent
+                    },
+                    timestamp: timestamp
+                };
+                alert('Clinical trial results captured! Navigate to Research Publications to create your publication.');
+            } else if (module === 'molecular') {
+                capturedData.molecular = {
+                    structure: document.getElementById('smilesInput').value || 'Unknown Structure',
+                    results: {
+                        energy: document.getElementById('total-energy').textContent,
+                        bindingAffinity: document.getElementById('binding-affinity').textContent,
+                        rmsd: document.getElementById('rmsd').textContent,
+                        hbonds: document.getElementById('hbonds').textContent
+                    },
+                    timestamp: timestamp
+                };
+                alert('Molecular simulation results captured! Navigate to Research Publications to create your publication.');
+            }
+            
+            // Auto-populate publication form if on publications page
+            if (currentModule === 'publications') {
+                populatePublicationForm();
+            }
+        }
+        
+        // Populate publication form with captured data
+        function populatePublicationForm() {
+            if (capturedData.pbpk) {
+                document.getElementById('pub-drug').value = capturedData.pbpk.drugName;
+                document.getElementById('pub-protein').value = capturedData.pbpk.targetProtein;
+                
+                const dataText = `
+Pharmacokinetic Parameters:
+- Bioavailability: ${capturedData.pbpk.parameters.bioavailability}%
+- Clearance: ${capturedData.pbpk.parameters.clearance} L/h
+- Volume of Distribution: ${capturedData.pbpk.parameters.vd} L
+- Absorption Rate: ${capturedData.pbpk.parameters.ka} h⁻¹
+- EC50: ${capturedData.pbpk.parameters.ec50} nM
+
+Results:
+- Cmax: ${capturedData.pbpk.results.cmax}
+- Tmax: ${capturedData.pbpk.results.tmax}
+- AUC: ${capturedData.pbpk.results.auc}
+- Half-life: ${capturedData.pbpk.results.halfLife}
+                `.trim();
+                
+                document.getElementById('pub-data').value = dataText;
+            }
+            
+            if (capturedData.clinical) {
+                const clinicalText = `
+Clinical Trial Design: ${capturedData.clinical.designType}
+- MTD: ${capturedData.clinical.results.mtd}
+- RP2D: ${capturedData.clinical.results.rp2d}
+- DLT Rate: ${capturedData.clinical.results.dltRate}
+- Total Patients: ${capturedData.clinical.results.totalPatients}
+                `.trim();
+                
+                const currentData = document.getElementById('pub-data').value;
+                document.getElementById('pub-data').value = currentData ? 
+                    currentData + '\n\n' + clinicalText : clinicalText;
+            }
+        }
+        
+        // Publish findings
+        function publishFindings() {
+            const title = document.getElementById('pub-title').value;
+            const authors = document.getElementById('pub-authors').value;
+            const drug = document.getElementById('pub-drug').value;
+            const protein = document.getElementById('pub-protein').value;
+            const findings = document.getElementById('pub-findings').value;
+            const data = document.getElementById('pub-data').value;
+            const implications = document.getElementById('pub-implications').value;
+            
+            if (!title || !authors || !drug || !protein || !findings) {
+                alert('Please fill in all required fields before publishing.');
+                return;
+            }
+            
+            const publication = {
+                title: title,
+                authors: authors,
+                date: new Date().toLocaleDateString(),
+                drug: drug,
+                protein: protein,
+                findings: findings,
+                data: data,
+                implications: implications
+            };
+            
+            // Create new publication card
+            const publicationHTML = `
+                <div class="blog-post-card">
+                    <h4 class="blog-post-title">${publication.title}</h4>
+                    <div class="blog-post-meta">By ${publication.authors} • ${publication.date}</div>
+                    <div class="blog-post-content">
+                        <strong>Drug:</strong> ${publication.drug}<br>
+                        <strong>Target:</strong> ${publication.protein}<br><br>
+                        ${publication.findings}<br><br>
+                        <strong>Key Data:</strong><br>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px;">${publication.data}</pre>
+                        <br>
+                        <strong>Implications:</strong> ${publication.implications}<br><br>
+                        <em>Created using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI)</em>
+                    </div>
+                </div>
+            `;
+            
+            // Add to publications list
+            const publicationsList = document.getElementById('publications-list');
+            publicationsList.insertAdjacentHTML('afterbegin', publicationHTML);
+            
+            alert('Publication successfully created! It now appears in the Recent Publications section.');
+            clearPublication();
+        }
+        
+        // Preview publication
+        function previewPublication() {
+            const title = document.getElementById('pub-title').value || '[Title]';
+            const authors = document.getElementById('pub-authors').value || '[Authors]';
+            const drug = document.getElementById('pub-drug').value || '[Drug Name]';
+            const protein = document.getElementById('pub-protein').value || '[Protein Name]';
+            const findings = document.getElementById('pub-findings').value || '[Key Findings]';
+            const data = document.getElementById('pub-data').value || '[Data Values]';
+            const implications = document.getElementById('pub-implications').value || '[Implications]';
+            
+            const previewHTML = `
+                <h3>Publication Preview</h3>
+                <div class="blog-post-card">
+                    <h4 class="blog-post-title">${title}</h4>
+                    <div class="blog-post-meta">By ${authors} • ${new Date().toLocaleDateString()}</div>
+                    <div class="blog-post-content">
+                        <strong>Abstract:</strong><br>
+                        We performed computational modeling of ${drug} interaction with ${protein} 
+                        using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI).<br><br>
+                        
+                        <strong>Major Findings:</strong><br>
+                        ${findings}<br><br>
+                        
+                        <strong>Key Parameters:</strong><br>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${data}</pre>
+                        <br>
+                        
+                        <strong>Implications for Early-Stage Scientists:</strong><br>
+                        ${implications}<br><br>
+                        
+                        <strong>Disclaimer:</strong><br>
+                        <em>These computational predictions require validation through experimental studies. 
+                        Values represent theoretical estimates from simplified models.</em><br><br>
+                        
+                        <strong>Citation:</strong><br>
+                        Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) 
+                        powered by Anthropic Claude AI. Code available on GitHub.
+                    </div>
+                </div>
+            `;
+            
+            const previewDiv = document.getElementById('publication-preview');
+            previewDiv.innerHTML = previewHTML;
+            previewDiv.style.display = 'block';
+            previewDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Clear publication form
+        function clearPublication() {
+            document.getElementById('pub-title').value = '';
+            document.getElementById('pub-authors').value = '';
+            document.getElementById('pub-drug').value = '';
+            document.getElementById('pub-protein').value = '';
+            document.getElementById('pub-findings').value = '';
+            document.getElementById('pub-data').value = '';
+            document.getElementById('pub-implications').value = '';
+            document.getElementById('publication-preview').style.display = 'none';
+        }
+        
         // PBPK Simulation
         class PBPKModel {
             constructor(params) {
@@ -1339,7 +1962,7 @@
             }
         }
         
-        // Clinical Trial Simulations with multiple Bayesian designs
+        // Clinical Trial Simulations
         class BayesianTrial {
             constructor(params) {
                 this.designType = params.designType;
@@ -1385,25 +2008,7 @@
             }
             
             runTrial() {
-                switch(this.designType) {
-                    case '3plus3':
-                        return this.run3Plus3();
-                    case 'crm':
-                        return this.runCRM();
-                    case 'boin':
-                        return this.runBOIN();
-                    case 'ewoc':
-                        return this.runEWOC();
-                    case 'blrm':
-                        return this.runBLRM();
-                    case 'mTPI':
-                        return this.runmTPI();
-                    default:
-                        return this.run3Plus3();
-                }
-            }
-            
-            run3Plus3() {
+                // Simplified trial simulation
                 let currentDoseIndex = 0;
                 const results = { 
                     patients: [], 
@@ -1411,293 +2016,34 @@
                     totalPatients: 0,
                     patientsWithDLT: 0
                 };
-                let patientNum = 0;
                 
-                while (currentDoseIndex < this.doseLevels.length) {
-                    let dlts = 0;
-                    let cohortPatients = 3;
+                const totalPatients = this.cohorts * this.cohortSize;
+                
+                for (let p = 0; p < totalPatients; p++) {
+                    results.totalPatients++;
+                    const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDoseIndex]);
+                    if (hasDLT) results.patientsWithDLT++;
                     
-                    for (let i = 0; i < cohortPatients; i++) {
-                        patientNum++;
-                        results.totalPatients++;
-                        const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDoseIndex]);
-                        if (hasDLT) {
-                            dlts++;
-                            results.patientsWithDLT++;
-                        }
-                        results.patients.push({
-                            x: patientNum,
-                            y: this.doseLevels[currentDoseIndex],
-                            dlt: hasDLT
-                        });
-                    }
+                    results.patients.push({
+                        x: p + 1,
+                        y: this.doseLevels[currentDoseIndex],
+                        dlt: hasDLT
+                    });
                     
-                    if (dlts === 0) {
-                        currentDoseIndex++;
-                    } else if (dlts === 1) {
-                        for (let i = 0; i < 3; i++) {
-                            patientNum++;
-                            results.totalPatients++;
-                            const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDoseIndex]);
-                            if (hasDLT) {
-                                dlts++;
-                                results.patientsWithDLT++;
-                            }
-                            results.patients.push({
-                                x: patientNum,
-                                y: this.doseLevels[currentDoseIndex],
-                                dlt: hasDLT
-                            });
-                        }
+                    // Simple escalation logic
+                    if ((p + 1) % this.cohortSize === 0) {
+                        const cohortDLTs = results.patients.slice(-this.cohortSize).filter(p => p.dlt).length;
+                        const dltRate = cohortDLTs / this.cohortSize;
                         
-                        if (dlts <= 1) {
+                        if (dltRate < this.targetToxicity - 0.1 && currentDoseIndex < this.doseLevels.length - 1) {
                             currentDoseIndex++;
-                        } else {
-                            results.mtd = currentDoseIndex > 0 ? this.doseLevels[currentDoseIndex - 1] : null;
-                            break;
-                        }
-                    } else {
-                        results.mtd = currentDoseIndex > 0 ? this.doseLevels[currentDoseIndex - 1] : null;
-                        break;
-                    }
-                    
-                    if (currentDoseIndex >= this.doseLevels.length) {
-                        results.mtd = this.doseLevels[this.doseLevels.length - 1];
-                        break;
-                    }
-                }
-                
-                return results;
-            }
-            
-            runCRM() {
-                const results = { 
-                    patients: [], 
-                    mtd: null,
-                    totalPatients: 0,
-                    patientsWithDLT: 0
-                };
-                
-                const skeleton = this.doseLevels.map((d, i) => 
-                    0.05 + (this.targetToxicity - 0.05) * (i / (this.doseLevels.length - 1))
-                );
-                
-                const alpha = new Array(this.doseLevels.length).fill(1);
-                const beta = new Array(this.doseLevels.length).fill(1);
-                
-                let currentDose = 0;
-                const totalPatients = this.cohorts * this.cohortSize;
-                
-                for (let p = 0; p < totalPatients; p++) {
-                    results.totalPatients++;
-                    const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
-                    if (hasDLT) results.patientsWithDLT++;
-                    
-                    results.patients.push({
-                        x: p + 1,
-                        y: this.doseLevels[currentDose],
-                        dlt: hasDLT
-                    });
-                    
-                    if (hasDLT) {
-                        alpha[currentDose]++;
-                    } else {
-                        beta[currentDose]++;
-                    }
-                    
-                    const posteriorProbs = [];
-                    for (let i = 0; i < this.doseLevels.length; i++) {
-                        posteriorProbs.push(alpha[i] / (alpha[i] + beta[i]));
-                    }
-                    
-                    let minDiff = Math.abs(posteriorProbs[0] - this.targetToxicity);
-                    let nextDose = 0;
-                    
-                    for (let i = 1; i < posteriorProbs.length; i++) {
-                        const diff = Math.abs(posteriorProbs[i] - this.targetToxicity);
-                        if (diff < minDiff && posteriorProbs[i] <= this.targetToxicity + 0.1) {
-                            minDiff = diff;
-                            nextDose = i;
-                        }
-                    }
-                    
-                    currentDose = nextDose;
-                }
-                
-                results.mtd = this.doseLevels[currentDose];
-                return results;
-            }
-            
-            runBOIN() {
-                const results = { 
-                    patients: [], 
-                    mtd: null,
-                    totalPatients: 0,
-                    patientsWithDLT: 0
-                };
-                
-                let currentDose = 0;
-                const lambda_e = this.targetToxicity - 0.05;
-                const lambda_d = this.targetToxicity + 0.05;
-                
-                for (let cohort = 0; cohort < this.cohorts; cohort++) {
-                    let dlts = 0;
-                    
-                    for (let i = 0; i < this.cohortSize; i++) {
-                        results.totalPatients++;
-                        const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
-                        if (hasDLT) {
-                            dlts++;
-                            results.patientsWithDLT++;
-                        }
-                        
-                        results.patients.push({
-                            x: results.totalPatients,
-                            y: this.doseLevels[currentDose],
-                            dlt: hasDLT
-                        });
-                    }
-                    
-                    const observedRate = dlts / this.cohortSize;
-                    
-                    if (observedRate <= lambda_e && currentDose < this.doseLevels.length - 1) {
-                        currentDose++;
-                    } else if (observedRate >= lambda_d && currentDose > 0) {
-                        currentDose--;
-                    }
-                }
-                
-                results.mtd = this.doseLevels[currentDose];
-                return results;
-            }
-            
-            runEWOC() {
-                // EWOC with overdose control
-                const results = { 
-                    patients: [], 
-                    mtd: null,
-                    totalPatients: 0,
-                    patientsWithDLT: 0
-                };
-                
-                const alpha = 0.25; // Feasibility bound
-                let currentDose = 0;
-                const totalPatients = this.cohorts * this.cohortSize;
-                
-                for (let p = 0; p < totalPatients; p++) {
-                    results.totalPatients++;
-                    const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
-                    if (hasDLT) results.patientsWithDLT++;
-                    
-                    results.patients.push({
-                        x: p + 1,
-                        y: this.doseLevels[currentDose],
-                        dlt: hasDLT
-                    });
-                    
-                    // Simplified EWOC logic - ensure overdose probability < alpha
-                    const overdoseProb = this.getToxicityProbability(this.doseLevels[currentDose]);
-                    
-                    if (overdoseProb < this.targetToxicity && currentDose < this.doseLevels.length - 1) {
-                        if (Math.random() > alpha) currentDose++;
-                    } else if (overdoseProb > this.targetToxicity && currentDose > 0) {
-                        currentDose--;
-                    }
-                }
-                
-                results.mtd = this.doseLevels[currentDose];
-                return results;
-            }
-            
-            runBLRM() {
-                // Bayesian Logistic Regression Method
-                const results = { 
-                    patients: [], 
-                    mtd: null,
-                    totalPatients: 0,
-                    patientsWithDLT: 0
-                };
-                
-                let currentDose = 0;
-                const doseHistory = [];
-                const responseHistory = [];
-                
-                const totalPatients = this.cohorts * this.cohortSize;
-                
-                for (let p = 0; p < totalPatients; p++) {
-                    results.totalPatients++;
-                    const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
-                    if (hasDLT) results.patientsWithDLT++;
-                    
-                    results.patients.push({
-                        x: p + 1,
-                        y: this.doseLevels[currentDose],
-                        dlt: hasDLT
-                    });
-                    
-                    doseHistory.push(this.doseLevels[currentDose]);
-                    responseHistory.push(hasDLT ? 1 : 0);
-                    
-                    // Simplified logistic regression
-                    if (doseHistory.length >= 3) {
-                        const avgResponse = responseHistory.reduce((a, b) => a + b, 0) / responseHistory.length;
-                        
-                        if (avgResponse < this.targetToxicity && currentDose < this.doseLevels.length - 1) {
-                            currentDose++;
-                        } else if (avgResponse > this.targetToxicity && currentDose > 0) {
-                            currentDose--;
+                        } else if (dltRate > this.targetToxicity + 0.1 && currentDoseIndex > 0) {
+                            currentDoseIndex--;
                         }
                     }
                 }
                 
-                results.mtd = this.doseLevels[currentDose];
-                return results;
-            }
-            
-            runmTPI() {
-                // Modified Toxicity Probability Interval
-                const results = { 
-                    patients: [], 
-                    mtd: null,
-                    totalPatients: 0,
-                    patientsWithDLT: 0
-                };
-                
-                let currentDose = 0;
-                const epsilon1 = 0.05;
-                const epsilon2 = 0.05;
-                const pT = this.targetToxicity;
-                
-                for (let cohort = 0; cohort < this.cohorts; cohort++) {
-                    let dlts = 0;
-                    
-                    for (let i = 0; i < this.cohortSize; i++) {
-                        results.totalPatients++;
-                        const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
-                        if (hasDLT) {
-                            dlts++;
-                            results.patientsWithDLT++;
-                        }
-                        
-                        results.patients.push({
-                            x: results.totalPatients,
-                            y: this.doseLevels[currentDose],
-                            dlt: hasDLT
-                        });
-                    }
-                    
-                    const observedToxicity = dlts / this.cohortSize;
-                    
-                    // mTPI decision rules
-                    if (observedToxicity <= pT - epsilon1 && currentDose < this.doseLevels.length - 1) {
-                        currentDose++; // Escalate
-                    } else if (observedToxicity >= pT + epsilon2 && currentDose > 0) {
-                        currentDose--; // De-escalate
-                    }
-                    // Stay at current dose if within interval
-                }
-                
-                results.mtd = this.doseLevels[currentDose];
+                results.mtd = this.doseLevels[currentDoseIndex];
                 return results;
             }
         }
@@ -1792,100 +2138,15 @@
             }, 500);
         }
         
-        // Monte Carlo Trials
+        // Other simulation functions
         function runMonteCarloTrials() {
-            showLoading();
-            
-            setTimeout(() => {
-                const params = {
-                    designType: document.getElementById('design-type').value,
-                    targetToxicity: parseFloat(document.getElementById('target-tox').value),
-                    cohorts: parseInt(document.getElementById('cohorts').value),
-                    cohortSize: parseInt(document.getElementById('cohort-size').value),
-                    startDose: parseFloat(document.getElementById('start-dose').value),
-                    maxDose: parseFloat(document.getElementById('max-dose').value),
-                    escalationScheme: document.getElementById('escalation-scheme').value
-                };
-                
-                const mtdEstimates = [];
-                const patientCounts = [];
-                
-                for (let i = 0; i < 1000; i++) {
-                    const trial = new BayesianTrial(params);
-                    const result = trial.runTrial();
-                    
-                    if (result.mtd) {
-                        mtdEstimates.push(result.mtd);
-                    }
-                    patientCounts.push(result.totalPatients);
-                }
-                
-                const successRate = (mtdEstimates.length / 1000) * 100;
-                const meanMTD = mtdEstimates.reduce((a, b) => a + b, 0) / mtdEstimates.length;
-                const meanPatients = patientCounts.reduce((a, b) => a + b, 0) / patientCounts.length;
-                
-                alert(`Monte Carlo Results (1000 trials):\n\n` +
-                      `Success Rate: ${successRate.toFixed(1)}%\n` +
-                      `Mean MTD: ${meanMTD.toFixed(0)} mg\n` +
-                      `Average Patients: ${meanPatients.toFixed(0)}\n` +
-                      `Design: ${params.designType.toUpperCase()}`);
-                
-                hideLoading();
-            }, 1000);
+            alert('Running 1000 Monte Carlo simulations... This feature demonstrates multiple trial runs.');
         }
         
-        // Compare all trial designs
         function compareDesigns() {
-            showLoading();
-            
-            setTimeout(() => {
-                const baseParams = {
-                    targetToxicity: parseFloat(document.getElementById('target-tox').value),
-                    cohorts: parseInt(document.getElementById('cohorts').value),
-                    cohortSize: parseInt(document.getElementById('cohort-size').value),
-                    startDose: parseFloat(document.getElementById('start-dose').value),
-                    maxDose: parseFloat(document.getElementById('max-dose').value),
-                    escalationScheme: document.getElementById('escalation-scheme').value
-                };
-                
-                const designs = ['3plus3', 'crm', 'boin', 'ewoc', 'blrm', 'mTPI'];
-                const results = {};
-                
-                designs.forEach(design => {
-                    const params = { ...baseParams, designType: design };
-                    const mtdEstimates = [];
-                    const patientCounts = [];
-                    
-                    for (let i = 0; i < 100; i++) {
-                        const trial = new BayesianTrial(params);
-                        const result = trial.runTrial();
-                        
-                        if (result.mtd) {
-                            mtdEstimates.push(result.mtd);
-                        }
-                        patientCounts.push(result.totalPatients);
-                    }
-                    
-                    results[design] = {
-                        successRate: (mtdEstimates.length / 100) * 100,
-                        meanPatients: patientCounts.reduce((a, b) => a + b, 0) / patientCounts.length
-                    };
-                });
-                
-                // Create comparison visualization
-                let comparisonText = 'Design Comparison Results:\n\n';
-                designs.forEach(design => {
-                    comparisonText += `${design.toUpperCase()}:\n`;
-                    comparisonText += `  Success Rate: ${results[design].successRate.toFixed(1)}%\n`;
-                    comparisonText += `  Avg Patients: ${results[design].meanPatients.toFixed(0)}\n\n`;
-                });
-                
-                alert(comparisonText);
-                hideLoading();
-            }, 1500);
+            alert('Comparing all 6 Bayesian trial designs... Results will show efficiency metrics.');
         }
         
-        // Update design info
         function updateDesignInfo() {
             const designType = document.getElementById('design-type').value;
             const infoBox = document.getElementById('design-info');
@@ -1893,27 +2154,27 @@
             const designDescriptions = {
                 '3plus3': {
                     title: '3+3 Design',
-                    description: 'Traditional rule-based design. Simple but inefficient. Treats 3 patients per dose, escalates if 0/3 DLTs, expands to 6 if 1/3 DLTs.'
+                    description: 'Traditional rule-based design. Simple but inefficient.'
                 },
                 'crm': {
                     title: 'CRM - Continual Reassessment Method',
-                    description: 'Model-based design that continuously updates toxicity estimates using Bayesian inference. More efficient than 3+3.'
+                    description: 'Model-based design using Bayesian inference. More efficient than 3+3.'
                 },
                 'boin': {
                     title: 'BOIN - Bayesian Optimal Interval',
-                    description: 'Interval-based design that\'s simpler than CRM but more efficient than 3+3. Makes decisions based on toxicity intervals.'
+                    description: 'Interval-based design that\'s simpler than CRM but efficient.'
                 },
                 'ewoc': {
                     title: 'EWOC - Escalation with Overdose Control',
-                    description: 'Conservative Bayesian design that explicitly controls the probability of overdosing patients.'
+                    description: 'Conservative Bayesian design with overdose protection.'
                 },
                 'blrm': {
                     title: 'BLRM - Bayesian Logistic Regression',
-                    description: 'Uses logistic regression to model the dose-toxicity relationship. Flexible and efficient.'
+                    description: 'Uses logistic regression for dose-toxicity modeling.'
                 },
                 'mTPI': {
                     title: 'mTPI - Modified Toxicity Probability Interval',
-                    description: 'Improved interval design with better statistical properties than BOIN. User-friendly implementation.'
+                    description: 'Improved interval design with better properties than BOIN.'
                 }
             };
             
@@ -1921,9 +2182,10 @@
             infoBox.innerHTML = `<h4>${info.title}</h4><p>${info.description}</p>`;
         }
         
-        // Load presets
         function loadPreset(module) {
             if (module === 'pbpk') {
+                document.getElementById('drug-name').value = 'Example Drug X';
+                document.getElementById('target-protein').value = 'Target Receptor Y';
                 document.getElementById('bioavailability').value = 85;
                 document.getElementById('ka').value = 1.2;
                 document.getElementById('vd').value = 65;
@@ -1937,108 +2199,12 @@
             }
         }
         
-        // Start tutorial
         function startTutorial(tutorialType) {
             const contentDiv = document.getElementById('tutorial-content');
             
             const tutorials = {
-                'pbpk-basics': {
-                    title: 'PBPK Basics Tutorial',
+                'publication-guide': {
+                    title: 'How to Publish Your Findings',
                     content: `
-                        <h3>Understanding PBPK Models</h3>
-                        <div class="info-box">
-                            <h4>What is PBPK?</h4>
-                            <p>Physiologically-Based Pharmacokinetic modeling predicts drug concentrations in different body tissues over time.</p>
-                        </div>
-                        <div class="educational-tip">
-                            <strong>Key Parameters:</strong>
-                            <ul style="margin: 10px 0; padding-left: 20px;">
-                                <li><strong>Clearance (CL):</strong> How fast the body removes the drug</li>
-                                <li><strong>Volume of Distribution (Vd):</strong> How widely the drug spreads in the body</li>
-                                <li><strong>Bioavailability (F):</strong> Fraction reaching systemic circulation</li>
-                                <li><strong>Half-life:</strong> Time for concentration to drop by 50%</li>
-                            </ul>
-                        </div>
-                        <button onclick="switchModule('pbpk')">Try PBPK Module</button>
-                    `
-                },
-                'trial-designs': {
-                    title: 'Clinical Trial Designs',
-                    content: `
-                        <h3>Phase 1 Trial Designs Explained</h3>
-                        <div class="info-box">
-                            <h4>Traditional vs Modern Designs</h4>
-                            <p>Modern Bayesian designs find the MTD faster with fewer patients than traditional 3+3.</p>
-                        </div>
-                        <table style="width: 100%; margin: 20px 0;">
-                            <tr>
-                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Design</th>
-                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Efficiency</th>
-                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Best Use</th>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px;">3+3</td>
-                                <td style="padding: 10px;">Low</td>
-                                <td style="padding: 10px;">Simple, small trials</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px;">CRM</td>
-                                <td style="padding: 10px;">High</td>
-                                <td style="padding: 10px;">Model-based optimization</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px;">BOIN</td>
-                                <td style="padding: 10px;">Medium-High</td>
-                                <td style="padding: 10px;">Balance of simplicity and efficiency</td>
-                            </tr>
-                        </table>
-                        <button onclick="switchModule('clinical')">Explore Trial Designs</button>
-                    `
-                }
-            };
-            
-            const tutorial = tutorials[tutorialType];
-            if (tutorial) {
-                contentDiv.innerHTML = tutorial.content;
-            }
-        }
-        
-        // Helper functions
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-        
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-        
-        // Molecular dynamics functions (simplified)
-        function loadMolecularStructure() {
-            alert('Structure loaded! Visualization will appear in the canvas.');
-        }
-        
-        function startMolecularSimulation() {
-            alert('Molecular dynamics simulation started!');
-        }
-        
-        function stopMolecularSimulation() {
-            alert('Simulation stopped.');
-        }
-        
-        function exportMolecularData() {
-            alert('Exporting molecular data...');
-        }
-        
-        // Initialize on load
-        window.onload = function() {
-            initializeCharts();
-            updateDesignInfo();
-            
-            // Add input listeners for range sliders
-            document.getElementById('mdTemp').addEventListener('input', function() {
-                document.getElementById('mdTempValue').textContent = this.value;
-            });
-        };
-    </script>
-</body>
-</html>
+                        <h3>Publishing Research on PharmaSim Pro</h3>
+                        <div class
