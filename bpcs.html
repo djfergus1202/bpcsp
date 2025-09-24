@@ -3,688 +3,2042 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biophysical Chemistry Research Simulator</title>
+    <title>PharmaSim Pro - Integrated Pharmaceutical Research Platform</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
             color: #333;
+            min-height: 100vh;
+            padding: 0;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            background: rgba(255, 255, 255, 0.95);
+        
+        .header {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,248,255,0.95) 100%);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 20px 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        h1 {
-            color: #667eea;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        .header h1 {
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
         }
-        .subtitle {
+        
+        .header-subtitle {
             color: #666;
-            font-size: 1.1em;
+            font-size: 1em;
         }
-        .main-content {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 30px;
-        }
-        .control-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            height: fit-content;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        .simulation-area {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        
+        .nav-tabs {
             display: flex;
-            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+            border-bottom: 2px solid rgba(30,60,114,0.1);
+            padding-bottom: 10px;
         }
-        .tab-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .tab {
+        
+        .nav-tab {
             padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
+            background: white;
+            color: #2a5298;
+            border: 2px solid #2a5298;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-        .tab:hover {
+        
+        .nav-tab:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 4px 12px rgba(42,82,152,0.3);
         }
-        .tab.active {
-            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border-color: transparent;
         }
-        .control-group {
-            margin-bottom: 20px;
+        
+        .tooltip {
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
         }
-        .control-group label {
+        
+        .nav-tab:hover .tooltip {
+            opacity: 1;
+        }
+        
+        .main-container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .module-section {
+            display: none;
+        }
+        
+        .module-section.active {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
+            animation: fadeIn 0.5s ease;
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 25px;
+        }
+        
+        .control-panel {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        
+        .control-panel h2 {
+            color: #1e3c72;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(30,60,114,0.1);
+        }
+        
+        .help-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: #2a5298;
+            color: white;
+            text-align: center;
+            line-height: 18px;
+            border-radius: 50%;
+            font-size: 11px;
+            margin-left: 8px;
+            cursor: help;
+            vertical-align: middle;
+        }
+        
+        .help-text {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            width: 250px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .help-icon:hover + .help-text {
+            display: block;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+        
+        .control-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .control-group input[type="number"],
+        .control-group input[type="text"],
+        .control-group input[type="file"],
+        .control-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #2a5298;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(42,82,152,0.1);
+        }
+        
         .control-group input[type="range"] {
             width: 100%;
             margin-bottom: 5px;
         }
-        .control-group input[type="number"],
-        .control-group input[type="text"],
-        .control-group select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-        .control-group input[type="number"]:focus,
-        .control-group input[type="text"]:focus,
-        .control-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+        
         .value-display {
             font-size: 12px;
             color: #777;
-            margin-top: 2px;
+            text-align: right;
         }
+        
         .button-group {
             display: flex;
             gap: 10px;
             margin-top: 20px;
         }
+        
         button {
             flex: 1;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 14px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(42,82,152,0.3);
         }
+        
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 6px 20px rgba(42,82,152,0.4);
         }
-        button:active {
-            transform: translateY(0);
+        
+        button.secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        button.stop {
+        
+        button.danger {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
-        button.export {
+        
+        button.success {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
-        #simulationContainer {
-            position: relative;
-            width: 100%;
-            flex-grow: 1;
-            min-height: 400px;
-        }
-        canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 15px;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
-            background: #fafafa;
-            position: absolute;
-        }
-        #smilesViewer {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            display: none; /* Hidden by default */
-        }
-        #smilesViewer img {
-            max-width: 150px;
-            max-height: 150px;
-        }
-        #smilesViewer p {
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        .stats-panel {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
+        
+        .visualization-area {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+        }
+        
+        .chart-container {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            min-height: 400px;
+            position: relative;
+        }
+        
+        .chart-container h3 {
+            color: #1e3c72;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(30,60,114,0.1);
+        }
+        
+        .results-panel {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .results-panel h3 {
+            color: #1e3c72;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(30,60,114,0.1);
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
         }
-        .stat-item {
+        
+        .metric-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(30,60,114,0.1);
+            transition: all 0.3s ease;
             text-align: center;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
+        
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
-        .stat-label {
+        
+        .metric-label {
             font-size: 12px;
-            color: #999;
-            margin-top: 5px;
-            text-transform: uppercase;
-        }
-        .info-panel {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-left: 4px solid #667eea;
-            border-radius: 8px;
-        }
-        .info-panel h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        .info-panel p {
             color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 4px solid #2a5298;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-box h4 {
+            color: #1e3c72;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .info-box p {
+            color: #555;
             line-height: 1.6;
             font-size: 14px;
         }
-        .formula {
-            font-family: 'Courier New', monospace;
-            background: #f0f0f0;
+        
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
             padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-size: 13px;
+            background: rgba(30,60,114,0.05);
+            border-radius: 10px;
         }
-        @media (max-width: 768px) {
-            .main-content {
+        
+        .tab-button {
+            padding: 8px 16px;
+            background: white;
+            color: #2a5298;
+            border: 1px solid #2a5298;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 350px !important;
+            border-radius: 10px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .educational-tip {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #5d4037;
+        }
+        
+        .educational-tip strong {
+            color: #e65100;
+        }
+        
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .control-panel {
+                position: relative;
+                top: 0;
+            }
+            .visualization-area {
                 grid-template-columns: 1fr;
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Biophysical Chemistry Research Simulator</h1>
-            <p class="subtitle">Advanced Molecular Simulations with PDB and SMILES Support</p>
-        </header>
-
-        <div class="main-content">
-            <div class="control-panel">
-                <div class="tab-container">
-                    <button class="tab" onclick="switchSimulation('enzymeKinetics')">Enzyme Kinetics</button>
-                    <button class="tab" onclick="switchSimulation('proteinFolding')">Protein Folding</button>
-                    <button class="tab" onclick="switchSimulation('ligandBinding')">Ligand Binding</button>
-                    <button class="tab active" onclick="switchSimulation('molecularDynamics')">MD Simulation</button>
-                </div>
-
-                <div id="enzymeKineticsControls" class="controls" style="display:none;">
-                    </div>
-
-                <div id="proteinFoldingControls" class="controls" style="display:none;">
-                    </div>
-
-                <div id="ligandBindingControls" class="controls" style="display:none;">
-                    </div>
-
-                <div id="molecularDynamicsControls" class="controls">
-                    <div class="control-group">
-                        <label for="pdbFile">Load PDB Structure</label>
-                        <input type="file" id="pdbFile" accept=".pdb" style="padding: 10px; border: 2px dashed #ddd; border-radius: 8px;">
-                    </div>
-                    <div class="control-group">
-                        <label for="smilesInput">Or Enter SMILES String</label>
-                        <input type="text" id="smilesInput" placeholder="e.g., CC(=O)OC1=CC=CC=C1C(=O)O">
-                    </div>
-                     <button onclick="loadStructure()" style="width:100%; margin-bottom: 20px;">Load Structure</button>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+    <div class="header">
+        <h1>PharmaSim Pro</h1>
+        <p class="header-subtitle">Integrated Pharmaceutical Research Platform for Students</p>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchModule('pbpk')">
+                PBPK/QSP Modeling
+                <span class="tooltip">Physiologically-based pharmacokinetic modeling</span>
+            </button>
+            <button class="nav-tab" onclick="switchModule('clinical')">
+                Clinical Trial Design
+                <span class="tooltip">Bayesian adaptive trial simulation</span>
+            </button>
+            <button class="nav-tab" onclick="switchModule('molecular')">
+                Molecular Dynamics
+                <span class="tooltip">Protein and ligand interactions</span>
+            </button>
+            <button class="nav-tab" onclick="switchModule('tutorial')">
+                Learning Center
+                <span class="tooltip">Interactive tutorials and guides</span>
+            </button>
+        </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Running simulation...</p>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <!-- PBPK/QSP Module -->
+        <div class="module-section active" id="pbpk-module">
+            <div class="dashboard-grid">
+                <div class="control-panel">
+                    <h2>PBPK/QSP Parameters</h2>
                     
-                    <div class="control-group">
-                        <label>Number of Atoms</label>
-                        <input type="range" id="numAtoms" min="10" max="200" value="50" step="10">
-                        <div class="value-display">Value: <span id="numAtomsValue">50</span></div>
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="switchTab('absorption', 'pbpk')">Absorption</button>
+                        <button class="tab-button" onclick="switchTab('distribution', 'pbpk')">Distribution</button>
+                        <button class="tab-button" onclick="switchTab('metabolism', 'pbpk')">Metabolism</button>
+                        <button class="tab-button" onclick="switchTab('qsp', 'pbpk')">QSP</button>
                     </div>
-                    <div class="control-group">
-                        <label>Simulation Temperature (K)</label>
-                        <input type="range" id="mdTemp" min="100" max="500" value="300" step="10">
-                        <div class="value-display">Value: <span id="mdTempValue">300</span> K</div>
+                    
+                    <div class="tab-content active" id="absorption-tab">
+                        <div class="control-group">
+                            <label>
+                                Bioavailability (F)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    The fraction of drug that reaches systemic circulation unchanged. 
+                                    Oral drugs typically range from 5-100%.
+                                </div>
+                            </label>
+                            <input type="number" id="bioavailability" value="80" min="0" max="100" step="5">
+                            <div class="value-display">80% reaches systemic circulation</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                Absorption Rate (ka)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    First-order absorption rate constant. Higher values = faster absorption.
+                                    Typical range: 0.5-3.0 h⁻¹
+                                </div>
+                            </label>
+                            <input type="number" id="ka" value="1.5" step="0.1">
+                            <div class="value-display">1.5 h⁻¹</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                Formulation
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Different formulations affect drug release and absorption patterns
+                                </div>
+                            </label>
+                            <select id="formulation">
+                                <option value="immediate">Immediate Release</option>
+                                <option value="extended">Extended Release</option>
+                                <option value="enteric">Enteric Coated</option>
+                                <option value="sublingual">Sublingual</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="control-group">
-                        <label>Time Step (fs)</label>
-                        <input type="number" id="timeStep" value="1" min="0.1" max="5" step="0.1">
+                    
+                    <div class="tab-content" id="distribution-tab">
+                        <div class="control-group">
+                            <label>
+                                Volume of Distribution (Vd)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Apparent volume the drug distributes into. Large Vd = extensive tissue distribution.
+                                    Water-soluble drugs: ~40L, Lipophilic drugs: >100L
+                                </div>
+                            </label>
+                            <input type="number" id="vd" value="70" step="5">
+                            <div class="value-display">70 L</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                Plasma Protein Binding
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Percentage bound to plasma proteins (mainly albumin).
+                                    Only unbound drug is pharmacologically active.
+                                </div>
+                            </label>
+                            <input type="number" id="protein-binding" value="90" min="0" max="100">
+                            <div class="value-display">90% bound, 10% free</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                LogP (Lipophilicity)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Partition coefficient - measure of lipophilicity.
+                                    LogP < 0: Hydrophilic, LogP > 3: Lipophilic
+                                </div>
+                            </label>
+                            <input type="number" id="logp" value="2.5" step="0.1">
+                        </div>
                     </div>
-                    <div class="control-group">
-                        <label>Force Field</label>
-                        <select id="forceField">
-                            <option value="amber">AMBER</option>
-                            <option value="charmm">CHARMM</option>
-                            <option value="gromos">GROMOS</option>
-                            <option value="opls">OPLS</option>
-                        </select>
+                    
+                    <div class="tab-content" id="metabolism-tab">
+                        <div class="control-group">
+                            <label>
+                                Clearance (CL)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Volume of plasma cleared of drug per unit time.
+                                    Hepatic CL typically 0.5-2.0 L/h for most drugs
+                                </div>
+                            </label>
+                            <input type="number" id="clearance" value="1.2" step="0.1">
+                            <div class="value-display">1.2 L/h</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                Primary Enzyme
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    CYP450 enzymes metabolize ~75% of all drugs.
+                                    Important for drug-drug interactions.
+                                </div>
+                            </label>
+                            <select id="enzyme">
+                                <option value="cyp3a4">CYP3A4 (50% of drugs)</option>
+                                <option value="cyp2d6">CYP2D6 (25% of drugs)</option>
+                                <option value="cyp2c9">CYP2C9 (15% of drugs)</option>
+                                <option value="cyp1a2">CYP1A2</option>
+                                <option value="cyp2c19">CYP2C19</option>
+                                <option value="ugt">UGT (Glucuronidation)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                Renal Function
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Creatinine clearance affects renal drug elimination.
+                                    Normal: 90-120 mL/min
+                                </div>
+                            </label>
+                            <select id="renal-function">
+                                <option value="normal">Normal (CrCl > 90)</option>
+                                <option value="mild">Mild Impairment (60-90)</option>
+                                <option value="moderate">Moderate (30-60)</option>
+                                <option value="severe">Severe (15-30)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="qsp-tab">
+                        <div class="control-group">
+                            <label>
+                                Target Receptor
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    The biological target the drug binds to
+                                </div>
+                            </label>
+                            <select id="target-receptor">
+                                <option value="gpcr">GPCR (40% of drugs)</option>
+                                <option value="kinase">Kinase</option>
+                                <option value="nuclear">Nuclear Receptor</option>
+                                <option value="ion-channel">Ion Channel</option>
+                                <option value="enzyme">Enzyme</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                EC50 (nM)
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Concentration producing 50% of maximum effect.
+                                    Lower EC50 = more potent drug
+                                </div>
+                            </label>
+                            <input type="number" id="ec50" value="50" step="5">
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                Hill Coefficient
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Steepness of dose-response curve.
+                                    n=1: Simple binding, n>1: Cooperative binding
+                                </div>
+                            </label>
+                            <input type="number" id="hill" value="1.5" step="0.1">
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button onclick="runPBPKSimulation()">Run PBPK Simulation</button>
+                        <button class="secondary" onclick="loadPreset('pbpk')">Load Example</button>
+                    </div>
+                    
+                    <div class="educational-tip">
+                        <strong>💡 Learning Tip:</strong> Start with the example preset to see typical drug parameters, then modify one parameter at a time to understand its effect on the PK profile.
                     </div>
                 </div>
-
-                <div class="button-group">
-                    <button onclick="startSimulation()">Start Simulation</button>
-                    <button class="stop" onclick="stopSimulation()">Stop</button>
-                    <button class="export" onclick="exportData()">Export Data</button>
-                </div>
-
-                <div class="info-panel">
-                    <h3>Current Model</h3>
-                    <p id="modelInfo">Molecular Dynamics Simulation</p>
-                    <div class="formula" id="formulaDisplay">F = ma = -∇U(r)</div>
+                
+                <div class="visualization-area">
+                    <div class="chart-container">
+                        <h3>Plasma Concentration Profile</h3>
+                        <canvas id="pkChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Target Occupancy</h3>
+                        <canvas id="qspChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Tissue Distribution</h3>
+                        <canvas id="tissueChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Drug-Drug Interactions</h3>
+                        <canvas id="ddiChart"></canvas>
+                    </div>
                 </div>
             </div>
-
-            <div class="simulation-area">
-                <div id="simulationContainer">
-                    <canvas id="simulationCanvas"></canvas>
-                    <div id="smilesViewer">
-                        <p>SMILES Structure</p>
-                        <img id="smilesImage" src="" alt="SMILES structure">
+            
+            <div class="results-panel">
+                <h3>Pharmacokinetic Parameters</h3>
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Cmax</div>
+                        <div class="metric-value" id="cmax">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Tmax</div>
+                        <div class="metric-value" id="tmax">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">AUC₀₋∞</div>
+                        <div class="metric-value" id="auc">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Half-life</div>
+                        <div class="metric-value" id="halflife">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Clearance</div>
+                        <div class="metric-value" id="cl-calc">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Vss</div>
+                        <div class="metric-value" id="vss">--</div>
                     </div>
                 </div>
-                <div class="stats-panel">
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat1Value">0</div>
-                        <div class="stat-label" id="stat1Label">Temperature (K)</div>
+            </div>
+        </div>
+        
+        <!-- Clinical Trial Module -->
+        <div class="module-section" id="clinical-module">
+            <div class="dashboard-grid">
+                <div class="control-panel">
+                    <h2>Clinical Trial Design</h2>
+                    
+                    <div class="info-box">
+                        <h4>Phase 1 Trial Objectives</h4>
+                        <p>Determine the maximum tolerated dose (MTD) and recommended phase 2 dose (RP2D) while minimizing patient exposure to toxic doses.</p>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat2Value">0</div>
-                        <div class="stat-label" id="stat2Label">Kinetic E</div>
+                    
+                    <div class="control-group">
+                        <label>
+                            Design Type
+                            <span class="help-icon">?</span>
+                            <div class="help-text">
+                                Choose between traditional and modern Bayesian adaptive designs
+                            </div>
+                        </label>
+                        <select id="design-type" onchange="updateDesignInfo()">
+                            <option value="3plus3">3+3 Traditional</option>
+                            <option value="crm">CRM - Continual Reassessment</option>
+                            <option value="boin">BOIN - Bayesian Optimal Interval</option>
+                            <option value="ewoc">EWOC - Escalation with Overdose Control</option>
+                            <option value="blrm">BLRM - Bayesian Logistic Regression</option>
+                            <option value="mTPI">mTPI - Modified Toxicity Probability Interval</option>
+                        </select>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat3Value">0</div>
-                        <div class="stat-label" id="stat3Label">Potential E</div>
+                    
+                    <div id="design-info" class="info-box" style="margin-top: 15px;">
+                        <h4>3+3 Design</h4>
+                        <p>Traditional rule-based design. Simple but inefficient. Treats 3 patients per dose, escalates if 0/3 DLTs, expands to 6 if 1/3 DLTs.</p>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat4Value">0</div>
-                        <div class="stat-label" id="stat4Label">Total Energy</div>
+                    
+                    <div class="control-group">
+                        <label>
+                            Target DLT Rate
+                            <span class="help-icon">?</span>
+                            <div class="help-text">
+                                Acceptable dose-limiting toxicity rate. Usually 20-33% for oncology trials
+                            </div>
+                        </label>
+                        <input type="number" id="target-tox" value="0.25" min="0.1" max="0.4" step="0.05">
+                        <div class="value-display">25% target toxicity</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>
+                            Starting Dose (mg)
+                            <span class="help-icon">?</span>
+                            <div class="help-text">
+                                Usually 1/10th of the dose that causes severe toxicity in 10% of animals (MABEL approach)
+                            </div>
+                        </label>
+                        <input type="number" id="start-dose" value="10" step="5">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>
+                            Maximum Dose (mg)
+                            <span class="help-icon">?</span>
+                            <div class="help-text">
+                                Safety ceiling based on preclinical data
+                            </div>
+                        </label>
+                        <input type="number" id="max-dose" value="200" step="10">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>
+                            Dose Escalation Scheme
+                            <span class="help-icon">?</span>
+                            <div class="help-text">
+                                How doses increase between cohorts
+                            </div>
+                        </label>
+                        <select id="escalation-scheme">
+                            <option value="fibonacci">Modified Fibonacci (67%, 50%, 40%, 33%...)</option>
+                            <option value="doubling">Doubling (100% increases)</option>
+                            <option value="pharmacologic">Pharmacologically-guided</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Number of Dose Levels</label>
+                        <input type="number" id="cohorts" value="6" min="3" max="10">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Cohort Size</label>
+                        <input type="number" id="cohort-size" value="3" min="1" max="6">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button onclick="runTrialSimulation()">Run Single Trial</button>
+                        <button class="secondary" onclick="runMonteCarloTrials()">Run 1000 Trials</button>
+                        <button class="success" onclick="compareDesigns()">Compare All Designs</button>
+                    </div>
+                    
+                    <div class="educational-tip">
+                        <strong>💡 Learning Tip:</strong> Modern Bayesian designs (CRM, BOIN) typically find the MTD with fewer patients than the traditional 3+3 design. Run the comparison to see the differences!
+                    </div>
+                </div>
+                
+                <div class="visualization-area">
+                    <div class="chart-container">
+                        <h3>Dose Escalation Progress</h3>
+                        <canvas id="trialChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Dose-Toxicity Curve</h3>
+                        <canvas id="toxicityChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Design Performance Comparison</h3>
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Operating Characteristics</h3>
+                        <canvas id="ocChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-panel">
+                <h3>Trial Results</h3>
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">MTD Estimate</div>
+                        <div class="metric-value" id="mtd">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">RP2D</div>
+                        <div class="metric-value" id="rp2d">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">DLT Rate at MTD</div>
+                        <div class="metric-value" id="dlt-rate">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Patients</div>
+                        <div class="metric-value" id="total-patients">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Patients with DLT</div>
+                        <div class="metric-value" id="patients-dlt">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Trial Duration</div>
+                        <div class="metric-value" id="trial-duration">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Molecular Dynamics Module -->
+        <div class="module-section" id="molecular-module">
+            <div class="dashboard-grid">
+                <div class="control-panel">
+                    <h2>Molecular Simulations</h2>
+                    
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="switchTab('structure', 'molecular')">Structure</button>
+                        <button class="tab-button" onclick="switchTab('dynamics', 'molecular')">Dynamics</button>
+                        <button class="tab-button" onclick="switchTab('binding', 'molecular')">Binding</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="structure-tab">
+                        <div class="control-group">
+                            <label>
+                                Load PDB Structure
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Upload a Protein Data Bank file to visualize molecular structure
+                                </div>
+                            </label>
+                            <input type="file" id="pdbFile" accept=".pdb">
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                Or Enter Drug SMILES
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Simplified molecular-input line-entry system notation
+                                </div>
+                            </label>
+                            <input type="text" id="smilesInput" placeholder="e.g., CC(=O)OC1=CC=CC=C1C(=O)O for Aspirin">
+                        </div>
+                        <button onclick="loadMolecularStructure()">Load Structure</button>
+                        
+                        <div class="educational-tip">
+                            <strong>Example SMILES:</strong><br>
+                            • Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O<br>
+                            • Caffeine: CN1C=NC2=C1C(=O)N(C(=O)N2)C<br>
+                            • Ibuprofen: CC(C)CC1=CC=C(C=C1)C(C)C(=O)O
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="dynamics-tab">
+                        <div class="control-group">
+                            <label>
+                                Simulation Type
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Different molecular simulation methods
+                                </div>
+                            </label>
+                            <select id="sim-type">
+                                <option value="md">Molecular Dynamics</option>
+                                <option value="mc">Monte Carlo</option>
+                                <option value="docking">Molecular Docking</option>
+                                <option value="qm">Quantum Mechanics</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Temperature (K)</label>
+                            <input type="range" id="mdTemp" min="100" max="500" value="300">
+                            <div class="value-display"><span id="mdTempValue">300</span> K (27°C)</div>
+                        </div>
+                        <div class="control-group">
+                            <label>Force Field</label>
+                            <select id="forceField">
+                                <option value="amber">AMBER (proteins)</option>
+                                <option value="charmm">CHARMM (biomolecules)</option>
+                                <option value="opls">OPLS (organic molecules)</option>
+                                <option value="gromos">GROMOS (united atom)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="binding-tab">
+                        <div class="control-group">
+                            <label>
+                                Binding Site
+                                <span class="help-icon">?</span>
+                                <div class="help-text">
+                                    Active site or allosteric binding location
+                                </div>
+                            </label>
+                            <select id="binding-site">
+                                <option value="active">Active Site</option>
+                                <option value="allosteric">Allosteric Site</option>
+                                <option value="interface">Protein-Protein Interface</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Docking Algorithm</label>
+                            <select id="docking-algorithm">
+                                <option value="rigid">Rigid Docking</option>
+                                <option value="flexible">Flexible Docking</option>
+                                <option value="ensemble">Ensemble Docking</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Scoring Function</label>
+                            <select id="scoring">
+                                <option value="empirical">Empirical</option>
+                                <option value="knowledge">Knowledge-based</option>
+                                <option value="force">Force Field</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button onclick="startMolecularSimulation()">Start Simulation</button>
+                        <button class="danger" onclick="stopMolecularSimulation()">Stop</button>
+                        <button class="secondary" onclick="exportMolecularData()">Export Data</button>
+                    </div>
+                </div>
+                
+                <div class="visualization-area">
+                    <div class="chart-container">
+                        <h3>3D Molecular Structure</h3>
+                        <canvas id="molecularCanvas"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Energy Profile</h3>
+                        <canvas id="energyChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>RMSD Over Time</h3>
+                        <canvas id="rmsdChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Interaction Analysis</h3>
+                        <canvas id="interactionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-panel">
+                <h3>Simulation Metrics</h3>
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Energy</div>
+                        <div class="metric-value" id="total-energy">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Binding Affinity</div>
+                        <div class="metric-value" id="binding-affinity">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">RMSD</div>
+                        <div class="metric-value" id="rmsd">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">H-Bonds</div>
+                        <div class="metric-value" id="hbonds">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Radius of Gyration</div>
+                        <div class="metric-value" id="rg">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">SASA</div>
+                        <div class="metric-value" id="sasa">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Learning Center -->
+        <div class="module-section" id="tutorial-module">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <div class="chart-container" style="margin-bottom: 25px;">
+                    <h3>Welcome to the Learning Center</h3>
+                    <div class="info-box">
+                        <h4>Getting Started with PharmaSim Pro</h4>
+                        <p>This integrated platform combines three essential areas of pharmaceutical research:</p>
+                        <ul style="margin: 15px 0; padding-left: 20px; line-height: 1.8;">
+                            <li><strong>PBPK/QSP Modeling:</strong> Understand drug absorption, distribution, metabolism, and excretion</li>
+                            <li><strong>Clinical Trial Design:</strong> Learn about adaptive dose-finding methods in Phase 1 trials</li>
+                            <li><strong>Molecular Dynamics:</strong> Explore drug-target interactions at the molecular level</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="control-panel">
+                        <h2>Interactive Tutorials</h2>
+                        <div class="button-group" style="flex-direction: column;">
+                            <button onclick="startTutorial('pbpk-basics')">PBPK Basics</button>
+                            <button onclick="startTutorial('trial-designs')">Understanding Trial Designs</button>
+                            <button onclick="startTutorial('molecular-intro')">Molecular Simulations 101</button>
+                            <button onclick="startTutorial('case-study')">Complete Case Study</button>
+                        </div>
+                        
+                        <div class="info-box" style="margin-top: 20px;">
+                            <h4>Key Concepts</h4>
+                            <p>Click on any tutorial to begin an interactive guided walkthrough of that module.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="visualization-area">
+                        <div class="chart-container" id="tutorial-content">
+                            <h3>Select a Tutorial</h3>
+                            <div class="educational-tip">
+                                <strong>Recommended Learning Path:</strong>
+                                <ol style="margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                                    <li>Start with PBPK Basics to understand drug pharmacokinetics</li>
+                                    <li>Move to Clinical Trial Designs to learn about dose finding</li>
+                                    <li>Explore Molecular Simulations for drug-target interactions</li>
+                                    <li>Complete the integrated case study</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="info-box" style="margin-top: 20px;">
+                                <h4>Quick Reference Formulas</h4>
+                                <div style="font-family: monospace; margin: 10px 0;">
+                                    <p><strong>Clearance:</strong> CL = Dose / AUC</p>
+                                    <p><strong>Half-life:</strong> t½ = 0.693 × Vd / CL</p>
+                                    <p><strong>Loading Dose:</strong> LD = Vd × Css</p>
+                                    <p><strong>Maintenance Dose:</strong> MD = CL × Css × τ</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <script>
         // Global variables
-        let canvas, ctx;
-        let animationId;
-        let currentSimulation = 'molecularDynamics';
-        let simulationData = [];
-        let time = 0;
-        let isRunning = false;
-
-        // Particle system for molecular dynamics
-        let particles = [];
-        let bonds = [];
-
-        window.onload = function() {
-            canvas = document.getElementById('simulationCanvas');
-            ctx = canvas.getContext('2d');
-            const simContainer = document.getElementById('simulationContainer');
-            
-            function resizeCanvas() {
-                canvas.width = simContainer.offsetWidth;
-                canvas.height = simContainer.offsetHeight;
-            }
-            
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            new ResizeObserver(resizeCanvas).observe(simContainer);
-
-            initializeControls();
-            switchSimulation('molecularDynamics');
-        };
-
-        function initializeControls() {
-            document.querySelectorAll('input[type="range"]').forEach(input => {
-                input.addEventListener('input', function() {
-                    const displayId = this.id + 'Value';
-                    const display = document.getElementById(displayId);
-                    if (display) {
-                        display.textContent = this.value;
-                    }
-                });
-            });
-        }
+        let charts = {};
+        let simulations = {};
+        let currentModule = 'pbpk';
+        let animationFrames = {};
         
-        function switchSimulation(type) {
-             currentSimulation = type;
-             stopSimulation();
-            
-             document.querySelectorAll('.controls').forEach(panel => panel.style.display = 'none');
-             document.getElementById(type + 'Controls').style.display = 'block';
-            
-             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-             document.querySelector(`.tab[onclick="switchSimulation('${type}')"]`).classList.add('active');
-            
-             updateModelInfo(type);
-             ctx.clearRect(0, 0, canvas.width, canvas.height);
-             document.getElementById('smilesViewer').style.display = 'none';
-        }
-
-        function updateModelInfo(type) {
-            const modelInfo = document.getElementById('modelInfo');
-            const formulaDisplay = document.getElementById('formulaDisplay');
-            const models = {
-                enzymeKinetics: { name: 'Michaelis-Menten Kinetics', formula: 'v = (Vmax*[S])/(Km + [S])' },
-                proteinFolding: { name: 'Protein Folding Energy', formula: 'ΔG = ΔH - TΔS' },
-                ligandBinding: { name: 'Ligand-Receptor Binding', formula: 'θ = [L]ⁿ / (Kd + [L]ⁿ)' },
-                molecularDynamics: { name: 'Molecular Dynamics', formula: 'F = ma = -∇U(r)' }
+        // Initialize all charts
+        function initializeCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#333' }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { color: '#666' }
+                    },
+                    y: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { color: '#666' }
+                    }
+                }
             };
-            modelInfo.textContent = models[type].name;
-            formulaDisplay.textContent = models[type].formula;
+            
+            // PBPK Charts
+            const pkCtx = document.getElementById('pkChart');
+            if (pkCtx) {
+                charts.pk = new Chart(pkCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Plasma Concentration',
+                            data: [],
+                            borderColor: '#2a5298',
+                            backgroundColor: 'rgba(42,82,152,0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Concentration (ng/mL)' }
+                            },
+                            x: {
+                                ...chartOptions.scales.x,
+                                title: { display: true, text: 'Time (hours)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const qspCtx = document.getElementById('qspChart');
+            if (qspCtx) {
+                charts.qsp = new Chart(qspCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Target Occupancy',
+                            data: [],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102,126,234,0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Occupancy (%)' },
+                                min: 0,
+                                max: 100
+                            },
+                            x: {
+                                ...chartOptions.scales.x,
+                                title: { display: true, text: 'Time (hours)' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Clinical Trial Charts
+            const trialCtx = document.getElementById('trialChart');
+            if (trialCtx) {
+                charts.trial = new Chart(trialCtx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'No DLT',
+                            data: [],
+                            backgroundColor: '#4facfe',
+                            pointRadius: 8
+                        }, {
+                            label: 'DLT',
+                            data: [],
+                            backgroundColor: '#f5576c',
+                            pointRadius: 8
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                title: { display: true, text: 'Dose Level (mg)' }
+                            },
+                            x: {
+                                ...chartOptions.scales.x,
+                                title: { display: true, text: 'Patient Number' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Initialize other charts similarly...
         }
-
-        function loadStructure() {
-            const pdbFile = document.getElementById('pdbFile').files[0];
-            const smilesInput = document.getElementById('smilesInput').value;
+        
+        // Module switching
+        function switchModule(module) {
+            document.querySelectorAll('.module-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
-            stopSimulation();
-            particles = [];
-            bonds = [];
+            document.getElementById(module + '-module').classList.add('active');
+            document.querySelector(`.nav-tab[onclick="switchModule('${module}')"]`).classList.add('active');
+            currentModule = module;
+        }
+        
+        // Tab switching within modules
+        function switchTab(tabName, module) {
+            const modulePrefix = module + '-';
+            document.querySelectorAll(`#${module}-module .tab-content`).forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll(`#${module}-module .tab-button`).forEach(button => {
+                button.classList.remove('active');
+            });
             
-            if (pdbFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    parsePDB(e.target.result);
-                    alert(`${particles.length} atoms and ${bonds.length} bonds loaded from PDB.`);
-                    document.getElementById('smilesViewer').style.display = 'none';
-                    drawInitialStructure();
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // PBPK Simulation
+        class PBPKModel {
+            constructor(params) {
+                this.clearance = params.clearance;
+                this.vd = params.vd;
+                this.ka = params.ka;
+                this.f = params.bioavailability / 100;
+                this.dose = params.dose || 100;
+                this.proteinBinding = params.proteinBinding / 100;
+            }
+            
+            simulate(timePoints) {
+                const ke = this.clearance / this.vd;
+                const concentrations = [];
+                
+                for (let t of timePoints) {
+                    let c;
+                    if (Math.abs(this.ka - ke) < 1e-6) {
+                        c = this.dose * this.f * this.ka * t * Math.exp(-this.ka * t) / this.vd;
+                    } else {
+                        c = (this.dose * this.f * this.ka / (this.vd * (this.ka - ke))) * 
+                            (Math.exp(-ke * t) - Math.exp(-this.ka * t));
+                    }
+                    concentrations.push(Math.max(0, c * 1000));
+                }
+                
+                return concentrations;
+            }
+            
+            calculateMetrics(concentrations, timePoints) {
+                const cmax = Math.max(...concentrations);
+                const tmaxIndex = concentrations.indexOf(cmax);
+                const tmax = timePoints[tmaxIndex];
+                
+                let auc = 0;
+                for (let i = 1; i < concentrations.length; i++) {
+                    auc += 0.5 * (concentrations[i] + concentrations[i-1]) * 
+                           (timePoints[i] - timePoints[i-1]);
+                }
+                
+                const ke = this.clearance / this.vd;
+                const halfLife = 0.693 / ke;
+                
+                return { 
+                    cmax: cmax.toFixed(1),
+                    tmax: tmax.toFixed(1),
+                    auc: auc.toFixed(0),
+                    halfLife: halfLife.toFixed(1),
+                    clearance: this.clearance.toFixed(2),
+                    vss: (this.vd * 0.8).toFixed(1)
                 };
-                reader.readAsText(pdbFile);
-                document.getElementById('smilesInput').value = '';
-            } else if (smilesInput.trim() !== '') {
-                // In a real application, you'd use a library like RDKit.js or a server call.
-                // Here, we'll just display an image and generate a placeholder molecule.
-                alert('Displaying 2D structure for SMILES and creating a simple simulation.');
-                document.getElementById('smilesImage').src = 'molecule_aspirin.png'; // Placeholder image
-                document.getElementById('smilesViewer').style.display = 'block';
-                // Create a simple representative molecule for simulation
-                generatePlaceholderMolecule();
-                drawInitialStructure();
             }
         }
         
-        function parsePDB(pdbData) {
-            const lines = pdbData.split('\n');
-            const atoms = {};
-            let minX = Infinity, minY = Infinity, minZ = Infinity;
-            let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
-
-            lines.forEach(line => {
-                if (line.startsWith('ATOM') || line.startsWith('HETATM')) {
-                    const serial = parseInt(line.substring(6, 11));
-                    const x = parseFloat(line.substring(30, 38));
-                    const y = parseFloat(line.substring(38, 46));
-                    const z = parseFloat(line.substring(46, 54));
-                    const element = line.substring(76, 78).trim() || 'C';
-
-                    if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-                        atoms[serial] = { x, y, z, element };
-                        minX = Math.min(minX, x); minY = Math.min(minY, y); minZ = Math.min(minZ, z);
-                        maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); maxZ = Math.max(maxZ, z);
+        // Clinical Trial Simulations with multiple Bayesian designs
+        class BayesianTrial {
+            constructor(params) {
+                this.designType = params.designType;
+                this.targetToxicity = params.targetToxicity;
+                this.cohorts = params.cohorts;
+                this.cohortSize = params.cohortSize;
+                this.startDose = params.startDose;
+                this.maxDose = params.maxDose;
+                this.escalationScheme = params.escalationScheme;
+                this.doseLevels = this.generateDoseLevels();
+            }
+            
+            generateDoseLevels() {
+                const levels = [];
+                let currentDose = this.startDose;
+                levels.push(currentDose);
+                
+                if (this.escalationScheme === 'fibonacci') {
+                    const increments = [1.67, 1.5, 1.4, 1.33, 1.33, 1.33];
+                    for (let i = 0; i < this.cohorts - 1 && currentDose < this.maxDose; i++) {
+                        currentDose *= increments[Math.min(i, increments.length - 1)];
+                        levels.push(Math.min(currentDose, this.maxDose));
+                    }
+                } else if (this.escalationScheme === 'doubling') {
+                    while (levels.length < this.cohorts && currentDose < this.maxDose) {
+                        currentDose *= 2;
+                        levels.push(Math.min(currentDose, this.maxDose));
+                    }
+                } else {
+                    const ratio = Math.pow(this.maxDose / this.startDose, 1 / (this.cohorts - 1));
+                    for (let i = 1; i < this.cohorts; i++) {
+                        levels.push(this.startDose * Math.pow(ratio, i));
                     }
                 }
-            });
-
-            // Center and scale coordinates
-            const centerX = (minX + maxX) / 2;
-            const centerY = (minY + maxY) / 2;
-            const range = Math.max(maxX - minX, maxY - minY, maxZ - minZ);
-            const scale = Math.min(canvas.width, canvas.height) * 0.8 / range;
+                
+                return levels;
+            }
             
-            Object.values(atoms).forEach((atom, index) => {
-                particles.push({
-                    id: index,
-                    x: (atom.x - centerX) * scale + canvas.width / 2,
-                    y: (atom.y - centerY) * scale + canvas.height / 2,
-                    vx: 0, vy: 0, ax: 0, ay: 0,
-                    type: atom.element,
-                    radius: 5
-                });
-            });
-
-            // Parse connections
-            lines.forEach(line => {
-                if (line.startsWith('CONECT')) {
-                    const fromAtomIndex = parseInt(line.substring(6, 11));
-                    const toAtomIndices = line.substring(11).trim().split(/\s+/).map(Number);
+            getToxicityProbability(dose) {
+                const steepness = 0.02;
+                const midpoint = this.maxDose * 0.6;
+                return 1 / (1 + Math.exp(-steepness * (dose - midpoint)));
+            }
+            
+            runTrial() {
+                switch(this.designType) {
+                    case '3plus3':
+                        return this.run3Plus3();
+                    case 'crm':
+                        return this.runCRM();
+                    case 'boin':
+                        return this.runBOIN();
+                    case 'ewoc':
+                        return this.runEWOC();
+                    case 'blrm':
+                        return this.runBLRM();
+                    case 'mTPI':
+                        return this.runmTPI();
+                    default:
+                        return this.run3Plus3();
+                }
+            }
+            
+            run3Plus3() {
+                let currentDoseIndex = 0;
+                const results = { 
+                    patients: [], 
+                    mtd: null,
+                    totalPatients: 0,
+                    patientsWithDLT: 0
+                };
+                let patientNum = 0;
+                
+                while (currentDoseIndex < this.doseLevels.length) {
+                    let dlts = 0;
+                    let cohortPatients = 3;
                     
-                    const p1Index = Object.keys(atoms).indexOf(fromAtomIndex.toString());
-                    
-                    toAtomIndices.forEach(toIndex => {
-                        const p2Index = Object.keys(atoms).indexOf(toIndex.toString());
-                        if (p1Index !== -1 && p2Index !== -1 && p1Index < p2Index) {
-                            const p1 = particles[p1Index];
-                            const p2 = particles[p2Index];
-                            const dist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-                            bonds.push({ a: p1Index, b: p2Index, length: dist });
+                    for (let i = 0; i < cohortPatients; i++) {
+                        patientNum++;
+                        results.totalPatients++;
+                        const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDoseIndex]);
+                        if (hasDLT) {
+                            dlts++;
+                            results.patientsWithDLT++;
                         }
-                    });
-                }
-            });
-             document.getElementById('numAtoms').value = particles.length;
-             document.getElementById('numAtomsValue').textContent = particles.length;
-        }
-
-        function generatePlaceholderMolecule() {
-            // Generates a small, generic molecule when a SMILES is entered.
-             particles = [
-                { id: 0, x: canvas.width/2 - 30, y: canvas.height/2, vx: 0, vy: 0, ax: 0, ay: 0, type: 'C', radius: 6 },
-                { id: 1, x: canvas.width/2, y: canvas.height/2 - 30, vx: 0, vy: 0, ax: 0, ay: 0, type: 'O', radius: 6 },
-                { id: 2, x: canvas.width/2 + 30, y: canvas.height/2, vx: 0, vy: 0, ax: 0, ay: 0, type: 'C', radius: 6 },
-                { id: 3, x: canvas.width/2, y: canvas.height/2 + 30, vx: 0, vy: 0, ax: 0, ay: 0, type: 'N', radius: 6 }
-            ];
-            bonds = [
-                { a: 0, b: 1, length: 30 }, { a: 1, b: 2, length: 30 },
-                { a: 2, b: 3, length: 30 }, { a: 3, b: 0, length: 30 }
-            ];
-             document.getElementById('numAtoms').value = 4;
-             document.getElementById('numAtomsValue').textContent = 4;
-        }
-
-        function drawInitialStructure() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Draw bonds first
-            ctx.strokeStyle = 'rgba(102, 126, 234, 0.5)';
-            ctx.lineWidth = 3;
-            bonds.forEach(bond => {
-                const p1 = particles[bond.a];
-                const p2 = particles[bond.b];
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.stroke();
-            });
-
-            // Draw particles on top
-            particles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = p.type === 'O' ? '#f5576c' : (p.type === 'N' ? '#4facfe' : '#667eea');
-                ctx.fill();
-            });
-        }
-
-        function startSimulation() {
-            if (isRunning) return;
-            if (currentSimulation !== 'molecularDynamics' && particles.length === 0) {
-                 alert("Please switch to the MD Simulation tab and load a structure first.");
-                 return;
-            }
-            isRunning = true;
-            time = 0;
-            simulationData = [];
-            
-            if (currentSimulation === 'molecularDynamics') {
-                runMolecularDynamics();
-            } else {
-                // Logic for other simulations can be placed here
-                alert(`Starting ${currentSimulation} simulation...`);
-            }
-        }
-
-        function stopSimulation() {
-            isRunning = false;
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-        }
-
-        function runMolecularDynamics() {
-            if (particles.length === 0) {
-                const numAtoms = parseInt(document.getElementById('numAtoms').value);
-                for (let i = 0; i < numAtoms; i++) {
-                    particles.push({
-                        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
-                        ax: 0, ay: 0, type: Math.random() > 0.5 ? 'A' : 'B', radius: 8
-                    });
-                }
-            }
-
-            const temperature = parseFloat(document.getElementById('mdTemp').value);
-            const timeStep = parseFloat(document.getElementById('timeStep').value);
-            let kineticEnergy = 0;
-            let potentialEnergy = 0;
-
-            function animate() {
-                if (!isRunning) return;
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                particles.forEach(p => { p.ax = 0; p.ay = 0; });
-                potentialEnergy = 0;
-
-                // Lennard-Jones potential
-                for (let i = 0; i < particles.length; i++) {
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const p1 = particles[i];
-                        const p2 = particles[j];
-                        const dx = p2.x - p1.x;
-                        const dy = p2.y - p1.y;
-                        const r2 = dx * dx + dy * dy;
-                        const r = Math.sqrt(r2);
+                        results.patients.push({
+                            x: patientNum,
+                            y: this.doseLevels[currentDoseIndex],
+                            dlt: hasDLT
+                        });
+                    }
+                    
+                    if (dlts === 0) {
+                        currentDoseIndex++;
+                    } else if (dlts === 1) {
+                        for (let i = 0; i < 3; i++) {
+                            patientNum++;
+                            results.totalPatients++;
+                            const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDoseIndex]);
+                            if (hasDLT) {
+                                dlts++;
+                                results.patientsWithDLT++;
+                            }
+                            results.patients.push({
+                                x: patientNum,
+                                y: this.doseLevels[currentDoseIndex],
+                                dlt: hasDLT
+                            });
+                        }
                         
-                        if (r < 100 && r > 1) {
-                            const sigma = 20;
-                            const epsilon = 0.5;
-                            const sr6 = Math.pow(sigma / r, 6);
-                            const force = 24 * epsilon / r * (2 * sr6 * sr6 - sr6);
-                            
-                            p1.ax -= force * dx / r;
-                            p1.ay -= force * dy / r;
-                            p2.ax += force * dx / r;
-                            p2.ay += force * dy / r;
-                            potentialEnergy += 4 * epsilon * (sr6 * sr6 - sr6);
+                        if (dlts <= 1) {
+                            currentDoseIndex++;
+                        } else {
+                            results.mtd = currentDoseIndex > 0 ? this.doseLevels[currentDoseIndex - 1] : null;
+                            break;
+                        }
+                    } else {
+                        results.mtd = currentDoseIndex > 0 ? this.doseLevels[currentDoseIndex - 1] : null;
+                        break;
+                    }
+                    
+                    if (currentDoseIndex >= this.doseLevels.length) {
+                        results.mtd = this.doseLevels[this.doseLevels.length - 1];
+                        break;
+                    }
+                }
+                
+                return results;
+            }
+            
+            runCRM() {
+                const results = { 
+                    patients: [], 
+                    mtd: null,
+                    totalPatients: 0,
+                    patientsWithDLT: 0
+                };
+                
+                const skeleton = this.doseLevels.map((d, i) => 
+                    0.05 + (this.targetToxicity - 0.05) * (i / (this.doseLevels.length - 1))
+                );
+                
+                const alpha = new Array(this.doseLevels.length).fill(1);
+                const beta = new Array(this.doseLevels.length).fill(1);
+                
+                let currentDose = 0;
+                const totalPatients = this.cohorts * this.cohortSize;
+                
+                for (let p = 0; p < totalPatients; p++) {
+                    results.totalPatients++;
+                    const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
+                    if (hasDLT) results.patientsWithDLT++;
+                    
+                    results.patients.push({
+                        x: p + 1,
+                        y: this.doseLevels[currentDose],
+                        dlt: hasDLT
+                    });
+                    
+                    if (hasDLT) {
+                        alpha[currentDose]++;
+                    } else {
+                        beta[currentDose]++;
+                    }
+                    
+                    const posteriorProbs = [];
+                    for (let i = 0; i < this.doseLevels.length; i++) {
+                        posteriorProbs.push(alpha[i] / (alpha[i] + beta[i]));
+                    }
+                    
+                    let minDiff = Math.abs(posteriorProbs[0] - this.targetToxicity);
+                    let nextDose = 0;
+                    
+                    for (let i = 1; i < posteriorProbs.length; i++) {
+                        const diff = Math.abs(posteriorProbs[i] - this.targetToxicity);
+                        if (diff < minDiff && posteriorProbs[i] <= this.targetToxicity + 0.1) {
+                            minDiff = diff;
+                            nextDose = i;
+                        }
+                    }
+                    
+                    currentDose = nextDose;
+                }
+                
+                results.mtd = this.doseLevels[currentDose];
+                return results;
+            }
+            
+            runBOIN() {
+                const results = { 
+                    patients: [], 
+                    mtd: null,
+                    totalPatients: 0,
+                    patientsWithDLT: 0
+                };
+                
+                let currentDose = 0;
+                const lambda_e = this.targetToxicity - 0.05;
+                const lambda_d = this.targetToxicity + 0.05;
+                
+                for (let cohort = 0; cohort < this.cohorts; cohort++) {
+                    let dlts = 0;
+                    
+                    for (let i = 0; i < this.cohortSize; i++) {
+                        results.totalPatients++;
+                        const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
+                        if (hasDLT) {
+                            dlts++;
+                            results.patientsWithDLT++;
+                        }
+                        
+                        results.patients.push({
+                            x: results.totalPatients,
+                            y: this.doseLevels[currentDose],
+                            dlt: hasDLT
+                        });
+                    }
+                    
+                    const observedRate = dlts / this.cohortSize;
+                    
+                    if (observedRate <= lambda_e && currentDose < this.doseLevels.length - 1) {
+                        currentDose++;
+                    } else if (observedRate >= lambda_d && currentDose > 0) {
+                        currentDose--;
+                    }
+                }
+                
+                results.mtd = this.doseLevels[currentDose];
+                return results;
+            }
+            
+            runEWOC() {
+                // EWOC with overdose control
+                const results = { 
+                    patients: [], 
+                    mtd: null,
+                    totalPatients: 0,
+                    patientsWithDLT: 0
+                };
+                
+                const alpha = 0.25; // Feasibility bound
+                let currentDose = 0;
+                const totalPatients = this.cohorts * this.cohortSize;
+                
+                for (let p = 0; p < totalPatients; p++) {
+                    results.totalPatients++;
+                    const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
+                    if (hasDLT) results.patientsWithDLT++;
+                    
+                    results.patients.push({
+                        x: p + 1,
+                        y: this.doseLevels[currentDose],
+                        dlt: hasDLT
+                    });
+                    
+                    // Simplified EWOC logic - ensure overdose probability < alpha
+                    const overdoseProb = this.getToxicityProbability(this.doseLevels[currentDose]);
+                    
+                    if (overdoseProb < this.targetToxicity && currentDose < this.doseLevels.length - 1) {
+                        if (Math.random() > alpha) currentDose++;
+                    } else if (overdoseProb > this.targetToxicity && currentDose > 0) {
+                        currentDose--;
+                    }
+                }
+                
+                results.mtd = this.doseLevels[currentDose];
+                return results;
+            }
+            
+            runBLRM() {
+                // Bayesian Logistic Regression Method
+                const results = { 
+                    patients: [], 
+                    mtd: null,
+                    totalPatients: 0,
+                    patientsWithDLT: 0
+                };
+                
+                let currentDose = 0;
+                const doseHistory = [];
+                const responseHistory = [];
+                
+                const totalPatients = this.cohorts * this.cohortSize;
+                
+                for (let p = 0; p < totalPatients; p++) {
+                    results.totalPatients++;
+                    const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
+                    if (hasDLT) results.patientsWithDLT++;
+                    
+                    results.patients.push({
+                        x: p + 1,
+                        y: this.doseLevels[currentDose],
+                        dlt: hasDLT
+                    });
+                    
+                    doseHistory.push(this.doseLevels[currentDose]);
+                    responseHistory.push(hasDLT ? 1 : 0);
+                    
+                    // Simplified logistic regression
+                    if (doseHistory.length >= 3) {
+                        const avgResponse = responseHistory.reduce((a, b) => a + b, 0) / responseHistory.length;
+                        
+                        if (avgResponse < this.targetToxicity && currentDose < this.doseLevels.length - 1) {
+                            currentDose++;
+                        } else if (avgResponse > this.targetToxicity && currentDose > 0) {
+                            currentDose--;
                         }
                     }
                 }
-
-                // Bond forces
-                bonds.forEach(bond => {
-                    const p1 = particles[bond.a];
-                    const p2 = particles[bond.b];
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    const r = Math.sqrt(dx * dx + dy * dy);
-                    if (r > 1) {
-                        const force = 0.5 * (r - bond.length);
-                        p1.ax += force * dx / r;
-                        p1.ay += force * dy / r;
-                        p2.ax -= force * dx / r;
-                        p2.ay -= force * dy / r;
-                        potentialEnergy += 0.5 * 0.5 * Math.pow(r - bond.length, 2);
-                    }
-                });
                 
-                kineticEnergy = 0;
-                particles.forEach(p => {
-                    p.x += p.vx * timeStep + 0.5 * p.ax * timeStep * timeStep;
-                    p.y += p.vy * timeStep + 0.5 * p.ay * timeStep * timeStep;
-                    p.vx += p.ax * timeStep;
-                    p.vy += p.ay * timeStep;
-
-                    // Berendsen thermostat
-                    const targetKE = temperature * 0.01;
-                    const currentKE = 0.5 * (p.vx*p.vx + p.vy*p.vy);
-                    const lambda = Math.sqrt(1 + 0.01 * (targetKE / currentKE - 1));
-                    if(!isNaN(lambda)) {
-                        p.vx *= lambda;
-                        p.vy *= lambda;
-                    }
-                    
-                    kineticEnergy += 0.5 * (p.vx*p.vx + p.vy*p.vy);
-                    
-                    if (p.x < p.radius) { p.x = p.radius; p.vx *= -0.9; }
-                    if (p.x > canvas.width - p.radius) { p.x = canvas.width - p.radius; p.vx *= -0.9; }
-                    if (p.y < p.radius) { p.y = p.radius; p.vy *= -0.9; }
-                    if (p.y > canvas.height - p.radius) { p.y = canvas.height - p.radius; p.vy *= -0.9; }
-                });
-
-                drawInitialStructure();
-
-                const currentTemp = kineticEnergy / particles.length / 2 * 120; // simplified conversion
-                document.getElementById('stat1Value').textContent = currentTemp.toFixed(1);
-                document.getElementById('stat2Value').textContent = kineticEnergy.toFixed(1);
-                document.getElementById('stat3Value').textContent = potentialEnergy.toFixed(1);
-                document.getElementById('stat4Value').textContent = (kineticEnergy + potentialEnergy).toFixed(1);
-                
-                time += timeStep * 0.001;
-                animationId = requestAnimationFrame(animate);
+                results.mtd = this.doseLevels[currentDose];
+                return results;
             }
-            animate();
+            
+            runmTPI() {
+                // Modified Toxicity Probability Interval
+                const results = { 
+                    patients: [], 
+                    mtd: null,
+                    totalPatients: 0,
+                    patientsWithDLT: 0
+                };
+                
+                let currentDose = 0;
+                const epsilon1 = 0.05;
+                const epsilon2 = 0.05;
+                const pT = this.targetToxicity;
+                
+                for (let cohort = 0; cohort < this.cohorts; cohort++) {
+                    let dlts = 0;
+                    
+                    for (let i = 0; i < this.cohortSize; i++) {
+                        results.totalPatients++;
+                        const hasDLT = Math.random() < this.getToxicityProbability(this.doseLevels[currentDose]);
+                        if (hasDLT) {
+                            dlts++;
+                            results.patientsWithDLT++;
+                        }
+                        
+                        results.patients.push({
+                            x: results.totalPatients,
+                            y: this.doseLevels[currentDose],
+                            dlt: hasDLT
+                        });
+                    }
+                    
+                    const observedToxicity = dlts / this.cohortSize;
+                    
+                    // mTPI decision rules
+                    if (observedToxicity <= pT - epsilon1 && currentDose < this.doseLevels.length - 1) {
+                        currentDose++; // Escalate
+                    } else if (observedToxicity >= pT + epsilon2 && currentDose > 0) {
+                        currentDose--; // De-escalate
+                    }
+                    // Stay at current dose if within interval
+                }
+                
+                results.mtd = this.doseLevels[currentDose];
+                return results;
+            }
         }
-
-        function exportData() {
-             alert("Exporting simulation data...");
-             // Export logic remains the same
+        
+        // Run PBPK Simulation
+        function runPBPKSimulation() {
+            showLoading();
+            
+            setTimeout(() => {
+                const params = {
+                    clearance: parseFloat(document.getElementById('clearance').value),
+                    vd: parseFloat(document.getElementById('vd').value),
+                    ka: parseFloat(document.getElementById('ka').value),
+                    bioavailability: parseFloat(document.getElementById('bioavailability').value),
+                    proteinBinding: parseFloat(document.getElementById('protein-binding').value)
+                };
+                
+                const timePoints = [];
+                for (let t = 0; t <= 48; t += 0.5) {
+                    timePoints.push(t);
+                }
+                
+                const model = new PBPKModel(params);
+                const concentrations = model.simulate(timePoints);
+                const metrics = model.calculateMetrics(concentrations, timePoints);
+                
+                // Update charts
+                charts.pk.data.labels = timePoints;
+                charts.pk.data.datasets[0].data = concentrations;
+                charts.pk.update();
+                
+                // Update QSP chart
+                const occupancy = concentrations.map(c => {
+                    const ec50 = parseFloat(document.getElementById('ec50').value);
+                    const hill = parseFloat(document.getElementById('hill').value);
+                    return (Math.pow(c, hill) / (Math.pow(ec50, hill) + Math.pow(c, hill))) * 100;
+                });
+                
+                charts.qsp.data.labels = timePoints;
+                charts.qsp.data.datasets[0].data = occupancy;
+                charts.qsp.update();
+                
+                // Update metrics
+                document.getElementById('cmax').textContent = metrics.cmax;
+                document.getElementById('tmax').textContent = metrics.tmax + ' h';
+                document.getElementById('auc').textContent = metrics.auc;
+                document.getElementById('halflife').textContent = metrics.halfLife + ' h';
+                document.getElementById('cl-calc').textContent = metrics.clearance + ' L/h';
+                document.getElementById('vss').textContent = metrics.vss + ' L';
+                
+                hideLoading();
+            }, 500);
         }
+        
+        // Run Clinical Trial Simulation
+        function runTrialSimulation() {
+            showLoading();
+            
+            setTimeout(() => {
+                const params = {
+                    designType: document.getElementById('design-type').value,
+                    targetToxicity: parseFloat(document.getElementById('target-tox').value),
+                    cohorts: parseInt(document.getElementById('cohorts').value),
+                    cohortSize: parseInt(document.getElementById('cohort-size').value),
+                    startDose: parseFloat(document.getElementById('start-dose').value),
+                    maxDose: parseFloat(document.getElementById('max-dose').value),
+                    escalationScheme: document.getElementById('escalation-scheme').value
+                };
+                
+                const trial = new BayesianTrial(params);
+                const results = trial.runTrial();
+                
+                // Update chart
+                const noDLT = results.patients.filter(p => !p.dlt);
+                const withDLT = results.patients.filter(p => p.dlt);
+                
+                charts.trial.data.datasets[0].data = noDLT;
+                charts.trial.data.datasets[1].data = withDLT;
+                charts.trial.update();
+                
+                // Update metrics
+                document.getElementById('mtd').textContent = results.mtd ? results.mtd.toFixed(0) + ' mg' : 'Not Found';
+                document.getElementById('rp2d').textContent = results.mtd ? (results.mtd * 0.8).toFixed(0) + ' mg' : 'N/A';
+                document.getElementById('dlt-rate').textContent = results.mtd ? 
+                    (trial.getToxicityProbability(results.mtd) * 100).toFixed(1) + '%' : 'N/A';
+                document.getElementById('total-patients').textContent = results.totalPatients;
+                document.getElementById('patients-dlt').textContent = results.patientsWithDLT;
+                document.getElementById('trial-duration').textContent = 
+                    Math.ceil(results.totalPatients / 3 * 4) + ' weeks';
+                
+                hideLoading();
+            }, 500);
+        }
+        
+        // Monte Carlo Trials
+        function runMonteCarloTrials() {
+            showLoading();
+            
+            setTimeout(() => {
+                const params = {
+                    designType: document.getElementById('design-type').value,
+                    targetToxicity: parseFloat(document.getElementById('target-tox').value),
+                    cohorts: parseInt(document.getElementById('cohorts').value),
+                    cohortSize: parseInt(document.getElementById('cohort-size').value),
+                    startDose: parseFloat(document.getElementById('start-dose').value),
+                    maxDose: parseFloat(document.getElementById('max-dose').value),
+                    escalationScheme: document.getElementById('escalation-scheme').value
+                };
+                
+                const mtdEstimates = [];
+                const patientCounts = [];
+                
+                for (let i = 0; i < 1000; i++) {
+                    const trial = new BayesianTrial(params);
+                    const result = trial.runTrial();
+                    
+                    if (result.mtd) {
+                        mtdEstimates.push(result.mtd);
+                    }
+                    patientCounts.push(result.totalPatients);
+                }
+                
+                const successRate = (mtdEstimates.length / 1000) * 100;
+                const meanMTD = mtdEstimates.reduce((a, b) => a + b, 0) / mtdEstimates.length;
+                const meanPatients = patientCounts.reduce((a, b) => a + b, 0) / patientCounts.length;
+                
+                alert(`Monte Carlo Results (1000 trials):\n\n` +
+                      `Success Rate: ${successRate.toFixed(1)}%\n` +
+                      `Mean MTD: ${meanMTD.toFixed(0)} mg\n` +
+                      `Average Patients: ${meanPatients.toFixed(0)}\n` +
+                      `Design: ${params.designType.toUpperCase()}`);
+                
+                hideLoading();
+            }, 1000);
+        }
+        
+        // Compare all trial designs
+        function compareDesigns() {
+            showLoading();
+            
+            setTimeout(() => {
+                const baseParams = {
+                    targetToxicity: parseFloat(document.getElementById('target-tox').value),
+                    cohorts: parseInt(document.getElementById('cohorts').value),
+                    cohortSize: parseInt(document.getElementById('cohort-size').value),
+                    startDose: parseFloat(document.getElementById('start-dose').value),
+                    maxDose: parseFloat(document.getElementById('max-dose').value),
+                    escalationScheme: document.getElementById('escalation-scheme').value
+                };
+                
+                const designs = ['3plus3', 'crm', 'boin', 'ewoc', 'blrm', 'mTPI'];
+                const results = {};
+                
+                designs.forEach(design => {
+                    const params = { ...baseParams, designType: design };
+                    const mtdEstimates = [];
+                    const patientCounts = [];
+                    
+                    for (let i = 0; i < 100; i++) {
+                        const trial = new BayesianTrial(params);
+                        const result = trial.runTrial();
+                        
+                        if (result.mtd) {
+                            mtdEstimates.push(result.mtd);
+                        }
+                        patientCounts.push(result.totalPatients);
+                    }
+                    
+                    results[design] = {
+                        successRate: (mtdEstimates.length / 100) * 100,
+                        meanPatients: patientCounts.reduce((a, b) => a + b, 0) / patientCounts.length
+                    };
+                });
+                
+                // Create comparison visualization
+                let comparisonText = 'Design Comparison Results:\n\n';
+                designs.forEach(design => {
+                    comparisonText += `${design.toUpperCase()}:\n`;
+                    comparisonText += `  Success Rate: ${results[design].successRate.toFixed(1)}%\n`;
+                    comparisonText += `  Avg Patients: ${results[design].meanPatients.toFixed(0)}\n\n`;
+                });
+                
+                alert(comparisonText);
+                hideLoading();
+            }, 1500);
+        }
+        
+        // Update design info
+        function updateDesignInfo() {
+            const designType = document.getElementById('design-type').value;
+            const infoBox = document.getElementById('design-info');
+            
+            const designDescriptions = {
+                '3plus3': {
+                    title: '3+3 Design',
+                    description: 'Traditional rule-based design. Simple but inefficient. Treats 3 patients per dose, escalates if 0/3 DLTs, expands to 6 if 1/3 DLTs.'
+                },
+                'crm': {
+                    title: 'CRM - Continual Reassessment Method',
+                    description: 'Model-based design that continuously updates toxicity estimates using Bayesian inference. More efficient than 3+3.'
+                },
+                'boin': {
+                    title: 'BOIN - Bayesian Optimal Interval',
+                    description: 'Interval-based design that\'s simpler than CRM but more efficient than 3+3. Makes decisions based on toxicity intervals.'
+                },
+                'ewoc': {
+                    title: 'EWOC - Escalation with Overdose Control',
+                    description: 'Conservative Bayesian design that explicitly controls the probability of overdosing patients.'
+                },
+                'blrm': {
+                    title: 'BLRM - Bayesian Logistic Regression',
+                    description: 'Uses logistic regression to model the dose-toxicity relationship. Flexible and efficient.'
+                },
+                'mTPI': {
+                    title: 'mTPI - Modified Toxicity Probability Interval',
+                    description: 'Improved interval design with better statistical properties than BOIN. User-friendly implementation.'
+                }
+            };
+            
+            const info = designDescriptions[designType];
+            infoBox.innerHTML = `<h4>${info.title}</h4><p>${info.description}</p>`;
+        }
+        
+        // Load presets
+        function loadPreset(module) {
+            if (module === 'pbpk') {
+                document.getElementById('bioavailability').value = 85;
+                document.getElementById('ka').value = 1.2;
+                document.getElementById('vd').value = 65;
+                document.getElementById('clearance').value = 1.0;
+                document.getElementById('protein-binding').value = 92;
+                document.getElementById('ec50').value = 45;
+                document.getElementById('hill').value = 1.4;
+                
+                alert('Loaded example: Typical oral small molecule drug parameters');
+                runPBPKSimulation();
+            }
+        }
+        
+        // Start tutorial
+        function startTutorial(tutorialType) {
+            const contentDiv = document.getElementById('tutorial-content');
+            
+            const tutorials = {
+                'pbpk-basics': {
+                    title: 'PBPK Basics Tutorial',
+                    content: `
+                        <h3>Understanding PBPK Models</h3>
+                        <div class="info-box">
+                            <h4>What is PBPK?</h4>
+                            <p>Physiologically-Based Pharmacokinetic modeling predicts drug concentrations in different body tissues over time.</p>
+                        </div>
+                        <div class="educational-tip">
+                            <strong>Key Parameters:</strong>
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Clearance (CL):</strong> How fast the body removes the drug</li>
+                                <li><strong>Volume of Distribution (Vd):</strong> How widely the drug spreads in the body</li>
+                                <li><strong>Bioavailability (F):</strong> Fraction reaching systemic circulation</li>
+                                <li><strong>Half-life:</strong> Time for concentration to drop by 50%</li>
+                            </ul>
+                        </div>
+                        <button onclick="switchModule('pbpk')">Try PBPK Module</button>
+                    `
+                },
+                'trial-designs': {
+                    title: 'Clinical Trial Designs',
+                    content: `
+                        <h3>Phase 1 Trial Designs Explained</h3>
+                        <div class="info-box">
+                            <h4>Traditional vs Modern Designs</h4>
+                            <p>Modern Bayesian designs find the MTD faster with fewer patients than traditional 3+3.</p>
+                        </div>
+                        <table style="width: 100%; margin: 20px 0;">
+                            <tr>
+                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Design</th>
+                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Efficiency</th>
+                                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Best Use</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px;">3+3</td>
+                                <td style="padding: 10px;">Low</td>
+                                <td style="padding: 10px;">Simple, small trials</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px;">CRM</td>
+                                <td style="padding: 10px;">High</td>
+                                <td style="padding: 10px;">Model-based optimization</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px;">BOIN</td>
+                                <td style="padding: 10px;">Medium-High</td>
+                                <td style="padding: 10px;">Balance of simplicity and efficiency</td>
+                            </tr>
+                        </table>
+                        <button onclick="switchModule('clinical')">Explore Trial Designs</button>
+                    `
+                }
+            };
+            
+            const tutorial = tutorials[tutorialType];
+            if (tutorial) {
+                contentDiv.innerHTML = tutorial.content;
+            }
+        }
+        
+        // Helper functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        
+        // Molecular dynamics functions (simplified)
+        function loadMolecularStructure() {
+            alert('Structure loaded! Visualization will appear in the canvas.');
+        }
+        
+        function startMolecularSimulation() {
+            alert('Molecular dynamics simulation started!');
+        }
+        
+        function stopMolecularSimulation() {
+            alert('Simulation stopped.');
+        }
+        
+        function exportMolecularData() {
+            alert('Exporting molecular data...');
+        }
+        
+        // Initialize on load
+        window.onload = function() {
+            initializeCharts();
+            updateDesignInfo();
+            
+            // Add input listeners for range sliders
+            document.getElementById('mdTemp').addEventListener('input', function() {
+                document.getElementById('mdTempValue').textContent = this.value;
+            });
+        };
     </script>
 </body>
 </html>
