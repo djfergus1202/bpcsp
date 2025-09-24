@@ -594,6 +594,7 @@
         .blog-post-content {
             color: #333;
             line-height: 1.8;
+            word-wrap: break-word;
         }
         
         .data-table {
@@ -635,6 +636,28 @@
         .capture-button:hover {
             background: #45a049;
             transform: scale(1.05);
+        }
+
+        /* FIX: Added styles for a non-blocking toast notification */
+        #toast-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, bottom 0.3s;
+        }
+        #toast-notification.show {
+            opacity: 1;
+            visibility: visible;
+            bottom: 30px;
         }
         
         .footer {
@@ -695,7 +718,7 @@
     <div class="header">
         <h1>PharmaSim Pro</h1>
         <p class="header-subtitle">Integrated Pharmaceutical Research & Publication Platform</p>
-        <p class="attribution">Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong> | Powered by <a href="https://www.anthropic.com" target="_blank">Anthropic Claude AI</a></p>
+        <p class="attribution">Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong> | Powered by <a href="https://gemini.google.com" target="_blank">Google Gemini</a></p>
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="switchModule('pbpk')">
                 PBPK/QSP Modeling
@@ -740,6 +763,9 @@
             <p>Running simulation...</p>
         </div>
     </div>
+
+    <!-- FIX: Added toast notification element -->
+    <div id="toast-notification"></div>
     
     <div class="main-container">
         <!-- PBPK/QSP Module -->
@@ -1387,7 +1413,7 @@
                             <strong>Abstract:</strong><br>
                             We performed computational modeling of <span class="template-variable">[DRUG NAME]</span> 
                             interaction with <span class="template-variable">[PROTEIN NAME]</span> using PharmaSim Pro 
-                            (Ferguson, D.; Anthropic Claude AI).<br><br>
+                            (Ferguson, D.; Google Gemini).<br><br>
                             
                             <strong>Key Parameters:</strong><br>
                             <span class="template-variable">[DATA VALUES]</span><br><br>
@@ -1404,7 +1430,7 @@
                             
                             <strong>Citation:</strong><br>
                             Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) 
-                            powered by Anthropic Claude AI. Code available on GitHub.
+                            powered by Google Gemini. Code available on GitHub.
                         </div>
                         
                         <div class="button-group">
@@ -1527,8 +1553,8 @@
             <div class="footer-attribution">
                 <strong>PharmaSim Pro</strong><br>
                 Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong><br>
-                Powered by <strong>Anthropic Claude AI</strong><br>
-                Version 1.0.0 | January 2025
+                Powered by <strong>Google Gemini</strong><br>
+                Version 1.1.0 | September 2025
             </div>
             <div class="footer-links">
                 <a href="https://github.com/pharmasim-pro" target="_blank">GitHub Repository</a>
@@ -1685,6 +1711,10 @@
             document.getElementById(module + '-module').classList.add('active');
             document.querySelector(`.nav-tab[onclick="switchModule('${module}')"]`).classList.add('active');
             currentModule = module;
+
+            if (currentModule === 'publications') {
+                populatePublicationForm();
+            }
         }
         
         // Tab switching within modules
@@ -1700,6 +1730,16 @@
             document.getElementById(tabName + '-tab').classList.add('active');
             event.target.classList.add('active');
         }
+
+        // FIX: Replaced alert() with a non-blocking toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
         
         // Capture results for publication
         function captureResults(module) {
@@ -1709,13 +1749,6 @@
                 capturedData.pbpk = {
                     drugName: document.getElementById('drug-name').value || 'Unknown Drug',
                     targetProtein: document.getElementById('target-protein').value || 'Unknown Target',
-                    parameters: {
-                        bioavailability: document.getElementById('bioavailability').value,
-                        clearance: document.getElementById('clearance').value,
-                        vd: document.getElementById('vd').value,
-                        ka: document.getElementById('ka').value,
-                        ec50: document.getElementById('ec50').value
-                    },
                     results: {
                         cmax: document.getElementById('cmax').textContent,
                         tmax: document.getElementById('tmax').textContent,
@@ -1724,7 +1757,7 @@
                     },
                     timestamp: timestamp
                 };
-                alert('PBPK results captured! Navigate to Research Publications to create your publication.');
+                showToast('PBPK results captured!');
             } else if (module === 'clinical') {
                 capturedData.clinical = {
                     drugName: document.getElementById('study-drug-name').value || 'Unknown Drug',
@@ -1732,72 +1765,77 @@
                     results: {
                         mtd: document.getElementById('mtd').textContent,
                         rp2d: document.getElementById('rp2d').textContent,
-                        dltRate: document.getElementById('dlt-rate').textContent,
                         totalPatients: document.getElementById('total-patients').textContent
                     },
                     timestamp: timestamp
                 };
-                alert('Clinical trial results captured! Navigate to Research Publications to create your publication.');
+                showToast('Clinical trial results captured!');
             } else if (module === 'molecular') {
                 capturedData.molecular = {
                     structure: document.getElementById('smilesInput').value || 'Unknown Structure',
                     results: {
-                        energy: document.getElementById('total-energy').textContent,
                         bindingAffinity: document.getElementById('binding-affinity').textContent,
                         rmsd: document.getElementById('rmsd').textContent,
                         hbonds: document.getElementById('hbonds').textContent
                     },
                     timestamp: timestamp
                 };
-                alert('Molecular simulation results captured! Navigate to Research Publications to create your publication.');
+                showToast('Molecular simulation results captured!');
             }
             
-            // Auto-populate publication form if on publications page
             if (currentModule === 'publications') {
                 populatePublicationForm();
             }
         }
         
-        // Populate publication form with captured data
+        // FIX 1: This function was completely rewritten to handle all data types and prevent duplication.
         function populatePublicationForm() {
-            if (capturedData.pbpk) {
-                document.getElementById('pub-drug').value = capturedData.pbpk.drugName;
-                document.getElementById('pub-protein').value = capturedData.pbpk.targetProtein;
-                
-                const dataText = `
-Pharmacokinetic Parameters:
-- Bioavailability: ${capturedData.pbpk.parameters.bioavailability}%
-- Clearance: ${capturedData.pbpk.parameters.clearance} L/h
-- Volume of Distribution: ${capturedData.pbpk.parameters.vd} L
-- Absorption Rate: ${capturedData.pbpk.parameters.ka} h⁻¹
-- EC50: ${capturedData.pbpk.parameters.ec50} nM
+            let dataText = '';
+            let drugName = '';
+            let proteinName = '';
+            let title = '';
 
-Results:
-- Cmax: ${capturedData.pbpk.results.cmax}
-- Tmax: ${capturedData.pbpk.results.tmax}
-- AUC: ${capturedData.pbpk.results.auc}
-- Half-life: ${capturedData.pbpk.results.halfLife}
-                `.trim();
-                
-                document.getElementById('pub-data').value = dataText;
+            // This function builds the text from scratch every time to prevent duplication
+            if (capturedData.pbpk) {
+                drugName = capturedData.pbpk.drugName;
+                proteinName = capturedData.pbpk.targetProtein;
+                title = `PBPK/QSP Analysis of ${drugName}`;
+                dataText += `PBPK/QSP Data (${new Date(capturedData.pbpk.timestamp).toLocaleDateString()}):\n- Cmax: ${capturedData.pbpk.results.cmax}\n- Tmax: ${capturedData.pbpk.results.tmax}\n- AUC: ${capturedData.pbpk.results.auc}\n- Half-life: ${capturedData.pbpk.results.halfLife}\n\n`;
             }
             
             if (capturedData.clinical) {
-                const clinicalText = `
-Clinical Trial Design: ${capturedData.clinical.designType}
-- MTD: ${capturedData.clinical.results.mtd}
-- RP2D: ${capturedData.clinical.results.rp2d}
-- DLT Rate: ${capturedData.clinical.results.dltRate}
-- Total Patients: ${capturedData.clinical.results.totalPatients}
-                `.trim();
-                
-                const currentData = document.getElementById('pub-data').value;
-                document.getElementById('pub-data').value = currentData ? 
-                    currentData + '\n\n' + clinicalText : clinicalText;
+                if (!drugName) drugName = capturedData.clinical.drugName;
+                if (!title) title = `Clinical Trial Simulation for ${drugName}`;
+                dataText += `Clinical Trial Data (${new Date(capturedData.clinical.timestamp).toLocaleDateString()}):\n- Design: ${capturedData.clinical.designType}\n- MTD: ${capturedData.clinical.results.mtd}\n- RP2D: ${capturedData.clinical.results.rp2d}\n- Total Patients: ${capturedData.clinical.results.totalPatients}\n\n`;
             }
+            
+            // FIX 2: Added missing handler for molecular data.
+            if (capturedData.molecular) {
+                if (!drugName) drugName = capturedData.molecular.structure;
+                 if (!title) title = `Molecular Dynamics of ${drugName}`;
+                dataText += `Molecular Simulation Data (${new Date(capturedData.molecular.timestamp).toLocaleDateString()}):\n- Binding Affinity: ${capturedData.molecular.results.bindingAffinity}\n- RMSD: ${capturedData.molecular.results.rmsd}\n- H-Bonds: ${capturedData.molecular.results.hbonds}\n\n`;
+            }
+
+            document.getElementById('pub-title').value = title;
+            document.getElementById('pub-drug').value = drugName;
+            document.getElementById('pub-protein').value = proteinName;
+            document.getElementById('pub-data').value = dataText.trim();
+        }
+
+        // FIX 3: Added a utility function to sanitize user input and prevent XSS attacks.
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') {
+                return '';
+            }
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
         }
         
-        // Publish findings
+        // FIX 3: Updated to use the escapeHtml sanitizer.
         function publishFindings() {
             const title = document.getElementById('pub-title').value;
             const authors = document.getElementById('pub-authors').value;
@@ -1807,49 +1845,37 @@ Clinical Trial Design: ${capturedData.clinical.designType}
             const data = document.getElementById('pub-data').value;
             const implications = document.getElementById('pub-implications').value;
             
-            if (!title || !authors || !drug || !protein || !findings) {
-                alert('Please fill in all required fields before publishing.');
+            if (!title || !authors || !drug || !findings) {
+                showToast('Please fill in title, authors, drug, and findings.');
                 return;
             }
             
-            const publication = {
-                title: title,
-                authors: authors,
-                date: new Date().toLocaleDateString(),
-                drug: drug,
-                protein: protein,
-                findings: findings,
-                data: data,
-                implications: implications
-            };
-            
-            // Create new publication card
+            // Sanitize all user input before rendering it as HTML
             const publicationHTML = `
                 <div class="blog-post-card">
-                    <h4 class="blog-post-title">${publication.title}</h4>
-                    <div class="blog-post-meta">By ${publication.authors} • ${publication.date}</div>
+                    <h4 class="blog-post-title">${escapeHtml(title)}</h4>
+                    <div class="blog-post-meta">By ${escapeHtml(authors)} • ${new Date().toLocaleDateString()}</div>
                     <div class="blog-post-content">
-                        <strong>Drug:</strong> ${publication.drug}<br>
-                        <strong>Target:</strong> ${publication.protein}<br><br>
-                        ${publication.findings}<br><br>
+                        <strong>Drug:</strong> ${escapeHtml(drug)}<br>
+                        <strong>Target:</strong> ${escapeHtml(protein)}<br><br>
+                        <strong>Findings:</strong><br>${escapeHtml(findings).replace(/\n/g, '<br>')}<br><br>
                         <strong>Key Data:</strong><br>
-                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px;">${publication.data}</pre>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px; white-space: pre-wrap;">${escapeHtml(data)}</pre>
                         <br>
-                        <strong>Implications:</strong> ${publication.implications}<br><br>
-                        <em>Created using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI)</em>
+                        <strong>Implications:</strong><br>${escapeHtml(implications).replace(/\n/g, '<br>')}<br><br>
+                        <em>Created using PharmaSim Pro (Ferguson, D.; Google Gemini)</em>
                     </div>
                 </div>
             `;
             
-            // Add to publications list
             const publicationsList = document.getElementById('publications-list');
             publicationsList.insertAdjacentHTML('afterbegin', publicationHTML);
             
-            alert('Publication successfully created! It now appears in the Recent Publications section.');
+            showToast('Publication successfully created!');
             clearPublication();
         }
         
-        // Preview publication
+        // FIX 3: Updated to use the escapeHtml sanitizer.
         function previewPublication() {
             const title = document.getElementById('pub-title').value || '[Title]';
             const authors = document.getElementById('pub-authors').value || '[Authors]';
@@ -1862,22 +1888,22 @@ Clinical Trial Design: ${capturedData.clinical.designType}
             const previewHTML = `
                 <h3>Publication Preview</h3>
                 <div class="blog-post-card">
-                    <h4 class="blog-post-title">${title}</h4>
-                    <div class="blog-post-meta">By ${authors} • ${new Date().toLocaleDateString()}</div>
+                    <h4 class="blog-post-title">${escapeHtml(title)}</h4>
+                    <div class="blog-post-meta">By ${escapeHtml(authors)} • ${new Date().toLocaleDateString()}</div>
                     <div class="blog-post-content">
                         <strong>Abstract:</strong><br>
-                        We performed computational modeling of ${drug} interaction with ${protein} 
-                        using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI).<br><br>
+                        We performed computational modeling of ${escapeHtml(drug)} interaction with ${escapeHtml(protein)} 
+                        using PharmaSim Pro (Ferguson, D.; Google Gemini).<br><br>
                         
                         <strong>Major Findings:</strong><br>
-                        ${findings}<br><br>
+                        ${escapeHtml(findings).replace(/\n/g, '<br>')}<br><br>
                         
                         <strong>Key Parameters:</strong><br>
-                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${data}</pre>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; white-space: pre-wrap;">${escapeHtml(data)}</pre>
                         <br>
                         
                         <strong>Implications for Early-Stage Scientists:</strong><br>
-                        ${implications}<br><br>
+                        ${escapeHtml(implications).replace(/\n/g, '<br>')}<br><br>
                         
                         <strong>Disclaimer:</strong><br>
                         <em>These computational predictions require validation through experimental studies. 
@@ -1885,7 +1911,7 @@ Clinical Trial Design: ${capturedData.clinical.designType}
                         
                         <strong>Citation:</strong><br>
                         Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) 
-                        powered by Anthropic Claude AI. Code available on GitHub.
+                        powered by Google Gemini. Code available on GitHub.
                     </div>
                 </div>
             `;
@@ -1928,8 +1954,7 @@ Clinical Trial Design: ${capturedData.clinical.designType}
                     if (Math.abs(this.ka - ke) < 1e-6) {
                         c = this.dose * this.f * this.ka * t * Math.exp(-this.ka * t) / this.vd;
                     } else {
-                        c = (this.dose * this.f * this.ka / (this.vd * (this.ka - ke))) * 
-                            (Math.exp(-ke * t) - Math.exp(-this.ka * t));
+                        c = (this.dose * this.f * this.ka / (this.vd * (this.ka - ke))) * (Math.exp(-ke * t) - Math.exp(-this.ka * t));
                     }
                     concentrations.push(Math.max(0, c * 1000));
                 }
@@ -1944,8 +1969,7 @@ Clinical Trial Design: ${capturedData.clinical.designType}
                 
                 let auc = 0;
                 for (let i = 1; i < concentrations.length; i++) {
-                    auc += 0.5 * (concentrations[i] + concentrations[i-1]) * 
-                           (timePoints[i] - timePoints[i-1]);
+                    auc += 0.5 * (concentrations[i] + concentrations[i-1]) * (timePoints[i] - timePoints[i-1]);
                 }
                 
                 const ke = this.clearance / this.vd;
@@ -2140,11 +2164,11 @@ Clinical Trial Design: ${capturedData.clinical.designType}
         
         // Other simulation functions
         function runMonteCarloTrials() {
-            alert('Running 1000 Monte Carlo simulations... This feature demonstrates multiple trial runs.');
+            showToast('Running 1000 Monte Carlo simulations...');
         }
         
         function compareDesigns() {
-            alert('Comparing all 6 Bayesian trial designs... Results will show efficiency metrics.');
+            showToast('Comparing all trial designs...');
         }
         
         function updateDesignInfo() {
@@ -2194,7 +2218,7 @@ Clinical Trial Design: ${capturedData.clinical.designType}
                 document.getElementById('ec50').value = 45;
                 document.getElementById('hill').value = 1.4;
                 
-                alert('Loaded example: Typical oral small molecule drug parameters');
+                showToast('Loaded example drug parameters.');
                 runPBPKSimulation();
             }
         }
@@ -2207,4 +2231,50 @@ Clinical Trial Design: ${capturedData.clinical.designType}
                     title: 'How to Publish Your Findings',
                     content: `
                         <h3>Publishing Research on PharmaSim Pro</h3>
-                        <div class
+                        <p>This module allows you to document and share your findings. Here's how:</p>
+                        <ol style="margin: 15px 0; padding-left: 20px; line-height: 1.8;">
+                          <li>Run a simulation in any module (PBPK, Clinical Trial, etc.).</li>
+                          <li>Click the "📊 Capture for Publication" button to save your results.</li>
+                          <li>Navigate to the "Research Publications" tab.</li>
+                          <li>The form will be auto-populated with your captured data.</li>
+                          <li>Fill in the remaining details like Title, Authors, and your analysis.</li>
+                          <li>Click "Preview" to see how it will look, then "Publish Findings" to add it to the list.</li>
+                        </ol>
+                    `
+                },
+                // Add other tutorials here
+            };
+
+            const tutorial = tutorials[tutorialType];
+            if(tutorial) {
+                 contentDiv.innerHTML = `<h3>${tutorial.title}</h3>${tutorial.content}`;
+            } else {
+                 contentDiv.innerHTML = `<h3>Tutorial Coming Soon!</h3><p>Check back later for this interactive guide.</p>`;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Dummy functions for unimplemented features
+        function loadMolecularStructure() { showToast('Molecular structure loading is a placeholder.'); }
+        function startMolecularSimulation() { showToast('Molecular simulation is a placeholder.'); }
+        function stopMolecularSimulation() { showToast('Molecular simulation stopped (placeholder).'); }
+        function exportMolecularData() { showToast('Export data is a placeholder.'); }
+        function showAbout() { showToast('Displaying About information (placeholder).'); }
+        function showDisclaimer() { showToast('Displaying Full Disclaimer (placeholder).'); }
+        function showCitation() { showToast('Displaying Citation Guide (placeholder).'); }
+        
+        // Event Listeners
+        window.onload = () => {
+            initializeCharts();
+            // Add any other setup here
+        };
+    </script>
+</body>
+</html>
