@@ -471,10 +471,15 @@
             display: block;
         }
         
-        canvas {
+        canvas, #molecularDisplay {
             width: 100% !important;
             height: 350px !important;
             border-radius: 10px;
+        }
+        
+        #molecularDisplay {
+            position: relative;
+            background-color: #f0f0f0;
         }
         
         .loading-overlay {
@@ -690,6 +695,8 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
+    <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
 </head>
 <body>
     <div class="header">
@@ -1315,7 +1322,7 @@
                 <div class="visualization-area">
                     <div class="chart-container">
                         <h3>3D Molecular Structure</h3>
-                        <canvas id="molecularCanvas"></canvas>
+                        <div id="molecularDisplay"></div>
                     </div>
                     
                     <div class="chart-container">
@@ -1580,7 +1587,17 @@
         let currentModule = 'pbpk';
         let animationFrames = {};
         let capturedData = {};
+        let rdkit;
+        let viewer;
         
+        // Initialize RDKit
+        window.initRDKitModule().then(function(RDKit) {
+            rdkit = RDKit;
+            console.log("RDKit version: " + rdkit.version());
+        }).catch(() => {
+            console.error("Failed to load RDKit module.");
+        });
+
         // Initialize all charts
         function initializeCharts() {
             const chartOptions = {
@@ -1967,50 +1984,6 @@
                         }
                     }
                 });
-            }
-            
-            // Initialize molecular canvas
-            const molecularCanvas = document.getElementById('molecularCanvas');
-            if (molecularCanvas) {
-                const ctx = molecularCanvas.getContext('2d');
-                // Draw a simple molecular representation
-                ctx.clearRect(0, 0, molecularCanvas.width, molecularCanvas.height);
-                ctx.fillStyle = '#f0f0f0';
-                ctx.fillRect(0, 0, molecularCanvas.width, molecularCanvas.height);
-                
-                // Draw some atoms
-                const atoms = [
-                    {x: 100, y: 100, color: '#2a5298', size: 15},
-                    {x: 200, y: 150, color: '#f5576c', size: 12},
-                    {x: 300, y: 120, color: '#4facfe', size: 14},
-                    {x: 250, y: 200, color: '#667eea', size: 13}
-                ];
-                
-                // Draw bonds
-                ctx.strokeStyle = '#999';
-                ctx.lineWidth = 2;
-                for (let i = 0; i < atoms.length - 1; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(atoms[i].x, atoms[i].y);
-                    ctx.lineTo(atoms[i+1].x, atoms[i+1].y);
-                    ctx.stroke();
-                }
-                
-                // Draw atoms
-                atoms.forEach(atom => {
-                    ctx.beginPath();
-                    ctx.arc(atom.x, atom.y, atom.size, 0, Math.PI * 2);
-                    ctx.fillStyle = atom.color;
-                    ctx.fill();
-                    ctx.strokeStyle = '#333';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                });
-                
-                // Add label
-                ctx.fillStyle = '#333';
-                ctx.font = '16px Arial';
-                ctx.fillText('3D Molecular Structure (Simplified)', 10, 30);
             }
         }
         
@@ -2926,18 +2899,38 @@ Clinical Trial Design: ${capturedData.clinical.designType}
             }
         }
         
-        // Molecular dynamics functions (simplified implementations)
+        // Molecular dynamics functions
         function loadMolecularStructure() {
             const smilesInput = document.getElementById('smilesInput').value;
             const pdbFile = document.getElementById('pdbFile').files[0];
-            
-            if (smilesInput) {
-                alert(`SMILES structure loaded: ${smilesInput}\nVisualization will appear in the canvas.`);
-                // In a real implementation, this would parse and display the structure
-            } else if (pdbFile) {
-                alert(`PDB file loaded: ${pdbFile.name}\nProcessing structure...`);
+            const displayDiv = document.getElementById('molecularDisplay');
+            displayDiv.innerHTML = ''; // Clear previous content
+
+            if (pdbFile) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const pdbData = event.target.result;
+                    if (viewer) {
+                        viewer.clear();
+                    }
+                    viewer = $3Dmol.createViewer(displayDiv);
+                    viewer.addModel(pdbData, "pdb");
+                    viewer.setStyle({}, {stick: {}});
+                    viewer.zoomTo();
+                    viewer.render();
+                };
+                reader.readAsText(pdbFile);
+            } else if (smilesInput && rdkit) {
+                const mol = rdkit.get_mol(smilesInput);
+                if (mol) {
+                    const svg = mol.get_svg();
+                    displayDiv.innerHTML = svg;
+                } else {
+                    displayDiv.innerHTML = '<p style="color: red; text-align: center; padding-top: 50px;">Invalid SMILES string</p>';
+                }
+                mol?.delete();
             } else {
-                alert('Please enter a SMILES string or upload a PDB file.');
+                 displayDiv.innerHTML = '<p style="color: #555; text-align: center; padding-top: 50px;">Please upload a PDB file or enter a SMILES string.</p>';
             }
         }
         
