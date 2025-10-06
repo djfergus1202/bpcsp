@@ -3,7 +3,7 @@ services:
     name: pharma-sim-pro
     env: node
     plan: free
-    buildCommand: "npm ci"
+    buildCommand: "npm install --no-audit --no-fund"
     startCommand: "node server.js"
     autoDeploy: true
     healthCheckPath: "/healthz"
