@@ -271,7 +271,7 @@
             <button class="nav-tab" onclick="switchModule('pbpk')">PBPK/QSP Modeling</button>
             <button class="nav-tab" onclick="switchModule('clinical')">Clinical Trial Design</button>
             <button class="nav-tab active" onclick="switchModule('molecular')">Molecular Docking</button>
-            <button class="nav-tab" onclick="switchModule('namd')">NAMD & VMD</button>
+            <button class="nav-tab" onclick="switchModule('md_setup')">MD Simulation Setup</button>
             <button class="nav-tab" onclick="switchModule('publications')">Publications</button>
             <button class="nav-tab" onclick="switchModule('tutorial')">Learning Center</button>
         </nav>
@@ -365,7 +365,7 @@
             </div>
         </section>
         
-        <!-- Molecular Dynamics Module -->
+        <!-- Molecular Docking Module -->
         <section class="module-section active" id="molecular-module">
             <div class="dashboard-grid">
                 <div class="control-panel">
@@ -408,61 +408,79 @@
             </div>
         </section>
 
-        <!-- NAMD & VMD Module -->
-        <section class="module-section" id="namd-module">
+        <!-- MD Simulation Setup Module -->
+        <section class="module-section" id="md_setup-module">
             <div class="dashboard-grid">
                 <div class="control-panel">
-                    <h2>NAMD Config Generator</h2>
+                    <h2>MD Simulation File Generator</h2>
                     <div class="control-group">
                         <label>Output Prefix</label>
-                        <input id="namd-out" value="output"/>
+                        <input id="md-out" value="output"/>
                     </div>
                     <div class="control-group">
                         <label>Temperature (K)</label>
-                        <input id="namd-temp" type="number" value="310"/>
+                        <input id="md-temp" type="number" value="310"/>
                     </div>
                     <div class="control-group">
                         <label>Production Time (ns)</label>
-                        <input id="namd-ns" type="number" value="10"/>
+                        <input id="md-ns" type="number" value="10"/>
                     </div>
                     <div class="control-group">
                         <label>switch/cut/pair (Å)</label>
-                        <input id="namd-cuts" value="10/12/14"/>
+                        <input id="md-cuts" value="10/12/14"/>
                     </div>
                      <div class="control-group">
-                        <label><input type="checkbox" id="namd-restraints" checked/> Use Restraints</label>
+                        <label><input type="checkbox" id="md-restraints" checked/> Use Restraints</label>
                     </div>
                     <div class="button-group">
-                        <button onclick="generateNAMDFiles()">Generate Files</button>
-                        <button id="zipBtn" onclick="downloadNAMDFiles()" disabled>Download ZIP</button>
+                        <button onclick="generateMDFiles()">Generate Files</button>
+                        <button id="zipBtn" onclick="downloadMDFiles()" disabled>Download ZIP</button>
                     </div>
                     <div id="fileList" style="margin-top:20px; display:flex; flex-direction:column; gap:8px;"></div>
                 </div>
                 <div class="chart-container">
-                    <h3>VMD Helper Scripts</h3>
-                    <p style="margin:0 0 15px; font-size: 14px; color: #555;">Copy/paste into <strong style="color: #1e3c72;">VMD → Extensions → Tk Console</strong> or save as a <strong style="color: #1e3c72;">.tcl</strong> file.</p>
+                    <h3>Visualization & Analysis Scripts</h3>
+                    <p style="margin:0 0 15px; font-size: 14px; color: #555;">These scripts use TCL syntax, common in visualization programs like VMD, to prepare and analyze your system.</p>
                     <div>
-                        <h4>1) Build restraints.pdb (B‑factor = k)</h4>
-                        <pre class="mono" id="vmd_restraints">set sel [atomselect top "all"]
+                        <h4>1) Prepare Restraints File</h4>
+                        <pre class="mono" id="script_restraints"># Selects all atoms and sets their B-factor (occupancy) column to 0
+set sel [atomselect top "all"]
 $sel set beta 0.0
+
+# Selects only the protein backbone atoms (N, CA, C, O)
 set backbone [atomselect top "protein and name N CA C O"]
+
+# Sets the B-factor for the backbone to a non-zero value (e.g., 2.0)
+# Simulation software can use this column to apply harmonic restraints.
 $backbone set beta 2.0
+
+# Writes the modified structure to a new PDB file
 $sel writepdb restraints.pdb</pre>
-                        <button style="width:auto; margin-top:5px;" onclick="copyVMDScript('vmd_restraints')">Copy restraints.tcl</button>
+                        <button style="width:auto; margin-top:5px;" onclick="copyMDScript('script_restraints')">Copy Restraints Script</button>
                     </div>
                     <div style="margin-top:20px;">
                         <h4>2) Quick Visualization Script</h4>
-                        <pre class="mono" id="vmd_cartoon">mol new system.pdb
+                        <pre class="mono" id="script_cartoon"># Load your system topology and coordinates
+mol new system.psf
+mol addfile system.pdb
+
+# Delete the default simple lines representation
 mol delrep 0 top
-mol representation NewCartoon 0.3 10 4 0
+
+# Create a new, publication-quality representation
+# Style: NewCartoon, with settings for smoothness
+mol representation NewCartoon 0.3 10.0 4.0 0
+# Color by secondary structure (alpha-helices, beta-sheets)
 mol color Structure
+# Apply this representation only to the protein
 mol selection {protein}
 mol addrep top
-# Optional: Show ligand if loaded as a separate molecule
+
+# Optional: Show the ligand with a different style
 # mol selection {resname LIG}
-# mol representation Licorice 0.3 12 12
+# mol representation Licorice 0.3 12.0 12.0
 # mol addrep top</pre>
-                         <button style="width:auto; margin-top:5px;" onclick="copyVMDScript('vmd_cartoon')">Copy cartoon.tcl</button>
+                         <button style="width:auto; margin-top:5px;" onclick="copyMDScript('script_cartoon')">Copy Visualization Script</button>
                     </div>
                 </div>
             </div>
@@ -488,7 +506,7 @@ mol addrep top
             </div>
             <div id="publications-list" style="margin-top: 30px;">
                 <h2>Recent Publications</h2>
-                <!-- Publications will be added here -->
+                <!-- Publications will be added here via JavaScript -->
             </div>
         </section>
         
@@ -503,6 +521,7 @@ mol addrep top
                  <div class="button-group">
                     <button onclick="loadTutorial('pbpk')">PBPK Basics</button>
                     <button onclick="loadTutorial('docking')">Molecular Docking</button>
+                    <button onclick="loadTutorial('md_setup')">MD Simulation Setup</button>
                 </div>
             </div>
         </section>
@@ -510,15 +529,14 @@ mol addrep top
     
     <script>
     // --- GLOBAL VARIABLES ---
-    let viewer;
-    let rdkit;
-    let charts = {};
-    let generatedNAMDFiles = {};
+    let viewer; // For 3Dmol.js
+    let rdkit;  // For RDKit.js
+    let charts = {}; // To store Chart.js instances
+    let generatedMDFiles = {}; // To store generated MD setup files
 
     // --- INITIALIZATION ---
     /**
-     * This function runs when the page loads. It initializes the Chart.js instances,
-     * sets up the RDKit WASM module, and sets the default active module.
+     * This function runs when the page loads. It initializes all necessary components.
      */
     window.onload = () => {
         // Initialize Chart.js instances for each canvas
@@ -527,13 +545,13 @@ mol addrep top
         charts.trial = createChart('trialChart', 'scatter');
         charts.toxicity = createChart('toxicityChart', 'line');
 
-        // Load publications from localStorage
+        // Load any saved publications from the browser's local storage
         loadPublications();
 
-        // Set the initial active module
+        // Set the initial active module to be visible
         switchModule('molecular');
 
-        // Asynchronously initialize the RDKit module
+        // Asynchronously initialize the RDKit WASM module for chemistry calculations
         window.initRDKitModule().then(RDKit => {
             rdkit = RDKit;
             document.getElementById('runButton').disabled = false;
@@ -563,21 +581,23 @@ mol addrep top
     }
 
     /**
-     * Switches the currently visible module.
+     * Switches the currently visible module based on the tab clicked.
      * @param {string} module - The ID of the module to activate (e.g., 'pbpk', 'molecular').
      */
     function switchModule(module) {
         document.querySelectorAll('.module-section').forEach(section => section.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
         
-        const activeSection = document.getElementById(`${module}-module`);
+        // The NAMD/VMD module was renamed to md_setup
+        const sectionId = (module === 'namd') ? 'md_setup-module' : `${module}-module`;
+        const activeSection = document.getElementById(sectionId);
         if (activeSection) activeSection.classList.add('active');
 
         const activeTab = document.querySelector(`.nav-tab[onclick="switchModule('${module}')"]`);
         if (activeTab) activeTab.classList.add('active');
     }
 
-    // --- MOLECULAR DOCKING MODULE ---
+    // --- MOLECULAR DOCKING MODULE (IN-BROWSER APPROXIMATION) ---
 
     /**
      * Main function to orchestrate the in-browser docking approximation.
@@ -595,28 +615,27 @@ mol addrep top
             return;
         }
 
-        showLoading("Analyzing molecules and running simulation...");
-        // Use a short timeout to allow the browser to render the loading spinner before intensive work
-        await new Promise(resolve => setTimeout(resolve, 50));
+        showLoading("Analyzing molecules and approximating docking...");
+        await new Promise(resolve => setTimeout(resolve, 50)); // Allow UI to update
 
         try {
-            // Step 1: Process the ligand SMILES string using RDKit
+            // Step 1: Process ligand SMILES using RDKit
             const ligand = processLigand(smiles);
             if (!ligand.mol) throw new Error("Invalid SMILES string provided.");
             
-            // Update UI with calculated ligand properties
+            // Update UI with calculated properties
             document.getElementById('ligand-mw').textContent = ligand.mw.toFixed(2);
             document.getElementById('ligand-logp').textContent = ligand.logp.toFixed(2);
 
-            // Step 2: Read the PDB file and identify the binding pocket
+            // Step 2: Read PDB file and find binding pocket
             const pdbData = await pdbFile.text();
             const protein = await findBindingPocket(pdbData);
 
-            // Step 3: Calculate the estimated binding score based on properties
+            // Step 3: Calculate the estimated binding score
             const score = calculateBindingScore(protein, ligand);
             document.getElementById('binding-affinity').textContent = `${score.toFixed(2)} kcal/mol`;
 
-            // Step 4: Display the final docked pose in the 3D viewer
+            // Step 4: Display the final docked pose
             displayResults(pdbData, ligand.molblock, protein.pocketResidues);
 
         } catch (error) {
@@ -630,14 +649,14 @@ mol addrep top
     /**
      * Processes a SMILES string to generate a 3D structure and calculate properties.
      * @param {string} smiles - The SMILES string of the ligand.
-     * @returns {object} An object containing the RDKit molecule object and calculated properties.
+     * @returns {object} An object containing the RDKit molecule object and its properties.
      */
     function processLigand(smiles) {
         const mol = rdkit.get_mol(smiles);
-        if (!mol) return { mol: null }; // Invalid SMILES
+        if (!mol) return { mol: null };
 
-        mol.add_hs(); // Add hydrogens for a more realistic structure
-        rdkit.get_conformers(mol); // Generate a 3D conformation
+        mol.add_hs();
+        mol.embed_molecule(); // Generate a 3D conformation
         const details = JSON.parse(mol.get_descriptors());
 
         return {
@@ -652,24 +671,17 @@ mol addrep top
 
     /**
      * A geometric algorithm to find the most likely binding pocket on a protein surface.
-     * This is a simplified approach that finds the densest region of the protein.
      * @param {string} pdbData - The raw text content of the PDB file.
-     * @returns {Promise<object>} An object containing protein atoms and the identified pocket residues.
+     * @returns {Promise<object>} An object with protein atoms and identified pocket residues.
      */
     async function findBindingPocket(pdbData) {
-        // Use a headless (non-visual) 3Dmol viewer for analysis
         const tempViewer = $3Dmol.createViewer({}, {});
         const model = tempViewer.addModel(pdbData, "pdb");
         const atoms = model.atoms;
 
-        // Group atoms by residue ID
         const residues = {};
-        atoms.forEach(atom => {
-            if (!residues[atom.resi]) residues[atom.resi] = [];
-            residues[atom.resi].push(atom);
-        });
+        atoms.forEach(atom => { (residues[atom.resi] = residues[atom.resi] || []).push(atom); });
 
-        // Find the most "buried" residue by counting its neighbors, which suggests a core region.
         let maxNeighbors = 0;
         let pocketCenterResi = -1;
         for (const resi in residues) {
@@ -682,17 +694,12 @@ mol addrep top
             }
         }
 
-        // Define the pocket as all residues within 10 Angstroms of this central residue's center
-        const centralResidueAtoms = residues[pocketCenterResi] || [];
-        if (centralResidueAtoms.length === 0) throw new Error("Could not identify a central residue for pocket detection.");
+        const centralAtoms = residues[pocketCenterResi] || [];
+        if (centralAtoms.length === 0) throw new Error("Could not identify a binding pocket.");
         
-        const pocketCenter = centralResidueAtoms.reduce((acc, atom) => acc.add(atom), new $3Dmol.Vector3()).divideScalar(centralResidueAtoms.length);
+        const pocketCenter = centralAtoms.reduce((acc, atom) => acc.add(atom), new $3Dmol.Vector3()).divideScalar(centralAtoms.length);
         const pocketResidues = new Set();
-        atoms.forEach(atom => {
-            if (pocketCenter.distanceTo(atom) < 10) {
-                pocketResidues.add(atom.resi);
-            }
-        });
+        atoms.forEach(atom => { if (pocketCenter.distanceTo(atom) < 10) pocketResidues.add(atom.resi); });
         
         return { atoms, pocketResidues: Array.from(pocketResidues) };
     }
@@ -704,20 +711,11 @@ mol addrep top
      * @returns {number} The estimated binding affinity in kcal/mol.
      */
     function calculateBindingScore(protein, ligand) {
-        let score = -2.0; // Base score for any binding event
-
-        // Term 1: Size and Lipophilicity (penalizes deviation from "drug-like" properties)
-        score -= Math.abs(ligand.mw - 350) / 100;      // Penalty for MW deviating from 350 Da
-        score -= Math.abs(ligand.logp - 2.5);         // Penalty for LogP deviating from 2.5
-
-        // Term 2: Hydrogen Bonding Potential
-        const hBondScore = Math.min(ligand.hDonors, 10) + Math.min(ligand.hAcceptors, 10);
-        score -= hBondScore * 0.4; // Each potential H-bond contributes favorably
-
-        // Term 3: A small random factor to simulate variability of real-world results
+        let score = -2.0;
+        score -= Math.abs(ligand.mw - 350) / 100;
+        score -= Math.abs(ligand.logp - 2.5);
+        score -= (Math.min(ligand.hDonors, 10) + Math.min(ligand.hAcceptors, 10)) * 0.4;
         score += (Math.random() - 0.5);
-
-        // Clamp the score to a realistic range for drug-like molecules
         return Math.max(-12.0, Math.min(-4.0, score));
     }
 
@@ -732,19 +730,15 @@ mol addrep top
         if (viewer) viewer.clear();
         else viewer = $3Dmol.createViewer(displayDiv, { backgroundColor: 'white' });
 
-        // Display protein as a cartoon
         const proteinModel = viewer.addModel(proteinPdbData, "pdb");
         viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
 
-        // Highlight the binding pocket with a transparent surface and sticks
         viewer.addSurface($3Dmol.VDW, { opacity: 0.85, color: 'white' }, { resi: pocketResidues });
         viewer.setStyle({ resi: pocketResidues }, { stick: { colorscheme: 'cyanCarbon', radius: 0.3 } });
         
-        // Display the ligand as sticks
         const ligandModel = viewer.addModel(ligandMolblock, "sdf");
         viewer.setStyle({ model: ligandModel }, { stick: { colorscheme: 'carbon' } });
 
-        // Zoom to the binding pocket
         viewer.zoomTo({ resi: pocketResidues });
         viewer.render();
     }
@@ -756,7 +750,6 @@ mol addrep top
      * Runs a one-compartment pharmacokinetic simulation based on user inputs.
      */
     function runPBPKSimulation() {
-        // Get parameters from the UI, with default fallbacks
         const D = parseFloat(document.getElementById('dose').value) || 100;
         const F = (parseFloat(document.getElementById('bioavailability').value) || 80) / 100;
         const ka = parseFloat(document.getElementById('ka').value) || 1.5;
@@ -770,18 +763,14 @@ mol addrep top
 
         const concentrations = [];
         const timePoints = [];
-        // Simulate for 48 hours, with a data point every hour
         for (let t = 0; t <= 48; t += 1) {
             timePoints.push(t);
-            // Bateman equation for a one-compartment model after oral administration
             const concentration = (F * D * ka / (Vd * (ka - ke))) * (Math.exp(-ke * t) - Math.exp(-ka * t));
             concentrations.push(concentration > 0 ? concentration : 0);
         }
         
-        // Calculate target occupancy using a simple Emax model (EC50 = 20)
         const occupancy = concentrations.map(c => 100 * c / (20 + c));
 
-        // Update the charts with the new data
         updateChart(charts.pk, "Plasma Concentration (mg/L)", timePoints, [concentrations]);
         updateChart(charts.qsp, "Target Occupancy (%)", timePoints, [occupancy], '#e67e22');
     }
@@ -797,7 +786,6 @@ mol addrep top
         const startDose = parseFloat(document.getElementById('start-dose').value) || 10;
         const targetTox = (parseFloat(document.getElementById('target-tox').value) || 25) / 100;
 
-        // Define dose levels and their "true" underlying toxicity probabilities
         const doseLevels = Array.from({length: numDoseLevels}, (_, i) => startDose * Math.pow(1.5, i));
         const trueToxProbs = doseLevels.map(d => 0.05 + 0.4 * (d / doseLevels[doseLevels.length-1]));
 
@@ -805,12 +793,10 @@ mol addrep top
         let patientNum = 0;
         let currentDoseIndex = 0;
 
-        // Simulate cohort by cohort
         while(currentDoseIndex < numDoseLevels) {
             let dltCount = 0;
             for (let i = 0; i < cohortSize; i++) {
                 patientNum++;
-                // Determine if a patient experiences a Dose-Limiting Toxicity (DLT)
                 const hasDLT = Math.random() < trueToxProbs[currentDoseIndex];
                 if(hasDLT) {
                     dltCount++;
@@ -819,174 +805,154 @@ mol addrep top
                     trialData.noDLT.push({x: patientNum, y: doseLevels[currentDoseIndex]});
                 }
             }
-            // 3+3 rule: if DLT rate is too high, the trial stops and MTD is the level below
-            if (dltCount / cohortSize > targetTox) {
-                break; 
-            }
-            currentDoseIndex++; // Escalate to the next dose level
+            if (dltCount / cohortSize > targetTox) break; 
+            currentDoseIndex++;
         }
 
         const toxCurve = doseLevels.map((d,i) => ({x: d, y: trueToxProbs[i] * 100}));
 
-        // Update charts with trial data
         updateScatterChart(charts.trial, [
             { label: 'No DLT', data: trialData.noDLT, backgroundColor: '#2ecc71' },
             { label: 'DLT', data: trialData.DLT, backgroundColor: '#e74c3c' }
         ]);
-        updateChart(charts.toxicity, 'True Toxicity Rate (%)', doseLevels, [toxCurve.map(p => p.y)], '#3498db');
-        charts.toxicity.data.labels = doseLevels.map(d => d.toFixed(1) + ' mg');
-        charts.toxicity.update();
+        updateChart(charts.toxicity, 'True Toxicity Rate (%)', doseLevels.map(d => d.toFixed(1) + ' mg'), [toxCurve.map(p => p.y)], '#3498db');
     }
     
-    // --- NAMD & VMD MODULE ---
+    // --- MD SIMULATION SETUP MODULE ---
 
     /**
-     * Generates NAMD configuration and helper script files based on user input.
+     * Generates generic MD simulation configuration files.
      */
-    function generateNAMDFiles() {
+    function generateMDFiles() {
         const p = {
-            out: document.getElementById('namd-out').value || 'output',
-            T: +document.getElementById('namd-temp').value || 310,
-            ns: +document.getElementById('namd-ns').value || 10,
-            cuts: (document.getElementById('namd-cuts').value || '10/12/14').split(/[\/ ,]+/).map(Number),
-            rest: document.getElementById('namd-restraints').checked
+            out: document.getElementById('md-out').value || 'output',
+            T: +document.getElementById('md-temp').value || 310,
+            ns: +document.getElementById('md-ns').value || 10,
+            cuts: (document.getElementById('md-cuts').value || '10/12/14').split(/[\/ ,]+/).map(Number),
+            rest: document.getElementById('md-restraints').checked
         };
-        const steps = Math.round((p.ns * 1e6) / 2); // ns to fs, divided by 2fs timestep
+        const steps = Math.round((p.ns * 1e6) / 2);
 
-        const common = `structure system.psf
-coordinates system.pdb
-set outname ${p.out}
-outputName $outname
-binaryoutput yes
-restartfreq 10000
-dcdfreq 5000
-DCDfile $outname.dcd
-XSTfreq 5000
-parameters system.prm
-exclude scaled1-4
-1-4scaling 1.0
-switching on
-switchdist ${p.cuts[0] || 10}
-cutoff ${p.cuts[1] || 12}
-pairlistdist ${p.cuts[2] || 14}
-PME yes
-PMEGridSpacing 1.0
-timestep 2.0
-rigidBonds all
-nonbondedFreq 1
-fullElectFrequency 2
-stepspercycle 10
-langevin on
-langevinDamping 1.0
-langevinTemp ${p.T}
-langevinHydrogen no
+        const common = `structure          system.psf
+coordinates        system.pdb
+set outputname       ${p.out}
+outputname           $outputname
+
+# Basic Simulation Parameters
+binaryoutput         yes
+parameters           system.prm
+exclude              scaled1-4
+1-4scaling           1.0
+timestep             2.0 ;# fs
+rigidBonds           all
+nonbondedFreq        1
+fullElectFrequency   2
+stepspercycle        20
+
+# Force Field Cutoffs
+switching            on
+switchdist           ${p.cuts[0] || 10}
+cutoff               ${p.cuts[1] || 12}
+pairlistdist         ${p.cuts[2] || 14}
+
+# PME for Long-Range Electrostatics
+PME                  yes
+PMEGridSpacing       1.0
+
+# Temperature Control
+langevin             on
+langevinDamping      1.0
+langevinTemp         ${p.T}
+langevinHydrogen     no
 `;
-        const eq = `${p.rest ? `consRef restraints.pdb\nconsKFile restraints.pdb\nconsKCol B\nconstraints on\nconstraintScaling 1.0\n` : ''}useGroupPressure yes\nuseFlexibleCell no\nlangevinPiston on\nlangevinPistonTarget 1.01325\nlangevinPistonPeriod 100\nlangevinPistonDecay 50\nlangevinPistonTemp ${p.T}\n# ... (further equilibration steps can be added here)\nrun 250000 ;# 0.5ns equilibration\n`;
-        const prod = `constraints off\nuseGroupPressure yes\n# ...(langevin piston settings as above)...\nrun ${steps}\n`;
+        const pressure = `
+# Pressure Control (for NPT ensemble)
+useGroupPressure      yes
+useFlexibleCell       no
+langevinPiston        on
+langevinPistonTarget  1.01325 ;# 1 atm
+langevinPistonPeriod  100
+langevinPistonDecay   50
+langevinPistonTemp    ${p.T}
+`;
+        const restraints = p.rest ? `
+# Harmonic Restraints
+constraints          on
+consRef              restraints.pdb
+consKFile            restraints.pdb
+consKCol             B
+constraintScaling    1.0
+` : `constraints off\n`;
 
-        generatedNAMDFiles = {
-            'namd_min.conf': common + `minimization 20000\n`,
-            'namd_eq.conf': common + eq,
-            'namd_prod.conf': common + prod,
-            'README.md': `# NAMD Simulation Files\n\n1. Minimize: namd2 namd_min.conf > min.log\n2. Equilibrate: namd2 namd_eq.conf > eq.log\n3. Production: namd2 namd_prod.conf > prod.log\n`
+        generatedMDFiles = {
+            'min.conf': common + `minimization         10000\n`,
+            'eq.conf': common + pressure + restraints + `run 250000 ;# 0.5 ns equilibration`,
+            'prod.conf': common + pressure + `run ${steps} ;# ${p.ns} ns production`,
+            'README.md': `# Generic MD Simulation Files\n\nThese are example configuration files for MD engines like NAMD.\n\nWorkflow:\n1. Minimize:     md-engine min.conf > min.log\n2. Equilibrate:  md-engine eq.conf > eq.log\n3. Production:   md-engine prod.conf > prod.log\n`
         };
         
         const list = document.getElementById('fileList');
         list.innerHTML = '';
-        Object.keys(generatedNAMDFiles).forEach(name => {
+        Object.keys(generatedMDFiles).forEach(name => {
             const a = document.createElement('a');
             a.textContent = `⬇ ${name}`;
-            a.href = URL.createObjectURL(new Blob([generatedNAMDFiles[name]], {type:'text/plain'}));
+            a.href = URL.createObjectURL(new Blob([generatedMDFiles[name]], {type:'text/plain'}));
             a.download = name;
-            a.className = 'nav-tab'; // Re-use style for download links
+            a.className = 'nav-tab';
             list.appendChild(a);
         });
         document.getElementById('zipBtn').disabled = false;
     }
 
-    /**
-     * Downloads all generated NAMD files as a single ZIP archive.
-     */
-    async function downloadNAMDFiles() {
-        if (!Object.keys(generatedNAMDFiles).length) return;
+    async function downloadMDFiles() {
+        if (!Object.keys(generatedMDFiles).length) return;
         const zip = new JSZip();
-        for (const [name, content] of Object.entries(generatedNAMDFiles)) {
-            zip.file(name, content);
-        }
+        for (const [name, content] of Object.entries(generatedMDFiles)) zip.file(name, content);
         const blob = await zip.generateAsync({type:'blob'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'namd_project.zip';
+        a.download = 'md_simulation_project.zip';
         a.click();
         URL.revokeObjectURL(a.href);
     }
 
-    /**
-     * Copies text from a given element ID to the clipboard.
-     * @param {string} elementId - The ID of the element containing the text.
-     */
-    function copyVMDScript(elementId) {
+    function copyMDScript(elementId) {
         const text = document.getElementById(elementId).textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            alert("VMD script copied to clipboard!");
-        }, () => {
-            alert("Failed to copy script.");
-        });
+        navigator.clipboard.writeText(text).then(() => alert("Script copied to clipboard!"), () => alert("Failed to copy script."));
     }
 
     // --- PUBLICATIONS MODULE ---
 
-    /**
-     * Submits a new publication and saves it to localStorage.
-     */
     function submitPublication() {
         const title = document.getElementById('pub-title').value.trim();
         const authors = document.getElementById('pub-authors').value.trim();
         const abstract = document.getElementById('pub-abstract').value.trim();
-
-        if (!title || !authors || !abstract) {
-            alert("Please fill in all publication fields.");
-            return;
-        }
+        if (!title || !authors || !abstract) { alert("Please fill in all publication fields."); return; }
         
         const newPub = { title, authors, abstract, date: new Date().toLocaleDateString() };
-        
         const pubs = JSON.parse(localStorage.getItem('pharmsim_pubs')) || [];
         pubs.unshift(newPub);
         localStorage.setItem('pharmsim_pubs', JSON.stringify(pubs));
-
-        renderPublication(newPub, true); // Render with prepend behavior
+        renderPublication(newPub, true);
         
-        // Clear form
         document.getElementById('pub-title').value = '';
         document.getElementById('pub-authors').value = '';
         document.getElementById('pub-abstract').value = '';
     }
 
-    /**
-     * Renders a single publication card into the list.
-     * @param {object} pub - The publication object.
-     * @param {boolean} prepend - If true, adds the card to the beginning of the list.
-     */
     function renderPublication(pub, prepend = false) {
         const list = document.getElementById('publications-list');
         const card = document.createElement('div');
-        card.className = 'publication-card chart-container'; // Reuse styles
+        card.className = 'publication-card chart-container';
         card.innerHTML = `
-            <h3 style="font-size: 1.2em; border: none;">${pub.title}</h3>
+            <h3 style="font-size: 1.2em; border: none; margin-bottom: 5px;">${pub.title}</h3>
             <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">By ${pub.authors} on ${pub.date}</p>
             <p>${pub.abstract}</p>
         `;
-        if (prepend) {
-            list.insertBefore(card, list.children[1]);
-        } else {
-            list.appendChild(card);
-        }
+        if (prepend) list.insertBefore(card, list.children[1]);
+        else list.appendChild(card);
     }
 
-    /**
-     * Loads and renders all publications from localStorage on page load.
-     */
     function loadPublications() {
         const pubs = JSON.parse(localStorage.getItem('pharmsim_pubs')) || [];
         pubs.forEach(pub => renderPublication(pub));
@@ -995,84 +961,45 @@ langevinHydrogen no
 
     // --- LEARNING CENTER MODULE ---
     
-    /**
-     * Loads tutorial content into the display area.
-     * @param {string} topic - The topic of the tutorial to load.
-     */
     function loadTutorial(topic) {
         const content = {
-            pbpk: `<h3>PBPK Basics</h3>
-                   <p>Physiologically-Based Pharmacokinetic (PBPK) models predict how a drug moves through the body over time. The one-compartment model used here is the simplest form, described by the Bateman equation. It assumes the body is a single, uniform container.</p>
-                   <p>Key parameters are <strong>Dose</strong>, <strong>Bioavailability (F)</strong> (how much drug is absorbed), <strong>Absorption Rate (ka)</strong>, and <strong>Elimination Rate (ke)</strong>.</p>`,
-            docking: `<h3>Molecular Docking Approximation</h3>
-                      <p>Docking predicts how a small molecule (ligand) binds to a large protein. True docking requires immense computational power to test trillions of possible poses.</p>
-                      <p>This tool uses a clever approximation:
-                      <ol>
-                        <li><strong>Pocket Finding:</strong> It finds the largest, most buried cavity on the protein surface, which is often the active site.</li>
-                        <li><strong>Scoring:</strong> It uses an empirical formula to estimate the binding affinity based on the ligand's size, lipophilicity (LogP), and potential for hydrogen bonds.</li>
-                      </ol>
-                      This gives a scientifically plausible estimate without needing a supercomputer.</p>`
+            pbpk: `<h3>PBPK Basics</h3><p>Physiologically-Based Pharmacokinetic (PBPK) models predict how a drug moves through the body over time. The one-compartment model used here is the simplest form, described by the Bateman equation. It assumes the body is a single, uniform container.</p><p>Key parameters are <strong>Dose</strong>, <strong>Bioavailability (F)</strong> (how much drug is absorbed), <strong>Absorption Rate (ka)</strong>, and <strong>Elimination Rate (ke)</strong>.</p>`,
+            docking: `<h3>Molecular Docking Approximation</h3><p>Docking predicts how a small molecule (ligand) binds to a large protein. True docking requires immense computational power to test trillions of possible poses.</p><p>This tool uses a clever approximation: <ol><li><strong>Pocket Finding:</strong> It finds the largest, most buried cavity on the protein surface, which is often the active site.</li><li><strong>Scoring:</strong> It uses an empirical formula to estimate the binding affinity based on the ligand's size, lipophilicity (LogP), and potential for hydrogen bonds.</li></ol> This gives a scientifically plausible estimate without needing a supercomputer.</p>`,
+            md_setup: `<h3>MD Simulation Setup</h3><p>Molecular Dynamics (MD) simulations model the movement of atoms in a system over time. This requires complex setup files.</p><p>This tool generates generic configuration files for MD engines like NAMD or GROMACS. You can adjust parameters like <strong>Temperature</strong> and <strong>Simulation Time</strong>, and the generator will create the necessary text files for minimization, equilibration, and production runs.</p>`
         };
         document.getElementById('tutorial-display').innerHTML = content[topic] || "<p>Select a topic to begin.</p>";
     }
 
     // --- CHARTING UTILITIES ---
     
-    /**
-     * Creates a new Chart.js instance or destroys the old one.
-     * @param {string} id - The canvas element ID.
-     * @param {string} type - The chart type (e.g., 'line', 'scatter').
-     * @returns {Chart} The new Chart.js instance.
-     */
     function createChart(id, type) {
         const ctx = document.getElementById(id);
         if (!ctx) return null;
-        if (charts[id]) charts[id].destroy(); // Clear previous chart if it exists
-        return new Chart(ctx, { 
-            type, 
-            data: { labels: [], datasets: [] }, 
-            options: { responsive: true, maintainAspectRatio: false } 
-        });
+        if (charts[id]) charts[id].destroy();
+        return new Chart(ctx, { type, data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
     }
     
-    /**
-     * Updates a line or bar chart with new data.
-     * @param {Chart} chart - The Chart.js instance.
-     * @param {string} label - The label for the dataset.
-     * @param {Array} labels - The x-axis labels.
-     * @param {Array<Array>} dataArrays - An array of data arrays for the datasets.
-     * @param {string} color - The border/background color for the chart.
-     */
     function updateChart(chart, label, labels, dataArrays, color = '#2a5298') {
         if (!chart) return;
         chart.data.labels = labels;
         chart.data.datasets = dataArrays.map((data, index) => ({
             label: `${label} ${dataArrays.length > 1 ? index + 1 : ''}`,
-            data: data,
-            borderColor: color,
-            backgroundColor: color.replace(')', ', 0.5)').replace('rgb', 'rgba'),
-            tension: 0.4,
+            data, borderColor: color,
+            backgroundColor: color.replace(')', ', 0.5)').replace('rgb', 'rgba'), tension: 0.4,
         }));
         chart.update();
     }
     
-    /**
-     * Updates a scatter chart with new datasets.
-     * @param {Chart} chart - The Chart.js instance.
-     * @param {Array<object>} datasetsConfig - Configuration objects for the datasets.
-     */
     function updateScatterChart(chart, datasetsConfig) {
         if (!chart) return;
         chart.data.datasets = datasetsConfig.map(ds => ({
-            label: ds.label,
-            data: ds.data,
-            backgroundColor: ds.backgroundColor,
-            type: 'scatter',
+            label: ds.label, data: ds.data,
+            backgroundColor: ds.backgroundColor, type: 'scatter',
         }));
         chart.update();
     }
-
     </script>
 </body>
 </html>
+
 
