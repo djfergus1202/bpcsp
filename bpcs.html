@@ -588,7 +588,6 @@ mol addrep top
         document.querySelectorAll('.module-section').forEach(section => section.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
         
-        // Use a consistent ID naming scheme
         const sectionId = `${module}-module`;
         const activeSection = document.getElementById(sectionId);
         if (activeSection) activeSection.classList.add('active');
@@ -616,26 +615,20 @@ mol addrep top
         }
 
         showLoading("Analyzing molecules and approximating docking...");
-        await new Promise(resolve => setTimeout(resolve, 50)); // Allow UI to update
+        await new Promise(resolve => setTimeout(resolve, 50));
 
         try {
-            // Step 1: Process ligand SMILES using RDKit
             const ligand = processLigand(smiles);
             if (!ligand) throw new Error("Invalid SMILES string. Could not generate molecule.");
             
-            // Update UI with calculated properties
             document.getElementById('ligand-mw').textContent = ligand.mw.toFixed(2);
             document.getElementById('ligand-logp').textContent = ligand.logp.toFixed(2);
 
-            // Step 2: Read PDB file and find binding pocket
             const pdbData = await pdbFile.text();
             const protein = await findBindingPocket(pdbData);
-
-            // Step 3: Calculate the estimated binding score
             const score = calculateBindingEnthalpy(protein, ligand);
             document.getElementById('binding-affinity').textContent = `${score.toFixed(2)} kcal/mol`;
 
-            // Step 4: Display the final docked pose
             displayResults(pdbData, ligand.molblock, protein.pocketResidues);
 
         } catch (error) {
@@ -659,31 +652,38 @@ mol addrep top
 
             mol.add_hs();
             
-            // Correct RDKit.js function for embedding a molecule in 3D
-            const embedParams = JSON.stringify({"useRandomCoords": true, "maxAttempts": 1000});
-            const embedResult = rdkit.EmbedMolecule(mol, embedParams);
+            // CORRECTED RDKit.js function for embedding a molecule in 3D
+            const embedParams = JSON.stringify({ "useRandomCoords": true, "maxAttempts": 1000 });
+            let embedResult = rdkit.EmbedMolecule(mol, embedParams);
+            
             if (embedResult < 0) {
                  console.warn("3D conformer generation failed, using unoptimized structure.");
+                 // Even if embedding fails, we can proceed with a 2D-like structure for property calculation
             }
-            rdkit.UFFOptimizeMolecule(mol); // Optimize the 3D structure
+            // Always try to optimize, it might fix a bad conformation
+            rdkit.UFFOptimizeMolecule(mol);
 
             const details = JSON.parse(mol.get_descriptors());
 
+            const molblock = mol.get_molblock();
+            mol.delete(); // CRITICAL: clean up C++ memory to prevent leaks
+
             return {
-                mol,
-                molblock: mol.get_molblock(),
+                molblock, // Return the text representation, not the deleted C++ object
                 mw: details.exactmw,
                 logp: details.MolLogP,
                 hDonors: details.NumHDonors,
                 hAcceptors: details.NumHAcceptors,
-                numRotatableBonds: details.NumRotatableBonds
+                numRotatableBonds: details.NumRotatableBonds,
+                numHeavyAtoms: details.NumHeavyAtoms
             };
         } catch (e) {
             console.error("RDKit processing error:", e);
-            if (mol) mol.delete(); // Clean up memory
+            if (mol) mol.delete();
             return null;
         }
     }
+
 
     /**
      * A geometric algorithm to find the most likely binding pocket on a protein surface.
@@ -727,29 +727,24 @@ mol addrep top
      * @returns {number} The estimated binding enthalpy in kcal/mol.
      */
     function calculateBindingEnthalpy(protein, ligand) {
-        // This is a simplified, empirical linear free energy model
-        // ΔG = c0 + c_vdw*N_heavy + c_hbond*N_hbond + c_hydrophobic*LogP + c_rot*N_rot
         const C = {
-            INTERCEPT: -1.5,      // Base affinity
-            VDW_PER_ATOM: -0.03,  // Favorable contribution per heavy atom
-            HBOND: -0.8,          // Favorable contribution per H-bond
-            HYDROPHOBIC: -0.2,    // Favorable contribution for lipophilicity
-            ROT_PENALTY: 0.3      // Unfavorable penalty for each rotatable bond
+            INTERCEPT: -1.5,
+            VDW_PER_ATOM: -0.035,
+            HBOND: -0.7,
+            HYDROPHOBIC: -0.25,
+            ROT_PENALTY: 0.3
         };
 
-        const numHeavyAtoms = ligand.mol.get_n_heavy_atoms();
-        const hBondTerm = Math.min(ligand.hDonors, ligand.hAcceptors); // A simple proxy
+        const hBondTerm = Math.min(ligand.hDonors, ligand.hAcceptors);
 
         let score = C.INTERCEPT;
-        score += C.VDW_PER_ATOM * numHeavyAtoms;
+        score += C.VDW_PER_ATOM * ligand.numHeavyAtoms;
         score += C.HBOND * hBondTerm;
         score += C.HYDROPHOBIC * ligand.logp;
         score += C.ROT_PENALTY * ligand.numRotatableBonds;
         
-        // Add a small random factor to simulate the inherent noise in real-world measurements/simulations
         score += (Math.random() - 0.5) * 0.5;
 
-        // Clamp the score to a realistic range for drug-like molecules
         return Math.max(-12.0, Math.min(-4.0, score));
     }
 
@@ -780,9 +775,6 @@ mol addrep top
 
     // --- PBPK/QSP MODULE ---
     
-    /**
-     * Runs a one-compartment pharmacokinetic simulation based on user inputs.
-     */
     function runPBPKSimulation() {
         const D = parseFloat(document.getElementById('dose').value) || 100;
         const F = (parseFloat(document.getElementById('bioavailability').value) || 80) / 100;
@@ -811,9 +803,6 @@ mol addrep top
 
     // --- CLINICAL TRIAL MODULE ---
 
-    /**
-     * Runs a simplified 3+3 dose escalation trial simulation.
-     */
     function runTrialSimulation() {
         const numDoseLevels = parseInt(document.getElementById('dose-levels').value) || 6;
         const cohortSize = parseInt(document.getElementById('cohort-size').value) || 3;
@@ -854,9 +843,6 @@ mol addrep top
     
     // --- MD SIMULATION SETUP MODULE ---
 
-    /**
-     * Generates generic MD simulation configuration files.
-     */
     function generateMDFiles() {
         const p = {
             out: document.getElementById('md-out').value || 'output',
@@ -867,62 +853,15 @@ mol addrep top
         };
         const steps = Math.round((p.ns * 1e6) / 2);
 
-        const common = `structure          system.psf
-coordinates        system.pdb
-set outputname       ${p.out}
-outputname           $outputname
-
-# Basic Simulation Parameters
-binaryoutput         yes
-parameters           system.prm
-exclude              scaled1-4
-1-4scaling           1.0
-timestep             2.0 ;# fs
-rigidBonds           all
-nonbondedFreq        1
-fullElectFrequency   2
-stepspercycle        20
-
-# Force Field Cutoffs
-switching            on
-switchdist           ${p.cuts[0] || 10}
-cutoff               ${p.cuts[1] || 12}
-pairlistdist         ${p.cuts[2] || 14}
-
-# PME for Long-Range Electrostatics
-PME                  yes
-PMEGridSpacing       1.0
-
-# Temperature Control
-langevin             on
-langevinDamping      1.0
-langevinTemp         ${p.T}
-langevinHydrogen     no
-`;
-        const pressure = `
-# Pressure Control (for NPT ensemble)
-useGroupPressure      yes
-useFlexibleCell       no
-langevinPiston        on
-langevinPistonTarget  1.01325 ;# 1 atm
-langevinPistonPeriod  100
-langevinPistonDecay   50
-langevinPistonTemp    ${p.T}
-`;
-        const restraints = p.rest ? `
-# Harmonic Restraints
-constraints          on
-consRef              restraints.pdb
-consKFile            restraints.pdb
-consKCol             B
-constraintScaling    1.0
-` : `constraints off\n`;
+        const common = `structure          system.psf\ncoordinates        system.pdb\nset outputname       ${p.out}\noutputname           $outputname\n\nbinaryoutput         yes\nparameters           system.prm\nexclude              scaled1-4\n1-4scaling           1.0\ntimestep             2.0 ;# fs\nrigidBonds           all\nnonbondedFreq        1\nfullElectFrequency   2\nstepspercycle        20\n\nswitching            on\nswitchdist           ${p.cuts[0] || 10}\ncutoff               ${p.cuts[1] || 12}\npairlistdist         ${p.cuts[2] || 14}\n\nPME                  yes\nPMEGridSpacing       1.0\n\nlangevin             on\nlangevinDamping      1.0\nlangevinTemp         ${p.T}\nlangevinHydrogen     no\n`;
+        const pressure = `\nuseGroupPressure      yes\nuseFlexibleCell       no\nlangevinPiston        on\nlangevinPistonTarget  1.01325 ;# 1 atm\nlangevinPistonPeriod  100\nlangevinPistonDecay   50\nlangevinPistonTemp    ${p.T}\n`;
+        const restraints = p.rest ? `\nconstraints          on\nconsRef              restraints.pdb\nconsKFile            restraints.pdb\nconsKCol             B\nconstraintScaling    1.0\n` : `constraints off\n`;
 
         generatedMDFiles = {
             'min.conf': common + `minimization         10000\n`,
             'eq.conf': common + pressure + restraints + `run 250000 ;# 0.5 ns equilibration`,
             'prod.conf': common + pressure + `run ${steps} ;# ${p.ns} ns production`,
-            'README.md': `# Generic MD Simulation Files\n\nThese are example configuration files for MD engines like NAMD.\n\nWorkflow:\n1. Minimize:     md-engine min.conf > min.log\n2. Equilibrate:  md-engine eq.conf > eq.log\n3. Production:   md-engine prod.conf > prod.log\n`
+            'README.md': `# Generic MD Simulation Files\n\nWorkflow:\n1. Minimize:     md-engine min.conf > min.log\n2. Equilibrate:  md-engine eq.conf > eq.log\n3. Production:   md-engine prod.conf > prod.log\n`
         };
         
         const list = document.getElementById('fileList');
