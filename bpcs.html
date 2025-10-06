@@ -60,7 +60,6 @@
       <button class="tab" data-t="clinical">Clinical</button>
       <button class="tab active" data-t="md">Docking</button>
       <button class="tab" data-t="mdsetup">MD Setup</button>
-      <button class="tab" data-t="namd">NAMD & VMD</button>
       <button class="tab" data-t="pub">Publications</button>
       <button class="tab" data-t="learn">Learning</button>
     </div>
@@ -164,94 +163,73 @@
     </div>
   </section>
 
-  <!-- MD Setup (generic text files) -->
-  <section id="mdsetup" class="section">
-    <div class="grid">
-      <div class="panel">
-        <h3>MD Simulation File Generator</h3>
-        <label>Output Prefix</label><input id="md-out" value="output"/>
-        <div class="row">
-          <div class="col"><label>Temperature (K)</label><input id="md-temp" type="number" value="310"/></div>
-          <div class="col"><label>Production Time (ns)</label><input id="md-ns" type="number" value="10"/></div>
-        </div>
-        <div class="row">
-          <div class="col"><label>switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14"/></div>
-          <div class="col" style="display:flex;align-items:flex-end"><label style="width:100%"><input type="checkbox" id="md-restraints" checked/> Use Restraints</label></div>
-        </div>
-        <div class="row"><button onclick="generateMDFiles()">Generate Files</button><button id="zipBtn" disabled>Download ZIP</button></div>
-        <div id="fileList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+  <!-- MD Setup (generic text files + restraints generator) -->
+<section id="mdsetup" class="section">
+  <div class="grid">
+    <div class="panel">
+      <h3>MD Simulation File Generator</h3>
+      <label>Output Prefix</label><input id="md-out" value="output"/>
+      <div class="row">
+        <div class="col"><label>Temperature (K)</label><input id="md-temp" type="number" value="310"/></div>
+        <div class="col"><label>Production Time (ns)</label><input id="md-ns" type="number" value="10"/></div>
       </div>
-      <div class="panel">
-        <h3>Visualization & Analysis Scripts (Tcl)</h3>
-        <div>
-          <strong>1) Prepare restraints.pdb (B as k)</strong>
-          <pre class="mono" id="script_restraints">set sel [atomselect top "all"]
+      <div class="row">
+        <div class="col"><label>switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14"/></div>
+        <div class="col" style="display:flex;align-items:flex-end"><label style="width:100%"><input type="checkbox" id="md-restraints" checked/> Use Restraints</label></div>
+      </div>
+      <div class="row"><button onclick="generateMDFiles()">Generate Files</button><button id="zipBtn" disabled>Download ZIP</button></div>
+      <div id="fileList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="panel">
+      <h3>Restraints PDB Builder (in‑browser)</h3>
+      <p class="hint">Upload a PDB; backbone atoms (N, CA, C, O) get B‑factor = 2.0, others = 0.0. Download the modified file as <em>restraints.pdb</em>.</p>
+      <div class="row">
+        <div class="col"><label>Source PDB</label><input type="file" id="md-pdb" accept=".pdb"/></div>
+        <div class="col" style="display:flex;align-items:end"><button id="buildRestraints" style="width:100%">Generate restraints.pdb</button></div>
+      </div>
+      <div id="restraintsStatus" class="hint" style="margin-top:8px"></div>
+    </div>
+  </div>
+  <div class="grid" style="margin-top:18px">
+    <div class="panel">
+      <h3>Backbone Restraints Script</h3>
+      <p class="hint">Sets B-factor to 0 for all atoms, then 2.0 for protein backbone. Save as a script and run in your preferred visualization tool.</p>
+      <pre class="mono" id="script_restraints"># Select all atoms and zero B-factor
+set sel [atomselect top "all"]
 $sel set beta 0.0
-set bb [atomselect top "protein and name N CA C O"]
-$bb set beta 2.0
-$sel writepdb restraints.pdb</pre>
-          <button style="width:auto;margin-top:6px" onclick="copyText('script_restraints')">Copy restraints.tcl</button>
-        </div>
-        <div style="margin-top:16px">
-          <strong>2) Quick cartoon+ligand</strong>
-          <pre class="mono" id="script_cartoon">mol new system.pdb
-mol delrep 0 top
-mol representation NewCartoon 0.3 10 4 0
-mol color Structure
-mol selection {protein}
-mol addrep top
-# ligand example:
-# mol modstyle 0 1 Licorice 0.3 12 12</pre>
-          <button style="width:auto;margin-top:6px" onclick="copyText('script_cartoon')">Copy cartoon.tcl</button>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- NAMD presets -->
-  <section id="namd" class="section">
-    <div class="grid">
-      <div class="panel">
-        <h3>NAMD Config Generator</h3>
-        <div class="row">
-          <div class="col"><label>Output prefix</label><input id="out" value="output"/></div>
-          <div class="col"><label>T (K)</label><input id="temp" type="number" value="310"/></div>
-          <div class="col"><label>PME spacing</label><input id="pme" type="number" value="1.0" step="0.1"/></div>
-        </div>
-        <div class="row">
-          <div class="col"><label>switch/cut/pair (Å)</label><input id="cuts" value="10/12/14"/></div>
-          <div class="col"><label>Prod (ns)</label><input id="ns" type="number" value="10"/></div>
-          <div class="col"><label><input type="checkbox" id="restraints" checked/> Restraints</label></div>
-        </div>
-        <div class="row"><button onclick="genNAMD()">Generate Files</button><button id="zipBtnNAMD" disabled>Download ZIP</button></div>
-        <div id="fileListNAMD" class="row" style="margin-top:10px;flex-direction:column;gap:8px"></div>
-      </div>
-      <div class="panel">
-        <h3>VMD Helper Scripts</h3>
-        <p style="margin:0 0 8px">Copy/paste into <span class="mono">VMD → Tk Console</span> or save as <span class="mono">.tcl</span>.</p>
-        <div>
-          <strong>1) Build restraints.pdb (B‑factor = k)</strong>
-          <pre class="mono" id="vmd_restraints">set a [atomselect top "all"]
-$a set beta 0.0
+# Protein backbone
 set bb [atomselect top "protein and name N CA C O"]
 $bb set beta 2.0
-$a writepdb restraints.pdb</pre>
-        </div>
-        <div>
-          <strong>2) Quick cartoon+ligand view</strong>
-          <pre class="mono" id="vmd_cartoon">mol new system.pdb
+
+# Write out modified PDB
+$sel writepdb restraints.pdb</pre>
+      <button class="tab" style="width:auto;margin-top:6px" onclick="copyText('script_restraints')">Copy Script</button>
+    </div>
+    <div class="panel">
+      <h3>Quick Cartoon + Ligand View</h3>
+      <p class="hint">Creates a publication-style cartoon for protein and licorice for ligand.</p>
+      <pre class="mono" id="script_cartoon"># Load topology/coords
+mol new system.psf
+mol addfile system.pdb
+
+# Clean default rep
 mol delrep 0 top
-mol representation NewCartoon 0.3 10 4 0
+
+# Protein cartoon
+mol representation NewCartoon 0.3 10.0 4.0 0
 mol color Structure
 mol selection {protein}
 mol addrep top
-# If you have ligand.sdf loaded as another mol:
-# mol modstyle 0 1 Licorice 0.3 12 12</pre>
-        </div>
-        <div class="row"><button onclick="copyText('vmd_restraints')">Copy restraints.tcl</button><button onclick="copyText('vmd_cartoon')">Copy cartoon.tcl</button></div>
-      </div>
+
+# Optional: ligand sticks
+# mol selection {resname LIG}
+# mol representation Licorice 0.3 12.0 12.0
+# mol addrep top</pre>
+      <button class="tab" style="width:auto;margin-top:6px" onclick="copyText('script_cartoon')">Copy Script</button>
     </div>
-  </section>
+  </div>
+</section>
 
   <!-- Publications -->
   <section id="pub" class="section">
@@ -280,7 +258,7 @@ mol addrep top
 <script>
 // ------- Navigation -------
 const tabs=[...document.querySelectorAll('.tab')];
-const sections={pbpk:document.getElementById('pbpk'),clinical:document.getElementById('clinical'),md:document.getElementById('md'),mdsetup:document.getElementById('mdsetup'),namd:document.getElementById('namd'),pub:document.getElementById('pub'),learn:document.getElementById('learn')};
+const sections={pbpk:document.getElementById('pbpk'),clinical:document.getElementById('clinical'),md:document.getElementById('md'),mdsetup:document.getElementById('mdsetup'),pub:document.getElementById('pub'),learn:document.getElementById('learn')};
 function activate(t){tabs.forEach(x=>x.classList.toggle('active',x.dataset.t===t));Object.entries(sections).forEach(([k,s])=>s.classList.toggle('active',k===t))}
 tabs.forEach(t=>t.addEventListener('click',()=>activate(t.dataset.t)));
 
@@ -420,7 +398,7 @@ function appendLog({protein,smiles,score,mw,logp}){
   tr.innerHTML=`<td>${row.ts.toLocaleString()}</td><td>${escapeHtml(row.protein)}</td><td style="word-break:break-all">${escapeHtml(row.smiles)}</td><td>${row.score}</td><td>${row.mw}</td><td>${row.logp}</td>`;
   document.getElementById('logBody').prepend(tr);
 }
-function escapeHtml(s){return String(s).replace(/[&<>"]g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]))}
+function escapeHtml(s){return String(s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]))}
 function exportCSV(){
   if(!logStore.length){alert('Log is empty. Run a docking first.');return}
   const header=['Timestamp','Protein','SMILES','DeltaG_kcal_per_mol','MW','LogP'];
@@ -450,45 +428,110 @@ savePosesBtn.addEventListener('click',()=>{ if(!lastDockPDBQT) return; const a=d
 
 // ------- MD Setup (generic) -------
 let generatedMDFiles={};
-function parseCuts(v){const n=(v||'10/12/14').split(/[\/ ,]+/).map(Number); return{sw:n[0]||10,co:n[1]||12,pl:n[2]||14}}
-function steps(ns,dt){return Math.round((ns*1e6)/(dt||2))}
 function generateMDFiles(){
   const p={out:document.getElementById('md-out').value||'output', T:+document.getElementById('md-temp').value||310, ns:+document.getElementById('md-ns').value||10, cuts:(document.getElementById('md-cuts').value||'10/12/14').split(/[\/ ,]+/).map(Number), rest: document.getElementById('md-restraints').checked};
-  const common=`structure system.psf\ncoordinates system.pdb\nset outputname ${p.out}\noutputname $outputname\n\nbinaryoutput yes\nparameters system.prm\nexclude scaled1-4\n1-4scaling 1.0\ntimestep 2.0\nrigidBonds all\nnonbondedFreq 1\nfullElectFrequency 2\nstepspercycle 20\n\nswitching on\nswitchdist ${p.cuts[0]||10}\ncutoff ${p.cuts[1]||12}\npairlistdist ${p.cuts[2]||14}\n\nPME yes\nPMEGridSpacing 1.0\n\nlangevin on\nlangevinDamping 1.0\nlangevinTemp ${p.T}\nlangevinHydrogen no\n`;
-  const pressure=`\nuseGroupPressure yes\nuseFlexibleCell no\nlangevinPiston on\nlangevinPistonTarget 1.01325\nlangevinPistonPeriod 100\nlangevinPistonDecay 50\nlangevinPistonTemp ${p.T}\n`;
-  const restraints=p.rest?`\nconstraints on\nconsRef restraints.pdb\nconsKFile restraints.pdb\nconsKCol B\nconstraintScaling 1.0\n`:`constraints off\n`;
+  const common=`structure system.psf
+coordinates system.pdb
+set outputname ${p.out}
+outputname $outputname
+
+binaryoutput yes
+parameters system.prm
+exclude scaled1-4
+1-4scaling 1.0
+timestep 2.0
+rigidBonds all
+nonbondedFreq 1
+fullElectFrequency 2
+stepspercycle 20
+
+switching on
+switchdist ${p.cuts[0]||10}
+cutoff ${p.cuts[1]||12}
+pairlistdist ${p.cuts[2]||14}
+
+PME yes
+PMEGridSpacing 1.0
+
+langevin on
+langevinDamping 1.0
+langevinTemp ${p.T}
+langevinHydrogen no
+`;
+  const pressure=`
+useGroupPressure yes
+useFlexibleCell no
+langevinPiston on
+langevinPistonTarget 1.01325
+langevinPistonPeriod 100
+langevinPistonDecay 50
+langevinPistonTemp ${p.T}
+`;
+  const restraints=p.rest?`
+constraints on
+consRef restraints.pdb
+consKFile restraints.pdb
+consKCol B
+constraintScaling 1.0
+`:`constraints off
+`;
   const stepsRun=Math.round((p.ns*1e6)/2);
   generatedMDFiles={
-    'min.conf': common+`minimization 10000\n`,
-    'eq.conf': common+pressure+restraints+`run 250000\n`,
-    'prod.conf': common+pressure+`run ${stepsRun}\n`,
-    'README.md': `# Generic MD Simulation Files\n\n1) md-engine min.conf > min.log\n2) md-engine eq.conf  > eq.log\n3) md-engine prod.conf > prod.log\n`
+    'min.conf': common+`minimization 10000
+`,
+    'eq.conf': common+pressure+restraints+`run 250000
+`,
+    'prod.conf': common+pressure+`run ${stepsRun}
+`,
+    'README.md': `# Generic MD Simulation Files
+
+1) md-engine min.conf > min.log
+2) md-engine eq.conf  > eq.log
+3) md-engine prod.conf > prod.log
+`
   };
   const list=document.getElementById('fileList'); list.innerHTML=''; Object.keys(generatedMDFiles).forEach(name=>{const a=document.createElement('a'); a.textContent=`⬇ ${name}`; a.href=URL.createObjectURL(new Blob([generatedMDFiles[name]],{type:'text/plain'})); a.download=name; a.className='tab'; list.appendChild(a)});
   document.getElementById('zipBtn').disabled=false;
 }
 
-document.getElementById('zipBtn').addEventListener('click',async()=>{ if(!Object.keys(generatedMDFiles).length) return; const zip=new JSZip(); for(const[k,v]of Object.entries(generatedMDFiles)) zip.file(k,v); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click() })
+document.getElementById('zipBtn').addEventListener('click', async ()=>{
+  if (!Object.keys(generatedMDFiles).length) return;
+  const zip = new JSZip();
+  for (const [k,v] of Object.entries(generatedMDFiles)) zip.file(k, v);
+  const blob = await zip.generateAsync({type:'blob'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'md_simulation_project.zip';
+  a.click();
+}); zip.file(k,v); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click() })('click',async()=>{ if(!Object.keys(generatedMDFiles).length) return; const zip=new JSZip(); for(const[k,v]of Object.entries(generatedMDFiles)) zip.file(k,v); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click() })
 
-// ------- NAMD preset generator (kept) -------
-let gen={};
-function common(p){return `structure system.psf\ncoordinates system.pdb\nset outname ${p.out}\noutputName $outname\nbinaryoutput yes\nrestartfreq 10000\ndcdfreq 5000\nDCDfile $outname.dcd\nXSTfreq 5000\nparameters system.prm\nexclude scaled1-4\n1-4scaling 1.0\nswitching on\nswitchdist ${p.sw}\ncutoff ${p.co}\npairlistdist ${p.pl}\nPME yes\nPMEGridSpacing ${p.pme}\ntimestep 2.0\nrigidBonds all\nnonbondedFreq 1\nfullElectFrequency 2\nstepspercycle 10\nlangevin on\nlangevinDamping 1.0\nlangevinTemp ${p.T}\nlangevinHydrogen no\n`}
-function eqBlock(p){return `${p.rest?`consRef restraints.pdb\nconsKFile restraints.pdb\nconsKCol B\nconstraints on\nconstraintScaling 1.0\n`:''}useGroupPressure yes\nuseFlexibleCell no\nlangevinPiston on\nlangevinPistonTarget 1.01325\nlangevinPistonPeriod 100\nlangevinPistonDecay 50\nlangevinPistonTemp ${p.T}\nbinCoordinates min.coor\nbinVelocities min.vel\nextendedSystem min.xsc\nset n 5\nset blk 50000\nfor {set i 1} {$i <= $n} {incr i} { constraintScaling [expr 1.0-0.2*($i-1)] ; run $blk }\nconstraints off\nrun 250000\n`}
-function prodBlock(p){return `constraints off\nuseGroupPressure yes\nuseFlexibleCell no\nlangevinPiston on\nlangevinPistonTarget 1.01325\nlangevinPistonPeriod 100\nlangevinPistonDecay 50\nlangevinPistonTemp ${p.T}\nbinCoordinates eq.coor\nbinVelocities eq.vel\nextendedSystem eq.xsc\ndcdfreq 2500\noutputEnergies 1000\noutputTiming 1000\nrestartfreq 10000\nrun ${steps(p.ns,2)}\n`}
-function genNAMD(){
-  const c=parseCuts(document.getElementById('cuts').value);
-  const p={out:document.getElementById('out').value||'output',T:+document.getElementById('temp').value||310,pme:+document.getElementById('pme').value||1.0,sw:c.sw,co:c.co,pl:c.pl,ns:+document.getElementById('ns').value||10,rest:document.getElementById('restraints').checked};
-  gen={
-    'namd_min.conf': common(p)+`minimization 20000\noutputName min\nDCDfile min.dcd\ndcdfreq 0\noutputEnergies 200\n` ,
-    'namd_eq.conf': common(p)+eqBlock(p),
-    'namd_prod.conf': common(p)+prodBlock(p),
-    'run_slurm.sh': `#!/usr/bin/env bash\n#SBATCH -J namd\n#SBATCH -N 1\n#SBATCH -n 8\n#SBATCH --gres=gpu:1\n#SBATCH -t 24:00:00\nmodule load namd/2.14-cuda\nsrun namd2 +p$SLURM_NTASKS namd_prod.conf > prod.log\n`,
-    'run_pbs.sh': `#!/usr/bin/env bash\n#PBS -N namd\n#PBS -l select=1:ncpus=8:ngpus=1:mem=32gb\n#PBS -l walltime=24:00:00\ncd "$PBS_O_WORKDIR"\nmodule load namd/2.14-cuda\nmpirun -np 8 namd2 namd_prod.conf > prod.log\n`,
-    'README.md': `# Run\nnamd2 +p8 namd_min.conf > min.log\nnamd2 +p8 namd_eq.conf  > eq.log\nnamd2 +p8 namd_prod.conf > prod.log\n\nRestraints use B-factor from restraints.pdb (see VMD script).`};
-  const list=document.getElementById('fileListNAMD'); list.innerHTML=''; Object.keys(gen).forEach(name=>{const a=document.createElement('a'); a.textContent=`⬇ ${name}`; a.href=URL.createObjectURL(new Blob([gen[name]],{type:'text/plain'})); a.download=name; a.className='tab'; list.appendChild(a)});
-  document.getElementById('zipBtnNAMD').disabled=false;
+// ------- Restraints PDB Builder -------
+function padRight(str,len){str=String(str);return str+" ".repeat(Math.max(0,len-str.length))}
+function formatFloat(num,width,dec){return (num>=0?" ":"-")+Math.abs(num).toFixed(dec).padStart(width-1,' ')}
+function buildRestraintsPDB(text){
+  const lines=text.split(/\r?\n/); const out=[]; const bbNames=new Set(['N','CA','C','O']);
+  for(const line of lines){
+    if(line.startsWith('ATOM')||line.startsWith('HETATM')){
+      const name=line.slice(12,16).trim();
+      // base line padded to 80 chars
+      let base=line.padEnd(80,' ');
+      const beta=bbNames.has(name)?2.0:0.0;
+      // Beta factor columns 61-66 (1-indexed) => slice(60,66)
+      base=base.slice(0,60)+formatFloat(beta,6,2)+base.slice(66);
+      out.push(base);
+    }else{ out.push(line) }
+  }
+  return out.join('\n')+"\n";
 }
-document.getElementById('zipBtnNAMD').addEventListener('click',async()=>{if(!Object.keys(gen).length)return; const zip=new JSZip(); for(const[k,v]of Object.entries(gen))zip.file(k,v); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='namd_project.zip'; a.click()})
+
+document.getElementById('buildRestraints').addEventListener('click',async()=>{
+  const f=document.getElementById('md-pdb').files[0]; if(!f){alert('Select a PDB file first.');return}
+  const txt=await f.text(); const res=buildRestraintsPDB(txt);
+  // Make a download link and add to generated files for convenience
+  const blob=new Blob([res],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='restraints.pdb'; a.textContent='⬇ Download restraints.pdb'; a.className='tab';
+  const status=document.getElementById('restraintsStatus'); status.innerHTML=''; status.append(a);
+  generatedMDFiles['restraints.pdb']=res;
+});
 
 // ------- Publications -------
 function renderPub(p,prepend=false){const card=document.createElement('div'); card.className='pub-card'; card.innerHTML=`<h4 style="margin:0 0 6px">${escapeHtml(p.title)}</h4><div style="color:#566">By ${escapeHtml(p.authors)} on ${p.date}</div><p style="margin:8px 0 0">${escapeHtml(p.abstract)}</p>`; const list=document.getElementById('pub-list'); prepend?list.prepend(card):list.append(card)}
@@ -500,13 +543,13 @@ function loadPubs(){(JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]')).fo
 function loadTutorial(which){ const box=document.getElementById('tutorialBox'); const map={
   pbpk:`<h4>PBPK Basics</h4><p>One‑compartment oral model using Bateman equation. Tune Dose, F, ka, ke, Vd then simulate.</p>`,
   docking:`<h4>Docking Approximation</h4><ol><li>Pocket: largest buried region via residue neighborhood.</li><li>Score: empirical ΔG using size, logP, H‑bonding, rotors.</li></ol>`,
-  md:`<h4>MD Setup</h4><p>Generator creates text configs for minimization → equilibration → production with optional restraints.</p>`
+  md:`<h4>MD Setup</h4><p>Generator creates text configs for minimization → equilibration → production with optional restraints. Use the in‑browser builder to create a matching <code>restraints.pdb</code>.</p>`
 }; box.innerHTML=map[which]||'<p>Select a topic above.</p>' }
 
 // ------- Shared helpers -------
 function parseCuts(v){const n=(v||'10/12/14').split(/[\/ ,]+/).map(Number); return{sw:n[0]||10,co:n[1]||12,pl:n[2]||14}}
 function steps(ns,dt){return Math.round((ns*1e6)/(dt||2))}
-function copyText(id){navigator.clipboard.writeText(document.getElementById(id).textContent)}
+function copyText(id){ navigator.clipboard.writeText(document.getElementById(id).textContent) }
 
 // ------- Boot -------
 buildCharts(); activate('md'); loadPubs();
