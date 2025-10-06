@@ -1,558 +1,783 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PharmaSim Pro · Full Integrated Suite (Stable In‑Browser)</title>
-<style>
-  *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);color:#0b1630}
-  header{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.08);z-index:10}
-  .nav{max-width:1400px;margin:0 auto;padding:14px 18px;display:flex;gap:10px;align-items:center;justify-content:space-between}
-  .tabs{display:flex;flex-wrap:wrap;gap:8px}
-  .tab{padding:8px 14px;border:2px solid #2a5298;border-radius:18px;background:#fff;color:#2a5298;font-weight:700;cursor:pointer}
-  .tab.active{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;border-color:transparent}
-  .container{max-width:1400px;margin:22px auto;padding:0 16px}
-  .grid{display:grid;grid-template-columns:360px 1fr;gap:22px}
-  .panel{background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.12);padding:18px}
-  label{display:block;font-size:13px;color:#334;margin:6px 0 4px}
-  input,textarea,select{width:100%;padding:10px 12px;border:2px solid #e0e6ed;border-radius:10px;background:#f8f9fa}
-  input:focus,textarea:focus,select:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
-  button{padding:10px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;cursor:pointer}
-  button:disabled{opacity:.6;cursor:not-allowed}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .col{flex:1 1 160px}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;overflow:auto;background:#0a142b;color:#e6edf3;border-radius:10px;border:1px solid rgba(255,255,255,.15);padding:10px;font-size:12.5px}
-  .section{display:none}
-  .section.active{display:block}
-  #viewer{width:100%;min-height:420px;border-radius:10px;background:#eef2f7}
-  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-  .metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:12px;text-align:center;padding:12px}
-  .metric .v{font-size:1.4em;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .testbox{margin-top:14px;padding:10px;border:1px dashed #2a5298;border-radius:10px;background:rgba(255,255,255,.7)}
-  .hint{font-size:12px;color:#476}
-  .disclaimer{background:linear-gradient(135deg,#fff3e0,#ffe0b2);border:2px solid #ff9800;border-radius:12px;padding:12px 16px;margin:16px auto;max-width:1400px}
-  .log{grid-column:1/-1}
-  .log h3{margin:0 0 8px}
-  .log .wrap{max-height:300px;overflow:auto;border:1px solid #e7e7e7;border-radius:10px;background:#fff}
-  table{width:100%;border-collapse:collapse}
-  th,td{font-size:12px;padding:8px 10px;border-bottom:1px solid #eee;text-align:left}
-  th{background:#f5f7fb}
-  .pub-form,.tutorial{background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.12);padding:18px}
-  .pub-card{background:rgba(255,255,255,.9);border:1px solid #e6eaf2;border-radius:14px;padding:14px}
-  @media(max-width:1000px){.grid{grid-template-columns:1fr}}
-  /* overlay */
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:9999;color:#fff;text-align:center}
-  .spinner{width:48px;height:48px;border-radius:50%;border:5px solid #eee;border-top:5px solid #2a5298;animation:spin 1s linear infinite;margin:0 auto 10px}@keyframes spin{to{transform:rotate(360deg)}}
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<!-- Optional: drop a Vina-like engine as browser-vina.js/.wasm and include it; UI degrades gracefully if absent. -->
-<!-- <script src="./browser-vina.js"></script> -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PharmaSim Pro · Full Integrated Suite (Stable In‑Browser)</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- Optional: drop a Vina-like engine as browser-vina.js/.wasm and include it; UI degrades gracefully if absent. -->
+    <!-- <script src="./browser-vina.js"></script> -->
+
+    <style>
+        /* --- Base & Layout --- */
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%); 
+            color: #0b1630; 
+        }
+        header { 
+            position: sticky; 
+            top: 0; 
+            background: rgba(255,255,255,.95); 
+            backdrop-filter: blur(8px); 
+            box-shadow: 0 6px 20px rgba(0,0,0,.08); 
+            z-index: 10; 
+        }
+        .nav { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 14px 18px; 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+        .tabs { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+        }
+        .tab { 
+            padding: 8px 14px; 
+            border: 2px solid #2a5298; 
+            border-radius: 18px; 
+            background: #fff; 
+            color: #2a5298; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+        }
+        .tab.active, .tab:hover { 
+            background: linear-gradient(135deg, #2a5298, #1e3c72); 
+            color: #fff; 
+            border-color: transparent; 
+            transform: translateY(-2px);
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 22px auto; 
+            padding: 0 16px; 
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: 360px 1fr; 
+            gap: 22px; 
+        }
+        .panel { 
+            background: rgba(255,255,255,.95); 
+            backdrop-filter: blur(6px); 
+            border-radius: 16px; 
+            box-shadow: 0 10px 26px rgba(0,0,0,.12); 
+            padding: 18px; 
+        }
+        label { 
+            display: block; 
+            font-size: 13px; 
+            color: #334; 
+            margin: 6px 0 4px; 
+        }
+        input,textarea,select { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 2px solid #e0e6ed; 
+            border-radius: 10px; 
+            background: #f8f9fa;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        input:focus,textarea:focus,select:focus { 
+            outline: none; 
+            border-color: #2a5298; 
+            background: #fff; 
+            box-shadow: 0 0 0 3px rgba(42,82,152,.12); 
+        }
+        button { 
+            padding: 10px 14px; 
+            border: none; 
+            border-radius: 10px; 
+            background: linear-gradient(135deg, #2a5298, #1e3c72); 
+            color: #fff; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        button:hover:not(:disabled) {
+             box-shadow: 0 4px 15px rgba(42,82,152,0.4);
+             transform: translateY(-2px);
+        }
+        button:disabled { 
+            opacity: .6; 
+            cursor: not-allowed; 
+        }
+        .row { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .col { 
+            flex: 1 1 160px; 
+        }
+        .mono { 
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
+            white-space: pre; 
+            overflow: auto; 
+            background: #0a142b; 
+            color: #e6edf3; 
+            border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,.15); 
+            padding: 10px; 
+            font-size: 12.5px; 
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        #viewer { 
+            width: 100%; 
+            min-height: 420px; 
+            border-radius: 10px; 
+            background: #eef2f7; 
+            position: relative;
+        }
+        .metrics { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 10px; 
+        }
+        .metric { 
+            background: linear-gradient(135deg, #f8f9fa, #e9eef6); 
+            border-radius: 12px; 
+            text-align: center; 
+            padding: 12px; 
+        }
+        .metric .v { 
+            font-size: 1.4em; 
+            font-weight: 800; 
+            background: linear-gradient(135deg, #2a5298, #1e3c72); 
+            -webkit-background-clip: text; 
+            background-clip: text; 
+            color: transparent; 
+        }
+        .hint { 
+            font-size: 12px; 
+            color: #476; 
+            margin-top: 8px;
+        }
+        .disclaimer { 
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2); 
+            border: 2px solid #ff9800; 
+            border-radius: 12px; 
+            padding: 12px 16px; 
+            margin: 16px auto; 
+            max-width: 1400px; 
+        }
+        .log { grid-column: 1/-1; }
+        .log h3 { margin: 0 0 8px; }
+        .log .wrap { 
+            max-height: 300px; 
+            overflow: auto; 
+            border: 1px solid #e7e7e7; 
+            border-radius: 10px; 
+            background: #fff; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        th,td { 
+            font-size: 12px; 
+            padding: 8px 10px; 
+            border-bottom: 1px solid #eee; 
+            text-align: left; 
+        }
+        th { background: #f5f7fb; }
+        .pub-form,.tutorial { 
+            background: rgba(255,255,255,.95); 
+            backdrop-filter: blur(6px); 
+            border-radius: 16px; 
+            box-shadow: 0 10px 26px rgba(0,0,0,.12); 
+            padding: 18px; 
+        }
+        .pub-card { 
+            background: rgba(255,255,255,.9); 
+            border: 1px solid #e6eaf2; 
+            border-radius: 14px; 
+            padding: 14px; 
+        }
+        .overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,.55); 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 9999; 
+            color: #fff; 
+            text-align: center; 
+        }
+        .spinner { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 50%; 
+            border: 5px solid #eee; 
+            border-top: 5px solid #2a5298; 
+            animation: spin 1s linear infinite; 
+            margin: 0 auto 10px; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @media(max-width: 1000px) { 
+            .grid { grid-template-columns: 1fr; } 
+            .panel { position: static !important; }
+        }
+    </style>
 </head>
 <body>
 <header>
-  <div class="nav">
-    <div style="font-weight:800;color:#1e3c72">PharmaSim Pro</div>
-    <div class="tabs">
-      <button class="tab" data-t="pbpk">PBPK/QSP</button>
-      <button class="tab" data-t="clinical">Clinical</button>
-      <button class="tab active" data-t="md">Docking</button>
-      <button class="tab" data-t="mdsetup">MD Setup</button>
-      <button class="tab" data-t="pub">Publications</button>
-      <button class="tab" data-t="learn">Learning</button>
+    <div class="nav">
+        <div style="font-weight:800;color:#1e3c72">PharmaSim Pro</div>
+        <div class="tabs">
+            <button class="tab" data-t="pbpk">PBPK/QSP</button>
+            <button class="tab" data-t="clinical">Clinical</button>
+            <button class="tab active" data-t="md">Docking</button>
+            <button class="tab" data-t="mdsetup">MD Setup</button>
+            <button class="tab" data-t="pub">Publications</button>
+            <button class="tab" data-t="learn">Learning</button>
+        </div>
     </div>
-  </div>
 </header>
-<div class="disclaimer"><strong>Note:</strong> All models here are approximations for educational use. Validate results experimentally before decisions.</div>
+<div class="disclaimer"><strong>Note:</strong> All models here are approximations for educational use. Validate results experimentally before making decisions.</div>
 <div class="overlay" id="loading"><div><div class="spinner"></div><div id="loadingText">Processing…</div></div></div>
 
 <div class="container">
 
-  <!-- PBPK/QSP -->
-  <section id="pbpk" class="section">
-    <div class="grid">
-      <div class="panel">
-        <h3>PBPK/QSP Parameters</h3>
-        <label>Dose (mg)</label><input id="dose" type="number" value="100" />
-        <div class="row">
-          <div class="col"><label>F (%)</label><input id="F" type="number" value="80"/></div>
-          <div class="col"><label>ka (h⁻¹)</label><input id="ka" type="number" value="1.2" step="0.1"/></div>
-          <div class="col"><label>ke (h⁻¹)</label><input id="ke" type="number" value="0.2" step="0.05"/></div>
-          <div class="col"><label>Vd (L)</label><input id="Vd" type="number" value="50"/></div>
+    <!-- PBPK/QSP Module -->
+    <section id="pbpk" class="section">
+        <div class="grid">
+            <div class="panel">
+                <h3>PBPK/QSP Parameters</h3>
+                <label>Dose (mg)</label><input id="dose" type="number" value="100" />
+                <div class="row">
+                    <div class="col"><label>F (%)</label><input id="F" type="number" value="80"/></div>
+                    <div class="col"><label>ka (h⁻¹)</label><input id="ka" type="number" value="1.2" step="0.1"/></div>
+                    <div class="col"><label>ke (h⁻¹)</label><input id="ke" type="number" value="0.2" step="0.05"/></div>
+                    <div class="col"><label>Vd (L)</label><input id="Vd" type="number" value="50"/></div>
+                </div>
+                <div class="row" style="margin-top:10px;"><button onclick="runPBPK()">Run PBPK Simulation</button></div>
+            </div>
+            <div class="panel">
+                <h3>Pharmacokinetic Outputs</h3>
+                <canvas id="pkChart"></canvas>
+                <canvas id="occChart" style="margin-top:10px;"></canvas>
+            </div>
         </div>
-        <div class="row"><button onclick="runPBPK()">Run PBPK</button><button id="testPBPK">Run Dev Tests</button></div>
-        <div id="testOut" class="testbox" style="display:none"></div>
-      </div>
-      <div class="panel">
-        <h3>Outputs</h3>
-        <canvas id="pkChart" style="width:100%;aspect-ratio:16/9"></canvas>
-        <div class="row" style="margin-top:10px"><canvas id="occChart" style="width:100%;aspect-ratio:16/9"></canvas></div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Clinical -->
-  <section id="clinical" class="section">
-    <div class="grid">
-      <div class="panel">
-        <h3>3+3 Dose Escalation (toy)</h3>
-        <div class="row">
-          <div class="col"><label>Levels</label><input id="levels" type="number" value="6"/></div>
-          <div class="col"><label>Cohort size</label><input id="cohort" type="number" value="3"/></div>
-          <div class="col"><label>Start dose (mg)</label><input id="startDose" type="number" value="10"/></div>
-          <div class="col"><label>Target tox (%)</label><input id="tox" type="number" value="25"/></div>
+    <!-- Clinical Trial Module -->
+    <section id="clinical" class="section">
+        <div class="grid">
+            <div class="panel">
+                <h3>3+3 Dose Escalation Simulation</h3>
+                <div class="row">
+                    <div class="col"><label>Dose Levels</label><input id="levels" type="number" value="6"/></div>
+                    <div class="col"><label>Cohort Size</label><input id="cohort" type="number" value="3"/></div>
+                    <div class="col"><label>Start Dose (mg)</label><input id="startDose" type="number" value="10"/></div>
+                    <div class="col"><label>Target DLT Rate (%)</label><input id="tox" type="number" value="25"/></div>
+                </div>
+                <div class="row" style="margin-top:10px;"><button onclick="runTrial()">Simulate Trial</button></div>
+            </div>
+            <div class="panel">
+                <h3>Trial Visualization</h3>
+                <canvas id="trialChart"></canvas>
+            </div>
         </div>
-        <button onclick="runTrial()">Simulate</button>
-      </div>
-      <div class="panel">
-        <h3>Trial View</h3>
-        <canvas id="trialChart" style="width:100%;aspect-ratio:16/9"></canvas>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Docking: RDKit + optional WASM engine -->
-  <section id="md" class="section active">
-    <div class="grid">
-      <div class="panel">
-        <h3>Ligand Prep & Quick Approximation</h3>
-        <label>Protein (PDB)</label><input type="file" id="pdbFile" accept=".pdb" />
-        <label>Ligand (SMILES)</label><input id="smiles" value="CC(=O)OC1=CC=CC=C1C(=O)O"/>
-        <button id="dockBtn" disabled>Run Approximate Dock</button>
-        <div class="metrics" style="margin-top:10px">
-          <div class="metric"><div>Est. ΔG</div><div id="aff" class="v">--</div></div>
-          <div class="metric"><div>MW</div><div id="mw" class="v">--</div></div>
-          <div class="metric"><div>LogP</div><div id="logp" class="v">--</div></div>
+    <!-- Molecular Docking Module -->
+    <section id="md" class="section active">
+        <div class="grid">
+            <div class="panel">
+                <h3>Ligand Prep & Heuristic Docking</h3>
+                <label>Protein (PDB)</label><input type="file" id="pdbFile" accept=".pdb" />
+                <label>Ligand (SMILES)</label><input id="smiles" value="CC(=O)OC1=CC=CC=C1C(=O)O"/>
+                <button id="dockBtn" disabled>Run Approximate Dock</button>
+                <div class="metrics" style="margin-top:10px">
+                    <div class="metric"><div>Est. ΔG</div><div id="aff" class="v">--</div></div>
+                    <div class="metric"><div>MW</div><div id="mw" class="v">--</div></div>
+                    <div class="metric"><div>LogP</div><div id="logp" class="v">--</div></div>
+                </div>
+                <div class="hint">This uses a heuristic pocket finder and a descriptor-based scoring function.</div>
+            </div>
+            <div class="panel">
+                <h3>In‑Browser Vina‑style Docking (Advanced)</h3>
+                <div class="row">
+                    <div class="col"><label>Receptor (PDBQT)</label><input type="file" id="recPDBQT" accept=".pdbqt"></div>
+                    <div class="col"><label>Ligand (PDBQT)</label><input type="file" id="ligPDBQT" accept=".pdbqt"></div>
+                </div>
+                <div class="row">
+                    <div class="col"><label>Center X</label><input id="cx" type="number" value="0" step="0.1"></div>
+                    <div class="col"><label>Center Y</label><input id="cy" type="number" value="0" step="0.1"></div>
+                    <div class="col"><label>Center Z</label><input id="cz" type="number" value="0" step="0.1"></div>
+                </div>
+                <div class="row">
+                    <div class="col"><label>Size X (Å)</label><input id="sx" type="number" value="20" step="1"></div>
+                    <div class="col"><label>Size Y (Å)</label><input id="sy" type="number" value="20" step="1"></div>
+                    <div class="col"><label>Size Z (Å)</label><input id="sz" type="number" value="20" step="1"></div>
+                </div>
+                <div class="row">
+                    <div class="col"><label>Exhaustiveness</label><input id="exh" type="number" value="8" step="1"></div>
+                    <div class="col"><label>Modes</label><input id="modes" type="number" value="9" step="1"></div>
+                </div>
+                <div class="row"><button id="runWasmDock">Run In‑Browser Dock</button><button id="savePoses" disabled>Download Poses</button></div>
+                <div class="hint">Requires `browser-vina.js` & `.wasm` files to be hosted alongside this HTML file. This feature is experimental.</div>
+            </div>
+            <div class="panel" style="grid-column:1/-1">
+                <h3>3D Visualization</h3>
+                <div id="viewer"></div>
+            </div>
+            <div class="panel log">
+                <div class="row" style="align-items:center;justify-content:space-between"><h3>Docking Log</h3><button class="tab" id="exportLog" style="width:auto">Export CSV</button></div>
+                <div class="wrap"><table><thead><tr><th>Timestamp</th><th>Protein</th><th>SMILES</th><th>ΔG (kcal/mol)</th><th>MW</th><th>LogP</th></tr></thead><tbody id="logBody"></tbody></table></div>
+            </div>
         </div>
-        <div class="hint">Heuristic pocket + descriptor-based scoring. For rigorous docking, use the right panel.</div>
-      </div>
-      <div class="panel">
-        <h3>In‑Browser Vina‑style Docking (PDBQT)</h3>
-        <div class="row">
-          <div class="col"><label>Receptor (PDBQT)</label><input type="file" id="recPDBQT" accept=".pdbqt"></div>
-          <div class="col"><label>Ligand (PDBQT)</label><input type="file" id="ligPDBQT" accept=".pdbqt"></div>
+    </section>
+
+    <!-- MD Simulation Setup Module -->
+    <section id="mdsetup" class="section">
+        <div class="grid">
+            <div class="panel">
+                <h3>MD Simulation File Generator</h3>
+                <label>Output Prefix</label><input id="md-out" value="output"/>
+                <div class="row">
+                    <div class="col"><label>Temperature (K)</label><input id="md-temp" type="number" value="310"/></div>
+                    <div class="col"><label>Production Time (ns)</label><input id="md-ns" type="number" value="10"/></div>
+                </div>
+                <div class="row">
+                    <div class="col"><label>switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14"/></div>
+                    <div class="col" style="display:flex;align-items:flex-end"><label style="width:100%"><input type="checkbox" id="md-restraints" checked/> Use Restraints</label></div>
+                </div>
+                <div class="row" style="margin-top:10px;"><button onclick="generateMDFiles()">Generate Files</button><button id="zipBtn" disabled>Download ZIP</button></div>
+                <div id="fileList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+            <div class="panel">
+                <h3>In‑Browser Restraints PDB Builder</h3>
+                <p class="hint">Upload a PDB; backbone atoms (N, CA, C, O) will have their B‑factor column set to 2.0, with all others set to 0.0. This file (e.g., `restraints.pdb`) is used by simulation engines to apply positional restraints.</p>
+                <div class="row">
+                    <div class="col"><label>Source PDB</label><input type="file" id="md-pdb" accept=".pdb"/></div>
+                    <div class="col" style="display:flex;align-items:end"><button id="buildRestraints">Generate restraints.pdb</button></div>
+                </div>
+                <div id="restraintsStatus" class="hint" style="margin-top:8px"></div>
+            </div>
         </div>
-        <div class="row">
-          <div class="col"><label>Center X</label><input id="cx" type="number" value="0" step="0.1"></div>
-          <div class="col"><label>Center Y</label><input id="cy" type="number" value="0" step="0.1"></div>
-          <div class="col"><label>Center Z</label><input id="cz" type="number" value="0" step="0.1"></div>
+    </section>
+
+    <!-- Publications Module -->
+    <section id="pub" class="section">
+        <div class="pub-form">
+            <h3>Create New Publication</h3>
+            <label>Title</label><input id="pub-title" placeholder="e.g., In Silico Analysis of Novel Kinase Inhibitors"/>
+            <label>Authors</label><input id="pub-authors" placeholder="Ferguson, D., et al."/>
+            <label>Abstract / Key Findings</label><textarea id="pub-abstract" rows="6"></textarea>
+            <div class="row" style="margin-top:8px"><button id="pubSubmit">Submit Publication</button></div>
         </div>
-        <div class="row">
-          <div class="col"><label>Size X (Å)</label><input id="sx" type="number" value="20" step="1"></div>
-          <div class="col"><label>Size Y (Å)</label><input id="sy" type="number" value="20" step="1"></div>
-          <div class="col"><label>Size Z (Å)</label><input id="sz" type="number" value="20" step="1"></div>
+        <div id="pub-list" style="margin-top:18px;display:grid;gap:12px"></div>
+    </section>
+
+    <!-- Learning Center Module -->
+    <section id="learn" class="section">
+        <div class="tutorial">
+            <h3>Learning Center</h3>
+            <p>Choose a topic to view a short tutorial.</p>
+            <div class="row" style="margin:8px 0">
+                <button class="tab" style="width:auto" onclick="loadTutorial('pbpk')">PBPK Basics</button>
+                <button class="tab" style="width:auto" onclick="loadTutorial('docking')">Docking</button>
+                <button class="tab" style="width:auto" onclick="loadTutorial('md')">MD Setup</button>
+            </div>
+            <div id="tutorialBox" class="panel" style="margin-top:10px"></div>
         </div>
-        <div class="row">
-          <div class="col"><label>Exhaustiveness</label><input id="exh" type="number" value="8" step="1"></div>
-          <div class="col"><label>Modes</label><input id="modes" type="number" value="9" step="1"></div>
-          <div class="col"><label>Energy Range</label><input id="erange" type="number" value="3" step="1"></div>
-        </div>
-        <div class="row"><button id="runWasmDock">Run In‑Browser Dock</button><button id="savePoses" disabled>Download Poses</button></div>
-        <div class="hint">Put <span class="mono">browser-vina.js</span> and <span class="mono">browser-vina.wasm</span> next to this file and uncomment the script tag above.</div>
-      </div>
-      <div class="panel" style="grid-column:1/-1">
-        <h3>3D View</h3>
-        <div id="viewer"></div>
-      </div>
-      <div class="panel log">
-        <div class="row" style="align-items:center;justify-content:space-between"><h3>Docking Log</h3><button class="tab" id="exportLog" style="width:auto">Export CSV</button></div>
-        <div class="wrap"><table><thead><tr><th>Timestamp</th><th>Protein</th><th>SMILES</th><th>ΔG (kcal/mol)</th><th>MW</th><th>LogP</th></tr></thead><tbody id="logBody"></tbody></table></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- MD Setup (generic text files + restraints generator) -->
-<section id="mdsetup" class="section">
-  <div class="grid">
-    <div class="panel">
-      <h3>MD Simulation File Generator</h3>
-      <label>Output Prefix</label><input id="md-out" value="output"/>
-      <div class="row">
-        <div class="col"><label>Temperature (K)</label><input id="md-temp" type="number" value="310"/></div>
-        <div class="col"><label>Production Time (ns)</label><input id="md-ns" type="number" value="10"/></div>
-      </div>
-      <div class="row">
-        <div class="col"><label>switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14"/></div>
-        <div class="col" style="display:flex;align-items:flex-end"><label style="width:100%"><input type="checkbox" id="md-restraints" checked/> Use Restraints</label></div>
-      </div>
-      <div class="row"><button onclick="generateMDFiles()">Generate Files</button><button id="zipBtn" disabled>Download ZIP</button></div>
-      <div id="fileList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-    <div class="panel">
-      <h3>Restraints PDB Builder (in‑browser)</h3>
-      <p class="hint">Upload a PDB; backbone atoms (N, CA, C, O) get B‑factor = 2.0, others = 0.0. Download the modified file as <em>restraints.pdb</em>.</p>
-      <div class="row">
-        <div class="col"><label>Source PDB</label><input type="file" id="md-pdb" accept=".pdb"/></div>
-        <div class="col" style="display:flex;align-items:end"><button id="buildRestraints" style="width:100%">Generate restraints.pdb</button></div>
-      </div>
-      <div id="restraintsStatus" class="hint" style="margin-top:8px"></div>
-    </div>
-  </div>
-  <div class="grid" style="margin-top:18px">
-    <div class="panel">
-      <h3>Backbone Restraints Script</h3>
-      <p class="hint">Sets B-factor to 0 for all atoms, then 2.0 for protein backbone. Save as a script and run in your preferred visualization tool.</p>
-      <pre class="mono" id="script_restraints"># Select all atoms and zero B-factor
-set sel [atomselect top "all"]
-$sel set beta 0.0
-
-# Protein backbone
-set bb [atomselect top "protein and name N CA C O"]
-$bb set beta 2.0
-
-# Write out modified PDB
-$sel writepdb restraints.pdb</pre>
-      <button class="tab" style="width:auto;margin-top:6px" onclick="copyText('script_restraints')">Copy Script</button>
-    </div>
-    <div class="panel">
-      <h3>Quick Cartoon + Ligand View</h3>
-      <p class="hint">Creates a publication-style cartoon for protein and licorice for ligand.</p>
-      <pre class="mono" id="script_cartoon"># Load topology/coords
-mol new system.psf
-mol addfile system.pdb
-
-# Clean default rep
-mol delrep 0 top
-
-# Protein cartoon
-mol representation NewCartoon 0.3 10.0 4.0 0
-mol color Structure
-mol selection {protein}
-mol addrep top
-
-# Optional: ligand sticks
-# mol selection {resname LIG}
-# mol representation Licorice 0.3 12.0 12.0
-# mol addrep top</pre>
-      <button class="tab" style="width:auto;margin-top:6px" onclick="copyText('script_cartoon')">Copy Script</button>
-    </div>
-  </div>
-</section>
-
-  <!-- Publications -->
-  <section id="pub" class="section">
-    <div class="pub-form">
-      <h3>Create New Publication</h3>
-      <label>Title</label><input id="pub-title" placeholder="e.g., In Silico Analysis of Novel Kinase Inhibitors"/>
-      <label>Authors</label><input id="pub-authors" placeholder="Ferguson, D., et al."/>
-      <label>Abstract / Key Findings</label><textarea id="pub-abstract" rows="6"></textarea>
-      <div class="row" style="margin-top:8px"><button id="pubSubmit">Submit Publication</button></div>
-    </div>
-    <div id="pub-list" style="margin-top:18px;display:grid;gap:12px"></div>
-  </section>
-
-  <!-- Learning -->
-  <section id="learn" class="section">
-    <div class="tutorial">
-      <h3>Learning Center</h3>
-      <p>Choose a topic to view a short tutorial.</p>
-      <div class="row" style="margin:8px 0"><button class="tab" style="width:auto" onclick="loadTutorial('pbpk')">PBPK Basics</button><button class="tab" style="width:auto" onclick="loadTutorial('docking')">Docking</button><button class="tab" style="width:auto" onclick="loadTutorial('md')">MD Setup</button></div>
-      <div id="tutorialBox" class="panel" style="margin-top:10px"></div>
-    </div>
-  </section>
+    </section>
 
 </div>
 
 <script>
-// ------- Navigation -------
-const tabs=[...document.querySelectorAll('.tab')];
-const sections={pbpk:document.getElementById('pbpk'),clinical:document.getElementById('clinical'),md:document.getElementById('md'),mdsetup:document.getElementById('mdsetup'),pub:document.getElementById('pub'),learn:document.getElementById('learn')};
-function activate(t){tabs.forEach(x=>x.classList.toggle('active',x.dataset.t===t));Object.entries(sections).forEach(([k,s])=>s.classList.toggle('active',k===t))}
-tabs.forEach(t=>t.addEventListener('click',()=>activate(t.dataset.t)));
+    // --- GLOBAL STATE & INITIALIZATION ---
+    let rdkit, viewer;
+    const charts = {};
+    const dockingLog = [];
+    let generatedMDFiles = {};
+    let lastDockPosesPDBQT = '';
 
-// ------- Loading overlay -------
-function showLoading(msg){const o=document.getElementById('loading');document.getElementById('loadingText').textContent=msg||'Processing…';o.style.display='flex'}
-function hideLoading(){document.getElementById('loading').style.display='none'}
-
-// ------- Charts -------
-let pkChart,occChart,trialChart;
-function buildCharts(){
-  pkChart=new Chart(document.getElementById('pkChart'),{type:'line',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
-  occChart=new Chart(document.getElementById('occChart'),{type:'line',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
-  trialChart=new Chart(document.getElementById('trialChart'),{type:'scatter',data:{datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
-}
-
-// ------- PBPK (TDZ-safe) -------
-function runPBPK(){
-  const D=Number(document.getElementById('dose').value);
-  const Fv=(Number(document.getElementById('F').value)||0)/100;
-  const kaVal=Number(document.getElementById('ka').value);
-  const keVal=Number(document.getElementById('ke').value);
-  const V=Number(document.getElementById('Vd').value)||1;
-  if([D,Fv,kaVal,keVal,V].some(v=>!isFinite(v))){alert('Please enter valid numeric values for all PBPK inputs.');return}
-  if(kaVal===keVal){alert('Absorption rate (ka) and elimination rate (ke) cannot be equal.');return}
-  const times=[],conc=[]; for(let t=0;t<=48;t++){times.push(t); const c=(Fv*D*kaVal/(V*(kaVal-keVal)))*(Math.exp(-keVal*t)-Math.exp(-kaVal*t)); conc.push(Math.max(0,c))}
-  const occ=conc.map(c=>100*c/(20+c));
-  pkChart.data.labels=times; pkChart.data.datasets=[{label:'Plasma (mg/L)',data:conc}]; pkChart.update();
-  occChart.data.labels=times; occChart.data.datasets=[{label:'Target occupancy (%)',data:occ}]; occChart.update();
-}
-
-// Dev tests
-function assert(cond,msg){return {ok:!!cond,msg}}
-function runDevTests(){
-  const out=document.getElementById('testOut'); out.style.display='block'; out.innerHTML='';
-  const tests=[];
-  // PBPK sanity
-  (function(){const D=100,Fv=0.8,ka=1.2,ke=0.2,V=50; const c0=(Fv*D*ka/(V*(ka-ke)))*(Math.exp(-ke*0)-Math.exp(-ka*0)); tests.push(assert(Math.abs(c0-0)<1e-9,'PBPK: c(0) == 0')); const c1=(Fv*D*ka/(V*(ka-ke)))*(Math.exp(-ke*1)-Math.exp(-ka*1)); tests.push(assert(c1>0&&isFinite(c1),'PBPK: c(1) > 0 & finite'))})()
-  tests.push(assert(steps(10,2)===5000000,'steps(10 ns,2 fs)=5,000,000'))
-  const pc=parseCuts('10/12/14'); tests.push(assert(pc.sw===10&&pc.co===12&&pc.pl===14,'parseCuts ok'))
-  const cx=parseFloat(document.getElementById('cx').value); tests.push(assert(isFinite(cx),'Center X numeric'))
-  const pass=tests.filter(t=>t.ok).length; const fail=tests.length-pass;
-  out.innerHTML=`<strong>Tests:</strong> ${pass} passed, ${fail} failed`+(fail?'<br>'+tests.filter(t=>!t.ok).map(t=>t.msg).join('<br>'):'')
-}
-document.getElementById('testPBPK')?.addEventListener('click',runDevTests)
-
-// ------- Clinical toy -------
-function runTrial(){
-  const L=Number(document.getElementById('levels').value), C=Number(document.getElementById('cohort').value), S=Number(document.getElementById('startDose').value), T=Number(document.getElementById('tox').value)/100;
-  const doses=Array.from({length:L},(_,i)=>S*Math.pow(1.5,i)); const p=doses.map((_,i)=>0.05+0.4*(i/(L-1)));
-  const nd=[],dd=[]; let pt=0,idx=0; while(idx<L){ let dlt=0; for(let i=0;i<C;i++){pt++; const has=Math.random()<p[idx]; (has?dd:nd).push({x:pt,y:doses[idx]}); if(has)dlt++} if(dlt/C>T) break; idx++ }
-  trialChart.data.datasets=[{label:'No DLT',data:nd,showLine:false,backgroundColor:'#2ecc71'},{label:'DLT',data:dd,showLine:false,backgroundColor:'#e74c3c'}]; trialChart.update()
-}
-
-// ------- RDKit init & heuristic docking -------
-let rdkit,viewer; const logStore=[]; // session log
-viewer=$3Dmol.createViewer(document.getElementById('viewer'),{backgroundColor:'white'});
-window.initRDKitModule().then(M=>{rdkit=M;document.getElementById('dockBtn').disabled=false;}).catch(()=>alert('RDKit failed to load'))
-
-document.getElementById('dockBtn').addEventListener('click',async()=>{
-  const file=document.getElementById('pdbFile').files[0]; const smi=(document.getElementById('smiles').value||'').trim();
-  if(!file||!smi||!rdkit){alert('Provide PDB + SMILES and wait for RDKit');return}
-  showLoading('Analyzing molecules…')
-  try{
-    const pdb=await file.text();
-    const ligInfo=processLigandSafe(smi);
-    if(!ligInfo){alert('Invalid SMILES or RDKit error');return}
-    document.getElementById('mw').textContent=Number(ligInfo.mw).toFixed(2);
-    document.getElementById('logp').textContent=Number(ligInfo.logp).toFixed(2);
-
-    // pocket selection using actual model atoms
-    viewer.clear(); const pModel=viewer.addModel(pdb,'pdb'); const atoms=pModel.getAtoms(); if(!atoms.length){alert('No atoms parsed from PDB');return}
-    const byRes={}; atoms.forEach(a=>{(byRes[a.resi]??=[]).push(a)});
-    let bestRes=null,bestN=-1,rx=0,ry=0,rz=0;
-    for(const [resi,alist] of Object.entries(byRes)){
-      rx=0;ry=0;rz=0; alist.forEach(a=>{rx+=a.x;ry+=a.y;rz+=a.z}); rx/=alist.length; ry/=alist.length; rz/=alist.length;
-      const n=atoms.filter(a=>{const dx=a.x-rx,dy=a.y-ry,dz=a.z-rz; return (dx*dx+dy*dy+dz*dz)<100}).length; if(n>bestN){bestN=n; bestRes=Number(resi)}
-    }
-    const anchor=byRes[bestRes]||[]; rx=0;ry=0;rz=0; anchor.forEach(a=>{rx+=a.x;ry+=a.y;rz+=a.z}); if(anchor.length){rx/=anchor.length; ry/=anchor.length; rz/=anchor.length}
-    const pocketRes=atoms.filter(a=>{const dx=a.x-rx,dy=a.y-ry,dz=a.z-rz; return (dx*dx+dy*dy+dz*dz)<100}).map(a=>a.resi)
-
-    pModel.setStyle({},{cartoon:{color:'spectrum'}});
-    viewer.addSurface($3Dmol.VDW,{opacity:0.8,color:'white'},{resi:pocketRes});
-    pModel.setStyle({resi:pocketRes},{stick:{radius:0.25,colorscheme:'cyanCarbon'}});
-
-    const ligModel=viewer.addModel(ligInfo.molblock,'sdf'); ligModel.setStyle({},{stick:{radius:0.22}});
-    viewer.zoomTo({resi:pocketRes}); viewer.render();
-
-    // empirical ΔG (bounded)
-    let score=-1.5; // intercept
-    const hBondTerm=Math.min(ligInfo.hDonors,ligInfo.hAcceptors);
-    score+=-0.035*ligInfo.numHeavyAtoms; // vdw proxy
-    score+=-0.7*hBondTerm; // hbond
-    score+=-0.25*ligInfo.logp; // hydrophobic
-    score+= 0.3*ligInfo.numRotatableBonds; // rot penalty
-    score+=(Math.random()-.5)*0.5; // jitter
-    score=Math.max(-12,Math.min(-4,score));
-    document.getElementById('aff').textContent=score.toFixed(2)+' kcal/mol';
-
-    appendLog({protein:file.name,smiles:smi,score, mw:ligInfo.mw, logp:ligInfo.logp})
-  }catch(e){console.error(e); alert('Docking approximation failed: '+(e&&e.message?e.message:'unknown error'))}
-  finally{hideLoading()}
-})
-
-function processLigandSafe(smi){
-  let mol=null; try{
-    mol=rdkit.get_mol(smi); if(!mol) return null;
-    // add hydrogens
-    mol.add_hs?.();
-    // Try to embed/optimize ONLY if available in this build
-    if(typeof rdkit.EmbedMolecule==='function'){
-      const params={useRandomCoords:true,maxAttempts:500}; const r=rdkit.EmbedMolecule(mol,JSON.stringify(params));
-      if(r<0) console.warn('3D embed failed; using 2D-derived geometry');
-    }
-    if(typeof rdkit.UFFOptimizeMolecule==='function'){
-      try{ rdkit.UFFOptimizeMolecule(mol) }catch{ /* ignore */ }
-    }
-    const desc=JSON.parse(mol.get_descriptors());
-    const out={
-      molblock: mol.get_molblock(),
-      mw: desc.exactmw,
-      logp: desc.MolLogP,
-      hDonors: desc.NumHDonors,
-      hAcceptors: desc.NumHAcceptors,
-      numRotatableBonds: desc.NumRotatableBonds,
-      numHeavyAtoms: mol.get_n_heavy_atoms?.() || desc.NumHeavyAtoms || 0
+    window.onload = () => {
+        // Initialize UI components and libraries
+        setupNavigation();
+        setupEventListeners();
+        buildCharts();
+        loadPubs();
+        activate('md'); // Default to docking module
+        
+        // Asynchronously initialize the RDKit WASM module
+        window.initRDKitModule().then(RDKit => {
+            rdkit = RDKit;
+            document.getElementById('dockBtn').disabled = false;
+            console.log("RDKit.js chemical library loaded successfully.");
+        }).catch(() => {
+            alert("Fatal Error: Failed to load RDKit.js. The molecular docking module cannot run.");
+        });
     };
-    mol.delete?.();
-    return out;
-  }catch(e){ if(mol&&mol.delete) mol.delete(); return null }
-}
 
-// ------- Log + CSV -------
-function appendLog({protein,smiles,score,mw,logp}){
-  const row={ts:new Date(),protein,smiles,score:score.toFixed(2),mw:mw.toFixed(2),logp:logp.toFixed(2)};
-  logStore.unshift(row);
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${row.ts.toLocaleString()}</td><td>${escapeHtml(row.protein)}</td><td style="word-break:break-all">${escapeHtml(row.smiles)}</td><td>${row.score}</td><td>${row.mw}</td><td>${row.logp}</td>`;
-  document.getElementById('logBody').prepend(tr);
-}
-function escapeHtml(s){return String(s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]))}
-function exportCSV(){
-  if(!logStore.length){alert('Log is empty. Run a docking first.');return}
-  const header=['Timestamp','Protein','SMILES','DeltaG_kcal_per_mol','MW','LogP'];
-  const lines=[header.join(',')].concat(logStore.map(r=>[
-    r.ts.toISOString(),`"${r.protein.replaceAll('"','""')}"`,`"${r.smiles.replaceAll('"','""')}"`,r.score,r.mw,r.logp].join(',')));
-  const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pharmsim_docking_log.csv'; a.click();
-}
-document.getElementById('exportLog').addEventListener('click',exportCSV)
+    function setupNavigation() {
+        document.querySelectorAll('.tab[data-t]').forEach(t => {
+            t.addEventListener('click', () => activate(t.dataset.t));
+        });
+    }
 
-// ------- Optional WASM docking -------
-const runWasmDockBtn=document.getElementById('runWasmDock'); const savePosesBtn=document.getElementById('savePoses'); let lastDockPDBQT='';
-runWasmDockBtn.addEventListener('click',async()=>{
-  if(typeof window.BrowserVina==='undefined'){alert('In‑browser docking engine not available. Add browser-vina.js/.wasm and include the script tag.');return}
-  const recFile=document.getElementById('recPDBQT').files[0]; const ligFile=document.getElementById('ligPDBQT').files[0]; if(!recFile||!ligFile){alert('Select receptor and ligand PDBQT files.');return}
-  const center={x:parseFloat(cx.value),y:parseFloat(cy.value),z:parseFloat(cz.value)}; const size={x:parseFloat(sx.value),y:parseFloat(sy.value),z:parseFloat(sz.value)}; const params={exhaustiveness:parseInt(exh.value),num_modes:parseInt(modes.value),energy_range:parseInt(erange.value)};
-  showLoading('Docking in browser…')
-  try{
-    const engine=await window.BrowserVina.create({locateFile:(p)=>p});
-    const receptor=new Uint8Array(await recFile.arrayBuffer()); const ligand=new Uint8Array(await ligFile.arrayBuffer());
-    const result=await engine.dock({receptor,ligand,center,size,...params}); lastDockPDBQT=result.posesPDBQT||'';
-    viewer.addModel(new TextDecoder().decode(ligand),'pdb'); if(lastDockPDBQT){ viewer.addModel(lastDockPDBQT,'pdb'); viewer.setStyle({},{stick:{radius:0.22}}); viewer.render(); }
-    savePosesBtn.disabled=!lastDockPDBQT;
-  }catch(e){console.error(e); alert('Docking failed: '+(e&&e.message?e.message:'unknown error'))}
-  finally{hideLoading()}
-});
-savePosesBtn.addEventListener('click',()=>{ if(!lastDockPDBQT) return; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([lastDockPDBQT],{type:'text/plain'})); a.download='poses.pdbqt'; a.click() })
+    function setupEventListeners() {
+        document.getElementById('dockBtn').addEventListener('click', runApproximation);
+        document.getElementById('exportLog').addEventListener('click', exportCSV);
+        document.getElementById('runWasmDock').addEventListener('click', runWasmDock);
+        document.getElementById('savePoses').addEventListener('click', downloadWasmPoses);
+        document.getElementById('buildRestraints').addEventListener('click', buildRestraintsFile);
+        document.getElementById('zipBtn').addEventListener('click', downloadMDFiles);
+        document.getElementById('pubSubmit').addEventListener('click', submitPub);
+    }
+    
+    // --- UI HELPERS ---
+    function activate(tabId) {
+        document.querySelectorAll('.tab[data-t]').forEach(t => t.classList.toggle('active', t.dataset.t === tabId));
+        document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === tabId));
+    }
+    
+    function showLoading(msg = 'Processing…') {
+        document.getElementById('loadingText').textContent = msg;
+        document.getElementById('loading').style.display = 'flex';
+    }
 
-// ------- MD Setup (generic) -------
-let generatedMDFiles={};
-function generateMDFiles(){
-  const p={out:document.getElementById('md-out').value||'output', T:+document.getElementById('md-temp').value||310, ns:+document.getElementById('md-ns').value||10, cuts:(document.getElementById('md-cuts').value||'10/12/14').split(/[\/ ,]+/).map(Number), rest: document.getElementById('md-restraints').checked};
-  const common=`structure system.psf
-coordinates system.pdb
-set outputname ${p.out}
-outputname $outputname
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
 
-binaryoutput yes
-parameters system.prm
-exclude scaled1-4
-1-4scaling 1.0
-timestep 2.0
-rigidBonds all
-nonbondedFreq 1
-fullElectFrequency 2
-stepspercycle 20
+    // --- CHARTING ---
+    function buildCharts() {
+        charts.pk = new Chart(document.getElementById('pkChart'), { type: 'line', options: { responsive: true, maintainAspectRatio: false } });
+        charts.occ = new Chart(document.getElementById('occChart'), { type: 'line', options: { responsive: true, maintainAspectRatio: false } });
+        charts.trial = new Chart(document.getElementById('trialChart'), { type: 'scatter', options: { responsive: true, maintainAspectRatio: false } });
+    }
 
-switching on
-switchdist ${p.cuts[0]||10}
-cutoff ${p.cuts[1]||12}
-pairlistdist ${p.cuts[2]||14}
+    // --- PBPK MODULE ---
+    function runPBPK() {
+        const D = Number(document.getElementById('dose').value);
+        const Fv = (Number(document.getElementById('F').value) || 0) / 100;
+        const kaVal = Number(document.getElementById('ka').value);
+        const keVal = Number(document.getElementById('ke').value);
+        const V = Number(document.getElementById('Vd').value) || 1;
+        if ([D, Fv, kaVal, keVal, V].some(v => !isFinite(v))) { alert('Please enter valid numeric values for all PBPK inputs.'); return; }
+        if (Math.abs(kaVal - keVal) < 1e-9) { alert('Absorption rate (ka) and elimination rate (ke) cannot be equal.'); return; }
+        
+        const times = [], conc = [];
+        for (let t = 0; t <= 48; t++) {
+            times.push(t);
+            const c = (Fv * D * kaVal / (V * (kaVal - keVal))) * (Math.exp(-keVal * t) - Math.exp(-kaVal * t));
+            conc.push(Math.max(0, c));
+        }
+        const occ = conc.map(c => 100 * c / (20 + c));
+        
+        if (charts.pk) {
+            charts.pk.data = { labels: times, datasets: [{ label: 'Plasma (mg/L)', data: conc, borderColor: '#2a5298', tension: 0.1 }] };
+            charts.pk.update();
+        }
+        if (charts.occ) {
+            charts.occ.data = { labels: times, datasets: [{ label: 'Target Occupancy (%)', data: occ, borderColor: '#e67e22', tension: 0.1 }] };
+            charts.occ.update();
+        }
+    }
 
-PME yes
-PMEGridSpacing 1.0
+    // --- CLINICAL TRIAL MODULE ---
+    function runTrial() {
+        const L = Number(document.getElementById('levels').value), C = Number(document.getElementById('cohort').value), S = Number(document.getElementById('startDose').value), T = Number(document.getElementById('tox').value) / 100;
+        const doses = Array.from({ length: L }, (_, i) => S * Math.pow(1.5, i));
+        const trueToxProbs = doses.map((_, i) => 0.05 + 0.4 * (i / (L - 1)));
+        
+        const nd = [], dd = [];
+        let pt = 0, idx = 0;
+        while (idx < L) {
+            let dltCount = 0;
+            for (let i = 0; i < C; i++) {
+                pt++;
+                const hasDLT = Math.random() < trueToxProbs[idx];
+                (hasDLT ? dd : nd).push({ x: pt, y: doses[idx] });
+                if (hasDLT) dltCount++;
+            }
+            if (dltCount / C > T) break;
+            idx++;
+        }
+        
+        if (charts.trial) {
+            charts.trial.data.datasets = [
+                { label: 'No DLT', data: nd, backgroundColor: '#2ecc71' },
+                { label: 'DLT', data: dd, backgroundColor: '#e74c3c' }
+            ];
+            charts.trial.update();
+        }
+    }
 
-langevin on
-langevinDamping 1.0
-langevinTemp ${p.T}
-langevinHydrogen no
-`;
-  const pressure=`
-useGroupPressure yes
-useFlexibleCell no
-langevinPiston on
-langevinPistonTarget 1.01325
-langevinPistonPeriod 100
-langevinPistonDecay 50
-langevinPistonTemp ${p.T}
-`;
-  const restraints=p.rest?`
-constraints on
-consRef restraints.pdb
-consKFile restraints.pdb
-consKCol B
-constraintScaling 1.0
-`:`constraints off
-`;
-  const stepsRun=Math.round((p.ns*1e6)/2);
-  generatedMDFiles={
-    'min.conf': common+`minimization 10000
-`,
-    'eq.conf': common+pressure+restraints+`run 250000
-`,
-    'prod.conf': common+pressure+`run ${stepsRun}
-`,
-    'README.md': `# Generic MD Simulation Files
+    // --- MOLECULAR DOCKING (HEURISTIC) ---
+    async function runApproximation() {
+        const file = document.getElementById('pdbFile').files[0];
+        const smi = (document.getElementById('smiles').value || '').trim();
+        if (!file || !smi || !rdkit) { alert('Provide PDB, SMILES, and wait for RDKit to load.'); return; }
+        
+        showLoading('Analyzing molecules & approximating dock...');
+        try {
+            const pdb = await file.text();
+            const ligInfo = processLigandSafe(smi);
+            if (!ligInfo) { throw new Error('Invalid SMILES string or RDKit error.'); }
+            
+            document.getElementById('mw').textContent = Number(ligInfo.mw).toFixed(2);
+            document.getElementById('logp').textContent = Number(ligInfo.logp).toFixed(2);
+            
+            if (!viewer) {
+                 viewer=$3Dmol.createViewer(document.getElementById('viewer'),{backgroundColor:'white'});
+            }
+            viewer.clear();
+            const pModel = viewer.addModel(pdb, 'pdb');
+            const pocketRes = findPocketHeuristic(pModel.getAtoms());
+            
+            pModel.setStyle({}, { cartoon: { color: 'spectrum' } });
+            viewer.addSurface($3Dmol.VDW, { opacity: 0.8, color: 'white' }, { resi: pocketRes });
+            pModel.setStyle({ resi: pocketRes }, { stick: { radius: 0.25, colorscheme: 'cyanCarbon' } });
+            
+            const ligModel = viewer.addModel(ligInfo.molblock, 'sdf');
+            ligModel.setStyle({}, { stick: { radius: 0.22 } });
+            viewer.zoomTo({ resi: pocketRes });
+            viewer.render();
+            
+            let score = -1.5 + (-0.035 * ligInfo.numHeavyAtoms) + (-0.7 * Math.min(ligInfo.hDonors, ligInfo.hAcceptors)) + (-0.25 * ligInfo.logp) + (0.3 * ligInfo.numRotatableBonds) + (Math.random() - 0.5) * 0.5;
+            score = Math.max(-12, Math.min(-4, score));
+            document.getElementById('aff').textContent = score.toFixed(2) + ' kcal/mol';
+            
+            appendLog({ protein: file.name, smiles: smi, score, mw: ligInfo.mw, logp: ligInfo.logp });
+        } catch (e) {
+            console.error(e);
+            alert('Docking approximation failed: ' + (e?.message || 'unknown error'));
+        } finally {
+            hideLoading();
+        }
+    }
+    
+    function processLigandSafe(smi){
+        let mol = null;
+        try {
+            mol = rdkit.get_mol(smi);
+            if (!mol) return null;
+            mol.add_hs();
+            if (typeof rdkit.EmbedMolecule === 'function') {
+                rdkit.EmbedMolecule(mol, JSON.stringify({ useRandomCoords: true, maxAttempts: 500 }));
+            }
+            if (typeof rdkit.UFFOptimizeMolecule === 'function') {
+                try { rdkit.UFFOptimizeMolecule(mol); } catch {}
+            }
+            const desc = JSON.parse(mol.get_descriptors());
+            const out = {
+                molblock: mol.get_molblock(),
+                mw: desc.exactmw,
+                logp: desc.MolLogP,
+                hDonors: desc.NumHDonors,
+                hAcceptors: desc.NumHAcceptors,
+                numRotatableBonds: desc.NumRotatableBonds,
+                numHeavyAtoms: mol.get_n_heavy_atoms?.() || desc.NumHeavyAtoms || 0
+            };
+            mol.delete?.();
+            return out;
+        } catch (e) {
+            if (mol && mol.delete) mol.delete();
+            return null;
+        }
+    }
 
-1) md-engine min.conf > min.log
-2) md-engine eq.conf  > eq.log
-3) md-engine prod.conf > prod.log
-`
-  };
-  const list=document.getElementById('fileList'); list.innerHTML=''; Object.keys(generatedMDFiles).forEach(name=>{const a=document.createElement('a'); a.textContent=`⬇ ${name}`; a.href=URL.createObjectURL(new Blob([generatedMDFiles[name]],{type:'text/plain'})); a.download=name; a.className='tab'; list.appendChild(a)});
-  document.getElementById('zipBtn').disabled=false;
-}
+    function findPocketHeuristic(atoms) {
+        if (!atoms.length) return [];
+        const byRes = {};
+        atoms.forEach(a => { (byRes[a.resi] = byRes[a.resi] || []).push(a); });
+        
+        let bestRes = null, bestN = -1, rx = 0, ry = 0, rz = 0;
+        for (const [resi, alist] of Object.entries(byRes)) {
+            rx = 0; ry = 0; rz = 0;
+            alist.forEach(a => { rx += a.x; ry += a.y; rz += a.z; });
+            rx /= alist.length; ry /= alist.length; rz /= alist.length;
+            const n = atoms.filter(a => { const dx = a.x - rx, dy = a.y - ry, dz = a.z - rz; return (dx * dx + dy * dy + dz * dz) < 100; }).length;
+            if (n > bestN) { bestN = n; bestRes = Number(resi); }
+        }
+        
+        const anchor = byRes[bestRes] || [];
+        rx = 0; ry = 0; rz = 0;
+        anchor.forEach(a => { rx += a.x; ry += a.y; rz += a.z; });
+        if (anchor.length) { rx /= anchor.length; ry /= anchor.length; rz /= anchor.length; }
+        
+        return [...new Set(atoms.filter(a => { const dx = a.x - rx, dy = a.y - ry, dz = a.z - rz; return (dx * dx + dy * dy + dz * dz) < 100; }).map(a => a.resi))];
+    }
+    
+    // --- DOCKING LOG ---
+    function appendLog({ protein, smiles, score, mw, logp }) {
+        const row = { ts: new Date(), protein, smiles, score: score.toFixed(2), mw: mw.toFixed(2), logp: logp.toFixed(2) };
+        dockingLog.unshift(row);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.ts.toLocaleString()}</td><td>${escapeHtml(row.protein)}</td><td style="word-break:break-all">${escapeHtml(row.smiles)}</td><td>${row.score}</td><td>${row.mw}</td><td>${row.logp}</td>`;
+        document.getElementById('logBody').prepend(tr);
+    }
+    
+    function escapeHtml(s) { return String(s).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[m])); }
+    
+    function exportCSV() {
+        if (!dockingLog.length) { alert('Log is empty.'); return; }
+        const header = ['Timestamp', 'Protein', 'SMILES', 'DeltaG_kcal_per_mol', 'MW', 'LogP'];
+        const lines = [header.join(',')].concat(dockingLog.map(r => [r.ts.toISOString(), `"${r.protein.replaceAll('"', '""')}"`, `"${r.smiles.replaceAll('"', '""')}"`, r.score, r.mw, r.logp].join(',')));
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'pharmsim_docking_log.csv';
+        a.click();
+    }
 
-document.getElementById('zipBtn').addEventListener('click', async ()=>{
-  if (!Object.keys(generatedMDFiles).length) return;
-  const zip = new JSZip();
-  for (const [k,v] of Object.entries(generatedMDFiles)) zip.file(k, v);
-  const blob = await zip.generateAsync({type:'blob'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'md_simulation_project.zip';
-  a.click();
-}); zip.file(k,v); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click() })('click',async()=>{ if(!Object.keys(generatedMDFiles).length) return; const zip=new JSZip(); for(const[k,v]of Object.entries(generatedMDFiles)) zip.file(k,v); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click() })
+    // --- WASM DOCKING (EXPERIMENTAL) ---
+    async function runWasmDock() {
+        if (typeof window.BrowserVina === 'undefined') { alert('In‑browser docking engine (browser-vina.js) not available.'); return; }
+        const recFile = document.getElementById('recPDBQT').files[0];
+        const ligFile = document.getElementById('ligPDBQT').files[0];
+        if (!recFile || !ligFile) { alert('Select receptor and ligand PDBQT files.'); return; }
+        
+        const center = { x: parseFloat(cx.value), y: parseFloat(cy.value), z: parseFloat(cz.value) };
+        const size = { x: parseFloat(sx.value), y: parseFloat(sy.value), z: parseFloat(sz.value) };
+        const params = { exhaustiveness: parseInt(exh.value), num_modes: parseInt(modes.value) };
+        
+        showLoading('Docking in browser (WASM)...');
+        try {
+            const engine = await window.BrowserVina.create({ locateFile: (p) => p });
+            const receptor = new Uint8Array(await recFile.arrayBuffer());
+            const ligand = new Uint8Array(await ligFile.arrayBuffer());
+            const result = await engine.dock({ receptor, ligand, center, size, ...params });
+            lastDockPosesPDBQT = result.posesPDBQT || '';
+            
+            viewer.clear();
+            viewer.addModel(new TextDecoder().decode(receptor), 'pdbqt');
+            viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+            if (lastDockPosesPDBQT) {
+                viewer.addModel(lastDockPosesPDBQT, 'pdbqt');
+                viewer.setStyle({ model: 1 }, { stick: { radius: 0.22 } });
+            }
+            viewer.zoomTo();
+            viewer.render();
+            
+            document.getElementById('savePoses').disabled = !lastDockPosesPDBQT;
+            appendLog({ protein: recFile.name, smiles: `PDBQT: ${ligFile.name}`, score: result.poses[0]?.affinity || 0, mw: 0, logp: 0 });
+        } catch (e) {
+            console.error(e);
+            alert('WASM Docking failed: ' + (e?.message || 'unknown error'));
+        } finally {
+            hideLoading();
+        }
+    }
+    
+    function downloadWasmPoses() {
+        if (!lastDockPosesPDBQT) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([lastDockPosesPDBQT], { type: 'text/plain' }));
+        a.download = 'poses.pdbqt';
+        a.click();
+    }
 
-// ------- Restraints PDB Builder -------
-function padRight(str,len){str=String(str);return str+" ".repeat(Math.max(0,len-str.length))}
-function formatFloat(num,width,dec){return (num>=0?" ":"-")+Math.abs(num).toFixed(dec).padStart(width-1,' ')}
-function buildRestraintsPDB(text){
-  const lines=text.split(/\r?\n/); const out=[]; const bbNames=new Set(['N','CA','C','O']);
-  for(const line of lines){
-    if(line.startsWith('ATOM')||line.startsWith('HETATM')){
-      const name=line.slice(12,16).trim();
-      // base line padded to 80 chars
-      let base=line.padEnd(80,' ');
-      const beta=bbNames.has(name)?2.0:0.0;
-      // Beta factor columns 61-66 (1-indexed) => slice(60,66)
-      base=base.slice(0,60)+formatFloat(beta,6,2)+base.slice(66);
-      out.push(base);
-    }else{ out.push(line) }
-  }
-  return out.join('\n')+"\n";
-}
+    // --- MD SETUP MODULE ---
+    function generateMDFiles() {
+        const p = { out: document.getElementById('md-out').value || 'output', T: +document.getElementById('md-temp').value || 310, ns: +document.getElementById('md-ns').value || 10, cuts: (document.getElementById('md-cuts').value || '10/12/14').split(/[\/ ,]+/).map(Number), rest: document.getElementById('md-restraints').checked };
+        const common = `structure system.psf\ncoordinates system.pdb\nset outputname ${p.out}\noutputname $outputname\n\nbinaryoutput yes\nparameters system.prm\nexclude scaled1-4\n1-4scaling 1.0\ntimestep 2.0\nrigidBonds all\nnonbondedFreq 1\nfullElectFrequency 2\nstepspercycle 20\n\nswitching on\nswitchdist ${p.cuts[0] || 10}\ncutoff ${p.cuts[1] || 12}\npairlistdist ${p.cuts[2] || 14}\n\nPME yes\nPMEGridSpacing 1.0\n\nlangevin on\nlangevinDamping 1.0\nlangevinTemp ${p.T}\nlangevinHydrogen no\n`;
+        const pressure = `\nuseGroupPressure yes\nuseFlexibleCell no\nlangevinPiston on\nlangevinPistonTarget 1.01325\nlangevinPistonPeriod 100\nlangevinPistonDecay 50\nlangevinPistonTemp ${p.T}\n`;
+        const restraints = p.rest ? `\nconstraints on\nconsRef restraints.pdb\nconsKFile restraints.pdb\nconsKCol B\nconstraintScaling 1.0\n` : `constraints off\n`;
+        generatedMDFiles = {
+            'min.conf': common + `minimization 10000\n`,
+            'eq.conf': common + pressure + restraints + `run 250000\n`,
+            'prod.conf': common + pressure + `run ${Math.round((p.ns * 1e6) / 2)}\n`,
+            'README.md': `# Generic MD Simulation Files\n\n1) md-engine min.conf > min.log\n2) md-engine eq.conf > eq.log\n3) md-engine prod.conf > prod.log\n`
+        };
+        const list = document.getElementById('fileList');
+        list.innerHTML = '';
+        Object.keys(generatedMDFiles).forEach(name => {
+            const a = document.createElement('a'); a.textContent = `⬇ ${name}`; a.href = URL.createObjectURL(new Blob([generatedMDFiles[name]], { type: 'text/plain' })); a.download = name; a.className = 'tab'; list.appendChild(a);
+        });
+        document.getElementById('zipBtn').disabled = false;
+    }
+    
+    async function downloadMDFiles() {
+        if (!Object.keys(generatedMDFiles).length) return;
+        const zip = new JSZip();
+        for (const [k, v] of Object.entries(generatedMDFiles)) zip.file(k, v);
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'md_simulation_project.zip';
+        a.click();
+    }
+    
+    async function buildRestraintsFile() {
+        const f = document.getElementById('md-pdb').files[0];
+        if (!f) { alert('Select a PDB file first.'); return; }
+        const txt = await f.text();
+        const out = []; const bb = new Set(['N', 'CA', 'C', 'O']);
+        for (const line of txt.split(/\r?\n/)) {
+            if (line.startsWith('ATOM') || line.startsWith('HETATM')) {
+                const beta = bb.has(line.slice(12, 16).trim()) ? 2.0 : 0.0;
+                out.push(line.slice(0, 60) + beta.toFixed(2).padStart(6, ' ') + line.slice(66));
+            } else { out.push(line); }
+        }
+        const res = out.join('\n') + "\n";
+        
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([res], { type: 'text/plain' }));
+        a.download = 'restraints.pdb'; a.textContent = '⬇ Download restraints.pdb'; a.className = 'tab';
+        const status = document.getElementById('restraintsStatus'); status.innerHTML = ''; status.append(a);
+        generatedMDFiles['restraints.pdb'] = res;
+    }
 
-document.getElementById('buildRestraints').addEventListener('click',async()=>{
-  const f=document.getElementById('md-pdb').files[0]; if(!f){alert('Select a PDB file first.');return}
-  const txt=await f.text(); const res=buildRestraintsPDB(txt);
-  // Make a download link and add to generated files for convenience
-  const blob=new Blob([res],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='restraints.pdb'; a.textContent='⬇ Download restraints.pdb'; a.className='tab';
-  const status=document.getElementById('restraintsStatus'); status.innerHTML=''; status.append(a);
-  generatedMDFiles['restraints.pdb']=res;
-});
+    // --- PUBLICATIONS ---
+    function renderPub(p, prepend = false) {
+        const card = document.createElement('div'); card.className = 'pub-card'; card.innerHTML = `<h4 style="margin:0 0 6px">${escapeHtml(p.title)}</h4><div style="color:#566">By ${escapeHtml(p.authors)} on ${p.date}</div><p style="margin:8px 0 0">${escapeHtml(p.abstract)}</p>`;
+        const list = document.getElementById('pub-list'); prepend ? list.prepend(card) : list.append(card);
+    }
+    
+    function submitPub() {
+        const title = document.getElementById('pub-title').value.trim(), authors = document.getElementById('pub-authors').value.trim(), abstract = document.getElementById('pub-abstract').value.trim();
+        if (!title || !authors || !abstract) { alert('Fill all fields.'); return; }
+        const p = { title, authors, abstract, date: new Date().toLocaleDateString() };
+        const arr = JSON.parse(localStorage.getItem('pharmsim_pubs') || '[]');
+        arr.unshift(p);
+        localStorage.setItem('pharmsim_pubs', JSON.stringify(arr));
+        renderPub(p, true);
+        document.getElementById('pub-title').value = ''; document.getElementById('pub-authors').value = ''; document.getElementById('pub-abstract').value = '';
+    }
+    
+    function loadPubs() {
+        (JSON.parse(localStorage.getItem('pharmsim_pubs') || '[]')).forEach(p => renderPub(p));
+    }
+    
+    // --- LEARNING CENTER ---
+    function loadTutorial(which) {
+        const box = document.getElementById('tutorialBox');
+        const map = {
+            pbpk: `<h4>PBPK Basics</h4><p>One‑compartment oral model using Bateman equation. Tune Dose, F, ka, ke, Vd then simulate.</p>`,
+            docking: `<h4>Docking Approximation</h4><ol><li>Pocket: largest buried region via residue neighborhood.</li><li>Score: empirical ΔG using size, logP, H‑bonding, rotors.</li></ol>`,
+            md: `<h4>MD Setup</h4><p>Generator creates text configs for minimization → equilibration → production with optional restraints. Use the in‑browser builder to create a matching <code>restraints.pdb</code>.</p>`
+        };
+        box.innerHTML = map[which] || '<p>Select a topic above.</p>';
+    }
 
-// ------- Publications -------
-function renderPub(p,prepend=false){const card=document.createElement('div'); card.className='pub-card'; card.innerHTML=`<h4 style="margin:0 0 6px">${escapeHtml(p.title)}</h4><div style="color:#566">By ${escapeHtml(p.authors)} on ${p.date}</div><p style="margin:8px 0 0">${escapeHtml(p.abstract)}</p>`; const list=document.getElementById('pub-list'); prepend?list.prepend(card):list.append(card)}
-function submitPub(){const title=document.getElementById('pub-title').value.trim(); const authors=document.getElementById('pub-authors').value.trim(); const abstract=document.getElementById('pub-abstract').value.trim(); if(!title||!authors||!abstract){alert('Fill all fields.');return} const p={title,authors,abstract,date:new Date().toLocaleDateString()}; const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'); arr.unshift(p); localStorage.setItem('pharmsim_pubs',JSON.stringify(arr)); renderPub(p,true); document.getElementById('pub-title').value=''; document.getElementById('pub-authors').value=''; document.getElementById('pub-abstract').value=''}
-document.getElementById('pubSubmit').addEventListener('click',submitPub)
-function loadPubs(){(JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]')).forEach(p=>renderPub(p))}
-
-// ------- Learning -------
-function loadTutorial(which){ const box=document.getElementById('tutorialBox'); const map={
-  pbpk:`<h4>PBPK Basics</h4><p>One‑compartment oral model using Bateman equation. Tune Dose, F, ka, ke, Vd then simulate.</p>`,
-  docking:`<h4>Docking Approximation</h4><ol><li>Pocket: largest buried region via residue neighborhood.</li><li>Score: empirical ΔG using size, logP, H‑bonding, rotors.</li></ol>`,
-  md:`<h4>MD Setup</h4><p>Generator creates text configs for minimization → equilibration → production with optional restraints. Use the in‑browser builder to create a matching <code>restraints.pdb</code>.</p>`
-}; box.innerHTML=map[which]||'<p>Select a topic above.</p>' }
-
-// ------- Shared helpers -------
-function parseCuts(v){const n=(v||'10/12/14').split(/[\/ ,]+/).map(Number); return{sw:n[0]||10,co:n[1]||12,pl:n[2]||14}}
-function steps(ns,dt){return Math.round((ns*1e6)/(dt||2))}
-function copyText(id){ navigator.clipboard.writeText(document.getElementById(id).textContent) }
-
-// ------- Boot -------
-buildCharts(); activate('md'); loadPubs();
+    // --- SHARED HELPERS ---
+    function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).textContent); }
+    
 </script>
 </body>
 </html>
+
