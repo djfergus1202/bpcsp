@@ -2,33 +2,23 @@
 const express = require("express");
 const path = require("path");
 const compression = require("compression");
-const helmet = require("helmet");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security headers (relaxed for in-browser libs, 3Dmol, RDKit, etc.)
-app.use(
-  helmet({
-    contentSecurityPolicy: false, // your app pulls from various CDNs
-    crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-  })
-);
+// Serve STATIC from the REPO ROOT (where your index.html is)
+const publicDir = __dirname; // ⬅ change from path.join(__dirname, "public")
+console.log("[boot] Serving static from:", publicDir);
 
-// Gzip / brotli (where supported)
 app.use(compression());
 
-// Health check for Render
-app.get("/healthz", (_req, res) => res.status(200).send("ok"));
+app.get("/healthz", (_req, res) => res.type("text/plain").send("ok"));
 
-// Serve static SPA
-const publicDir = path.join(__dirname, "public");
-app.use(express.static(publicDir, { maxAge: "1d", extensions: ["html"] }));
+// Serve files; add "html" extension fallback (so "/" serves index.html)
+app.use(express.static(publicDir, { extensions: ["html"], maxAge: "1d" }));
 
-// Single-page fallback
+// Root and SPA fallback
+app.get("/", (_req, res) => res.sendFile(path.join(publicDir, "index.html")));
 app.get("*", (_req, res) => res.sendFile(path.join(publicDir, "index.html")));
 
-app.listen(PORT, () => {
-  console.log(`PharmaSim Pro running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`[boot] Listening on :${PORT}`));
