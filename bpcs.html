@@ -376,7 +376,7 @@
                     </div>
                     <div class="control-group">
                         <label for="smilesInput">2. Enter Ligand (SMILES string)</label>
-                        <input type="text" id="smilesInput" placeholder="Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O">
+                        <input type="text" id="smilesInput" value="CC(=O)OC1=CC=CC=C1C(=O)O" placeholder="Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O">
                     </div>
                     <button id="runButton" onclick="runApproximation()" disabled>3. Run Docking Approximation</button>
                     <div class="info-box">
@@ -391,7 +391,7 @@
                     <div class="results-panel">
                         <div class="metric-grid">
                             <div class="metric-card">
-                                <div class="metric-label">Estimated Affinity</div>
+                                <div class="metric-label">Est. Binding Enthalpy</div>
                                 <div class="metric-value" id="binding-affinity">--</div>
                             </div>
                             <div class="metric-card">
@@ -588,8 +588,8 @@ mol addrep top
         document.querySelectorAll('.module-section').forEach(section => section.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
         
-        // The NAMD/VMD module was renamed to md_setup
-        const sectionId = (module === 'namd') ? 'md_setup-module' : `${module}-module`;
+        // Use a consistent ID naming scheme
+        const sectionId = `${module}-module`;
         const activeSection = document.getElementById(sectionId);
         if (activeSection) activeSection.classList.add('active');
 
@@ -621,7 +621,7 @@ mol addrep top
         try {
             // Step 1: Process ligand SMILES using RDKit
             const ligand = processLigand(smiles);
-            if (!ligand.mol) throw new Error("Invalid SMILES string provided.");
+            if (!ligand) throw new Error("Invalid SMILES string. Could not generate molecule.");
             
             // Update UI with calculated properties
             document.getElementById('ligand-mw').textContent = ligand.mw.toFixed(2);
@@ -632,7 +632,7 @@ mol addrep top
             const protein = await findBindingPocket(pdbData);
 
             // Step 3: Calculate the estimated binding score
-            const score = calculateBindingScore(protein, ligand);
+            const score = calculateBindingEnthalpy(protein, ligand);
             document.getElementById('binding-affinity').textContent = `${score.toFixed(2)} kcal/mol`;
 
             // Step 4: Display the final docked pose
@@ -649,24 +649,40 @@ mol addrep top
     /**
      * Processes a SMILES string to generate a 3D structure and calculate properties.
      * @param {string} smiles - The SMILES string of the ligand.
-     * @returns {object} An object containing the RDKit molecule object and its properties.
+     * @returns {object|null} An object containing the RDKit molecule object and its properties, or null if invalid.
      */
     function processLigand(smiles) {
-        const mol = rdkit.get_mol(smiles);
-        if (!mol) return { mol: null };
+        let mol = null;
+        try {
+            mol = rdkit.get_mol(smiles);
+            if (!mol) return null;
 
-        mol.add_hs();
-        mol.embed_molecule(); // Generate a 3D conformation
-        const details = JSON.parse(mol.get_descriptors());
+            mol.add_hs();
+            
+            // Correct RDKit.js function for embedding a molecule in 3D
+            const embedParams = JSON.stringify({"useRandomCoords": true, "maxAttempts": 1000});
+            const embedResult = rdkit.EmbedMolecule(mol, embedParams);
+            if (embedResult < 0) {
+                 console.warn("3D conformer generation failed, using unoptimized structure.");
+            }
+            rdkit.UFFOptimizeMolecule(mol); // Optimize the 3D structure
 
-        return {
-            mol,
-            molblock: mol.get_molblock(),
-            mw: details.exactmw,
-            logp: details.MolLogP,
-            hDonors: details.NumHDonors,
-            hAcceptors: details.NumHAcceptors
-        };
+            const details = JSON.parse(mol.get_descriptors());
+
+            return {
+                mol,
+                molblock: mol.get_molblock(),
+                mw: details.exactmw,
+                logp: details.MolLogP,
+                hDonors: details.NumHDonors,
+                hAcceptors: details.NumHAcceptors,
+                numRotatableBonds: details.NumRotatableBonds
+            };
+        } catch (e) {
+            console.error("RDKit processing error:", e);
+            if (mol) mol.delete(); // Clean up memory
+            return null;
+        }
     }
 
     /**
@@ -705,17 +721,35 @@ mol addrep top
     }
 
     /**
-     * An empirical scoring function to estimate binding affinity.
+     * An empirical scoring function to estimate binding enthalpy (free energy of binding, ΔG).
      * @param {object} protein - The processed protein object.
      * @param {object} ligand - The processed ligand object.
-     * @returns {number} The estimated binding affinity in kcal/mol.
+     * @returns {number} The estimated binding enthalpy in kcal/mol.
      */
-    function calculateBindingScore(protein, ligand) {
-        let score = -2.0;
-        score -= Math.abs(ligand.mw - 350) / 100;
-        score -= Math.abs(ligand.logp - 2.5);
-        score -= (Math.min(ligand.hDonors, 10) + Math.min(ligand.hAcceptors, 10)) * 0.4;
-        score += (Math.random() - 0.5);
+    function calculateBindingEnthalpy(protein, ligand) {
+        // This is a simplified, empirical linear free energy model
+        // ΔG = c0 + c_vdw*N_heavy + c_hbond*N_hbond + c_hydrophobic*LogP + c_rot*N_rot
+        const C = {
+            INTERCEPT: -1.5,      // Base affinity
+            VDW_PER_ATOM: -0.03,  // Favorable contribution per heavy atom
+            HBOND: -0.8,          // Favorable contribution per H-bond
+            HYDROPHOBIC: -0.2,    // Favorable contribution for lipophilicity
+            ROT_PENALTY: 0.3      // Unfavorable penalty for each rotatable bond
+        };
+
+        const numHeavyAtoms = ligand.mol.get_n_heavy_atoms();
+        const hBondTerm = Math.min(ligand.hDonors, ligand.hAcceptors); // A simple proxy
+
+        let score = C.INTERCEPT;
+        score += C.VDW_PER_ATOM * numHeavyAtoms;
+        score += C.HBOND * hBondTerm;
+        score += C.HYDROPHOBIC * ligand.logp;
+        score += C.ROT_PENALTY * ligand.numRotatableBonds;
+        
+        // Add a small random factor to simulate the inherent noise in real-world measurements/simulations
+        score += (Math.random() - 0.5) * 0.5;
+
+        // Clamp the score to a realistic range for drug-like molecules
         return Math.max(-12.0, Math.min(-4.0, score));
     }
 
@@ -964,7 +998,7 @@ constraintScaling    1.0
     function loadTutorial(topic) {
         const content = {
             pbpk: `<h3>PBPK Basics</h3><p>Physiologically-Based Pharmacokinetic (PBPK) models predict how a drug moves through the body over time. The one-compartment model used here is the simplest form, described by the Bateman equation. It assumes the body is a single, uniform container.</p><p>Key parameters are <strong>Dose</strong>, <strong>Bioavailability (F)</strong> (how much drug is absorbed), <strong>Absorption Rate (ka)</strong>, and <strong>Elimination Rate (ke)</strong>.</p>`,
-            docking: `<h3>Molecular Docking Approximation</h3><p>Docking predicts how a small molecule (ligand) binds to a large protein. True docking requires immense computational power to test trillions of possible poses.</p><p>This tool uses a clever approximation: <ol><li><strong>Pocket Finding:</strong> It finds the largest, most buried cavity on the protein surface, which is often the active site.</li><li><strong>Scoring:</strong> It uses an empirical formula to estimate the binding affinity based on the ligand's size, lipophilicity (LogP), and potential for hydrogen bonds.</li></ol> This gives a scientifically plausible estimate without needing a supercomputer.</p>`,
+            docking: `<h3>Molecular Docking Approximation</h3><p>Docking predicts how a small molecule (ligand) binds to a large protein. True docking requires immense computational power to test trillions of possible poses.</p><p>This tool uses a clever approximation: <ol><li><strong>Pocket Finding:</strong> It finds the largest, most buried cavity on the protein surface, which is often the active site.</li><li><strong>Scoring:</strong> It uses an empirical free energy function to estimate the binding enthalpy based on the ligand's size, lipophilicity (LogP), flexibility, and hydrogen bonding potential.</li></ol> This gives a scientifically plausible estimate without needing a supercomputer.</p>`,
             md_setup: `<h3>MD Simulation Setup</h3><p>Molecular Dynamics (MD) simulations model the movement of atoms in a system over time. This requires complex setup files.</p><p>This tool generates generic configuration files for MD engines like NAMD or GROMACS. You can adjust parameters like <strong>Temperature</strong> and <strong>Simulation Time</strong>, and the generator will create the necessary text files for minimization, equilibration, and production runs.</p>`
         };
         document.getElementById('tutorial-display').innerHTML = content[topic] || "<p>Select a topic to begin.</p>";
@@ -1001,5 +1035,4 @@ constraintScaling    1.0
     </script>
 </body>
 </html>
-
 
