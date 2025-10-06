@@ -1,1576 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PharmaSim Pro - Integrated Pharmaceutical Research & Publication Platform</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaSim Pro - Integrated Pharmaceutical Research Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240,248,255,0.98) 100%);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .main-container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .module-section {
+            display: none;
+        }
+        
+        .module-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+        }
+        
+        .control-panel {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        
+        .control-panel h2 {
+            color: #1e3c72;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(30,60,114,0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .control-group input[type="text"],
+        .control-group input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
 
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);color:#333;min-height:100vh;padding:0}
-    .header{background:linear-gradient(135deg,rgba(255,255,255,0.98) 0%,rgba(240,248,255,0.98) 100%);backdrop-filter:blur(10px);padding:20px 40px;box-shadow:0 4px 20px rgba(0,0,0,0.1);position:sticky;top:0;z-index:1000}
-    .header h1{font-size:2.2em;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px}
-    .header-subtitle{color:#666;font-size:1em;margin-bottom:5px}
-    .attribution{font-size:.85em;color:#888;font-style:italic}
-    .attribution a{color:#2a5298;text-decoration:none}
-    .attribution a:hover{text-decoration:underline}
-    .disclaimer-banner{background:linear-gradient(135deg,#fff3e0 0%,#ffe0b2 100%);border:2px solid #ff9800;border-radius:12px;padding:15px 20px;margin:20px 40px;box-shadow:0 4px 15px rgba(255,152,0,0.2)}
-    .disclaimer-banner h4{color:#e65100;margin-bottom:8px;display:flex;align-items:center;gap:10px}
-    .disclaimer-banner h4::before{content:'⚠️';font-size:1.2em}
-    .disclaimer-banner p{color:#5d4037;line-height:1.6;font-size:14px}
-    .disclaimer-banner .github-link{color:#e65100;font-weight:600;text-decoration:none}
-    .disclaimer-banner .github-link:hover{text-decoration:underline}
-    .nav-tabs{display:flex;gap:15px;margin-top:15px;border-bottom:2px solid rgba(30,60,114,0.1);padding-bottom:10px;flex-wrap:wrap}
-    .nav-tab{padding:10px 20px;background:#fff;color:#2a5298;border:2px solid #2a5298;border-radius:25px;cursor:pointer;font-weight:600;transition:.3s all;position:relative;overflow:hidden}
-    .nav-tab:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,82,152,0.3)}
-    .nav-tab.active{background:linear-gradient(135deg,#2a5298 0%,#1e3c72 100%);color:#fff;border-color:transparent}
-    .nav-tab.new-feature::after{content:'NEW';position:absolute;top:-5px;right:-5px;background:#f44336;color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:700}
-    .tooltip{position:absolute;background:#333;color:#fff;padding:8px 12px;border-radius:5px;font-size:12px;white-space:nowrap;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;top:-40px;left:50%;transform:translateX(-50%)}
-    .nav-tab:hover .tooltip{opacity:1}
-    .main-container{max-width:1600px;margin:30px auto;padding:0 20px}
-    .module-section{display:none}
-    .module-section.active{display:block;animation:fadeIn .5s ease}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .dashboard-grid{display:grid;grid-template-columns:320px 1fr;gap:25px}
-    .control-panel{background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:20px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,0.15);height:fit-content;position:sticky;top:180px}
-    .control-panel h2{color:#1e3c72;font-size:1.3em;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid rgba(30,60,114,0.1)}
-    .help-icon{display:inline-block;width:18px;height:18px;background:#2a5298;color:#fff;text-align:center;line-height:18px;border-radius:50%;font-size:11px;margin-left:8px;cursor:help;vertical-align:middle}
-    .help-text{position:absolute;background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;width:250px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;display:none}
-    .help-icon:hover + .help-text{display:block}
-    .control-group{margin-bottom:18px;position:relative}
-    .control-group label{display:flex;align-items:center;margin-bottom:8px;color:#555;font-weight:600;font-size:14px}
-    .control-group input[type="number"],
-    .control-group input[type="text"],
-    .control-group input[type="file"],
-    .control-group textarea,
-    .control-group select{width:100%;padding:10px 12px;border:2px solid #e0e6ed;border-radius:8px;font-size:14px;transition:.3s all;background:#f8f9fa;font-family:inherit}
-    .control-group textarea{resize:vertical;min-height:100px}
-    .control-group input:focus,.control-group select:focus,.control-group textarea:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,0.1)}
-    .control-group input[type="range"]{width:100%;margin-bottom:5px}
-    .value-display{font-size:12px;color:#777;text-align:right}
-    .button-group{display:flex;gap:10px;margin-top:20px}
-    button{flex:1;padding:12px 18px;background:linear-gradient(135deg,#2a5298 0%,#1e3c72 100%);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;transition:.3s all;box-shadow:0 4px 12px rgba(42,82,152,0.3)}
-    button:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(42,82,152,0.4)}
-    button.secondary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
-    button.danger{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}
-    button.success{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}
-    button.publish{background:linear-gradient(135deg,#00c853 0%,#4caf50 100%)}
-    .visualization-area{display:grid;grid-template-columns:repeat(auto-fit,minmax(450px,1fr));gap:25px}
-    .chart-container{background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:20px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,0.15);min-height:400px;position:relative}
-    .chart-container h3{color:#1e3c72;font-size:1.2em;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid rgba(30,60,114,0.1)}
-    .results-panel{background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:20px;padding:25px;margin-top:25px;box-shadow:0 10px 30px rgba(0,0,0,0.15)}
-    .results-panel h3{color:#1e3c72;font-size:1.3em;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid rgba(30,60,114,0.1)}
-    .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
-    .metric-card{background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);padding:20px;border-radius:15px;border:1px solid rgba(30,60,114,0.1);transition:.3s all;text-align:center}
-    .metric-card:hover{transform:translateY(-3px);box-shadow:0 8px 16px rgba(0,0,0,0.1)}
-    .metric-label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-    .metric-value{font-size:1.8em;font-weight:700;background:linear-gradient(135deg,#2a5298 0%,#1e3c72 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .info-box{background:linear-gradient(135deg,#e3f2fd 0%,#bbdefb 100%);border-left:4px solid #2a5298;border-radius:8px;padding:15px;margin:20px 0}
-    .info-box h4{color:#1e3c72;margin-bottom:8px;font-size:1.1em}
-    .info-box p{color:#555;line-height:1.6;font-size:14px}
-    .tab-buttons{display:flex;gap:10px;margin-bottom:20px;padding:10px;background:rgba(30,60,114,0.05);border-radius:10px}
-    .tab-button{padding:8px 16px;background:#fff;color:#2a5298;border:1px solid #2a5298;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;transition:.3s all}
-    .tab-button.active{background:#2a5298;color:#fff}
-    .tab-content{display:none}
-    .tab-content.active{display:block}
-    canvas,#molecularDisplay{width:100%!important;height:350px!important;border-radius:10px}
-    #molecularDisplay{position:relative;background:#f0f0f0}
-    .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:9999}
-    .loading-spinner{background:#fff;padding:30px;border-radius:15px;text-align:center}
-    .spinner{width:50px;height:50px;border:5px solid #f3f3f3;border-top:5px solid #2a5298;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
-    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-    .educational-tip{background:linear-gradient(135deg,#fff3e0 0%,#ffe0b2 100%);border-left:4px solid #ff9800;padding:12px;margin:15px 0;border-radius:8px;font-size:13px;color:#5d4037}
-    .educational-tip strong{color:#e65100}
-    .blog-post-form{background:#fff;border-radius:15px;padding:30px;margin:20px 0}
-    .blog-post-form h3{color:#1e3c72;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid rgba(30,60,114,0.1)}
-    .template-box{background:#f8f9fa;border:2px dashed #2a5298;border-radius:10px;padding:20px;margin:20px 0;font-family:'Courier New',monospace;font-size:13px;line-height:1.8}
-    .template-variable{color:#e65100;font-weight:700}
-    .blog-preview{background:#fff;border-radius:15px;padding:30px;margin:20px 0;box-shadow:0 5px 15px rgba(0,0,0,0.1)}
-    .blog-post-card{background:#fff;border-radius:15px;padding:25px;margin:20px 0;box-shadow:0 5px 15px rgba(0,0,0,0.1);transition:.3s all}
-    .blog-post-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,0.15)}
-    .blog-post-title{color:#1e3c72;font-size:1.5em;margin-bottom:10px}
-    .blog-post-meta{color:#888;font-size:.9em;margin-bottom:15px}
-    .blog-post-content{color:#333;line-height:1.8}
-    .data-table{width:100%;border-collapse:collapse;margin:20px 0}
-    .data-table th{background:#2a5298;color:#fff;padding:12px;text-align:left}
-    .data-table td{padding:10px 12px;border-bottom:1px solid #ddd}
-    .data-table tr:hover{background:#f5f5f5}
-    .capture-button{position:absolute;top:20px;right:20px;padding:8px 15px;background:#4caf50;color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;transition:.3s all}
-    .capture-button:hover{background:#45a049;transform:scale(1.05)}
-    .footer{background:linear-gradient(135deg,rgba(255,255,255,0.98) 0%,rgba(240,248,255,0.98) 100%);padding:30px 40px;margin-top:50px;text-align:center;border-top:2px solid rgba(30,60,114,0.1)}
-    .footer-content{max-width:1200px;margin:0 auto}
-    .footer-attribution{color:#666;font-size:14px;line-height:1.8}
-    .footer-links{margin-top:15px;display:flex;justify-content:center;gap:30px;flex-wrap:wrap}
-    .footer-links a{color:#2a5298;text-decoration:none;font-weight:600;transition:color .3s ease}
-    .footer-links a:hover{color:#1e3c72;text-decoration:underline}
-    @media (max-width:968px){.dashboard-grid{grid-template-columns:1fr}.control-panel{position:relative;top:0}.visualization-area{grid-template-columns:1fr}}
-  </style>
+        .control-group input:focus {
+            outline: none;
+            border-color: #2a5298;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(42,82,152,0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(42,82,152,0.3);
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(42,82,152,0.4);
+        }
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
-  <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+        button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .visualization-area {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        .chart-container {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            min-height: 400px;
+        }
+
+        #molecularDisplay {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .results-panel {
+            margin-top: 25px;
+            background: rgba(255,255,255,0.95);
+            padding: 25px;
+            border-radius: 20px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2a5298;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .info-box p { color: #555; line-height: 1.6; font-size: 14px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
 </head>
-
 <body>
-  <div class="header">
-    <h1>PharmaSim Pro</h1>
-    <p class="header-subtitle">Integrated Pharmaceutical Research & Publication Platform</p>
-    <p class="attribution">Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong> | Powered by <a href="https://www.anthropic.com" target="_blank">Anthropic Claude AI</a></p>
-    <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchModule('pbpk')">
-        PBPK/QSP Modeling <span class="tooltip">Physiologically-based pharmacokinetic modeling</span>
-      </button>
-      <button class="nav-tab" onclick="switchModule('clinical')">
-        Clinical Trial Design <span class="tooltip">Bayesian adaptive trial simulation</span>
-      </button>
-      <button class="nav-tab" onclick="switchModule('molecular')">
-        Molecular Dynamics <span class="tooltip">Protein and ligand interactions</span>
-      </button>
-      <button class="nav-tab new-feature" onclick="switchModule('publications')">
-        Research Publications <span class="tooltip">Share your findings</span>
-      </button>
-      <button class="nav-tab" onclick="switchModule('tutorial')">
-        Learning Center <span class="tooltip">Interactive tutorials and guides</span>
-      </button>
+    <div class="header">
+        <h1>PharmaSim Pro</h1>
+        <p>A local, browser-based interface for molecular docking.</p>
     </div>
-  </div>
-
-  <div class="disclaimer-banner">
-    <h4>Important Research Disclaimer</h4>
-    <p>
-      <strong>These computational models provide approximations for educational and exploratory purposes only.</strong>
-      All values generated represent theoretical estimates based on simplified mathematical models.
-      Results must be validated through proper in vitro, in vivo, and additional in silico studies before any critical decisions.
-      Models are inherently limited and can produce errors—always double-check calculations and consult with qualified professionals.
-      <br><br>
-      <strong>Never use these simulations as the sole basis for clinical or research decisions.</strong>
-      <br>
-      Source code available on <a href="https://github.com/pharmasim-pro" class="github-link" target="_blank">GitHub</a> for transparency and peer review.
-    </p>
-  </div>
-
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p>Running simulation...</p>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="spinner"></div>
+            <p id="loadingText">Running simulation on local server...</p>
+        </div>
     </div>
-  </div>
+    
+    <div class="main-container">
+        <div class="module-section active" id="molecular-module">
+            <div class="dashboard-grid">
+                <div class="control-panel">
+                    <h2>Molecular Docking</h2>
+                    <div class="control-group">
+                        <label for="pdbFile">1. Upload Protein (PDB file)</label>
+                        <input type="file" id="pdbFile" accept=".pdb">
+                    </div>
+                    <div class="control-group">
+                        <label for="smilesInput">2. Enter Ligand (SMILES string)</label>
+                        <input type="text" id="smilesInput" placeholder="e.g., Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O">
+                    </div>
+                    <button id="runButton" onclick="startMolecularSimulation()">3. Run Docking Simulation</button>
 
-  <div class="main-container">
-    <!-- PBPK/QSP Module -->
-    <div class="module-section active" id="pbpk-module">
-      <div class="dashboard-grid">
-        <div class="control-panel">
-          <h2>PBPK/QSP Parameters</h2>
-          <button class="capture-button" onclick="captureResults('pbpk')">📊 Capture for Publication</button>
-
-          <div class="tab-buttons">
-            <button class="tab-button active" onclick="switchTab('absorption','pbpk',this)">Absorption</button>
-            <button class="tab-button" onclick="switchTab('distribution','pbpk',this)">Distribution</button>
-            <button class="tab-button" onclick="switchTab('metabolism','pbpk',this)">Metabolism</button>
-            <button class="tab-button" onclick="switchTab('qsp','pbpk',this)">QSP</button>
-          </div>
-
-          <div class="tab-content active" id="absorption-tab">
-            <div class="control-group">
-              <label>Drug Name/ID</label>
-              <input type="text" id="drug-name" placeholder="e.g., Aspirin, Drug X">
-            </div>
-            <div class="control-group">
-              <label> Dose (mg)
-                <span class="help-icon">?</span>
-                <div class="help-text">Amount of drug administered. Higher doses lead to proportionally higher concentrations.</div>
-              </label>
-              <input type="number" id="dose" value="100" min="1" max="1000" step="10">
-              <div class="value-display">100 mg dose</div>
-            </div>
-            <div class="control-group">
-              <label> Bioavailability (F)
-                <span class="help-icon">?</span>
-                <div class="help-text">Fraction reaching systemic circulation (5–100% typical oral).</div>
-              </label>
-              <input type="number" id="bioavailability" value="80" min="0" max="100" step="5">
-              <div class="value-display">80% reaches systemic circulation</div>
-            </div>
-            <div class="control-group">
-              <label> Absorption Rate (ka)
-                <span class="help-icon">?</span>
-                <div class="help-text">First-order absorption rate constant (0.5–3.0 h⁻¹ typical).</div>
-              </label>
-              <input type="number" id="ka" value="1.5" step="0.1" min="0.1" max="5">
-              <div class="value-display">1.5 h⁻¹</div>
-            </div>
-            <div class="control-group">
-              <label> Formulation
-                <span class="help-icon">?</span>
-                <div class="help-text">Different formulations affect release and absorption.</div>
-              </label>
-              <select id="formulation">
-                <option value="immediate">Immediate Release</option>
-                <option value="extended">Extended Release</option>
-                <option value="enteric">Enteric Coated</option>
-                <option value="sublingual">Sublingual</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="tab-content" id="distribution-tab">
-            <div class="control-group">
-              <label> Molecular Weight (Da)
-                <span class="help-icon">?</span>
-                <div class="help-text">Affects tissue penetration (large >500 Da limited distribution).</div>
-              </label>
-              <input type="number" id="mw" value="350" step="10" min="100" max="2000">
-              <div class="value-display">350 Da</div>
-            </div>
-            <div class="control-group">
-              <label> Volume of Distribution (Vd)
-                <span class="help-icon">?</span>
-                <div class="help-text">Apparent volume: water-soluble ~40 L; lipophilic >100 L.</div>
-              </label>
-              <input type="number" id="vd" value="70" step="5" min="10" max="500">
-              <div class="value-display">70 L</div>
-            </div>
-            <div class="control-group">
-              <label> Plasma Protein Binding
-                <span class="help-icon">?</span>
-                <div class="help-text">Only unbound drug is active.</div>
-              </label>
-              <input type="number" id="protein-binding" value="90" min="0" max="99" step="1">
-              <div class="value-display">90% bound, 10% free</div>
-            </div>
-            <div class="control-group">
-              <label> LogP (Lipophilicity)
-                <span class="help-icon">?</span>
-                <div class="help-text">LogP < 0 hydrophilic; 1–3 drug-like; >5 very lipophilic.</div>
-              </label>
-              <input type="number" id="logp" value="2.5" step="0.1" min="-2" max="8">
-              <div class="value-display">2.5 (moderately lipophilic)</div>
-            </div>
-          </div>
-
-          <div class="tab-content" id="metabolism-tab">
-            <div class="control-group">
-              <label> Clearance (CL)
-                <span class="help-icon">?</span>
-                <div class="help-text">Volume of plasma cleared per hour.</div>
-              </label>
-              <input type="number" id="clearance" value="1.2" step="0.1">
-              <div class="value-display">1.2 L/h</div>
-            </div>
-            <div class="control-group">
-              <label> Primary Enzyme
-                <span class="help-icon">?</span>
-                <div class="help-text">CYP enzymes key for DDI simulations.</div>
-              </label>
-              <select id="enzyme">
-                <option value="cyp3a4">CYP3A4 (50% of drugs)</option>
-                <option value="cyp2d6">CYP2D6 (25% of drugs)</option>
-                <option value="cyp2c9">CYP2C9 (15% of drugs)</option>
-                <option value="cyp1a2">CYP1A2</option>
-                <option value="cyp2c19">CYP2C19</option>
-                <option value="ugt">UGT (Glucuronidation)</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label> Renal Function
-                <span class="help-icon">?</span>
-                <div class="help-text">Affects elimination rate constant.</div>
-              </label>
-              <select id="renal-function">
-                <option value="normal">Normal (CrCl > 90)</option>
-                <option value="mild">Mild Impairment (60–90)</option>
-                <option value="moderate">Moderate (30–60)</option>
-                <option value="severe">Severe (15–30)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="tab-content" id="qsp-tab">
-            <div class="control-group">
-              <label>Target Protein</label>
-              <input type="text" id="target-protein" placeholder="e.g., ACE2, EGFR, COX-2">
-            </div>
-            <div class="control-group">
-              <label> Target Receptor Type
-                <span class="help-icon">?</span>
-                <div class="help-text">Biological target class.</div>
-              </label>
-              <select id="target-receptor">
-                <option value="gpcr">GPCR</option>
-                <option value="kinase">Kinase</option>
-                <option value="nuclear">Nuclear Receptor</option>
-                <option value="ion-channel">Ion Channel</option>
-                <option value="enzyme">Enzyme</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label> EC50 (nM)
-                <span class="help-icon">?</span>
-                <div class="help-text">Concentration producing 50% effect.</div>
-              </label>
-              <input type="number" id="ec50" value="50" step="5">
-            </div>
-            <div class="control-group">
-              <label> Hill Coefficient
-                <span class="help-icon">?</span>
-                <div class="help-text">Steepness of dose-response.</div>
-              </label>
-              <input type="number" id="hill" value="1.5" step="0.1">
-            </div>
-          </div>
-
-          <div class="button-group">
-            <button onclick="runPBPKSimulation()">Run PBPK Simulation</button>
-            <button class="secondary" onclick="loadPreset('pbpk')">Random Example</button>
-          </div>
-
-          <div class="info-box" style="margin-top:15px;">
-            <h4>🎯 Quick Drug Comparisons</h4>
-            <p style="margin-bottom:10px;">Try these different drug types to see how parameters affect PK:</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button onclick="loadSpecificDrug('hydrophilic')" style="flex:1;padding:8px;font-size:12px;">Hydrophilic</button>
-              <button onclick="loadSpecificDrug('lipophilic')" style="flex:1;padding:8px;font-size:12px;">Lipophilic</button>
-              <button onclick="loadSpecificDrug('high-clearance')" style="flex:1;padding:8px;font-size:12px;">High Clearance</button>
-            </div>
-          </div>
-
-          <div class="educational-tip">
-            <strong>💡 Learning Tip:</strong> Compare hydrophilic vs lipophilic drugs to see how LogP affects tissue distribution!
-          </div>
-        </div>
-
-        <div class="visualization-area">
-          <div class="chart-container">
-            <h3>Plasma Concentration Profile</h3>
-            <canvas id="pkChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Target Occupancy</h3>
-            <canvas id="qspChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Tissue Distribution</h3>
-            <canvas id="tissueChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Drug-Drug Interactions</h3>
-            <canvas id="ddiChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="results-panel">
-        <h3>Pharmacokinetic Parameters</h3>
-        <div class="metric-grid">
-          <div class="metric-card"><div class="metric-label">Cmax</div><div class="metric-value" id="cmax">--</div></div>
-          <div class="metric-card"><div class="metric-label">Tmax</div><div class="metric-value" id="tmax">--</div></div>
-          <div class="metric-card"><div class="metric-label">AUC₀₋∞</div><div class="metric-value" id="auc">--</div></div>
-          <div class="metric-card"><div class="metric-label">Half-life</div><div class="metric-value" id="halflife">--</div></div>
-          <div class="metric-card"><div class="metric-label">Clearance</div><div class="metric-value" id="cl-calc">--</div></div>
-          <div class="metric-card"><div class="metric-label">Vss</div><div class="metric-value" id="vss">--</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Clinical Trial Module -->
-    <div class="module-section" id="clinical-module">
-      <div class="dashboard-grid">
-        <div class="control-panel">
-          <h2>Clinical Trial Design</h2>
-          <button class="capture-button" onclick="captureResults('clinical')">📊 Capture for Publication</button>
-
-          <div class="info-box">
-            <h4>Phase 1 Trial Objectives</h4>
-            <p>Determine MTD and RP2D while minimizing exposure to toxic doses.</p>
-          </div>
-
-          <div class="control-group">
-            <label>Study Drug Name</label>
-            <input type="text" id="study-drug-name" placeholder="e.g., Novel Kinase Inhibitor X">
-          </div>
-
-          <div class="control-group">
-            <label> Design Type
-              <span class="help-icon">?</span>
-              <div class="help-text">Choose between traditional and interval-based designs.</div>
-            </label>
-            <select id="design-type" onchange="updateDesignInfo()">
-              <option value="3plus3">3+3 Traditional</option>
-              <option value="boin">BOIN - Bayesian Optimal Interval (lite)</option>
-              <option value="crm">CRM (not enabled in lite)</option>
-              <option value="ewoc">EWOC (not enabled in lite)</option>
-              <option value="blrm">BLRM (not enabled in lite)</option>
-              <option value="mTPI">mTPI (not enabled in lite)</option>
-            </select>
-          </div>
-
-          <div id="design-info" class="info-box" style="margin-top:15px;">
-            <h4>3+3 Design</h4>
-            <p>Traditional rule-based design. Simple but inefficient.</p>
-          </div>
-
-          <div class="control-group">
-            <label> Target DLT Rate
-              <span class="help-icon">?</span>
-              <div class="help-text">Usually 20–33% for oncology trials.</div>
-            </label>
-            <input type="number" id="target-tox" value="0.25" min="0.1" max="0.4" step="0.05">
-            <div class="value-display">25% target toxicity</div>
-          </div>
-
-          <div class="control-group">
-            <label> Starting Dose (mg)
-              <span class="help-icon">?</span>
-              <div class="help-text">Often 1/10 MABEL.</div>
-            </label>
-            <input type="number" id="start-dose" value="10" step="5">
-          </div>
-
-          <div class="control-group">
-            <label> Maximum Dose (mg)
-              <span class="help-icon">?</span>
-              <div class="help-text">Safety ceiling based on preclinical data.</div>
-            </label>
-            <input type="number" id="max-dose" value="200" step="10">
-          </div>
-
-          <div class="control-group">
-            <label> Dose Escalation Scheme
-              <span class="help-icon">?</span>
-              <div class="help-text">How doses increase between cohorts.</div>
-            </label>
-            <select id="escalation-scheme">
-              <option value="fibonacci">Modified Fibonacci</option>
-              <option value="doubling">Doubling</option>
-              <option value="pharmacologic">Pharmacologically-guided</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-
-          <div class="control-group">
-            <label>Number of Dose Levels</label>
-            <input type="number" id="cohorts" value="6" min="3" max="10">
-          </div>
-
-          <div class="control-group">
-            <label>Cohort Size</label>
-            <input type="number" id="cohort-size" value="3" min="1" max="6">
-          </div>
-
-          <div class="button-group">
-            <button onclick="runTrialSimulation()">Run Single Trial</button>
-            <button class="secondary" onclick="runMonteCarloTrials()">Run 1000 Trials</button>
-            <button class="success" onclick="compareDesigns()">Compare All Designs</button>
-          </div>
-
-          <div class="educational-tip">
-            <strong>💡 Tip:</strong> The BOIN-like design is often more efficient than 3+3.
-          </div>
-        </div>
-
-        <div class="visualization-area">
-          <div class="chart-container">
-            <h3>Dose Escalation Progress</h3>
-            <canvas id="trialChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Dose-Toxicity Curve</h3>
-            <canvas id="toxicityChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Design Performance Comparison</h3>
-            <canvas id="comparisonChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Operating Characteristics</h3>
-            <canvas id="ocChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="results-panel">
-        <h3>Trial Results</h3>
-        <div class="metric-grid">
-          <div class="metric-card"><div class="metric-label">MTD Estimate</div><div class="metric-value" id="mtd">--</div></div>
-          <div class="metric-card"><div class="metric-label">RP2D</div><div class="metric-value" id="rp2d">--</div></div>
-          <div class="metric-card"><div class="metric-label">DLT Rate at MTD</div><div class="metric-value" id="dlt-rate">--</div></div>
-          <div class="metric-card"><div class="metric-label">Total Patients</div><div class="metric-value" id="total-patients">--</div></div>
-          <div class="metric-card"><div class="metric-label">Patients with DLT</div><div class="metric-value" id="patients-dlt">--</div></div>
-          <div class="metric-card"><div class="metric-label">Trial Duration</div><div class="metric-value" id="trial-duration">--</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Molecular Dynamics Module -->
-    <div class="module-section" id="molecular-module">
-      <div class="dashboard-grid">
-        <div class="control-panel">
-          <h2>Molecular Simulations</h2>
-          <button class="capture-button" onclick="captureResults('molecular')">📊 Capture for Publication</button>
-
-          <div class="tab-buttons">
-            <button class="tab-button active" onclick="switchTab('structure','molecular',this)">Structure</button>
-            <button class="tab-button" onclick="switchTab('dynamics','molecular',this)">Dynamics</button>
-            <button class="tab-button" onclick="switchTab('binding','molecular',this)">Binding</button>
-          </div>
-
-          <div class="tab-content active" id="structure-tab">
-            <div class="control-group">
-              <label> Load PDB Structure
-                <span class="help-icon">?</span>
-                <div class="help-text">Upload a Protein Data Bank file to visualize structure.</div>
-              </label>
-              <input type="file" id="pdbFile" accept=".pdb">
-            </div>
-            <div class="control-group">
-              <label> Or Enter Drug SMILES
-                <span class="help-icon">?</span>
-                <div class="help-text">Simplified molecular-input line-entry system notation.</div>
-              </label>
-              <input type="text" id="smilesInput" placeholder="e.g., CC(=O)OC1=CC=CC=C1C(=O)O for Aspirin">
-            </div>
-            <button onclick="loadMolecularStructure()">Load Structure</button>
-
-            <div class="educational-tip">
-              <strong>Example SMILES:</strong><br>
-              • Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O<br>
-              • Caffeine: CN1C=NC2=C1C(=O)N(C(=O)N2)C<br>
-              • Ibuprofen: CC(C)CC1=CC=C(C=C1)C(C)C(=O)O
-            </div>
-          </div>
-
-          <div class="tab-content" id="dynamics-tab">
-            <div class="control-group">
-              <label> Simulation Type
-                <span class="help-icon">?</span>
-                <div class="help-text">Different molecular simulation methods.</div>
-              </label>
-              <select id="sim-type">
-                <option value="md">Molecular Dynamics</option>
-                <option value="mc">Monte Carlo</option>
-                <option value="docking">Molecular Docking</option>
-                <option value="qm">Quantum Mechanics</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>Temperature (K)</label>
-              <input type="range" id="mdTemp" min="100" max="500" value="300">
-              <div class="value-display"><span id="mdTempValue">300</span> K (27°C)</div>
-            </div>
-            <div class="control-group">
-              <label>Force Field</label>
-              <select id="forceField">
-                <option value="amber">AMBER (proteins)</option>
-                <option value="charmm">CHARMM (biomolecules)</option>
-                <option value="opls">OPLS (organic molecules)</option>
-                <option value="gromos">GROMOS (united atom)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="tab-content" id="binding-tab">
-            <div class="control-group">
-              <label>Binding Site
-                <span class="help-icon">?</span>
-                <div class="help-text">Active site or allosteric binding location.</div>
-              </label>
-              <select id="binding-site">
-                <option value="active">Active Site</option>
-                <option value="allosteric">Allosteric Site</option>
-                <option value="interface">Protein-Protein Interface</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>Docking Algorithm</label>
-              <select id="docking-algorithm">
-                <option value="rigid">Rigid Docking</option>
-                <option value="flexible">Flexible Docking</option>
-                <option value="ensemble">Ensemble Docking</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>Scoring Function</label>
-              <select id="scoring">
-                <option value="empirical">Empirical</option>
-                <option value="knowledge">Knowledge-based</option>
-                <option value="force">Force Field</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="button-group">
-            <button onclick="startMolecularSimulation()">Start Simulation</button>
-            <button class="danger" onclick="stopMolecularSimulation()">Stop</button>
-            <button class="secondary" onclick="exportMolecularData()">Export Data</button>
-          </div>
-        </div>
-
-        <div class="visualization-area">
-          <div class="chart-container">
-            <h3>3D Molecular Structure</h3>
-            <div id="molecularDisplay"></div>
-          </div>
-          <div class="chart-container">
-            <h3>Energy Profile</h3>
-            <canvas id="energyChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>RMSD Over Time</h3>
-            <canvas id="rmsdChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Interaction Analysis</h3>
-            <canvas id="interactionChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="results-panel">
-        <h3>Simulation Metrics</h3>
-        <div class="metric-grid">
-          <div class="metric-card"><div class="metric-label">Total Energy</div><div class="metric-value" id="total-energy">--</div></div>
-          <div class="metric-card"><div class="metric-label">Binding Affinity</div><div class="metric-value" id="binding-affinity">--</div></div>
-          <div class="metric-card"><div class="metric-label">RMSD</div><div class="metric-value" id="rmsd">--</div></div>
-          <div class="metric-card"><div class="metric-label">H-Bonds</div><div class="metric-value" id="hbonds">--</div></div>
-          <div class="metric-card"><div class="metric-label">Radius of Gyration</div><div class="metric-value" id="rg">--</div></div>
-          <div class="metric-card"><div class="metric-label">SASA</div><div class="metric-value" id="sasa">--</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Publications Module -->
-    <div class="module-section" id="publications-module">
-      <div style="max-width:1200px;margin:0 auto;">
-        <div class="chart-container">
-          <h3>Research Publication Center</h3>
-          <p style="color:#666;margin-bottom:20px;">Share your computational findings with the research community</p>
-
-          <div class="blog-post-form">
-            <h3>Create New Publication</h3>
-
-            <div class="control-group"><label>Publication Title</label><input type="text" id="pub-title" placeholder="e.g., In Silico Analysis of Drug X Binding to Protein Y"></div>
-            <div class="control-group"><label>Author(s)</label><input type="text" id="pub-authors" placeholder="Your name and affiliations"></div>
-            <div class="control-group"><label>Drug/Compound Name</label><input type="text" id="pub-drug" placeholder="e.g., Novel Kinase Inhibitor X"></div>
-            <div class="control-group"><label>Target Protein</label><input type="text" id="pub-protein" placeholder="e.g., EGFR, COX-2, ACE2"></div>
-            <div class="control-group"><label>Key Findings</label><textarea id="pub-findings" placeholder="Describe your main discoveries and their implications..."></textarea></div>
-            <div class="control-group"><label>Data Values</label><textarea id="pub-data" placeholder="Include relevant metrics: EC50, Kd, clearance, half-life, etc."></textarea></div>
-            <div class="control-group"><label>Implications for Early-Stage Scientists</label><textarea id="pub-implications" placeholder="What does this mean for future research? Suggested next steps?"></textarea></div>
-
-            <div class="template-box">
-              <strong>Publication Template:</strong><br><br>
-              <span class="template-variable">[TITLE]</span><br>
-              Authors: <span class="template-variable">[AUTHORS]</span><br>
-              Date: <span class="template-variable">[DATE]</span><br><br>
-              <strong>Abstract:</strong><br>
-              We performed computational modeling of <span class="template-variable">[DRUG NAME]</span>
-              interaction with <span class="template-variable">[PROTEIN NAME]</span> using PharmaSim Pro
-              (Ferguson, D.; Anthropic Claude AI).<br><br>
-              <strong>Key Parameters:</strong><br>
-              <span class="template-variable">[DATA VALUES]</span><br><br>
-              <strong>Major Findings:</strong><br>
-              <span class="template-variable">[KEY FINDINGS]</span><br><br>
-              <strong>Implications:</strong><br>
-              <span class="template-variable">[IMPLICATIONS FOR SCIENTISTS]</span><br><br>
-              <strong>Disclaimer:</strong><br>
-              These computational predictions require validation through experimental studies.<br><br>
-              <strong>Citation:</strong><br>
-              Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) powered by Anthropic Claude AI.
-            </div>
-
-            <div class="button-group">
-              <button class="publish" onclick="publishFindings()">Publish Findings</button>
-              <button class="secondary" onclick="previewPublication()">Preview</button>
-              <button onclick="clearPublication()">Clear Form</button>
-            </div>
-          </div>
-
-          <div id="publication-preview" class="blog-preview" style="display:none;"></div>
-
-          <div style="margin-top:40px;">
-            <h3>Recent Publications</h3>
-            <div id="publications-list">
-              <div class="blog-post-card">
-                <h4 class="blog-post-title">Example: PBPK Modeling of Novel JAK Inhibitor</h4>
-                <div class="blog-post-meta">By Research Team A • January 15, 2025</div>
-                <div class="blog-post-content">
-                  Computational analysis revealed favorable pharmacokinetic properties with
-                  85% bioavailability, 1.2 L/h clearance, and 12-hour half-life. Target
-                  occupancy reached 90% at steady state. Further in vitro validation recommended.
+                    <div class="info-box">
+                        <p><strong>Instructions:</strong> This page sends data to a local Python server (server.py) for processing. Please ensure the server is running on your computer for the simulation to work.</p>
+                    </div>
                 </div>
-              </div>
-              <div class="blog-post-card">
-                <h4 class="blog-post-title">Example: Bayesian Dose-Finding Simulation for Anti-PD1 Antibody</h4>
-                <div class="blog-post-meta">By Team B • January 10, 2025</div>
-                <div class="blog-post-content">
-                  Compared 6 trial designs for Phase 1 dose escalation. BOIN design showed
-                  optimal performance with 85% MTD identification rate using 25% fewer patients
-                  than traditional 3+3. Recommended starting dose: 0.5 mg/kg with escalation
-                  to 10 mg/kg maximum.
+                
+                <div class="visualization-area">
+                    <div class="chart-container">
+                        <h3>3D Docking Visualization</h3>
+                        <div id="molecularDisplay"></div>
+                    </div>
+                    <div class="results-panel">
+                        <div class="metric-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Binding Affinity</div>
+                                <div class="metric-value" id="binding-affinity">--</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-
-      </div>
     </div>
+    
+    <script>
+        let viewer;
+        let proteinModel;
 
-    <!-- Learning Center -->
-    <div class="module-section" id="tutorial-module">
-      <div style="max-width:1200px;margin:0 auto;">
-        <div class="chart-container" style="margin-bottom:25px;">
-          <h3>Welcome to the Learning Center</h3>
-          <div class="info-box">
-            <h4>Getting Started with PharmaSim Pro</h4>
-            <p>This integrated platform combines:</p>
-            <ul style="margin:15px 0;padding-left:20px;line-height:1.8;">
-              <li><strong>PBPK/QSP Modeling</strong></li>
-              <li><strong>Clinical Trial Design</strong></li>
-              <li><strong>Molecular Dynamics</strong></li>
-              <li><strong>Research Publications</strong></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="dashboard-grid">
-          <div class="control-panel">
-            <h2>Interactive Tutorials</h2>
-            <div class="button-group" style="flex-direction:column;">
-              <button onclick="startTutorial('pbpk-basics')">PBPK Basics</button>
-              <button onclick="startTutorial('trial-designs')">Understanding Trial Designs</button>
-              <button onclick="startTutorial('molecular-intro')">Molecular Simulations 101</button>
-              <button onclick="startTutorial('publication-guide')">How to Publish Findings</button>
-              <button onclick="startTutorial('case-study')">Complete Case Study</button>
-            </div>
-            <div class="info-box" style="margin-top:20px;">
-              <h4>Key Concepts</h4>
-              <p>Click on any tutorial to begin an interactive guided walkthrough.</p>
-            </div>
-          </div>
-
-          <div class="visualization-area">
-            <div class="chart-container" id="tutorial-content">
-              <h3>Select a Tutorial</h3>
-              <div class="educational-tip">
-                <strong>Recommended Path:</strong>
-                <ol style="margin:10px 0;padding-left:20px;line-height:1.8;">
-                  <li>PBPK Basics</li>
-                  <li>Clinical Trial Designs</li>
-                  <li>Molecular Simulations</li>
-                  <li>Publish Findings</li>
-                  <li>Integrated Case Study</li>
-                </ol>
-              </div>
-              <div class="disclaimer-banner" style="margin-top:20px;">
-                <h4>Remember</h4>
-                <p>All simulations are theoretical estimates and require experimental validation.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div class="footer-content">
-      <div class="footer-attribution">
-        <strong>PharmaSim Pro</strong><br>
-        Created by <strong>David Ferguson, BS, MS, Pharm.D. Candidate</strong><br>
-        Powered by <strong>Anthropic Claude AI</strong><br>
-        Version 1.0.0 | January 2025
-      </div>
-      <div class="footer-links">
-        <a href="https://github.com/pharmasim-pro" target="_blank">GitHub Repository</a>
-        <a href="#" onclick="showAbout()">About</a>
-        <a href="#" onclick="showDisclaimer()">Full Disclaimer</a>
-        <a href="#" onclick="showCitation()">How to Cite</a>
-        <a href="mailto:contact@pharmasim.pro">Contact</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== Functional Simulation Core ===== -->
-  <script>
-    // ---------- Globals ----------
-    let charts = {};
-    let currentModule = 'pbpk';
-    let capturedData = {};
-    let rdkit;
-    let viewer;
-    let mdAnim = null;
-
-    // RDKit init
-    window.initRDKitModule().then(function(RDKit) {
-      rdkit = RDKit;
-      console.log("RDKit version: " + rdkit.version());
-    }).catch(() => console.error("Failed to load RDKit module."));
-
-    // Utils
-    const clamp = (x,lo,hi)=>Math.max(lo,Math.min(hi,x));
-    const mean = arr => arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
-    const trapz=(x,y)=>y.slice(1).reduce((acc,yi,i)=>acc+(yi+y[i])*(x[i+1]-x[i])/2,0);
-    function ngmL_to_nM(c_ngmL, MW){ return (1000/MW)*c_ngmL; } // 1 ng/mL = 1000/MW nM
-
-    // Charts
-    function initializeCharts(){
-      const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#333'}}},
-        scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#666'}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#666'}}}};
-      const get=id=>document.getElementById(id);
-
-      charts.pk=new Chart(get('pkChart'),{type:'line',data:{labels:[],datasets:[{label:'Plasma Concentration',data:[],borderColor:'#2a5298',backgroundColor:'rgba(42,82,152,0.1)',tension:.25}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Concentration (ng/mL)'}},x:{...baseOpts.scales.x,title:{display:true,text:'Time (h)'}}}});
-
-      charts.qsp=new Chart(get('qspChart'),{type:'line',data:{labels:[],datasets:[{label:'Target Occupancy',data:[],borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',tension:.25}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Occupancy (%)'},min:0,max:100},x:{...baseOpts.scales.x,title:{display:true,text:'Time (h)'}}}});
-
-      charts.tissue=new Chart(get('tissueChart'),{type:'bar',data:{labels:['Plasma','Liver','Kidney','Brain','Muscle','Fat','Heart','Bone'],datasets:[{label:'Tissue Concentration (rel.)',data:[100,85,120,15,45,150,60,10],backgroundColor:['#2a5298','#667eea','#4facfe','#00f2fe','#764ba2','#7e8ba3','#1e3c72','#f093fb']}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Relative Concentration (%)'}}}});
-
-      charts.ddi=new Chart(get('ddiChart'),{type:'line',data:{labels:[],datasets:[
-        {label:'Without Inhibitor',data:[],borderColor:'#2a5298',backgroundColor:'rgba(42,82,152,0.1)',tension:.25},
-        {label:'With CYP Inhibitor',data:[],borderColor:'#f5576c',backgroundColor:'rgba(245,87,108,0.1)',tension:.25}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Concentration (ng/mL)'}},x:{...baseOpts.scales.x,title:{display:true,text:'Time (h)'}}}});
-
-      charts.trial=new Chart(get('trialChart'),{type:'scatter',data:{datasets:[
-        {label:'No DLT',data:[],backgroundColor:'#4facfe',pointRadius:7},
-        {label:'DLT',data:[],backgroundColor:'#f5576c',pointRadius:7}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Dose (mg)'}},x:{...baseOpts.scales.x,title:{display:true,text:'Patient #'}}}});
-
-      charts.toxicity=new Chart(get('toxicityChart'),{type:'line',data:{labels:[],datasets:[
-        {label:'True Toxicity',data:[],borderColor:'#f5576c',backgroundColor:'rgba(245,87,108,0.1)',tension:.25},
-        {label:'Estimated Toxicity',data:[],borderColor:'#2a5298',backgroundColor:'rgba(42,82,152,0.1)',tension:.25,borderDash:[5,5]}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Toxicity Probability'},min:0,max:1},x:{...baseOpts.scales.x,title:{display:true,text:'Dose (mg)'}}}});
-
-      charts.comparison=new Chart(get('comparisonChart'),{type:'bar',data:{labels:['3+3','BOIN-like'],datasets:[
-        {label:'MTD Success (%)',data:[0,0],backgroundColor:'#2a5298'},
-        {label:'Avg Patients',data:[0,0],backgroundColor:'#667eea'},
-        {label:'Overdose Rate (%)',data:[0,0],backgroundColor:'#f5576c'}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Value'}}}});
-
-      charts.energy=new Chart(get('energyChart'),{type:'line',data:{labels:[],datasets:[{label:'Total Energy',data:[],borderColor:'#2a5298',backgroundColor:'rgba(42,82,152,0.1)',tension:.2}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Energy (kJ/mol)'}},x:{...baseOpts.scales.x,title:{display:true,text:'Time (ps)'}}}});
-
-      charts.rmsd=new Chart(get('rmsdChart'),{type:'line',data:{labels:[],datasets:[{label:'RMSD',data:[],borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',tension:.2}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'RMSD (Å)'}},x:{...baseOpts.scales.x,title:{display:true,text:'Time (ps)'}}}});
-
-      charts.interaction=new Chart(get('interactionChart'),{type:'bar',data:{labels:['H-Bonds','Hydrophobic','Electrostatic','VdW'],datasets:[{label:'Count',data:[0,0,0,0],backgroundColor:['#2a5298','#667eea','#4facfe','#00f2fe']}]},
-        options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,title:{display:true,text:'Interactions'}}}});
-    }
-
-    // Module switching
-    function switchModule(module){
-      document.querySelectorAll('.module-section').forEach(s=>s.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-      document.getElementById(module+'-module').classList.add('active');
-      document.querySelector(`.nav-tab[onclick="switchModule('${module}')"]`).classList.add('active');
-      currentModule=module;
-    }
-    function switchTab(tab,module,el){
-      document.querySelectorAll(`#${module}-module .tab-content`).forEach(c=>c.classList.remove('active'));
-      document.querySelectorAll(`#${module}-module .tab-button`).forEach(b=>b.classList.remove('active'));
-      document.getElementById(`${tab}-tab`).classList.add('active');
-      (el||event?.target)?.classList.add('active');
-    }
-
-    // Loading overlay
-    function showLoading(){document.getElementById('loadingOverlay').style.display='flex'}
-    function hideLoading(){document.getElementById('loadingOverlay').style.display='none'}
-
-    // ----- PBPK/QSP -----
-    class PBPKModel{
-      constructor(p){
-        this.name=p.name||'Unknown Drug';
-        this.dose=+p.dose||100; // mg
-        this.F=(+p.bioavailability||80)/100;
-        this.ka=+p.ka||1.5;
-        this.CL=+p.clearance||1.2; // L/h
-        this.Vd=+p.vd||70; // L
-        this.pb=(+p.proteinBinding||90)/100;
-        this.fu=1-this.pb;
-        this.logP=+p.logp||2.5;
-        this.MW=+p.mw||350;
-        this.formulation=p.formulation||'immediate';
-        this.enzyme=p.enzyme||'cyp3a4';
-        this.renalFunction=p.renalFunction||'normal';
-        const renalMult={normal:1.0,mild:0.9,moderate:0.7,severe:0.5}[this.renalFunction]||1;
-        this.ke=(this.CL*renalMult)/this.Vd;
-      }
-      _formulationMods(){
-        let ka=this.ka, lag=0, bioMod=1;
-        if(this.formulation==='extended') ka*=0.25;
-        else if(this.formulation==='enteric'){lag=1.2; ka*=0.8;}
-        else if(this.formulation==='sublingual'){ka*=4; bioMod=1.25;}
-        return {ka, lag, F_eff:clamp(this.F*bioMod,0,1)};
-      }
-      simulate(time){
-        const {ka,lag,F_eff}=this._formulationMods();
-        const D=this.dose*F_eff; // mg
-        return time.map(t=>{
-          const te=Math.max(0,t-lag);
-          if(te<=0) return 0;
-          if(Math.abs(ka-this.ke)<1e-6){
-            return (D/this.Vd)*ka*te*Math.exp(-this.ke*te)*1000;
-          }
-          const A=(D*ka)/(this.Vd*(ka-this.ke));
-          const C=A*(Math.exp(-this.ke*te)-Math.exp(-ka*te)); // mg/L
-          return Math.max(0,C*1000); // ng/mL
-        });
-      }
-      inhibited(enzyme=this.enzyme){
-        const inhib={cyp3a4:0.15,cyp2d6:0.30,cyp2c9:0.25,cyp1a2:0.45,cyp2c19:0.35,ugt:0.60}[enzyme] ?? 0.5;
-        return new PBPKModel({...this.params(), clearance:this.CL*inhib});
-      }
-      tissuesAt(c_ngmL){
-        const fu=this.fu, lp=this.logP, MW=this.MW;
-        const brain=clamp((MW>1000?0.01:(0.1+0.2*Math.max(0,lp))*fu),0.01,2.0);
-        const liver=1.0+0.5*(this.CL)+0.3*lp;
-        const kidney=(0.3+1.5*fu) * (MW>500?0.7:1);
-        const muscle=0.4+0.15*lp+(this.Vd/500);
-        const fat=0.1+Math.max(0,lp)*1.2+(lp>3?2.0:0);
-        const heart=0.6+0.2*lp+0.1*this.CL;
-        const bone=0.1+(MW<200?0.2:0);
-        const ratio={Plasma:1,Liver:liver,Kidney:kidney,Brain:brain,Muscle:muscle,Fat:fat,Heart:heart,Bone:bone};
-        const maxR=Math.max(...Object.values(ratio));
-        const relPct=Object.fromEntries(Object.entries(ratio).map(([k,v])=>[k,(v/maxR)*100]));
-        const abs=Object.fromEntries(Object.entries(ratio).map(([k,v])=>[k,c_ngmL*v]));
-        return {relPct:relPct, absConc:abs};
-      }
-      occupancySeries(conc_ngmL, ec50_nM, hill){
-        const fu=this.fu;
-        return conc_ngmL.map(c=>{
-          const c_nM=ngmL_to_nM(c*fu,this.MW);
-          const num=Math.pow(c_nM,hill);
-          const den=Math.pow(ec50_nM,hill)+num;
-          return clamp(100*(den?(num/den):0),0,100);
-        });
-      }
-      metrics(conc,time){
-        const Cmax=Math.max(...conc);
-        const tmax=time[conc.indexOf(Cmax)];
-        const AUC=trapz(time,conc);
-        const t12=0.693/this.ke;
-        const Vss=this.Vd*(1+Math.max(0,this.logP)*0.3);
-        return {cmax:Cmax.toFixed(1),tmax:tmax.toFixed(1),auc:AUC.toFixed(0),halfLife:t12.toFixed(1),
-                clearance:this.CL.toFixed(2),vss:Vss.toFixed(1),freeCmax:(Cmax*this.fu).toFixed(1)};
-      }
-      params(){ return {name:this.name,dose:this.dose,bioavailability:this.F*100,ka:this.ka,clearance:this.CL,vd:this.Vd,
-                        proteinBinding:this.pb*100,logp:this.logP,mw:this.MW,formulation:this.formulation,
-                        enzyme:this.enzyme,renalFunction:this.renalFunction};}
-    }
-
-    function _readPBPKParams(){
-      const v=id=>document.getElementById(id).value;
-      return {name:v('drug-name'), dose:+v('dose'), bioavailability:+v('bioavailability'), ka:+v('ka'),
-              clearance:+v('clearance'), vd:+v('vd'), proteinBinding:+v('protein-binding'), logp:+v('logp'),
-              mw:+v('mw'), formulation:v('formulation'), enzyme:v('enzyme'), renalFunction:v('renal-function')};
-    }
-
-    function runPBPKSimulation(){
-      showLoading();
-      setTimeout(()=>{
-        const params=_readPBPKParams();
-        const time=Array.from({length:97},(_,i)=>i*0.5); // 0..48h
-        const model=new PBPKModel(params);
-        const conc=model.simulate(time);
-
-        // DDI
-        const inhib=model.inhibited(model.enzyme).simulate(time);
-
-        charts.pk.data.labels=time;
-        charts.pk.data.datasets[0].data=conc;
-        charts.pk.update();
-
-        const ec50=+document.getElementById('ec50').value||50;
-        const hill=+document.getElementById('hill').value||1.5;
-        const occ=model.occupancySeries(conc,ec50,hill);
-        charts.qsp.data.labels=time;
-        charts.qsp.data.datasets[0].data=occ;
-        charts.qsp.update();
-
-        const Cmax=Math.max(...conc);
-        const tiss=model.tissuesAt(Cmax);
-        const rel=['Plasma','Liver','Kidney','Brain','Muscle','Fat','Heart','Bone'].map(k=>+tiss.relPct[k].toFixed(1));
-        charts.tissue.data.datasets[0].data=rel;
-        charts.tissue.update();
-
-        charts.ddi.data.labels=time;
-        charts.ddi.data.datasets[0].data=conc;
-        charts.ddi.data.datasets[1].data=inhib;
-        charts.ddi.update();
-
-        const m=model.metrics(conc,time);
-        document.getElementById('cmax').textContent=m.cmax;
-        document.getElementById('tmax').textContent=m.tmax+' h';
-        document.getElementById('auc').textContent=m.auc;
-        document.getElementById('halflife').textContent=m.halfLife+' h';
-        document.getElementById('cl-calc').textContent=m.clearance+' L/h';
-        document.getElementById('vss').textContent=m.vss+' L';
-
-        hideLoading();
-      },150);
-    }
-
-    function loadSpecificDrug(kind){
-      const set=(id,v)=>document.getElementById(id).value=v;
-      if(kind==='hydrophilic'){
-        set('logp',-0.5); set('vd',35); set('protein-binding',40); set('ka',1.2); set('mw',180); set('clearance',1.4);
-      }else if(kind==='lipophilic'){
-        set('logp',4.2); set('vd',250); set('protein-binding',98); set('ka',0.8); set('mw',420); set('clearance',0.8);
-      }else if(kind==='high-clearance'){
-        set('logp',1.2); set('vd',60); set('protein-binding',60); set('ka',1.6); set('mw',320); set('clearance',2.4);
-      }
-      runPBPKSimulation();
-    }
-    function loadPreset(module){
-      if(module==='pbpk'){
-        const set=(id,v)=>document.getElementById(id).value=v;
-        set('drug-name','Example Drug X'); set('target-protein','Target Y'); set('dose',100);
-        set('bioavailability',85); set('ka',1.2); set('vd',65); set('clearance',1.0); set('protein-binding',92);
-        set('ec50',45); set('hill',1.4); set('logp',2.1); set('mw',350);
-        runPBPKSimulation();
-      }
-    }
-
-    // ----- Clinical Trials -----
-    class DoseFinding{
-      constructor({design='3plus3',target=0.25,startDose=10,maxDose=200,cohorts=6,cohortSize=3,scheme='fibonacci'}){
-        this.design = design==='3plus3'?'3plus3':'boin';
-        this.target=target; this.startDose=startDose; this.maxDose=maxDose; this.cohorts=cohorts; this.cohortSize=cohortSize; this.scheme=scheme;
-        this.levels=this._levels();
-        const steep=0.02, mid=this.maxDose*0.6;
-        this.trueTox=d => 1/(1+Math.exp(-steep*(d-mid)));
-      }
-      _levels(){
-        const L=[this.startDose]; let d=this.startDose;
-        if(this.scheme==='fibonacci'){
-          const inc=[1.67,1.5,1.4,1.33,1.33,1.33];
-          for(let i=0;i<this.cohorts-1&&d<this.maxDose;i++){ d*=inc[Math.min(i,inc.length-1)]; L.push(Math.min(d,this.maxDose)); }
-        }else if(this.scheme==='doubling'){
-          while(L.length<this.cohorts&&d<this.maxDose){ d*=2; L.push(Math.min(d,this.maxDose));}
-        }else{
-          const r=Math.pow(this.maxDose/this.startDose,1/(this.cohorts-1));
-          for(let i=1;i<this.cohorts;i++) L.push(this.startDose*Math.pow(r,i));
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('runButton').disabled = true;
         }
-        return L.map(x=>+x.toFixed(2));
-      }
-      run(){ return (this.design==='3plus3')?this._run33():this._runBOIN(); }
-      _run33(){
-        const pts=[]; let i=0, cur=0, overdosed=0;
-        for(let coh=0; coh<this.cohorts; coh++){
-          let dltCoh=0;
-          for(let j=0;j<this.cohortSize;j++){
-            const dose=this.levels[cur];
-            const hasDLT = Math.random() < this.trueTox(dose);
-            dltCoh += hasDLT?1:0;
-            pts.push({x:++i, y:dose, dlt:hasDLT});
-          }
-          const rate=dltCoh/this.cohortSize;
-          if(rate===0 && cur<this.levels.length-1) cur++;
-          else if(rate===1 && cur>0){ overdosed++; cur--; }
-          else if(rate>0 && cur>0) cur--;
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('runButton').disabled = false;
         }
-        const mtd=this.levels[cur];
-        return {patients:pts, mtd, total:pts.length, dltCount:pts.filter(p=>p.dlt).length, overdose:overdosed};
-      }
-      _runBOIN(){
-        const lambda_e=this.target-0.1*this.target;
-        const lambda_d=this.target+0.1*this.target;
-        const pts=[]; let i=0, cur=0, overdosed=0;
-        for(let coh=0; coh<this.cohorts; coh++){
-          let dlt=0;
-          for(let j=0;j<this.cohortSize;j++){
-            const dose=this.levels[cur];
-            const hasDLT = Math.random() < this.trueTox(dose);
-            dlt += hasDLT?1:0;
-            pts.push({x:++i, y:dose, dlt:hasDLT});
-          }
-          const p_hat=dlt/this.cohortSize;
-          if(p_hat<=lambda_e && cur<this.levels.length-1) cur++;
-          else if(p_hat>=lambda_d && cur>0){ cur--; overdosed++; }
+
+        async function startMolecularSimulation() {
+            const pdbFile = document.getElementById('pdbFile').files[0];
+            const smiles = document.getElementById('smilesInput').value;
+            const serverUrl = 'http://127.0.0.1:5000/api/run-docking';
+
+            if (!pdbFile || !smiles) {
+                alert("Please provide both a protein PDB file and a ligand SMILES string.");
+                return;
+            }
+
+            showLoading("Submitting job to local server... This may take several minutes.");
+
+            const formData = new FormData();
+            formData.append('pdbFile', pdbFile);
+            formData.append('smiles', smiles);
+            
+            try {
+                // First, send the job request. The server will run Vina.
+                const runResponse = await fetch(serverUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!runResponse.ok) {
+                    const errorData = await runResponse.json();
+                    throw new Error(`Server error: ${errorData.error || runResponse.statusText}`);
+                }
+
+                const runResult = await runResponse.json();
+                
+                if (runResult.status !== 'completed') {
+                     throw new Error('Server did not complete the job synchronously.');
+                }
+
+                // If completed, fetch the results immediately.
+                showLoading("Fetching results from server...");
+                const resultsResponse = await fetch(`http://127.0.0.1:5000/api/get-results/${runResult.job_id}`);
+                
+                if (!resultsResponse.ok) {
+                    const errorData = await resultsResponse.json();
+                    throw new Error(`Failed to fetch results: ${errorData.error || resultsResponse.statusText}`);
+                }
+
+                const finalResults = await resultsResponse.json();
+                
+                // Update the UI with the real data
+                updateVisualization(finalResults);
+
+            } catch (error) {
+                console.error('Simulation failed:', error);
+                alert(`An error occurred: ${error.message}. Please check that the local server is running and that AutoDock Vina and Open Babel are correctly installed and configured in server.py.`);
+            } finally {
+                hideLoading();
+            }
         }
-        const mtd=this._selectMTD(pts);
-        return {patients:pts, mtd, total:pts.length, dltCount:pts.filter(p=>p.dlt).length, overdose:overdosed};
-      }
-      _selectMTD(pts){
-        const grouped=new Map();
-        pts.forEach(p=>{const g=grouped.get(p.y)||{n:0,d:0}; g.n++; g.d+=p.dlt?1:0; grouped.set(p.y,g);});
-        let best=null, diff=1e9;
-        for(const [dose,{n,d}] of grouped.entries()){
-          const phat=d/Math.max(1,n), dlt=Math.abs(phat-this.target);
-          if(dlt<diff){ diff=dlt; best=dose; }
+
+        async function updateVisualization(results) {
+            const pdbFile = document.getElementById('pdbFile').files[0];
+            if (!pdbFile) return;
+
+            const proteinPdbData = await pdbFile.text();
+            
+            // Display the binding affinity
+            document.getElementById('binding-affinity').textContent = `${results.binding_affinity} kcal/mol`;
+
+            // Setup the 3D viewer
+            const displayDiv = document.getElementById('molecularDisplay');
+            if (viewer) {
+                viewer.clear();
+            } else {
+                viewer = $3Dmol.createViewer(displayDiv, { backgroundColor: 'white' });
+            }
+
+            // Add the original protein model
+            proteinModel = viewer.addModel(proteinPdbData, "pdb");
+            viewer.setStyle({}, { cartoon: { color: 'spectrum' }});
+            viewer.addSurface($3Dmol.VDW, { opacity: 0.85, color: 'white' }, {});
+
+            // Add the final, docked ligand model from the results
+            const ligandModel = viewer.addModel(results.docked_pdb_data, "pdb");
+            viewer.setStyle({model: ligandModel}, { stick: { colorscheme: 'carbon' } });
+
+            viewer.zoomTo();
+            viewer.render();
         }
-        return best ?? this.levels[0];
-      }
-    }
 
-    function _readTrialParams(){
-      const gv=id=>document.getElementById(id).value;
-      return {design: (gv('design-type')==='3plus3'?'3plus3':'boin'), target:+gv('target-tox')||0.25,
-              cohorts:+gv('cohorts')||6, cohortSize:+gv('cohort-size')||3,
-              startDose:+gv('start-dose')||10, maxDose:+gv('max-dose')||200, scheme:gv('escalation-scheme')||'fibonacci'};
-    }
-
-    function runTrialSimulation(){
-      showLoading();
-      setTimeout(()=>{
-        const p=_readTrialParams();
-        const sim=new DoseFinding(p).run();
-
-        const noDLT=sim.patients.filter(p=>!p.dlt);
-        const DLT=sim.patients.filter(p=>p.dlt);
-        charts.trial.data.datasets[0].data=noDLT;
-        charts.trial.data.datasets[1].data=DLT;
-        charts.trial.update();
-
-        const df=new DoseFinding(p);
-        const doses=df.levels;
-        const trueP=doses.map(d=>df.trueTox(d));
-        const group=new Map();
-        sim.patients.forEach(pt=>{const g=group.get(pt.y)||{n:0,d:0}; g.n++; g.d+=pt.dlt?1:0; group.set(pt.y,g);});
-        const est=doses.map(d=>{const g=group.get(d)||{n:0,d:0}; return g.n?g.d/g.n:null;});
-        let last=0; const estFilled=est.map(e=>e==null?last:(last=e,e));
-        charts.toxicity.data.labels=doses.map(d=>+d.toFixed(0));
-        charts.toxicity.data.datasets[0].data=trueP;
-        charts.toxicity.data.datasets[1].data=estFilled;
-        charts.toxicity.update();
-
-        document.getElementById('mtd').textContent = sim.mtd ? sim.mtd.toFixed(0)+' mg' : 'Not Found';
-        document.getElementById('rp2d').textContent = sim.mtd ? (sim.mtd*0.8).toFixed(0)+' mg' : 'N/A';
-        document.getElementById('dlt-rate').textContent = (df.trueTox(sim.mtd)*100).toFixed(1)+'%';
-        document.getElementById('total-patients').textContent = sim.total;
-        document.getElementById('patients-dlt').textContent = sim.dltCount;
-        document.getElementById('trial-duration').textContent = Math.ceil(sim.total/3*4)+' weeks';
-
-        hideLoading();
-      },150);
-    }
-
-    function runMonteCarloTrials(n=1000){
-      showLoading();
-      setTimeout(()=>{
-        const p=_readTrialParams();
-        const res={success:0,pts:[],overdose:0};
-        const dfProto=new DoseFinding(p);
-        for(let i=0;i<n;i++){
-          const sim=new DoseFinding(p).run();
-          const tox=dfProto.trueTox(sim.mtd);
-          if(Math.abs(tox - p.target) <= 0.1*p.target) res.success++;
-          if(sim.overdose>0) res.overdose++;
-          res.pts.push(sim.total);
-        }
-        const s=+(100*res.success/n).toFixed(1);
-        const a=+mean(res.pts).toFixed(1);
-        const o=+(100*res.overdose/n).toFixed(1);
-        const idx=(p.design==='3plus3')?0:1;
-        charts.comparison.data.datasets[0].data[idx]=s;
-        charts.comparison.data.datasets[1].data[idx]=a;
-        charts.comparison.data.datasets[2].data[idx]=o;
-        charts.comparison.update();
-        alert(`Monte Carlo (${n}) complete for ${p.design}:\nSuccess ${s}%\nAvg patients ${a}\nOverdose ${o}%`);
-        hideLoading();
-      },50);
-    }
-
-    function compareDesigns(){
-      const base=_readTrialParams();
-      const designs=['3plus3','boin'];
-      showLoading();
-      setTimeout(()=>{
-        designs.forEach((d,idx)=>{
-          const p={...base,design:d};
-          const n=600;
-          const dfP=new DoseFinding(p);
-          let succ=0, od=0; const pts=[];
-          for(let i=0;i<n;i++){
-            const sim=new DoseFinding(p).run();
-            const tox=dfP.trueTox(sim.mtd);
-            if(Math.abs(tox - p.target) <= 0.1*p.target) succ++;
-            if(sim.overdose>0) od++;
-            pts.push(sim.total);
-          }
-          charts.comparison.data.datasets[0].data[idx]=+(100*succ/n).toFixed(1);
-          charts.comparison.data.datasets[1].data[idx]=+mean(pts).toFixed(1);
-          charts.comparison.data.datasets[2].data[idx]=+(100*od/n).toFixed(1);
-        });
-        charts.comparison.update();
-        hideLoading();
-      },50);
-    }
-    function updateDesignInfo(){
-      const d=document.getElementById('design-type').value;
-      const info=document.getElementById('design-info');
-      const desc={
-        '3plus3':['3+3 Design','Traditional rule-based design. Simple but inefficient.'],
-        'crm':['CRM – Continual Reassessment','(Not enabled in this lite build) Model-based Bayesian design.'],
-        'boin':['BOIN – Bayesian Optimal Interval','Interval-based, efficient and simple. A BOIN-like variant is implemented.'],
-        'ewoc':['EWOC – Overdose Control','(Not enabled in this lite build) Conservative Bayesian escalation.'],
-        'blrm':['BLRM – Logistic Regression','(Not enabled in this lite build) Bayesian logistic dose-tox model.'],
-        'mTPI':['mTPI – Modified TPI','(Not enabled in this lite build) Improved interval design.']
-      }[d];
-      info.innerHTML=`<h4>${desc[0]}</h4><p>${desc[1]}</p>`;
-    }
-
-    // ----- Molecular -----
-    function loadMolecularStructure(){
-      const smiles=document.getElementById('smilesInput').value;
-      const file=document.getElementById('pdbFile').files[0];
-      const div=document.getElementById('molecularDisplay');
-      div.innerHTML='';
-      if(file){
-        const reader=new FileReader();
-        reader.onload=e=>{
-          const pdb=e.target.result;
-          if(viewer) viewer.clear();
-          viewer=$3Dmol.createViewer(div);
-          viewer.addModel(pdb,'pdb');
-          viewer.setStyle({}, {stick:{}});
-          viewer.zoomTo(); viewer.render();
-        };
-        reader.readAsText(file);
-      }else if(smiles && rdkit){
-        const mol=rdkit.get_mol(smiles);
-        if(mol){ div.innerHTML=mol.get_svg(); mol.delete();}
-        else div.innerHTML='<p style="color:red;text-align:center;padding-top:50px;">Invalid SMILES</p>';
-      }else{
-        div.innerHTML='<p style="color:#555;text-align:center;padding-top:50px;">Upload a PDB or enter SMILES.</p>';
-      }
-    }
-
-    function startMolecularSimulation(){
-      if(mdAnim) return;
-      showLoading();
-      setTimeout(()=>{
-        const steps=400, dt=1;
-        let E=-1200, rmsd=0.5, rg=18, sasa=140, hb=3;
-        charts.energy.data.labels=[]; charts.energy.data.datasets[0].data=[];
-        charts.rmsd.data.labels=[]; charts.rmsd.data.datasets[0].data=[];
-        charts.interaction.data.datasets[0].data=[hb,12,2,18];
-        let t=0;
-        mdAnim=setInterval(()=>{
-          if(t>steps){ stopMolecularSimulation(); return; }
-          const noise=()=> (Math.random()-0.5);
-          E += -0.8 + 2.5*noise();
-          rmsd = clamp(rmsd + 0.02*noise(), 0.5, 3.5);
-          rg   = clamp(rg   + 0.03*noise(), 16, 22);
-          sasa = clamp(sasa + 0.8*noise(), 120, 180);
-          hb   = clamp(hb   + (Math.random()<0.2?(Math.random()<0.5?-1:1):0), 0, 8);
-
-          charts.energy.data.labels.push(t);
-          charts.energy.data.datasets[0].data.push(E);
-          charts.energy.update('none');
-
-          charts.rmsd.data.labels.push(t);
-          charts.rmsd.data.datasets[0].data.push(rmsd);
-          charts.rmsd.update('none');
-
-          charts.interaction.data.datasets[0].data=[hb, 10+Math.round(4*noise()+12), 2+Math.round(2*noise()+2), 16+Math.round(3*noise()+18)];
-          charts.interaction.update('none');
-
-          document.getElementById('total-energy').textContent=E.toFixed(1)+' kJ/mol';
-          document.getElementById('binding-affinity').textContent=(-8.0+0.6*noise()).toFixed(1)+' kcal/mol';
-          document.getElementById('rmsd').textContent=rmsd.toFixed(2)+' Å';
-          document.getElementById('hbonds').textContent=Math.round(hb).toString();
-          document.getElementById('rg').textContent=rg.toFixed(1)+' Å';
-          document.getElementById('sasa').textContent=sasa.toFixed(1)+' Å²';
-          t+=dt;
-        },20);
-        hideLoading();
-        alert('Molecular “toy MD” simulation started. Click Stop to halt.');
-      },150);
-    }
-    function stopMolecularSimulation(){
-      if(mdAnim){ clearInterval(mdAnim); mdAnim=null; alert('Simulation stopped.'); }
-    }
-    function exportMolecularData(){
-      const data={timestamp:new Date().toISOString(), structure:document.getElementById('smilesInput')?.value||'Unknown',
-        results:{ totalEnergy:document.getElementById('total-energy')?.textContent||'--',
-          bindingAffinity:document.getElementById('binding-affinity')?.textContent||'--',
-          rmsd:document.getElementById('rmsd')?.textContent||'--',
-          hbonds:document.getElementById('hbonds')?.textContent||'--',
-          rg:document.getElementById('rg')?.textContent||'--',
-          sasa:document.getElementById('sasa')?.textContent||'--'},
-        note:'Toy MD generator (Langevin-like). Educational only.'};
-      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob); const a=document.createElement('a');
-      a.href=url; a.download=`molecular_dynamics_${new Date().toISOString().slice(0,10)}.json`;
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      alert('Molecular data exported.');
-    }
-
-    // ----- Publications capture -----
-    function captureResults(module){
-      const timestamp=new Date().toISOString();
-      if(module==='pbpk'){
-        capturedData.pbpk={
-          drugName:document.getElementById('drug-name').value||'Unknown Drug',
-          targetProtein:document.getElementById('target-protein').value||'Unknown Target',
-          parameters:{
-            dose:document.getElementById('dose').value,
-            bioavailability:document.getElementById('bioavailability').value,
-            clearance:document.getElementById('clearance').value,
-            vd:document.getElementById('vd').value,
-            ka:document.getElementById('ka').value,
-            ec50:document.getElementById('ec50').value
-          },
-          results:{
-            cmax:document.getElementById('cmax').textContent,
-            tmax:document.getElementById('tmax').textContent,
-            auc:document.getElementById('auc').textContent,
-            halfLife:document.getElementById('halflife').textContent
-          },
-          timestamp
-        };
-        alert('PBPK results captured! Go to Research Publications.');
-      }else if(module==='clinical'){
-        capturedData.clinical={
-          drugName:document.getElementById('study-drug-name').value||'Unknown Drug',
-          designType:document.getElementById('design-type').value,
-          results:{
-            mtd:document.getElementById('mtd').textContent,
-            rp2d:document.getElementById('rp2d').textContent,
-            dltRate:document.getElementById('dlt-rate').textContent,
-            totalPatients:document.getElementById('total-patients').textContent
-          },
-          timestamp
-        };
-        alert('Clinical trial results captured! Go to Research Publications.');
-      }else if(module==='molecular'){
-        capturedData.molecular={
-          structure:document.getElementById('smilesInput').value||'Unknown Structure',
-          results:{
-            energy:document.getElementById('total-energy').textContent,
-            bindingAffinity:document.getElementById('binding-affinity').textContent,
-            rmsd:document.getElementById('rmsd').textContent,
-            hbonds:document.getElementById('hbonds').textContent
-          },
-          timestamp
-        };
-        alert('Molecular results captured! Go to Research Publications.');
-      }
-      if(currentModule==='publications') populatePublicationForm();
-    }
-    function populatePublicationForm(){
-      if(capturedData.pbpk){
-        const d=capturedData.pbpk;
-        document.getElementById('pub-drug').value=d.drugName;
-        document.getElementById('pub-protein').value=d.targetProtein;
-        const txt=`PK Parameters:
-- Dose: ${d.parameters.dose} mg
-- Bioavailability: ${d.parameters.bioavailability}%
-- Clearance: ${d.parameters.clearance} L/h
-- Vd: ${d.parameters.vd} L
-- ka: ${d.parameters.ka} h⁻¹
-- EC50: ${d.parameters.ec50} nM
-
-Results:
-- Cmax: ${d.results.cmax}
-- Tmax: ${d.results.tmax}
-- AUC: ${d.results.auc}
-- Half-life: ${d.results.halfLife}`;
-        const el=document.getElementById('pub-data');
-        el.value=el.value ? (el.value+'\n\n'+txt) : txt;
-      }
-      if(capturedData.clinical){
-        const c=capturedData.clinical;
-        const txt=`Clinical Trial:
-- Design: ${c.designType}
-- MTD: ${c.results.mtd}
-- RP2D: ${c.results.rp2d}
-- DLT Rate: ${c.results.dltRate}
-- Total Patients: ${c.results.totalPatients}`;
-        const el=document.getElementById('pub-data');
-        el.value=el.value ? (el.value+'\n\n'+txt) : txt;
-      }
-    }
-
-    // ----- Publications UI (from your original) -----
-    function publishFindings(){
-      const titleEl=document.getElementById('pub-title');
-      const authorsEl=document.getElementById('pub-authors');
-      const drugEl=document.getElementById('pub-drug');
-      const proteinEl=document.getElementById('pub-protein');
-      const findingsEl=document.getElementById('pub-findings');
-      const dataEl=document.getElementById('pub-data');
-      const implicationsEl=document.getElementById('pub-implications');
-
-      if(!titleEl||!authorsEl||!drugEl||!proteinEl||!findingsEl){ alert('Publication form elements not found.'); return; }
-
-      const title=titleEl.value.trim();
-      const authors=authorsEl.value.trim();
-      const drug=drugEl.value.trim();
-      const protein=proteinEl.value.trim();
-      const findings=findingsEl.value.trim();
-      const data=dataEl?dataEl.value.trim():'';
-      const implications=implicationsEl?implicationsEl.value.trim():'';
-
-      if(!title||!authors||!drug||!protein||!findings){
-        alert('Please fill in Title, Authors, Drug, Protein, and Key Findings.');
-        return;
-      }
-
-      const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-      const html=`
-        <div class="blog-post-card">
-          <h4 class="blog-post-title">${title}</h4>
-          <div class="blog-post-meta">By ${authors} • ${date}</div>
-          <div class="blog-post-content">
-            <strong>Abstract:</strong><br>
-            We performed computational modeling of ${drug} interaction with ${protein}
-            using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI).<br><br>
-
-            <strong>Major Findings:</strong><br>
-            ${findings}<br><br>
-
-            ${data?`<strong>Key Data:</strong><br>
-            <pre style="background:#f5f5f5;padding:10px;border-radius:5px;font-size:12px;white-space:pre-wrap;overflow-x:auto;">${data}</pre><br>`:''}
-
-            ${implications?`<strong>Implications for Early-Stage Scientists:</strong><br>${implications}<br><br>`:''}
-
-            <strong>Disclaimer:</strong><br>
-            <em>These computational predictions require validation through experimental studies. Values represent theoretical estimates from simplified models.</em><br><br>
-
-            <strong>Citation:</strong><br>
-            <em>Created using PharmaSim Pro by David Ferguson, BS, MS, Pharm.D. Candidate, powered by Anthropic Claude AI.</em>
-          </div>
-        </div>`;
-      const list=document.getElementById('publications-list');
-      if(list){
-        list.insertAdjacentHTML('afterbegin',html);
-        const card=list.firstElementChild;
-        if(card){ card.style.opacity='0'; card.style.transform='translateY(20px)';
-          setTimeout(()=>{card.style.transition='all .5s ease'; card.style.opacity='1'; card.style.transform='translateY(0)';},100);}
-        alert('🎉 Publication created!');
-        clearPublication();
-        setTimeout(()=>{ list.scrollIntoView({behavior:'smooth',block:'start'});},600);
-      }else{
-        alert('Error: publications list not found.');
-      }
-    }
-    function previewPublication(){
-      const title=document.getElementById('pub-title').value||'[Title]';
-      const authors=document.getElementById('pub-authors').value||'[Authors]';
-      const drug=document.getElementById('pub-drug').value||'[Drug Name]';
-      const protein=document.getElementById('pub-protein').value||'[Protein Name]';
-      const findings=document.getElementById('pub-findings').value||'[Key Findings]';
-      const data=document.getElementById('pub-data').value||'[Data Values]';
-      const implications=document.getElementById('pub-implications').value||'[Implications]';
-
-      const html=`
-        <h3>Publication Preview</h3>
-        <div class="blog-post-card">
-          <h4 class="blog-post-title">${title}</h4>
-          <div class="blog-post-meta">By ${authors} • ${new Date().toLocaleDateString()}</div>
-          <div class="blog-post-content">
-            <strong>Abstract:</strong><br>
-            We performed computational modeling of ${drug} interaction with ${protein}
-            using PharmaSim Pro (Ferguson, D.; Anthropic Claude AI).<br><br>
-
-            <strong>Major Findings:</strong><br>${findings}<br><br>
-            <strong>Key Parameters:</strong><br>
-            <pre style="background:#f5f5f5;padding:10px;border-radius:5px;">${data}</pre><br>
-            <strong>Implications for Early-Stage Scientists:</strong><br>${implications}<br><br>
-            <strong>Disclaimer:</strong><br>
-            <em>These computational predictions require validation through experimental studies.</em><br><br>
-            <strong>Citation:</strong><br>
-            Created using PharmaSim Pro by David Ferguson (Pharm.D. Candidate) powered by Anthropic Claude AI.
-          </div>
-        </div>`;
-      const prev=document.getElementById('publication-preview');
-      prev.innerHTML=html; prev.style.display='block'; prev.scrollIntoView({behavior:'smooth'});
-    }
-    function clearPublication(){
-      ['pub-title','pub-authors','pub-drug','pub-protein','pub-findings','pub-data','pub-implications'].forEach(id=>{
-        const el=document.getElementById(id); if(el) el.value='';
-      });
-      document.getElementById('publication-preview').style.display='none';
-    }
-
-    // Tutorials
-    function startTutorial(type){
-      const div=document.getElementById('tutorial-content');
-      const t={
-        'publication-guide':{title:'How to Publish Your Findings',content:`
-          <h3>Publishing Research on PharmaSim Pro</h3>
-          <div class="info-box"><h4>Steps</h4>
-          <ol style="margin:10px 0;padding-left:20px;line-height:1.8;">
-            <li>Run simulations</li><li>Capture results</li><li>Open Publications</li>
-            <li>Fill details</li><li>Add data</li><li>Discuss implications</li><li>Preview & Publish</li>
-          </ol></div>`},
-        'pbpk-basics':{title:'PBPK Basics',content:`
-          <h3>Understanding PBPK Models</h3>
-          <div class="info-box"><h4>What is PBPK?</h4><p>Predict tissue concentrations over time.</p></div>
-          <div class="educational-tip"><strong>Key Parameters:</strong>
-          <ul style="margin:10px 0;padding-left:20px;">
-            <li>CL, Vd, F, Half-life</li></ul></div>
-          <button onclick="switchModule('pbpk')">Try PBPK Module</button>`},
-        'trial-designs':{title:'Clinical Trial Designs',content:`
-          <h3>Phase 1 Designs</h3>
-          <div class="info-box"><h4>Traditional vs Modern</h4><p>Modern designs often more efficient.</p></div>
-          <button onclick="switchModule('clinical')">Explore Trial Designs</button>`},
-        'molecular-intro':{title:'Molecular Simulations 101',content:`
-          <h3>Introduction to MD</h3>
-          <div class="info-box"><h4>Key Metrics</h4><p>Affinity, RMSD, H-bonds, SASA</p></div>
-          <button onclick="switchModule('molecular')">Try MD</button>`},
-        'case-study':{title:'Integrated Case Study',content:`
-          <h3>Novel Kinase Inhibitor</h3>
-          <div class="info-box"><h4>Steps</h4><p>Molecular → PBPK → Trial → Publish</p></div>
-          <button onclick="alert('Guided case study would start here')">Start</button>`}
-      }[type];
-      div.innerHTML=t?t.content:'<h3>Tutorial not found</h3>';
-    }
-
-    // Footer dialogs
-    function showDisclaimer(){
-      alert(`COMPREHENSIVE DISCLAIMER
-
-PharmaSim Pro provides computational models for educational and exploratory research purposes only.
-
-IMPORTANT LIMITATIONS:
-• All values are theoretical estimates based on simplified mathematical models
-• Results have NOT been validated experimentally
-• Models can produce errors and inaccuracies
-• Not suitable for clinical decision-making
-
-REQUIRED VALIDATION:
-• In vitro, in vivo, additional in silico, and peer review
-
-By using this platform, you acknowledge these limitations and agree to use results responsibly.
-
-Created by David Ferguson, BS, MS, Pharm.D. Candidate
-Powered by Anthropic Claude AI`);
-    }
-    function showAbout(){
-      alert(`ABOUT PHARMASIM PRO
-
-PharmaSim Pro is an integrated pharmaceutical research platform.
-
-FEATURES:
-• PBPK/QSP Modeling
-• Bayesian Clinical Trial Design
-• Molecular Dynamics Simulations
-• Research Publication System
-
-TECHNOLOGY: Web-only, runs on GitHub Pages.
-`);
-    }
-    function showCitation(){
-      alert(`HOW TO CITE PHARMASIM PRO
-
-Ferguson, D. (2025). PharmaSim Pro: Integrated Pharmaceutical Research Platform [Computer software].
-Powered by Anthropic Claude AI. https://github.com/pharmasim-pro`);
-    }
-
-    // Init
-    window.onload=function(){
-      initializeCharts();
-      updateDesignInfo();
-      const temp=document.getElementById('mdTemp');
-      if(temp) temp.addEventListener('input', function(){ document.getElementById('mdTempValue').textContent=this.value; });
-      console.log('PharmaSim Pro initialized • functional simulation core loaded');
-    };
-  </script>
+    </script>
 </body>
 </html>
+
