@@ -1,0 +1,19 @@
+{
+  "name": "pharma-sim-pro",
+  "version": "1.0.0",
+  "description": "PharmaSim Pro · Full Integrated Suite (Stable In-Browser) — Render-ready web service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0"
+  }
+}
