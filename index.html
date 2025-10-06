@@ -5,36 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>PharmaSim Pro · In-Browser Suite</title>
 
+<!-- CDNs -->
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <style>
-*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);color:#0b1630}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);color:#0b1630}
 header{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.08);z-index:10}
 .nav{max-width:1400px;margin:0 auto;padding:14px 18px;display:flex;gap:10px;align-items:center;justify-content:space-between}
-.tabs{display:flex;flex-wrap:wrap;gap:8px}.tab{padding:8px 14px;border:2px solid #2a5298;border-radius:18px;background:#fff;color:#2a5298;font-weight:700;cursor:pointer;transition:.2s}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{padding:8px 14px;border:2px solid #2a5298;border-radius:18px;background:#fff;color:#2a5298;font-weight:700;cursor:pointer;transition:.2s}
 .tab.active,.tab:hover{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;border-color:transparent;transform:translateY(-2px)}
-.container{max-width:1400px;margin:22px auto;padding:0 16px}.grid{display:grid;grid-template-columns:360px 1fr;gap:22px}
+.container{max-width:1400px;margin:20px auto;padding:0 16px}
+.grid{display:grid;grid-template-columns:360px 1fr;gap:22px}
 .panel{background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.12);padding:18px}
 label{display:block;font-size:13px;color:#334;margin:6px 0 4px}
 input,textarea,select{width:100%;padding:10px 12px;border:2px solid #e0e6ed;border-radius:10px;background:#f8f9fa;font:inherit;font-size:14px}
 input:focus,textarea:focus,select:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
-button{padding:10px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;cursor:pointer;transition:.2s;width:100%}
-button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:translateY(-2px)} button:disabled{opacity:.6;cursor:not-allowed}
-.section{display:none}.section.active{display:block}
+button{padding:10px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;cursor:pointer;transition:.2s}
+button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:translateY(-2px)}
+button:disabled{opacity:.6;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.col{flex:1 1 160px}
+.section{display:none}
+.section.active{display:block}
 #viewer{width:100%;min-height:440px;border-radius:10px;background:#eef2f7}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:12px;text-align:center;padding:12px}
 .metric .v{font-size:1.35em;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hint{font-size:12px;color:#476;margin-top:8px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px}
+.badge.ok{background:#dcfce7;color:#166534}
+.badge.warn{background:#fff7ed;color:#9a3412}
+.badge.err{background:#fee2e2;color:#991b1b}
 .status{max-width:1400px;margin:10px auto 0;background:#fffdf5;border:1px solid #fde68a;color:#854d0e;border-radius:10px;padding:10px 12px;display:none}
 .status.ok{background:#f0fdf4;border-color:#bbf7d0;color:#14532d}
+.canvas-wrap{height:260px}
+.canvas-wrap.tall{height:320px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{font-size:12px;padding:6px 8px;border-bottom:1px solid #eee;text-align:left}
+.empty{padding:16px;text-align:center;background:#fff}
 @media(max-width:1000px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -43,9 +59,9 @@ button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:t
   <div class="nav">
     <div style="font-weight:800;color:#1e3c72">PharmaSim Pro</div>
     <div class="tabs">
+      <button class="tab active" data-t="md">Docking</button>
       <button class="tab" data-t="pbpk">PBPK/QSP</button>
       <button class="tab" data-t="clinical">Clinical</button>
-      <button class="tab active" data-t="md">Docking</button>
       <button class="tab" data-t="mdsetup">MD Setup</button>
       <button class="tab" data-t="pub">Publications</button>
       <button class="tab" data-t="learn">Learning</button>
@@ -56,25 +72,17 @@ button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:t
 <div id="status" class="status"></div>
 
 <div class="container">
-  <!-- Docking -->
+  <!-- ===== Docking (working) ===== -->
   <section id="md" class="section active">
     <div class="grid">
       <div class="panel">
         <h3>Ligand Prep & Structure-Aware Heuristic Docking</h3>
-
         <label>Protein (PDB File)</label>
         <input type="file" id="pdbFile" accept=".pdb" />
-
         <div class="row" style="gap:8px;margin-top:8px">
-          <div style="flex:1">
-            <label>…or Fetch by PDB ID</label>
-            <input id="pdbId" placeholder="e.g., 6LU7" />
-          </div>
-          <div style="flex:0 0 160px;display:flex;align-items:flex-end">
-            <button id="fetchPdbBtn" type="button">Fetch PDB</button>
-          </div>
+          <div style="flex:1"><label>…or Fetch by PDB ID</label><input id="pdbId" placeholder="e.g., 6LU7" /></div>
+          <div style="flex:0 0 160px;display:flex;align-items:flex-end"><button id="fetchPdbBtn" type="button">Fetch PDB</button></div>
         </div>
-
         <label style="margin-top:8px">Load Example from Paper</label>
         <select id="exampleSmiles">
           <option value="" disabled selected>Select a Drug Hit...</option>
@@ -85,25 +93,19 @@ button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:t
           <option value="CC(C)NC(=O)C1CCN(CC1)c1cccc2OCOc12">Drug Hit 5 (Reversible)</option>
           <option value="CC(C)CC(NC(=O)C1CCN(CC1)c1cccc2OCOc12)Cc1ccccc1">Drug Hit 6 (Irreversible)</option>
         </select>
-
-        <label>Ligand (SMILES)</label>
-        <input id="smiles" value="CC(=O)OC1=CC=CC=C1C(=O)O"/>
-
+        <label>Ligand (SMILES)</label><input id="smiles" value="CC(=O)OC1=CC=CC=C1C(=O)O"/>
         <label>Scoring Model</label>
         <select id="scoringModel">
           <option value="balanced" selected>Balanced</option>
           <option value="hbond">H-Bond Focused</option>
           <option value="hydrophobic">Hydrophobicity Focused</option>
         </select>
-
         <div class="row" style="gap:8px;margin-top:8px">
           <button id="dockBtn" disabled>Run Approximate Dock</button>
           <button id="centerBtn" type="button" disabled>Re-center & Re-score</button>
         </div>
-
         <p class="hint" id="modelInfoText" style="margin-top:8px"></p>
       </div>
-
       <div class="panel">
         <h3>Results</h3>
         <div class="metrics">
@@ -120,7 +122,6 @@ button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:t
           <div class="metric"><div class="hint">Clashes (&lt;1.8Å)</div><div id="clashes" class="v">--</div></div>
         </div>
       </div>
-
       <div class="panel" style="grid-column:1/-1">
         <h3>3D Visualization</h3>
         <div id="viewer"></div>
@@ -128,7 +129,7 @@ button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:t
     </div>
   </section>
 
-  <!-- PBPK -->
+  <!-- ===== PBPK/QSP (fixed) ===== -->
   <section id="pbpk" class="section">
     <div class="grid">
       <div class="panel">
@@ -140,17 +141,23 @@ button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:t
           <div class="col"><label>ke (h⁻¹)</label><input id="ke" type="number" value="0.2" step="0.05"/></div>
           <div class="col"><label>Vd (L)</label><input id="Vd" type="number" value="50"/></div>
         </div>
-        <div class="row" style="margin-top:10px;"><button id="runPBPKBtn">Run PBPK Simulation</button></div>
+        <div class="row" style="margin-top:10px"><button id="runPBPKBtn">Run PBPK Simulation</button></div>
+        <p class="hint">Model: one-compartment oral, Bateman function. Occupancy uses E<sub>max</sub> with K<sub>d</sub>=20 mg/L (demo).</p>
       </div>
       <div class="panel">
         <h3>Pharmacokinetic Outputs</h3>
-        <canvas id="pkChart"></canvas>
-        <canvas id="occChart" style="margin-top:10px;"></canvas>
+        <div class="metrics" style="margin-bottom:8px">
+          <div class="metric"><div>C<sub>max</sub> (mg/L)</div><div id="cmax" class="v">--</div></div>
+          <div class="metric"><div>T<sub>max</sub> (h)</div><div id="tmax" class="v">--</div></div>
+          <div class="metric"><div>AUC<sub>0-48h</sub> (mg·h/L)</div><div id="auc" class="v">--</div></div>
+        </div>
+        <div class="canvas-wrap tall"><canvas id="pkChart"></canvas></div>
+        <div class="canvas-wrap" style="margin-top:10px"><canvas id="occChart"></canvas></div>
       </div>
     </div>
   </section>
 
-  <!-- Clinical -->
+  <!-- ===== Clinical 3+3 (fixed) ===== -->
   <section id="clinical" class="section">
     <div class="grid">
       <div class="panel">
@@ -161,67 +168,168 @@ button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:t
           <div class="col"><label>Start Dose (mg)</label><input id="startDose" type="number" value="10"/></div>
           <div class="col"><label>Target DLT Rate (%)</label><input id="tox" type="number" value="25"/></div>
         </div>
-        <div class="row" style="margin-top:10px;"><button id="runTrialBtn">Simulate Trial</button></div>
+        <div class="row" style="margin-top:8px">
+          <div class="col"><label>Escalation Factor</label><input id="esc" type="number" value="1.5" step="0.1"/></div>
+          <div class="col"><label>Random Seed</label><input id="seed" type="number" value="42"/></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="runTrialBtn">Simulate Trial</button>
+          <button id="run100Btn" type="button">Run 100 Trials (summary)</button>
+        </div>
+        <p class="hint">Implements canonical 3+3: 0/3 → escalate, 1/3 → expand to 6, ≥2/3 stop/de-escalate. MTD is highest dose with ≤1/6 DLTs.</p>
       </div>
       <div class="panel">
-        <h3>Trial Visualization</h3>
-        <canvas id="trialChart"></canvas>
+        <div class="row" style="align-items:center;justify-content:space-between">
+          <h3>Trial Visualization</h3>
+          <div id="trialBadge" class="badge" style="display:none"></div>
+        </div>
+        <div class="canvas-wrap tall"><canvas id="trialChart"></canvas></div>
+        <div id="trialTableWrap" class="panel" style="margin-top:10px;background:#f9fafb">
+          <h4 style="margin:0 0 8px">Cohorts</h4>
+          <table class="table" id="trialTable"><thead><tr><th>#</th><th>Dose (mg)</th><th>DLTs</th><th>N</th></tr></thead><tbody></tbody></table>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== MD Setup (fixed) ===== -->
+  <section id="mdsetup" class="section">
+    <div class="grid">
+      <div class="panel">
+        <h3>MD Simulation File Generator</h3>
+        <label>Output Prefix</label><input id="md-out" value="output"/>
+        <div class="row">
+          <div class="col"><label>Temperature (K)</label><input id="md-temp" type="number" value="310"/></div>
+          <div class="col"><label>Production Time (ns)</label><input id="md-ns" type="number" value="10"/></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14"/></div>
+          <div class="col" style="display:flex;align-items:flex-end"><label style="width:100%"><input type="checkbox" id="md-restraints" checked/> Use Restraints</label></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="generateMDFilesBtn">Generate Files</button>
+          <button id="zipBtn" disabled>Download ZIP</button>
+        </div>
+        <div id="mdStatus" class="hint" style="margin-top:6px"></div>
+        <div id="fileList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <div class="panel">
+        <h3>In-Browser Restraints PDB Builder</h3>
+        <p class="hint">Backbone atoms (N, CA, C, O) receive B-factor = 2.0 (others 0.0). Save as <code>restraints.pdb</code>.</p>
+        <div class="row">
+          <div class="col"><label>Source PDB</label><input type="file" id="md-pdb" accept=".pdb"/></div>
+          <div class="col" style="display:flex;align-items:end"><button id="buildRestraints">Generate restraints.pdb</button></div>
+        </div>
+        <div id="restraintsStatus" class="hint" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Publications (fixed) ===== -->
+  <section id="pub" class="section">
+    <div class="panel">
+      <h3>Create New Publication</h3>
+      <label>Title</label><input id="pub-title" placeholder="e.g., In Silico Analysis of Novel Kinase Inhibitors"/>
+      <label>Authors</label><input id="pub-authors" placeholder="Ferguson, D., et al."/>
+      <label>Abstract / Key Findings</label><textarea id="pub-abstract" rows="6" placeholder="Brief abstract or bullet points…"></textarea>
+      <div class="row" style="margin-top:8px"><button id="pubSubmit">Submit Publication</button></div>
+      <div id="pubError" class="hint" style="color:#9a3412;margin-top:8px"></div>
+    </div>
+    <div id="pub-list" style="margin-top:18px;display:grid;gap:12px"></div>
+    <div id="pub-empty" class="empty" style="display:none">No publications yet—add your first one above.</div>
+  </section>
+
+  <!-- ===== Learning (enhanced) ===== -->
+  <section id="learn" class="section">
+    <div class="panel">
+      <h3>Learning Center</h3>
+      <div class="row" style="gap:8px;margin:8px 0">
+        <button class="tab" style="width:auto" data-learn="pbpk">PBPK Basics</button>
+        <button class="tab" style="width:auto" data-learn="docking">Docking</button>
+        <button class="tab" style="width:auto" data-learn="md">MD Setup</button>
+        <button class="tab" style="width:auto" data-learn="threeplus">3+3 Design</button>
+      </div>
+      <div id="tutorialBox" class="panel" style="margin-top:10px;background:#f9fafb"></div>
     </div>
   </section>
 </div>
 
 <script>
+/* ===== Utilities ===== */
 const $ = (s)=>document.querySelector(s);
 const statusBox = $('#status');
 function setStatus(msg, ok=false){ statusBox.textContent=msg; statusBox.style.display='block'; statusBox.classList.toggle('ok', ok); }
+function waitFor(cond, timeoutMs=12000){
+  const start=Date.now(); return new Promise((res,rej)=>{
+    (function tick(){ try{ if(cond()) return res(true);}catch{} if(Date.now()-start>timeoutMs) return rej(new Error('timeout')); setTimeout(tick,80); })();
+  });
+}
+function hexToRgba(hex, alpha){ const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); if(!m) return hex; const r=parseInt(m[1],16),g=parseInt(m[2],16),b=parseInt(m[3],16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; }
 
-let viewer, rdkit;
-let proteinModel=null, ligandModel=null, pocketResidues=[];
-let pocketCenter=null;
-
+/* ===== Nav & init ===== */
 document.addEventListener('DOMContentLoaded', async () => {
-  // tabs
+  // nav tabs
   document.querySelectorAll('.tab[data-t]').forEach(t=>t.addEventListener('click',()=>{
     const id=t.dataset.t;
     document.querySelectorAll('.tab[data-t]').forEach(b=>b.classList.toggle('active', b===t));
     document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active', s.id===id));
   }));
 
-  // events
+  // Docking listeners
   $('#exampleSmiles').addEventListener('change', e => $('#smiles').value = e.target.value);
   $('#fetchPdbBtn').addEventListener('click', fetchPdbById);
   $('#dockBtn').addEventListener('click', runApproxDock);
   $('#centerBtn').addEventListener('click', () => { if (proteinModel && ligandModel) placeLigandAndRender(); });
-  $('#runPBPKBtn')?.addEventListener('click', runPBPK);
 
-  // init libs
+  // PBPK & Clinical listeners
+  $('#runPBPKBtn').addEventListener('click', runPBPK);
+  $('#runTrialBtn').addEventListener('click', simulateOneThreePlusThree);
+  $('#run100Btn').addEventListener('click', simulateManyThreePlusThree);
+
+  // MD Setup listeners
+  $('#generateMDFilesBtn').addEventListener('click', generateMDFiles);
+  $('#zipBtn').addEventListener('click', downloadMDFiles);
+  $('#buildRestraints').addEventListener('click', buildRestraintsFile);
+
+  // Publications listeners
+  $('#pubSubmit').addEventListener('click', submitPub);
+  loadPubs(); updatePubEmpty();
+
+  // Learning
+  document.querySelectorAll('button[data-learn]').forEach(btn=>{
+    btn.addEventListener('click',()=>loadTutorial(btn.dataset.learn));
+  });
+
+  // Init libs for Docking
   try{
     await waitFor(()=> window.$3Dmol && window.initRDKitModule, 15000);
     rdkit = await window.initRDKitModule();
-    $('#dockBtn').disabled = false;
-    $('#centerBtn').disabled = false;
+    $('#dockBtn').disabled = false; $('#centerBtn').disabled = false;
     setStatus('Libraries ready. RDKit initialized. You can dock now.', true);
   }catch(e){
     setStatus('Failed to initialize required libraries; RDKit or 3Dmol not ready.', false);
   }
 
-  // 3D viewer
+  // Viewer init
   viewer = $3Dmol.createViewer($('#viewer'), { backgroundColor: 'white' });
 
-  // file input → load protein
+  // PDB file input
   $('#pdbFile').addEventListener('change', async (e)=>{
     const f=e.target.files[0]; if(!f) return;
     const pdb=await f.text();
     loadProteinFromText(pdb);
   });
 
-  // scoring model hint
+  // Model info text
   updateModelInfo();
   $('#scoringModel').addEventListener('change', updateModelInfo);
 
-  buildCharts(); // for PBPK tab
+  // Charts
+  buildCharts();
 });
+
+/* ===== Docking (unchanged from working version, trimmed) ===== */
+let viewer, rdkit, proteinModel=null, ligandModel=null, pocketResidues=[], pocketCenter=null;
 
 function updateModelInfo(){
   const info = {
@@ -231,240 +339,316 @@ function updateModelInfo(){
   };
   $('#modelInfoText').textContent = info[$('#scoringModel').value] || '';
 }
-
 async function fetchPdbById(){
   const id = ($('#pdbId').value || '').trim().toLowerCase();
   if(!id){ alert('Enter a PDB ID'); return; }
   try{
     setStatus(`Fetching PDB ${id}…`);
-    const url = `https://files.rcsb.org/download/${id}.pdb`;
-    const res = await fetch(url);
+    const res = await fetch(`https://files.rcsb.org/download/${id}.pdb`);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const pdb = await res.text();
-    loadProteinFromText(pdb);
+    const pdb = await res.text(); loadProteinFromText(pdb);
     setStatus(`Loaded PDB ${id}.`, true);
-  }catch(err){
-    console.error(err);
-    setStatus(`Failed to fetch ${id}: ${err.message}`, false);
-  }
+  }catch(err){ console.error(err); setStatus(`Failed to fetch ${id}: ${err.message}`, false); }
 }
-
 function loadProteinFromText(pdb){
   viewer.clear();
   proteinModel = viewer.addModel(pdb, 'pdb');
   proteinModel.setStyle({}, { cartoon: { color:'spectrum' } });
-
-  // pocket detection
   const atoms = getModelAtoms(proteinModel);
   pocketResidues = findPocketResidues(atoms);
   pocketCenter = centroidOfResidues(atoms, pocketResidues);
-
   if (pocketResidues.length){
     viewer.addSurface($3Dmol.VDW, { opacity:0.7, color:'white' }, { resi: pocketResidues });
     proteinModel.setStyle({ resi: pocketResidues }, { stick:{ radius:0.25, colorscheme:'cyanCarbon' } });
   }
-  viewer.zoomTo(pocketResidues.length ? { resi: pocketResidues } : {});
-  viewer.render();
+  viewer.zoomTo(pocketResidues.length ? { resi: pocketResidues } : {}); viewer.render();
 }
-
 function getModelAtoms(model){
-  // Prefer selectedAtoms; fallbacks for older builds
   return (typeof model.selectedAtoms==='function' && model.selectedAtoms({})) ||
          (typeof model.getAtoms==='function' && model.getAtoms()) ||
          (Array.isArray(model.atoms) && model.atoms) || [];
 }
-
 async function runApproxDock(){
-  if(!proteinModel){ alert('Load a protein PDB first (file or PDB ID).'); return; }
+  if(!proteinModel){ alert('Load a protein PDB first.'); return; }
   const smi = ($('#smiles').value || '').trim();
   if(!smi){ alert('Enter a SMILES.'); return; }
-
-  // ligand 3D with RDKit
   let lig;
   try{
-    lig = rdkit.get_mol(smi);
-    if(!lig) throw new Error('RDKit failed to parse SMILES');
-    lig.add_hs?.();
-    if (rdkit.EmbedMolecule) rdkit.EmbedMolecule(lig, JSON.stringify({ useRandomCoords:true, maxAttempts:500 }));
+    lig = rdkit.get_mol(smi); if(!lig) throw new Error('RDKit parse error');
+    lig.add_hs?.(); if (rdkit.EmbedMolecule) rdkit.EmbedMolecule(lig, JSON.stringify({ useRandomCoords:true, maxAttempts:500 }));
     rdkit.UFFOptimizeMolecule?.(lig);
-  }catch(e){
-    console.error(e);
-    alert('Ligand preparation failed.');
-    return;
-  }
-
-  const desc = JSON.parse(lig.get_descriptors());
-  const ligInfo = {
-    molblock: lig.get_molblock(),
-    mw: desc.exactmw,
-    logp: desc.MolLogP,
-    hDonors: desc.NumHDonors,
-    hAcceptors: desc.NumHAcceptors,
-    numRotatableBonds: desc.NumRotatableBonds,
-    numHeavyAtoms: (typeof lig.get_n_heavy_atoms==='function') ? lig.get_n_heavy_atoms() : (desc.NumHeavyAtoms||0)
-  };
+  }catch(e){ console.error(e); alert('Ligand preparation failed.'); return; }
+  const d=JSON.parse(lig.get_descriptors());
+  const info={ molblock:lig.get_molblock(), mw:d.exactmw, logp:d.MolLogP, hDonors:d.NumHDonors, hAcceptors:d.NumHAcceptors, numRotatableBonds:d.NumRotatableBonds, numHeavyAtoms: typeof lig.get_n_heavy_atoms==='function'? lig.get_n_heavy_atoms(): (d.NumHeavyAtoms||0) };
   lig.delete?.();
-
-  // Show physchem immediately
-  $('#mw').textContent = Number(ligInfo.mw).toFixed(2);
-  $('#logp').textContent = Number(ligInfo.logp).toFixed(2);
-
-  // Add/update ligand in viewer, translated to pocket
-  addLigandToViewer(ligInfo.molblock);
-  placeLigandAndRender();
-
-  // Score with structure-aware terms
-  scoreAndDisplay(ligInfo);
+  $('#mw').textContent=Number(info.mw).toFixed(2); $('#logp').textContent=Number(info.logp).toFixed(2);
+  addLigandToViewer(info.molblock); placeLigandAndRender(); scoreAndDisplay(info);
 }
-
-function addLigandToViewer(molblock){
-  if (ligandModel) try{ viewer.removeModel(ligandModel); }catch{}
-  ligandModel = viewer.addModel(molblock, 'sdf');
-  ligandModel.setStyle({}, { stick:{ radius:0.22 } });
-}
-
+function addLigandToViewer(molblock){ if(ligandModel) try{ viewer.removeModel(ligandModel);}catch{} ligandModel=viewer.addModel(molblock,'sdf'); ligandModel.setStyle({}, { stick:{ radius:0.22 } }); }
 function placeLigandAndRender(){
-  const atomsProt = getModelAtoms(proteinModel);
-  if (!atomsProt.length){ alert('Protein atoms unavailable.'); return; }
-  if (!pocketResidues.length) pocketResidues = findPocketResidues(atomsProt);
+  const atomsProt=getModelAtoms(proteinModel); if(!atomsProt.length){ alert('Protein atoms unavailable.'); return; }
+  if(!pocketResidues.length) pocketResidues = findPocketResidues(atomsProt);
   pocketCenter = centroidOfResidues(atomsProt, pocketResidues) || centroid(atomsProt);
-
-  // translate ligand coordinates so its centroid aligns to pocketCenter (with a tiny offset)
-  const ligAtoms = getModelAtoms(ligandModel);
-  const ligCenter = centroid(ligAtoms);
-  const dx = (pocketCenter.x - ligCenter.x);
-  const dy = (pocketCenter.y - ligCenter.y);
-  const dz = (pocketCenter.z - ligCenter.z);
-  const offset = normalize({x:1,y:1,z:1}); // small nudge
-  for (const a of ligAtoms){
-    a.x += dx + 0.8*offset.x;
-    a.y += dy + 0.8*offset.y;
-    a.z += dz + 0.8*offset.z;
-  }
+  const ligAtoms=getModelAtoms(ligandModel), ligCenter=centroid(ligAtoms);
+  const dx=pocketCenter.x-ligCenter.x, dy=pocketCenter.y-ligCenter.y, dz=pocketCenter.z-ligCenter.z;
+  for(const a of ligAtoms){ a.x+=dx+0.5; a.y+=dy+0.5; a.z+=dz+0.5; }
   ligandModel.setCoordinates(ligAtoms);
-  viewer.setStyle({model:proteinModel},{cartoon:{color:'spectrum'}});
-  if (pocketResidues.length){
-    viewer.addSurface($3Dmol.VDW, { opacity:0.6, color:'white' }, { resi: pocketResidues });
-  }
-  ligandModel.setStyle({}, { stick:{ radius:0.22 } });
-  viewer.zoomTo({resi: pocketResidues.length ? pocketResidues : undefined});
-  viewer.render();
+  viewer.setStyle({model:proteinModel},{cartoon:{color:'spectrum'}}); if(pocketResidues.length) viewer.addSurface($3Dmol.VDW,{opacity:0.6,color:'white'},{resi:pocketResidues});
+  ligandModel.setStyle({}, { stick:{ radius:0.22 } }); viewer.zoomTo({resi: pocketResidues.length? pocketResidues: undefined}); viewer.render();
 }
-
-function scoreAndDisplay(ligInfo){
-  const modelType = $('#scoringModel').value;
-
-  // Base (ligand-only) heuristic
-  const base = calculateBindingContributions(ligInfo, modelType);
-
-  // Structure terms
-  const protAtoms = getModelAtoms(proteinModel);
-  const ligAtoms = getModelAtoms(ligandModel);
-
-  // Contact: protein hetero (N,O,S) within 3.5 Å to ligand atoms
-  const het = new Set(['N','O','S']);
-  let contacts=0, clashes=0;
-  for (const la of ligAtoms){
-    for (const pa of protAtoms){
-      const dx=la.x-pa.x, dy=la.y-pa.y, dz=la.z-pa.z;
-      const r2=dx*dx+dy*dy+dz*dz;
-      if (r2 < 3.5*3.5 && het.has(pa.elem)) contacts++;
-      if (r2 < 1.8*1.8) clashes++;
-    }
-  }
-  // Convert to energy-ish terms
-  const contactBonus = -0.15 * Math.min(contacts, 50);   // cap to reduce runaway
-  const clashPenalty = +0.40 * Math.min(clashes, 25);
-
-  const total = Object.values(base).reduce((s,v)=>s+v,0) + contactBonus + clashPenalty;
-
-  $('#aff').textContent = total.toFixed(2);
-  $('#vdw_contrib').textContent = base.vdw.toFixed(2);
-  $('#hbond_contrib').textContent = base.hbond.toFixed(2);
-  $('#hydro_contrib').textContent = base.hydrophobic.toFixed(2);
-  $('#rot_contrib').textContent = base.rotational.toFixed(2);
-  $('#contacts').textContent = contacts.toString();
-  $('#clashes').textContent = clashes.toString();
+function scoreAndDisplay(lig){
+  const base = bindingContrib(lig, $('#scoringModel').value);
+  const prot=getModelAtoms(proteinModel), lat=getModelAtoms(ligandModel);
+  const het=new Set(['N','O','S']); let contacts=0, clashes=0;
+  for(const la of lat){ for(const pa of prot){ const dx=la.x-pa.x,dy=la.y-pa.y,dz=la.z-pa.z, r2=dx*dx+dy*dy+dz*dz; if(r2<3.5*3.5&&het.has(pa.elem)) contacts++; if(r2<1.8*1.8) clashes++; } }
+  const total=Object.values(base).reduce((s,v)=>s+v,0) + (-0.15*Math.min(contacts,50)) + (0.4*Math.min(clashes,25));
+  $('#aff').textContent=total.toFixed(2); $('#vdw_contrib').textContent=base.vdw.toFixed(2); $('#hbond_contrib').textContent=base.hbond.toFixed(2); $('#hydro_contrib').textContent=base.hydrophobic.toFixed(2); $('#rot_contrib').textContent=base.rotational.toFixed(2); $('#contacts').textContent=String(contacts); $('#clashes').textContent=String(clashes);
 }
-
 function findPocketResidues(atoms){
-  if(!atoms.length) return [];
-  // group by residue id
-  const byRes={};
-  for (const a of atoms){ const k=a.resi ?? a.resn ?? '0'; (byRes[k]=byRes[k]||[]).push(a); }
-  // pick residue whose centroid has the densest 10 Å neighborhood
-  let best=null, bestN=-1;
-  for (const [resi,alist] of Object.entries(byRes)){
-    const c = centroid(alist);
-    let n=0; for (const a of atoms){ const dx=a.x-c.x, dy=a.y-c.y, dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz < 100) n++; }
-    if (n>bestN){ bestN=n; best=resi; }
-  }
-  if (!best) return [];
-  const core = byRes[best];
-  const c = centroid(core);
-  const set=new Set();
-  for (const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) set.add(a.resi ?? a.resn ?? '0'); }
-  return [...set];
+  if(!atoms.length) return []; const byRes={};
+  for(const a of atoms){ const k=a.resi ?? a.resn ?? '0'; (byRes[k]=byRes[k]||[]).push(a); }
+  let best=null,bN=-1; for(const [resi,alist] of Object.entries(byRes)){ const c=centroid(alist); let n=0; for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) n++; } if(n>bN){bN=n; best=resi;} }
+  if(!best) return []; const core=byRes[best], c=centroid(core); const res=new Set(); for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) res.add(a.resi ?? a.resn ?? '0'); } return [...res];
 }
+function centroidOfResidues(atoms, list){ if(!list||!list.length) return null; const pick=atoms.filter(a=>list.includes(a.resi ?? a.resn ?? '0')); return pick.length? centroid(pick): null; }
+function centroid(list){ let x=0,y=0,z=0; for(const a of list){ x+=a.x;y+=a.y;z+=a.z; } const n=Math.max(1,list.length); return {x:x/n,y:y/n,z:z/n}; }
+function bindingContrib(l, type='balanced'){ const M={balanced:{I:-1.5,V:-0.035,H:-0.7,Hy:-0.25,R:0.3},hbond:{I:-1.0,V:-0.030,H:-1.2,Hy:-0.15,R:0.3},hydrophobic:{I:-1.2,V:-0.040,H:-0.5,Hy:-0.45,R:0.25}}[type]||M.balanced; const hb=Math.min(l.hDonors,l.hAcceptors); return { intercept:M.I, vdw:M.V*l.numHeavyAtoms, hbond:M.H*hb, hydrophobic:M.Hy*l.logp, rotational:M.R*l.numRotatableBonds }; }
 
-function centroidOfResidues(atoms, resiList){
-  if(!resiList || !resiList.length) return null;
-  const pick = atoms.filter(a => resiList.includes(a.resi ?? a.resn ?? '0'));
-  return pick.length ? centroid(pick) : null;
-}
-function centroid(list){
-  if(!list.length) return {x:0,y:0,z:0};
-  let x=0,y=0,z=0; for (const a of list){ x+=a.x; y+=a.y; z+=a.z; }
-  return { x:x/list.length, y:y/list.length, z:z/list.length };
-}
-function normalize(v){
-  const m=Math.sqrt(v.x*v.x+v.y*v.y+v.z*v.z)||1; return {x:v.x/m,y:v.y/m,z:v.z/m};
-}
-
-function calculateBindingContributions(ligand, modelType='balanced'){
-  const MODELS = {
-    balanced:    { INTERCEPT:-1.5, VDW_PER_ATOM:-0.035, HBOND:-0.7,  HYDROPHOBIC:-0.25, ROT_PENALTY:0.30 },
-    hbond:       { INTERCEPT:-1.0, VDW_PER_ATOM:-0.030, HBOND:-1.2,  HYDROPHOBIC:-0.15, ROT_PENALTY:0.30 },
-    hydrophobic: { INTERCEPT:-1.2, VDW_PER_ATOM:-0.040, HBOND:-0.5,  HYDROPHOBIC:-0.45, ROT_PENALTY:0.25 }
-  };
-  const C = MODELS[modelType] || MODELS.balanced;
-  const hBondTerm = Math.min(ligand.hDonors, ligand.hAcceptors);
-  return {
-    intercept: C.INTERCEPT,
-    vdw: C.VDW_PER_ATOM * ligand.numHeavyAtoms,
-    hbond: C.HBOND * hBondTerm,
-    hydrophobic: C.HYDROPHOBIC * ligand.logp,
-    rotational: C.ROT_PENALTY * ligand.numRotatableBonds
-  };
-}
-
-/* ===== PBPK (unchanged logic) ===== */
+/* ===== PBPK/QSP (fixed) ===== */
 let charts={};
-function buildCharts(){ if(!window.Chart) return;
-  charts.pk=new Chart($('#pkChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false}});
-  charts.occ=new Chart($('#occChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false}});
+function buildCharts(){
+  if(!window.Chart) return;
+  charts.pk=new Chart($('#pkChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (h)'}},y:{title:{display:true,text:'Plasma (mg/L)'}}}}});
+  charts.occ=new Chart($('#occChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (h)'}},y:{title:{display:true,text:'Occupancy (%)'},min:0,max:100}}}});
+  // Clinical chart init here, too
+  charts.trial=new Chart($('#trialChart'),{type:'scatter',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Patient Index'}},y:{title:{display:true,text:'Dose (mg)'}}}}});
 }
-function updateChart(chart,label,labels,data,color='#2a5298'){
-  if(!chart) return;
-  chart.data={labels,datasets:[{label,data,borderColor:color,backgroundColor:'rgba(42,82,152,0.35)',pointRadius:0,tension:0.1}]};
-  chart.update();
-}
+function updateChart(chart,label,labels,data,color='#2a5298'){ if(!chart) return; chart.data={labels,datasets:[{label,data,borderColor:color,backgroundColor:hexToRgba(color,0.35),pointRadius:0,tension:0.1}]}; chart.update(); }
+function trapz(x,y){ let a=0; for(let i=1;i<x.length;i++) a+=0.5*(y[i]+y[i-1])*(x[i]-x[i-1]); return a; }
 function runPBPK(){
   if(!charts.pk||!charts.occ){ alert('Charts not ready'); return; }
   const D=+$('#dose').value||100, Fv=(+$('#F').value||80)/100, ka=+$('#ka').value||1.2, ke=+$('#ke').value||0.2, V=+$('#Vd').value||50;
+  if(ka<=0||ke<=0||V<=0||D<=0){ alert('All parameters must be positive.'); return; }
   if(Math.abs(ka-ke)<1e-9){ alert('ka and ke cannot be equal.'); return; }
-  const t=[], c=[]; for(let i=0;i<=48;i++){ t.push(i); const ci=(Fv*D*ka/(V*(ka-ke)))*(Math.exp(-ke*i)-Math.exp(-ka*i)); c.push(Math.max(0,ci)); }
-  const occ=c.map(v=>100*v/(20+v));
+  const t=[], c=[]; for(let h=0;h<=48;h++){ t.push(h); const ci=(Fv*D*ka/(V*(ka-ke)))*(Math.exp(-ke*h)-Math.exp(-ka*h)); c.push(Math.max(0,ci)); }
+  const occ=c.map(v=>100*v/(20+v)); // toy occupancy
+  // PK metrics
+  let cmax=-1,tmax=0; c.forEach((v,i)=>{ if(v>cmax){cmax=v;tmax=t[i];} });
+  const auc=trapz(t,c);
+  $('#cmax').textContent=cmax.toFixed(3); $('#tmax').textContent=tmax.toFixed(1); $('#auc').textContent=auc.toFixed(2);
   updateChart(charts.pk,'Plasma (mg/L)',t,c);
   updateChart(charts.occ,'Target Occupancy (%)',t,occ,'#e67e22');
 }
 
-/* ===== helpers ===== */
-function waitFor(cond, timeoutMs=12000){
-  const start=Date.now(); return new Promise((res,rej)=>{
-    (function tick(){ try{ if(cond()) return res(true);}catch{} if(Date.now()-start>timeoutMs) return rej(new Error('timeout')); setTimeout(tick,80); })();
-  });
+/* ===== Clinical 3+3 (fixed) ===== */
+function seedRand(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return (s>>>8)/0x01000000; }; }
+function simulateThreePlusThree({levels=6, cohort=3, startDose=10, esc=1.5, toxTarget=0.25, seed=42}={}){
+  const rnd = seedRand(seed);
+  const doses = Array.from({length:levels},(_,i)=> startDose*Math.pow(esc,i));
+  // “true” toxicity curve increasing with dose index
+  const trueTox = doses.map((_,i)=> Math.min(0.05 + 0.45*(i/(levels-1)), 0.80));
+  const rows=[], timelineNo=[], timelineDLT=[];
+  let i=0; let mtdIndex=null; let stopped=false;
+  while(!stopped && i<levels){
+    // enroll 3
+    let dlt=0; for(let k=0;k<3;k++){ const has = rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
+    rows.push({dose:doses[i], n:3, dlt});
+    if(dlt===0){ i++; continue; } // escalate
+    if(dlt>=2){ mtdIndex = Math.max(0,i-1); stopped=true; break; } // de-escalate/stop
+    // dlt===1 → expand to 6
+    for(let k=0;k<3;k++){ const has = rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
+    rows[rows.length-1].n=6; rows[rows.length-1].dlt=dlt;
+    if(dlt<=1){ i++; } else { mtdIndex=Math.max(0,i-1); stopped=true; }
+  }
+  if(!stopped){ // reached top without rule violation
+    // if last level had <=1/6 DLTs (or 0/3), call MTD as last
+    mtdIndex = Math.min(levels-1, Math.max(0, i-1));
+  }
+  return { doses, trueTox, timelineNo, timelineDLT, cohorts:rows, mtdIndex };
 }
+function simulateOneThreePlusThree(){
+  if(!charts.trial){ alert('Chart not ready'); return; }
+  const L=+$('#levels').value||6, C=+$('#cohort').value||3, S=+$('#startDose').value||10, T=(+$('#tox').value||25)/100, E=+$('#esc').value||1.5, seed=+$('#seed').value||42;
+  const res = simulateThreePlusThree({levels:L, cohort:C, startDose:S, esc:E, toxTarget:T, seed});
+  // chart
+  charts.trial.data.datasets = [
+    { label:'No DLT', data:res.timelineNo, backgroundColor:'#22c55e' },
+    { label:'DLT',    data:res.timelineDLT, backgroundColor:'#ef4444' }
+  ];
+  charts.trial.update();
+  // table
+  const tb = $('#trialTable tbody'); tb.innerHTML='';
+  res.cohorts.forEach((r,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${idx+1}</td><td>${r.dose.toFixed(2)}</td><td>${r.dlt}</td><td>${r.n}</td>`; tb.appendChild(tr); });
+  const badge=$('#trialBadge'); badge.style.display='inline-block';
+  if(res.mtdIndex===null){ badge.className='badge warn'; badge.textContent='Stopped without MTD'; }
+  else { badge.className='badge ok'; badge.textContent=`MTD/RP2D ≈ Dose Level ${res.mtdIndex+1} (${res.doses[res.mtdIndex].toFixed(2)} mg)`; }
+}
+function simulateManyThreePlusThree(){
+  const L=+$('#levels').value||6, C=+$('#cohort').value||3, S=+$('#startDose').value||10, T=(+$('#tox').value||25)/100, E=+$('#esc').value||1.5;
+  let counts=Array(L).fill(0);
+  for(let k=0;k<100;k++){ const res=simulateThreePlusThree({levels:L, cohort:C, startDose:S, esc:E, toxTarget:T, seed:42+k}); if(res.mtdIndex!=null) counts[res.mtdIndex]++; }
+  const idx = counts.indexOf(Math.max(...counts));
+  const badge=$('#trialBadge'); badge.style.display='inline-block'; badge.className='badge ok';
+  badge.textContent = `Across 100 sims: MTD most often at L${idx+1} (${(counts[idx]||0)}%)`;
+}
+
+/* ===== MD Setup (fixed) ===== */
+let generatedMDFiles = {};
+function generateMDFiles(){
+  const out=($('#md-out').value||'output').trim(), T=+$('#md-temp').value||310, ns=+$('#md-ns').value||10;
+  const cuts=($('#md-cuts').value||'10/12/14').split(/[\/ ,]+/).map(Number); const rest=$('#md-restraints').checked;
+  const common =
+`structure system.psf
+coordinates system.pdb
+set outputname ${out}
+outputname $outputname
+
+binaryoutput yes
+parameters system.prm
+exclude scaled1-4
+1-4scaling 1.0
+timestep 2.0
+rigidBonds all
+nonbondedFreq 1
+fullElectFrequency 2
+stepspercycle 20
+
+switching on
+switchdist ${cuts[0]||10}
+cutoff ${cuts[1]||12}
+pairlistdist ${cuts[2]||14}
+
+PME yes
+PMEGridSpacing 1.0
+
+langevin on
+langevinDamping 1.0
+langevinTemp ${T}
+langevinHydrogen no
+`;
+  const pressure =
+`
+useGroupPressure yes
+useFlexibleCell no
+langevinPiston on
+langevinPistonTarget 1.01325
+langevinPistonPeriod 100
+langevinPistonDecay 50
+langevinPistonTemp ${T}
+`;
+  const restraints = rest ? `
+constraints on
+consRef restraints.pdb
+consKFile restraints.pdb
+consKCol B
+constraintScaling 1.0
+` : `constraints off
+`;
+  generatedMDFiles = {
+    'min.conf': common + `minimization 10000\n`,
+    'eq.conf':  common + pressure + restraints + `run 250000\n`,
+    'prod.conf':common + pressure + `run ${Math.round((ns*1e6)/2)}\n`,
+    'README.md':
+`# Generic MD Simulation Files
+
+Place your prepared system files alongside:
+- system.psf
+- system.pdb
+- system.prm
+- restraints.pdb (if using constraints)
+
+Typical run:
+  md-engine min.conf  > min.log
+  md-engine eq.conf   > eq.log
+  md-engine prod.conf > prod.log
+`
+  };
+  const list=$('#fileList'); list.innerHTML='';
+  Object.entries(generatedMDFiles).forEach(([name,txt])=>{
+    const a=document.createElement('a'); a.textContent=`⬇ ${name}`;
+    a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=name; a.className='tab'; list.appendChild(a);
+  });
+  $('#zipBtn').disabled=false;
+  $('#mdStatus').textContent='Config files generated.';
+}
+async function downloadMDFiles(){
+  if(!Object.keys(generatedMDFiles).length){ return; }
+  if(typeof JSZip==='undefined'){ alert('JSZip not loaded.'); return; }
+  const zip=new JSZip(); for(const [k,v] of Object.entries(generatedMDFiles)) zip.file(k,v);
+  const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click();
+}
+async function buildRestraintsFile(){
+  const f=$('#md-pdb').files[0]; if(!f){ alert('Select a PDB file first.'); return; }
+  const txt=await f.text(); const out=[]; const bb=new Set(['N','CA','C','O']);
+  for(const line of txt.split(/\r?\n/)){
+    if(line.startsWith('ATOM')||line.startsWith('HETATM')){
+      const beta=bb.has(line.slice(12,16).trim())?2.0:0.0;
+      out.push(line.slice(0,60)+beta.toFixed(2).padStart(6,' ')+line.slice(66));
+    }else out.push(line);
+  }
+  const res=out.join('\n')+"\n";
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([res],{type:'text/plain'})); a.download='restraints.pdb'; a.textContent='⬇ Download restraints.pdb'; a.className='tab';
+  const status=$('#restraintsStatus'); status.innerHTML=''; status.append(a);
+  generatedMDFiles['restraints.pdb']=res;
+}
+
+/* ===== Publications (fixed) ===== */
+function renderPub(p, idx){
+  const card=document.createElement('div'); card.className='panel'; card.style.padding='14px';
+  card.innerHTML = `
+    <h4 style="margin:0 0 6px">${escapeHtml(p.title)}</h4>
+    <div style="color:#566;margin-bottom:6px">By ${escapeHtml(p.authors)} · ${p.date}</div>
+    <p style="margin:0 0 8px;white-space:pre-wrap">${escapeHtml(p.abstract)}</p>
+    <button data-del="${idx}" style="width:auto">Delete</button>
+  `;
+  card.querySelector('button[data-del]').addEventListener('click', ()=>{
+    const arr = JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]');
+    arr.splice(idx,1); localStorage.setItem('pharmsim_pubs', JSON.stringify(arr));
+    loadPubs();
+  });
+  return card;
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m])); }
+function submitPub(){
+  const title=$('#pub-title').value.trim(), authors=$('#pub-authors').value.trim(), abstract=$('#pub-abstract').value.trim();
+  const err=$('#pubError'); err.textContent='';
+  if(!title||!authors||!abstract){ err.textContent='Please complete Title, Authors, and Abstract.'; return; }
+  const p={title,authors,abstract,date:new Date().toLocaleDateString()};
+  const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'); arr.unshift(p);
+  localStorage.setItem('pharmsim_pubs', JSON.stringify(arr));
+  $('#pub-title').value=''; $('#pub-authors').value=''; $('#pub-abstract').value='';
+  loadPubs();
+}
+function loadPubs(){
+  const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]');
+  const list=$('#pub-list'); list.innerHTML='';
+  arr.forEach((p,i)=> list.appendChild(renderPub(p,i)));
+  updatePubEmpty();
+}
+function updatePubEmpty(){ const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'); $('#pub-empty').style.display = arr.length? 'none':'block'; }
+
+/* ===== Learning (enhanced) ===== */
+function loadTutorial(which){
+  const box=$('#tutorialBox');
+  const content={
+    pbpk:`<h4>PBPK Basics</h4>
+<p>We use a one-compartment oral absorption model (Bateman function). The curve shows plasma concentration vs. time. C<sub>max</sub>/T<sub>max</sub> and AUC summarize exposure. For multi-compartment behavior, extend with an additional distribution term or a transit compartment for absorption.</p>`,
+    docking:`<h4>Docking (Heuristic)</h4>
+<ol>
+<li><b>Pocket detection</b> by residue-neighborhood density (~10 Å).</li>
+<li><b>Ligand 3D</b> via RDKit.js (Embed + UFF).</li>
+<li><b>Placement</b> aligns ligand centroid to pocket centroid with a small offset.</li>
+<li><b>Scoring</b> = size + H-bond + hydrophobics + rotor penalty + contacts − clashes (structure-aware).</li>
+</ol>`,
+    md:`<h4>MD Setup</h4>
+<p>Generates NAMD-style config files (min/eq/prod) with PME and Langevin dynamics. Optional positional restraints via <code>restraints.pdb</code> (B-factor as force constant). Replace <code>system.*</code> with your prepared system.</p>`,
+    threeplus:`<h4>3+3 Design</h4>
+<p>Start with 3 patients at a dose. If 0/3 DLT → escalate; if 1/3 DLT → expand to 6; if ≥2/3 → stop and declare MTD at prior dose. The MTD is the highest dose with ≤1/6 DLTs.</p>`
+  };
+  box.innerHTML = content[which] || '<p>Select a topic above.</p>';
+}
+
+/* ===== Shared state for Docking (extracted helpers already above) ===== */
 </script>
 </body>
 </html>
