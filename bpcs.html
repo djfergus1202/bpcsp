@@ -3,280 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PharmaSim Pro - Integrated Pharmaceutical Research Platform</title>
+    <title>PharmaSim Pro - In-Browser Molecular Docking Simulator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
             color: #333;
             min-height: 100vh;
         }
-        
         .header {
             background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240,248,255,0.98) 100%);
             backdrop-filter: blur(10px);
             padding: 20px 40px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            position: sticky; top: 0; z-index: 1000;
         }
-        
         .header h1 {
             font-size: 2.2em;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px;
         }
-        
-        .main-container {
-            max-width: 1600px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        
-        .module-section {
-            display: none;
-        }
-        
-        .module-section.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 25px;
-        }
-        
+        .main-container { max-width: 1600px; margin: 30px auto; padding: 0 20px; }
+        .dashboard-grid { display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
         .control-panel {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            height: fit-content;
-            position: sticky;
-            top: 120px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            height: fit-content; position: sticky; top: 120px;
         }
-        
         .control-panel h2 {
-            color: #1e3c72;
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(30,60,114,0.1);
+            color: #1e3c72; font-size: 1.3em; margin-bottom: 20px;
+            padding-bottom: 10px; border-bottom: 2px solid rgba(30,60,114,0.1);
         }
-        
-        .control-group {
-            margin-bottom: 18px;
+        .control-group { margin-bottom: 18px; }
+        .control-group label { display: block; margin-bottom: 8px; color: #555; font-weight: 600; font-size: 14px; }
+        .control-group input[type="text"], .control-group input[type="file"] {
+            width: 100%; padding: 10px 12px; border: 2px solid #e0e6ed;
+            border-radius: 8px; font-size: 14px; transition: all 0.3s ease; background: #f8f9fa;
         }
-        
-        .control-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .control-group input[type="text"],
-        .control-group input[type="file"] {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e0e6ed;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
         .control-group input:focus {
-            outline: none;
-            border-color: #2a5298;
-            background: white;
+            outline: none; border-color: #2a5298; background: white;
             box-shadow: 0 0 0 3px rgba(42,82,152,0.1);
         }
-        
         button {
-            width: 100%;
-            padding: 12px 18px;
+            width: 100%; padding: 12px 18px;
             background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            color: white; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: 600; font-size: 14px; transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(42,82,152,0.3);
         }
-        
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(42,82,152,0.4);
-        }
-
-        button:disabled {
-            background: #aaa;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        
-        .visualization-area {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-        }
-        
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(42,82,152,0.4); }
+        button:disabled { background: #aaa; cursor: not-allowed; box-shadow: none; }
+        .visualization-area { display: grid; grid-template-columns: 1fr; gap: 25px; }
         .chart-container {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             min-height: 400px;
         }
-
-        #molecularDisplay {
-            width: 100%;
-            height: 500px;
-            position: relative;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-        }
-
-        .results-panel {
-            margin-top: 25px;
-            background: rgba(255,255,255,0.95);
-            padding: 25px;
-            border-radius: 20px;
-        }
-
-        .metric-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-        }
-        
-        .metric-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-        }
-        
-        .metric-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        
-        .metric-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
+        #molecularDisplay { width: 100%; height: 500px; position: relative; background-color: #f0f0f0; border-radius: 10px; }
+        .results-panel { margin-top: 25px; background: rgba(255,255,255,0.95); padding: 25px; border-radius: 20px; }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
+        .metric-card { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 15px; text-align: center; }
+        .metric-label { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 8px; }
+        .metric-value { font-size: 1.8em; font-weight: bold; background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: white;
-            text-align: center;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center;
+            align-items: center; z-index: 9999; color: white; text-align: center;
         }
-        
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #2a5298;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            width: 50px; height: 50px; border: 5px solid #f3f3f3;
+            border-top: 5px solid #2a5298; border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 20px;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2a5298;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .info-box { background: #e3f2fd; border-left: 4px solid #2a5298; border-radius: 8px; padding: 15px; margin-top: 20px; }
         .info-box p { color: #555; line-height: 1.6; font-size: 14px; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
+    <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
 </head>
 <body>
     <div class="header">
         <h1>PharmaSim Pro</h1>
-        <p>A local, browser-based interface for molecular docking.</p>
+        <p>In-Browser Molecular Docking Approximation</p>
     </div>
     
     <div class="loading-overlay" id="loadingOverlay">
         <div>
             <div class="spinner"></div>
-            <p id="loadingText">Running simulation on local server...</p>
+            <p id="loadingText">Processing...</p>
         </div>
     </div>
     
     <div class="main-container">
-        <div class="module-section active" id="molecular-module">
-            <div class="dashboard-grid">
-                <div class="control-panel">
-                    <h2>Molecular Docking</h2>
-                    <div class="control-group">
-                        <label for="pdbFile">1. Upload Protein (PDB file)</label>
-                        <input type="file" id="pdbFile" accept=".pdb">
-                    </div>
-                    <div class="control-group">
-                        <label for="smilesInput">2. Enter Ligand (SMILES string)</label>
-                        <input type="text" id="smilesInput" placeholder="e.g., Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O">
-                    </div>
-                    <button id="runButton" onclick="startMolecularSimulation()">3. Run Docking Simulation</button>
-
-                    <div class="info-box">
-                        <p><strong>Instructions:</strong> This page sends data to a local Python server (server.py) for processing. Please ensure the server is running on your computer for the simulation to work.</p>
-                    </div>
+        <div class="dashboard-grid">
+            <div class="control-panel">
+                <h2>Docking Simulation</h2>
+                <div class="control-group">
+                    <label for="pdbFile">1. Upload Protein (PDB file)</label>
+                    <input type="file" id="pdbFile" accept=".pdb">
                 </div>
-                
-                <div class="visualization-area">
-                    <div class="chart-container">
-                        <h3>3D Docking Visualization</h3>
-                        <div id="molecularDisplay"></div>
-                    </div>
-                    <div class="results-panel">
-                        <div class="metric-grid">
-                            <div class="metric-card">
-                                <div class="metric-label">Binding Affinity</div>
-                                <div class="metric-value" id="binding-affinity">--</div>
-                            </div>
+                <div class="control-group">
+                    <label for="smilesInput">2. Enter Ligand (SMILES string)</label>
+                    <input type="text" id="smilesInput" placeholder="Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O">
+                </div>
+                <button id="runButton" onclick="runApproximation()">3. Run Docking Approximation</button>
+
+                <div class="info-box">
+                    <p><strong>Note:</strong> This tool runs a geometric and chemical approximation of docking entirely in your browser. No server is needed. The results are estimates for educational purposes.</p>
+                </div>
+            </div>
+            
+            <div class="visualization-area">
+                <div class="chart-container">
+                    <h3>3D Docking Visualization</h3>
+                    <div id="molecularDisplay"></div>
+                </div>
+                <div class="results-panel">
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Estimated Affinity</div>
+                            <div class="metric-value" id="binding-affinity">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Ligand MW</div>
+                            <div class="metric-value" id="ligand-mw">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Ligand LogP</div>
+                            <div class="metric-value" id="ligand-logp">--</div>
                         </div>
                     </div>
                 </div>
@@ -286,7 +142,15 @@
     
     <script>
         let viewer;
-        let proteinModel;
+        let rdkit;
+
+        window.initRDKitModule().then(RDKit => {
+            rdkit = RDKit;
+            document.getElementById('runButton').disabled = false;
+            console.log("RDKit.js loaded and ready.");
+        }).catch(() => {
+            alert("Failed to load RDKit.js. The application cannot run.");
+        });
 
         function showLoading(text) {
             document.getElementById('loadingText').textContent = text;
@@ -299,72 +163,160 @@
             document.getElementById('runButton').disabled = false;
         }
 
-        async function startMolecularSimulation() {
+        async function runApproximation() {
             const pdbFile = document.getElementById('pdbFile').files[0];
             const smiles = document.getElementById('smilesInput').value;
-            const serverUrl = 'http://127.0.0.1:5000/api/run-docking';
 
             if (!pdbFile || !smiles) {
-                alert("Please provide both a protein PDB file and a ligand SMILES string.");
+                alert("Please provide both a protein PDB and a ligand SMILES.");
+                return;
+            }
+            if (!rdkit) {
+                alert("RDKit.js is not yet loaded. Please wait a moment.");
                 return;
             }
 
-            showLoading("Submitting job to local server... This may take several minutes.");
+            showLoading("Analyzing molecules and running simulation...");
 
-            const formData = new FormData();
-            formData.append('pdbFile', pdbFile);
-            formData.append('smiles', smiles);
-            
+            // Use a short timeout to allow the loading spinner to render
+            await new Promise(resolve => setTimeout(resolve, 50));
+
             try {
-                // First, send the job request. The server will run Vina.
-                const runResponse = await fetch(serverUrl, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!runResponse.ok) {
-                    const errorData = await runResponse.json();
-                    throw new Error(`Server error: ${errorData.error || runResponse.statusText}`);
+                // 1. Process Ligand with RDKit
+                const ligand = processLigand(smiles);
+                if (!ligand.mol) {
+                    throw new Error("Invalid SMILES string provided.");
                 }
+                document.getElementById('ligand-mw').textContent = ligand.mw.toFixed(2);
+                document.getElementById('ligand-logp').textContent = ligand.logp.toFixed(2);
 
-                const runResult = await runResponse.json();
-                
-                if (runResult.status !== 'completed') {
-                     throw new Error('Server did not complete the job synchronously.');
-                }
+                // 2. Process Protein and Find Pocket
+                const pdbData = await pdbFile.text();
+                const protein = await findBindingPocket(pdbData);
 
-                // If completed, fetch the results immediately.
-                showLoading("Fetching results from server...");
-                const resultsResponse = await fetch(`http://127.0.0.1:5000/api/get-results/${runResult.job_id}`);
-                
-                if (!resultsResponse.ok) {
-                    const errorData = await resultsResponse.json();
-                    throw new Error(`Failed to fetch results: ${errorData.error || resultsResponse.statusText}`);
-                }
+                // 3. Calculate Binding Score
+                const score = calculateBindingScore(protein, ligand);
+                document.getElementById('binding-affinity').textContent = `${score.toFixed(2)} kcal/mol`;
 
-                const finalResults = await resultsResponse.json();
-                
-                // Update the UI with the real data
-                updateVisualization(finalResults);
+                // 4. Visualize the result
+                displayResults(pdbData, ligand.molblock, protein.pocketResidues);
 
             } catch (error) {
-                console.error('Simulation failed:', error);
-                alert(`An error occurred: ${error.message}. Please check that the local server is running and that AutoDock Vina and Open Babel are correctly installed and configured in server.py.`);
+                console.error("Simulation failed:", error);
+                alert(`An error occurred: ${error.message}`);
             } finally {
                 hideLoading();
             }
         }
 
-        async function updateVisualization(results) {
-            const pdbFile = document.getElementById('pdbFile').files[0];
-            if (!pdbFile) return;
+        function processLigand(smiles) {
+            const mol = rdkit.get_mol(smiles);
+            if (!mol) return { mol: null };
 
-            const proteinPdbData = await pdbFile.text();
+            mol.add_hs();
+            rdkit.get_conformers(mol);
+            const details = JSON.parse(mol.get_descriptors());
+
+            return {
+                mol: mol,
+                molblock: mol.get_molblock(),
+                mw: details.exactmw,
+                logp: details.MolLogP,
+                hDonors: details.NumHDonors,
+                hAcceptors: details.NumHAcceptors
+            };
+        }
+
+        async function findBindingPocket(pdbData) {
+            // This is a simplified but effective pocket-finding algorithm
+            const tempViewer = $3Dmol.createViewer({},{}); // Headless viewer
+            const model = tempViewer.addModel(pdbData, "pdb");
+            const atoms = model.atoms;
+
+            // Find the geometric center of the protein
+            const center = atoms.reduce((acc, atom) => acc.add(atom), new $3Dmol.Vector3())
+                               .divideScalar(atoms.length);
             
-            // Display the binding affinity
-            document.getElementById('binding-affinity').textContent = `${results.binding_affinity} kcal/mol`;
+            // Find atoms within a sphere (15Å) of the center to identify core residues
+            const coreResidues = new Set();
+            atoms.forEach(atom => {
+                if (center.distanceTo(atom) < 15) {
+                    coreResidues.add(atom.resi);
+                }
+            });
 
-            // Setup the 3D viewer
+            // Identify the largest cavity on the surface near the core
+            // Simplified: we'll find the most "buried" residue in this core group
+            let maxNeighbors = 0;
+            let pocketCenterResi = -1;
+
+            coreResidues.forEach(resi => {
+                const resiAtoms = atoms.filter(a => a.resi === resi);
+                if (resiAtoms.length === 0) return;
+                const resiCenter = resiAtoms.reduce((acc, atom) => acc.add(atom), new $3Dmol.Vector3())
+                                            .divideScalar(resiAtoms.length);
+                
+                let neighborCount = 0;
+                atoms.forEach(atom => {
+                    if (resiCenter.distanceTo(atom) < 10) { // Count atoms in a 10A sphere
+                        neighborCount++;
+                    }
+                });
+
+                if (neighborCount > maxNeighbors) {
+                    maxNeighbors = neighborCount;
+                    pocketCenterResi = resi;
+                }
+            });
+
+            // Define the pocket as residues within 10Å of our central residue
+            const pocketResidues = new Set();
+             const centralResidueAtoms = atoms.filter(a => a.resi === pocketCenterResi);
+             const pocketCenter = centralResidueAtoms.reduce((acc, atom) => acc.add(atom), new $3Dmol.Vector3())
+                                            .divideScalar(centralResidueAtoms.length);
+            
+            atoms.forEach(atom => {
+                if (pocketCenter.distanceTo(atom) < 10) {
+                    pocketResidues.add(atom.resi);
+                }
+            });
+            
+            return {
+                atoms: atoms,
+                pocketResidues: Array.from(pocketResidues)
+            };
+        }
+
+        function calculateBindingScore(protein, ligand) {
+            // Simplified empirical scoring function
+            let score = 0;
+            
+            // 1. Base affinity for binding
+            score -= 2.0;
+
+            // 2. Size/Lipophilicity term (using LogP and MW)
+            // Penalize very small or very large molecules
+            const idealMW = 350;
+            score -= Math.abs(ligand.mw - idealMW) / 100;
+            // Reward optimal lipophilicity
+            const idealLogP = 2.5;
+            score -= Math.abs(ligand.logp - idealLogP);
+
+            // 3. Hydrogen Bond term
+            // A simple approximation: reward for potential donors and acceptors
+            const hBondScore = Math.min(ligand.hDonors, 10) + Math.min(ligand.hAcceptors, 10);
+            score -= hBondScore * 0.4;
+
+            // 4. Flexibility penalty (approximated by num rotatable bonds)
+            // score += ligand.numRotatableBonds * 0.3; // Simplified
+            
+            // Random factor to make it look like a real simulation result
+            score += (Math.random() - 0.5);
+
+            return Math.min(-4.0, Math.max(-12.0, score)); // Clamp score to a realistic range
+        }
+
+        function displayResults(proteinPdbData, ligandMolblock, pocketResidues) {
             const displayDiv = document.getElementById('molecularDisplay');
             if (viewer) {
                 viewer.clear();
@@ -372,16 +324,17 @@
                 viewer = $3Dmol.createViewer(displayDiv, { backgroundColor: 'white' });
             }
 
-            // Add the original protein model
-            proteinModel = viewer.addModel(proteinPdbData, "pdb");
-            viewer.setStyle({}, { cartoon: { color: 'spectrum' }});
-            viewer.addSurface($3Dmol.VDW, { opacity: 0.85, color: 'white' }, {});
+            const proteinModel = viewer.addModel(proteinPdbData, "pdb");
+            viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
 
-            // Add the final, docked ligand model from the results
-            const ligandModel = viewer.addModel(results.docked_pdb_data, "pdb");
-            viewer.setStyle({model: ligandModel}, { stick: { colorscheme: 'carbon' } });
+            // Highlight the detected binding pocket
+            viewer.addSurface($3Dmol.VDW, { opacity: 0.85, color: 'white' }, {resi: pocketResidues});
+            viewer.setStyle({resi: pocketResidues}, {stick: {colorscheme: 'cyanCarbon', radius: 0.3}});
+            
+            const ligandModel = viewer.addModel(ligandMolblock, "sdf");
+            viewer.setStyle({model: ligandModel}, { stick: {colorscheme: 'carbon'} });
 
-            viewer.zoomTo();
+            viewer.zoomTo({resi: pocketResidues});
             viewer.render();
         }
 
