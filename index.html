@@ -41,6 +41,7 @@
 
     .btn{ background: linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; font-weight: 700; border-radius: 10px; padding: .65rem .9rem; }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
+    .btn-plain{ background:#fff; border-radius:10px; padding:.6rem .9rem; font-weight:600; }
     .input, select, textarea{ width:100%; padding:.65rem .8rem; border:2px solid #e5e7eb; border-radius:10px; background:#f8f9fa; }
     .input:focus, select:focus, textarea:focus{ outline:none; border-color:#2a5298; background:#fff; box-shadow:0 0 0 3px rgba(42,82,152,.12); }
 
@@ -136,6 +137,10 @@
             <input id="pdbId" placeholder="Fetch by PDB ID (e.g., 6LU7)" class="col-span-2 input">
             <button id="fetchPdbBtn" class="btn w-full">Fetch PDB</button>
           </div>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button id="clearProteinBtn" class="btn-plain">Clear Protein</button>
+            <button id="resetViewBtn" class="btn-plain">Reset View</button>
+          </div>
         </div>
 
         <!-- Brick: Ligand input -->
@@ -152,13 +157,18 @@
               <option value="CC(C)NC(=O)C1CCN(CC1)c1cccc2OCOc12">Drug Hit 5 (Reversible)</option>
               <option value="CC(C)CC(NC(=O)C1CCN(CC1)c1cccc2OCOc12)Cc1ccccc1">Drug Hit 6 (Irreversible)</option>
             </select>
-            <button id="useExampleBtn" class="px-3 py-2 rounded-lg font-semibold bg-white w-full">Use Example</button>
+            <button id="useExampleBtn" class="btn-plain w-full">Use Example</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <button id="loadSmilesBtn" class="btn w-full">Load SMILES</button>
+            <button id="clearLigandBtn" class="btn-plain w-full">Clear Ligand</button>
           </div>
         </div>
 
         <!-- Brick: Model + scoring -->
         <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">Scoring Model</h2>
+          <h2 class="text-lg font-bold mb-2">Scoring & Controls</h2>
+          <label class="block text-sm font-semibold mb-1">Scoring Model</label>
           <select id="scoringModel" class="input">
             <option value="balanced" selected>Balanced</option>
             <option value="hbond">H-Bond Focused</option>
@@ -169,8 +179,9 @@
             <button id="dockBtn" class="btn" disabled>Run Approximate Dock</button>
             <button id="centerBtn" class="btn" disabled>Re-center &amp; Re-score</button>
           </div>
-          <div class="mt-3">
-            <button id="prefillFromDock" class="px-3 py-2 rounded-lg font-semibold bg-white w-full">Use Current Dock in Community Post</button>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <button id="clearAllBtn" class="btn-plain">Clear All</button>
+            <button id="prefillFromDock" class="btn-plain">Use Current Dock in Post</button>
           </div>
         </div>
 
@@ -190,7 +201,7 @@
           </div>
         </div>
 
-        <!-- Brick: Metrics B -->
+        <!-- Brick: Contributions -->
         <div class="glass panel">
           <h2 class="text-lg font-bold mb-2">Contributions</h2>
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -309,7 +320,7 @@
               </div>
               <div><label class="block text-sm font-semibold">Notes (optional)</label><textarea id="postNotes" rows="3" class="input" placeholder="Key interactions, pocket features, next steps…"></textarea></div>
               <div class="grid grid-cols-2 gap-2">
-                <button id="prefillFromDock" class="px-3 py-2 rounded-lg font-semibold bg-white">Use Current Dock</button>
+                <button id="prefillFromDock" class="btn-plain">Use Current Dock</button>
                 <button id="createPostBtn" class="btn">Post</button>
               </div>
             </div>
@@ -319,7 +330,7 @@
               <div><label class="block text-sm font-semibold">Content</label><textarea id="postContent" rows="6" class="input" placeholder="Educational content, blog, or discussion…"></textarea></div>
               <div class="grid grid-cols-2 gap-2">
                 <button id="createNonDockBtn" class="btn">Publish</button>
-                <button id="clearNonDockBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Clear</button>
+                <button id="clearNonDockBtn" class="btn-plain">Clear</button>
               </div>
             </div>
           </div>
@@ -337,8 +348,8 @@
               <option>P</option><option>Q</option><option>R</option><option>S</option><option>T</option>
               <option>U</option><option>V</option><option>W</option><option>X</option><option>Y</option><option>Z</option>
             </select>
-            <button id="exportJsonBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Export DB (JSON)</button>
-            <button id="exportCsvBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Export Posts (CSV)</button>
+            <button id="exportJsonBtn" class="btn-plain">Export DB (JSON)</button>
+            <button id="exportCsvBtn" class="btn-plain">Export Posts (CSV)</button>
           </div>
           <div id="feedGrid" class="bricks"></div>
           <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result.</div>
@@ -434,11 +445,11 @@
       <input id="authAvatar" class="input" placeholder="https://…">
       <div class="grid grid-cols-2 gap-2 mt-3">
         <button id="signInBtn" class="btn">Sign In</button>
-        <button id="signUpBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Create Account</button>
+        <button id="signUpBtn" class="btn-plain">Create Account</button>
       </div>
       <div class="grid grid-cols-2 gap-2 mt-2">
-        <button id="closeProfileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Cancel</button>
-        <button id="signOutBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Sign Out</button>
+        <button id="closeProfileBtn" class="btn-plain">Cancel</button>
+        <button id="signOutBtn" class="btn-plain">Sign Out</button>
       </div>
       <div id="authMsg" class="text-sm mt-2"></div>
     </div>
@@ -516,6 +527,16 @@
   /* ===== Metrics ===== */
   const metricIds = ['mw','logp','aff','vdw_contrib','hbond_contrib','hydro_contrib','rot_contrib','contacts','clashes'];
   function resetMetrics(){ metricIds.forEach(id=>{ const el=$('#'+id); if(el) el.textContent='--'; }); }
+  function refreshButtons(){
+    const hasProt = !!proteinModel;
+    const hasLig  = !!ligandModel;
+    if(exists('#dockBtn'))    $('#dockBtn').disabled = !(hasProt && hasLig && currentLigandProps);
+    if(exists('#centerBtn'))  $('#centerBtn').disabled = !(hasProt || hasLig);
+    if(exists('#clearProteinBtn')) $('#clearProteinBtn').disabled = !hasProt;
+    if(exists('#clearLigandBtn'))  $('#clearLigandBtn').disabled  = !hasLig;
+    if(exists('#clearAllBtn'))     $('#clearAllBtn').disabled     = !(hasProt || hasLig);
+    if(exists('#resetViewBtn'))    $('#resetViewBtn').disabled    = !(hasProt || hasLig);
+  }
 
   /* ===== 3Dmol viewer ===== */
   function ensureViewer(){
@@ -532,9 +553,8 @@
     proteinModel = v.addModel(txt,'pdb');
     proteinModel.setStyle({hetflag:false},{cartoon:{color:'spectrum'}});
     v.zoomTo(); v.render();
-    if(exists('#centerBtn')) $('#centerBtn').disabled=false;
-    if(exists('#dockBtn'))   $('#dockBtn').disabled=!currentLigandProps;
     setStatus('Protein loaded.','ok');
+    refreshButtons();
   }
   function addLigandFromMolblock(molblock){
     const v=ensureViewer(); if(!v) return;
@@ -543,6 +563,33 @@
     ligandModel.setStyle({}, {stick:{radius:0.22}});
     v.zoomTo(); v.render();
     setStatus('Ligand loaded.','ok');
+    refreshButtons();
+  }
+  function resetView(){
+    const v=ensureViewer(); if(!v) return;
+    v.zoomTo(); v.render();
+  }
+  function clearProtein(){
+    if(!viewer || !proteinModel) return;
+    try{ viewer.removeModel(proteinModel); }catch(_){}
+    proteinModel=null;
+    setStatus('Protein cleared.','info');
+    refreshButtons();
+  }
+  function clearLigand(){
+    if(!viewer || !ligandModel) return;
+    try{ viewer.removeModel(ligandModel); }catch(_){}
+    ligandModel=null;
+    currentLigandProps=null;
+    resetMetrics();
+    setStatus('Ligand cleared.','info');
+    refreshButtons();
+  }
+  function clearAll(){
+    clearLigand();
+    clearProtein();
+    resetView();
+    setStatus('Cleared all.','info');
   }
 
   /* ===== PDB: drop, file, fetch ===== */
@@ -558,11 +605,11 @@
       const file=e.dataTransfer?.files?.[0];
       if(file && file.name.toLowerCase().endsWith('.pdb')){
         pdbFileFromDrop=file;
-        dz.innerHTML = \`<div class="font-semibold text-indigo-700">Ready: \${file.name}</div>
-        <div class="text-xs text-gray-600">Click “Load Local PDB” to display</div>\`;
+        dz.innerHTML = `<div class="font-semibold text-indigo-700">Ready: ${file.name}</div>
+        <div class="text-xs text-gray-600">Click “Load Local PDB” to display</div>`;
       }else{
-        dz.innerHTML = \`<div class="font-semibold text-rose-700">Not a .pdb file</div>
-        <div class="text-xs text-gray-600">Please drop a valid PDB</div>\`;
+        dz.innerHTML = `<div class="font-semibold text-rose-700">Not a .pdb file</div>
+        <div class="text-xs text-gray-600">Please drop a valid PDB</div>`;
       }
     });
   }
@@ -574,18 +621,18 @@
     addProteinFromPDB(txt);
     pdbFileFromDrop=null;
     const dz=$('#pdbDrop');
-    if(dz) dz.innerHTML = \`<div class="font-semibold text-green-700">Loaded: \${file.name}</div>
-    <div class="text-xs text-gray-600">Drop a new file to replace it.</div>\`;
-    latestDock.proteinName = file.name.replace(/\\.pdb$/i,'');
+    if(dz) dz.innerHTML = `<div class="font-semibold text-green-700">Loaded: ${file.name}</div>
+    <div class="text-xs text-gray-600">Drop a new file to replace it.</div>`;
+    latestDock.proteinName = file.name.replace(/\.pdb$/i,'');
     latestDock.pdbId='';
   }
   async function fetchPdb(){
     const el=$('#pdbId'); if(!el) return;
     const id=el.value.trim().toUpperCase(); if(!id) return;
     try{
-      setStatus(\`Fetching PDB \${id}…\`,'info');
-      const r=await fetch(\`https://files.rcsb.org/download/\${id}.pdb\`);
-      if(!r.ok) throw new Error(\`PDB \${id} not found.\`);
+      setStatus(`Fetching PDB ${id}…`,'info');
+      const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`);
+      if(!r.ok) throw new Error(`PDB ${id} not found.`);
       const txt=await r.text();
       addProteinFromPDB(txt);
       latestDock.proteinName=id; latestDock.pdbId=id;
@@ -597,9 +644,7 @@
   }
 
   /* ===== RDKit (SMILES → 3Dmol) ===== */
-  async function processSmiles(){
-    const input=$('#smiles'); if(!input) return;
-    const smiles=input.value.trim();
+  async function processSmilesString(smiles){
     const v=ensureViewer(); if(!v) return;
 
     safeRemoveModel(ligandModel); ligandModel=null;
@@ -630,12 +675,25 @@
       addLigandFromMolblock(mol.get_molblock());
 
       latestDock.smiles = smiles;
-      if(exists('#dockBtn')) $('#dockBtn').disabled = !proteinModel;
+      setStatus('SMILES loaded & embedded.','ok');
     }catch(e){
       console.error('RDKit error:', e);
       setStatus('RDKit error while processing SMILES.','err');
     }finally{
       if(mol) mol.delete();
+      refreshButtons();
+    }
+  }
+  function loadSmilesBtn(){
+    const smiles = $('#smiles')?.value.trim() || '';
+    if(!smiles){ alert('Enter a SMILES string first.'); return; }
+    processSmilesString(smiles);
+  }
+  function useExampleSmiles(){
+    const sel=$('#exampleSmiles');
+    if(sel && sel.value){
+      $('#smiles').value=sel.value;
+      processSmilesString(sel.value);
     }
   }
 
@@ -665,7 +723,7 @@
   }
   function runDock(){
     if(!proteinModel || !ligandModel || !currentLigandProps){
-      alert('Please load a protein and a valid ligand first.');
+      alert('Please load a protein and a ligand first.');
       return;
     }
     const which = $('#scoringModel')?.value || 'balanced';
@@ -693,26 +751,11 @@
     set('clashes', String(clashes));
     latestDock.dG = Number(total.toFixed(2));
     setStatus('Docking scored (heuristic).','ok');
+    refreshButtons();
   }
   function recenterAndRescore(){
-    const v=ensureViewer(); if(!v) return;
-    v.zoomTo(); v.render();
+    resetView();
     if(proteinModel && ligandModel && currentLigandProps) runDock();
-  }
-
-  /* ===== Examples & Prefill ===== */
-  function useExampleSmiles(){
-    const sel=$('#exampleSmiles');
-    if(sel && sel.value){ $('#smiles').value=sel.value; processSmiles(); }
-  }
-  function prefillFromDock(){
-    const map = {
-      postProtein: latestDock.proteinName || '',
-      postPdbId:   latestDock.pdbId || '',
-      postSmiles:  latestDock.smiles || '',
-      postDG:      latestDock.dG || ''
-    };
-    Object.entries(map).forEach(([id,val])=>{ const el=$('#'+id); if(el) el.value=val; });
   }
 
   /* ===== Minimal local “DB” for channels/posts (stubs) ===== */
@@ -879,17 +922,14 @@
   }
 
   /* ===== Fake auth (local) ===== */
-  const K_USERS='ps_users_v1', K_SESSION='ps_session_v1';
-  const userdb = ()=> JSON.parse(localStorage.getItem(K_USERS)||'[]');
   function openProfile(){ const m=$('#profileModal'); if(m){ $('#authMsg').textContent=''; m.classList.remove('hidden'); m.classList.add('flex'); } }
   function closeProfile(){ const m=$('#profileModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
-  function setSession(u){ localStorage.setItem(K_SESSION, JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
-  function getSession(){ return JSON.parse(localStorage.getItem(K_SESSION)||'null'); }
+  function setSession(u){ localStorage.setItem('ps_session_v1', JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
   function signUp(){
     const username=$('#authUser').value.trim(), pass=$('#authPass').value, avatar=$('#authAvatar').value.trim();
     if(!username||!pass){ $('#authMsg').textContent='Provide username & password.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
     const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem(K_USERS, JSON.stringify(users));
+    users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem('ps_users_v1', JSON.stringify(users));
     setSession({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm';
   }
   function signIn(){
@@ -898,7 +938,7 @@
     if(!u){ $('#authMsg').textContent='Invalid credentials.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
     setSession({username:u.username, avatar:u.avatar});
   }
-  function signOut(){ localStorage.removeItem(K_SESSION); $('#profileBtn').textContent='Sign In'; closeProfile(); }
+  function signOut(){ localStorage.removeItem('ps_session_v1'); $('#profileBtn').textContent='Sign In'; closeProfile(); }
 
   /* ===== Wire up everything ===== */
   document.addEventListener('DOMContentLoaded', async ()=>{
@@ -915,18 +955,36 @@
     ensureViewer(); // create 3Dmol viewer
     wirePdbDropZone();
 
-    // Buttons / inputs
+    // Buttons / inputs — protein
     on('#loadLocalPdbBtn','click',loadLocalPdb);
     on('#fetchPdbBtn','click',fetchPdb);
+    on('#clearProteinBtn','click',clearProtein);
+    on('#resetViewBtn','click',resetView);
+
+    // Buttons / inputs — ligand
     on('#useExampleBtn','click',useExampleSmiles);
-    on('#smiles','input',processSmiles);
+    on('#loadSmilesBtn','click',loadSmilesBtn);
+    on('#clearLigandBtn','click',clearLigand);
+
+    // Docking controls
     on('#dockBtn','click',runDock);
     on('#centerBtn','click',recenterAndRescore);
+    on('#clearAllBtn','click',clearAll);
 
-    on('#prefillFromDock','click',prefillFromDock);
+    // Community / posts
+    on('#prefillFromDock','click',()=>{
+      const map = {
+        postProtein: latestDock.proteinName || '',
+        postPdbId:   latestDock.pdbId || '',
+        postSmiles:  latestDock.smiles || '',
+        postDG:      latestDock.dG || ''
+      };
+      Object.entries(map).forEach(([id,val])=>{ const el=$('#'+id); if(el) el.value=val; });
+    });
     on('#createPostBtn','click',createDockPost);
     on('#createNonDockBtn','click',createNonDockPost);
 
+    // Auth
     on('#profileBtn','click',openProfile);
     on('#closeProfileBtn','click',closeProfile);
     on('#signUpBtn','click',signUp);
@@ -948,10 +1006,9 @@
     // Initialize route
     navigateFromHash();
 
-    // Disable until ready
-    if(exists('#dockBtn'))   $('#dockBtn').disabled=true;
-    if(exists('#centerBtn')) $('#centerBtn').disabled=true;
+    // Initial UI state
     resetMetrics();
+    refreshButtons();
 
     // First render of feeds
     refreshFeed(); refreshChannelList();
