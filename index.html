@@ -3,334 +3,412 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PharmaSim Pro · In-Browser Suite</title>
+<title>PharmaSim Pro · Social Computational Chemistry</title>
 
-<!-- CDNs -->
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- Tailwind for modern UI -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- Core science libs -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);color:#0b1630}
-header{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.08);z-index:10}
-.nav{max-width:1400px;margin:0 auto;padding:14px 18px;display:flex;gap:10px;align-items:center;justify-content:space-between}
-.tabs{display:flex;flex-wrap:wrap;gap:8px}
-.tab{padding:8px 14px;border:2px solid #2a5298;border-radius:18px;background:#fff;color:#2a5298;font-weight:700;cursor:pointer;transition:.2s}
-.tab.active,.tab:hover{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;border-color:transparent;transform:translateY(-2px)}
-.container{max-width:1400px;margin:20px auto;padding:0 16px}
-.grid{display:grid;grid-template-columns:360px 1fr;gap:22px}
-.panel{background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.12);padding:18px}
-label{display:block;font-size:13px;color:#334;margin:6px 0 4px}
-input,textarea,select{width:100%;padding:10px 12px;border:2px solid #e0e6ed;border-radius:10px;background:#f8f9fa;font:inherit;font-size:14px}
-input:focus,textarea:focus,select:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
-button{padding:10px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;cursor:pointer;transition:.2s}
-button:hover:not(:disabled){box-shadow:0 4px 15px rgba(42,82,152,.4);transform:translateY(-2px)}
-button:disabled{opacity:.6;cursor:not-allowed}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.col{flex:1 1 160px}
-.section{display:none}
-.section.active{display:block}
-#viewer{width:100%;min-height:440px;border-radius:10px;background:#eef2f7}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:12px;text-align:center;padding:12px}
-.metric .v{font-size:1.35em;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hint{font-size:12px;color:#476;margin-top:8px}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px}
-.badge.ok{background:#dcfce7;color:#166534}
-.badge.warn{background:#fff7ed;color:#9a3412}
-.badge.err{background:#fee2e2;color:#991b1b}
-.status{max-width:1400px;margin:10px auto 0;background:#fffdf5;border:1px solid #fde68a;color:#854d0e;border-radius:10px;padding:10px 12px;display:none}
-.status.ok{background:#f0fdf4;border-color:#bbf7d0;color:#14532d}
-.canvas-wrap{height:260px}
-.canvas-wrap.tall{height:320px}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{font-size:12px;padding:6px 8px;border-bottom:1px solid #eee;text-align:left}
-.empty{padding:16px;text-align:center;background:#fff}
-@media(max-width:1000px){.grid{grid-template-columns:1fr}}
+  :root {
+    --ink:#0b1630; --brand:#2a5298; --brand2:#1e3c72;
+  }
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink);
+       background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);}
+  .glass{background:rgba(255,255,255,.92); backdrop-filter:blur(10px); box-shadow:0 10px 26px rgba(0,0,0,.12); border-radius:16px;}
+  .chip{display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .6rem;border-radius:999px;font-weight:700;font-size:.75rem}
+  .chip.pos{background:#ecfdf5;color:#065f46}
+  .chip.info{background:#eff6ff;color:#1e3a8a}
+  .chip.warn{background:#fff7ed;color:#9a3412}
+  .chip.err{background:#fee2e2;color:#991b1b}
+  .panel{padding:18px}
+  .metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6); border-radius:12px; padding:12px; text-align:center}
+  .metric .v{font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .canvas-wrap{height:280px}
+  .canvas-wrap.tall{height:340px}
+  #viewer{width:100%;min-height:420px;border-radius:12px;background:#eef2f7}
+  .btn{background:linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; font-weight:700; border-radius:10px; padding:.65rem .9rem}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .btn:hover{filter:brightness(1.05)}
+  .input,select,textarea{width:100%; padding:.65rem .8rem; border:2px solid #e5e7eb; border-radius:10px; background:#f8f9fa}
+  .input:focus,select:focus,textarea:focus{outline:none;border-color:#2a5298; background:#fff; box-shadow:0 0 0 3px rgba(42,82,152,.12)}
+  .feed-card{border:1px solid #e6eaf2; border-radius:16px; padding:14px; background:#fff}
+  .feed-grid{display:grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap:14px}
+  .split{display:grid; grid-template-columns:360px 1fr; gap:20px}
+  @media (max-width:1024px){ .split{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
-<header>
-  <div class="nav">
-    <div style="font-weight:800;color:#1e3c72">PharmaSim Pro</div>
-    <div class="tabs">
-      <button class="tab active" data-t="md">Docking</button>
-      <button class="tab" data-t="pbpk">PBPK/QSP</button>
-      <button class="tab" data-t="clinical">Clinical</button>
-      <button class="tab" data-t="mdsetup">MD Setup</button>
-      <button class="tab" data-t="pub">Publications</button>
-      <button class="tab" data-t="learn">Learning</button>
+
+<!-- Top Nav -->
+<header class="sticky top-0 z-40 glass">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="text-2xl font-extrabold" style="color:#1e3c72">PharmaSim Pro</div>
+      <span class="chip info">Social Computational Chemistry (in-browser)</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-2">
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="md">Docking</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="pbpk">PBPK/QSP</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="clinical">Clinical</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="mdsetup">MD Setup</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="community">Community</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="pub">Publications</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="learn">Learning</button>
+    </nav>
+    <div class="flex items-center gap-3">
+      <div id="statusBadge" class="chip warn hidden">Initializing…</div>
+      <button id="profileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Sign In</button>
     </div>
   </div>
 </header>
 
-<div id="status" class="status"></div>
+<!-- Disclaimer -->
+<div class="max-w-7xl mx-auto px-4 mt-3">
+  <div class="glass panel text-sm leading-relaxed">
+    <strong>Disclaimer:</strong> This platform is for <em>educational and research</em> purposes.
+    All docking scores, PBPK/QSP outputs, and clinical simulations are <em>approximations</em>.
+    Always validate computational results with appropriate experimental studies before making decisions.
+  </div>
+</div>
 
-<div class="container">
-  <!-- ===== Docking (working) ===== -->
-  <section id="md" class="section active">
-    <div class="grid">
-      <div class="panel">
-        <h3>Ligand Prep & Structure-Aware Heuristic Docking</h3>
-        <label>Protein (PDB File)</label>
-        <input type="file" id="pdbFile" accept=".pdb" />
-        <div class="row" style="gap:8px;margin-top:8px">
-          <div style="flex:1"><label>…or Fetch by PDB ID</label><input id="pdbId" placeholder="e.g., 6LU7" /></div>
-          <div style="flex:0 0 160px;display:flex;align-items:flex-end"><button id="fetchPdbBtn" type="button">Fetch PDB</button></div>
+<!-- Main Container -->
+<main class="max-w-7xl mx-auto px-4 my-4">
+  <!-- Docking -->
+  <section id="md" class="glass panel section">
+    <h2 class="text-xl font-bold mb-2">Ligand Prep & Structure-Aware Heuristic Docking</h2>
+    <div class="split">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Protein (PDB File)</label>
+        <input type="file" id="pdbFile" accept=".pdb" class="input" />
+        <div class="grid grid-cols-3 gap-2 mt-2">
+          <div class="col-span-2">
+            <label class="block text-sm font-semibold mb-1">…or Fetch by PDB ID</label>
+            <input id="pdbId" placeholder="e.g., 6LU7" class="input" />
+          </div>
+          <div class="flex items-end">
+            <button id="fetchPdbBtn" class="btn w-full">Fetch PDB</button>
+          </div>
         </div>
-        <label style="margin-top:8px">Load Example from Paper</label>
-        <select id="exampleSmiles">
-          <option value="" disabled selected>Select a Drug Hit...</option>
+
+        <label class="block text-sm font-semibold mt-3 mb-1">Load Example from Paper</label>
+        <select id="exampleSmiles" class="input">
+          <option value="" disabled selected>Select a Drug Hit…</option>
           <option value="O=P(O)(O)COC(=O)C1CCCN1C(=O)c1ccc(CNS(=O)(=O)c2ccc(C)cc2)cc1">Drug Hit 1 (Zn-Chelator)</option>
-          <option value="CC(C)NCc1ccc(S(=O)(=O)Nc2cccc(c2)C(=O)N2CCCC2C(=O)OCC)cc1">Drug Hit 2 (π-π Stacking)</option>
+          <option value="CC(C)NCc1ccc(S(=O)(=O)Nc2cccc(c2)C(=O)N2CCCC2C(=O)OCC)cc1">Drug Hit 2 (π-π)</option>
           <option value="N1=C(N)N=C(C1)CCS(=O)(=O)NCc1ccc(C(=O)OCP(=O)(O)O)cc1">Drug Hit 3 (H-Bond)</option>
           <option value="Cc1ccc(OCc2ccc(C(=O)OC[C@H]3O[C@H](O)[C@H](O)[C@@H](O)[C@@H]3CO)cc2)cc1">Drug Hit 4 (Allosteric)</option>
           <option value="CC(C)NC(=O)C1CCN(CC1)c1cccc2OCOc12">Drug Hit 5 (Reversible)</option>
           <option value="CC(C)CC(NC(=O)C1CCN(CC1)c1cccc2OCOc12)Cc1ccccc1">Drug Hit 6 (Irreversible)</option>
         </select>
-        <label>Ligand (SMILES)</label><input id="smiles" value="CC(=O)OC1=CC=CC=C1C(=O)O"/>
-        <label>Scoring Model</label>
-        <select id="scoringModel">
+
+        <label class="block text-sm font-semibold mt-3 mb-1">Ligand (SMILES)</label>
+        <input id="smiles" value="CC(=O)OC1=CC=CC=C1C(=O)O" class="input"/>
+
+        <label class="block text-sm font-semibold mt-3 mb-1">Scoring Model</label>
+        <select id="scoringModel" class="input">
           <option value="balanced" selected>Balanced</option>
           <option value="hbond">H-Bond Focused</option>
           <option value="hydrophobic">Hydrophobicity Focused</option>
         </select>
-        <div class="row" style="gap:8px;margin-top:8px">
-          <button id="dockBtn" disabled>Run Approximate Dock</button>
-          <button id="centerBtn" type="button" disabled>Re-center & Re-score</button>
+
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button id="dockBtn" class="btn" disabled>Run Approximate Dock</button>
+          <button id="centerBtn" class="btn" disabled>Re-center & Re-score</button>
         </div>
-        <p class="hint" id="modelInfoText" style="margin-top:8px"></p>
+
+        <p class="text-sm text-gray-600 mt-2" id="modelInfoText"></p>
+
+        <div class="mt-4">
+          <button id="useForPostBtn" class="px-3 py-2 rounded-lg font-semibold bg-white w-full">Use Current Dock in Community Post</button>
+        </div>
       </div>
-      <div class="panel">
-        <h3>Results</h3>
-        <div class="metrics">
+
+      <div>
+        <div class="grid grid-cols-3 gap-2">
           <div class="metric"><div>Total ΔG</div><div id="aff" class="v">--</div></div>
           <div class="metric"><div>Ligand MW</div><div id="mw" class="v">--</div></div>
           <div class="metric"><div>Ligand LogP</div><div id="logp" class="v">--</div></div>
         </div>
-        <div class="metrics" style="margin-top:10px">
-          <div class="metric"><div class="hint">ΔG vdW</div><div id="vdw_contrib" class="v">--</div></div>
-          <div class="metric"><div class="hint">ΔG H-Bond</div><div id="hbond_contrib" class="v">--</div></div>
-          <div class="metric"><div class="hint">ΔG Hydrophobic</div><div id="hydro_contrib" class="v">--</div></div>
-          <div class="metric"><div class="hint">ΔS Rotational</div><div id="rot_contrib" class="v">--</div></div>
-          <div class="metric"><div class="hint">Contacts (≤3.5Å)</div><div id="contacts" class="v">--</div></div>
-          <div class="metric"><div class="hint">Clashes (&lt;1.8Å)</div><div id="clashes" class="v">--</div></div>
+        <div class="grid grid-cols-6 gap-2 mt-2">
+          <div class="metric"><div class="text-xs">ΔG vdW</div><div id="vdw_contrib" class="v">--</div></div>
+          <div class="metric"><div class="text-xs">ΔG H-Bond</div><div id="hbond_contrib" class="v">--</div></div>
+          <div class="metric"><div class="text-xs">ΔG Hydroph.</div><div id="hydro_contrib" class="v">--</div></div>
+          <div class="metric"><div class="text-xs">ΔS Rot.</div><div id="rot_contrib" class="v">--</div></div>
+          <div class="metric"><div class="text-xs">Contacts</div><div id="contacts" class="v">--</div></div>
+          <div class="metric"><div class="text-xs">Clashes</div><div id="clashes" class="v">--</div></div>
         </div>
-      </div>
-      <div class="panel" style="grid-column:1/-1">
-        <h3>3D Visualization</h3>
-        <div id="viewer"></div>
+        <div class="mt-3">
+          <h3 class="font-semibold mb-1">3D Visualization</h3>
+          <div id="viewer"></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== PBPK/QSP (fixed) ===== -->
-  <section id="pbpk" class="section">
-    <div class="grid">
-      <div class="panel">
-        <h3>PBPK/QSP Parameters</h3>
-        <label>Dose (mg)</label><input id="dose" type="number" value="100" />
-        <div class="row">
-          <div class="col"><label>F (%)</label><input id="F" type="number" value="80"/></div>
-          <div class="col"><label>ka (h⁻¹)</label><input id="ka" type="number" value="1.2" step="0.1"/></div>
-          <div class="col"><label>ke (h⁻¹)</label><input id="ke" type="number" value="0.2" step="0.05"/></div>
-          <div class="col"><label>Vd (L)</label><input id="Vd" type="number" value="50"/></div>
+  <!-- PBPK/QSP -->
+  <section id="pbpk" class="glass panel section hidden">
+    <h2 class="text-xl font-bold mb-2">PBPK/QSP (One-Compartment Oral)</h2>
+    <div class="split">
+      <div>
+        <label class="block text-sm font-semibold">Dose (mg)</label><input id="dose" type="number" value="100" class="input"/>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div><label class="block text-sm font-semibold">F (%)</label><input id="F" type="number" value="80" class="input"/></div>
+          <div><label class="block text-sm font-semibold">ka (h⁻¹)</label><input id="ka" type="number" value="1.2" step="0.1" class="input"/></div>
+          <div><label class="block text-sm font-semibold">ke (h⁻¹)</label><input id="ke" type="number" value="0.2" step="0.05" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Vd (L)</label><input id="Vd" type="number" value="50" class="input"/></div>
         </div>
-        <div class="row" style="margin-top:10px"><button id="runPBPKBtn">Run PBPK Simulation</button></div>
-        <p class="hint">Model: one-compartment oral, Bateman function. Occupancy uses E<sub>max</sub> with K<sub>d</sub>=20 mg/L (demo).</p>
+        <button id="runPBPKBtn" class="btn w-full mt-3">Run PBPK Simulation</button>
+        <p class="text-sm text-gray-600 mt-2">Model uses Bateman function; Occupancy via E<sub>max</sub> with demo K<sub>d</sub>=20 mg/L.</p>
       </div>
-      <div class="panel">
-        <h3>Pharmacokinetic Outputs</h3>
-        <div class="metrics" style="margin-bottom:8px">
+      <div>
+        <div class="grid grid-cols-3 gap-2">
           <div class="metric"><div>C<sub>max</sub> (mg/L)</div><div id="cmax" class="v">--</div></div>
           <div class="metric"><div>T<sub>max</sub> (h)</div><div id="tmax" class="v">--</div></div>
-          <div class="metric"><div>AUC<sub>0-48h</sub> (mg·h/L)</div><div id="auc" class="v">--</div></div>
+          <div class="metric"><div>AUC<sub>0-48</sub> (mg·h/L)</div><div id="auc" class="v">--</div></div>
         </div>
-        <div class="canvas-wrap tall"><canvas id="pkChart"></canvas></div>
-        <div class="canvas-wrap" style="margin-top:10px"><canvas id="occChart"></canvas></div>
+        <div class="canvas-wrap tall mt-2"><canvas id="pkChart"></canvas></div>
+        <div class="canvas-wrap mt-2"><canvas id="occChart"></canvas></div>
       </div>
     </div>
   </section>
 
-  <!-- ===== Clinical 3+3 (fixed) ===== -->
-  <section id="clinical" class="section">
-    <div class="grid">
-      <div class="panel">
-        <h3>3+3 Dose Escalation Simulation</h3>
-        <div class="row">
-          <div class="col"><label>Dose Levels</label><input id="levels" type="number" value="6"/></div>
-          <div class="col"><label>Cohort Size</label><input id="cohort" type="number" value="3"/></div>
-          <div class="col"><label>Start Dose (mg)</label><input id="startDose" type="number" value="10"/></div>
-          <div class="col"><label>Target DLT Rate (%)</label><input id="tox" type="number" value="25"/></div>
+  <!-- Clinical 3+3 -->
+  <section id="clinical" class="glass panel section hidden">
+    <h2 class="text-xl font-bold mb-2">3+3 Dose Escalation Simulator</h2>
+    <div class="split">
+      <div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block text-sm font-semibold">Dose Levels</label><input id="levels" type="number" value="6" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Cohort Size</label><input id="cohort" type="number" value="3" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Start Dose (mg)</label><input id="startDose" type="number" value="10" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Target DLT Rate (%)</label><input id="tox" type="number" value="25" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Escalation Factor</label><input id="esc" type="number" value="1.5" step="0.1" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Random Seed</label><input id="seed" type="number" value="42" class="input"/></div>
         </div>
-        <div class="row" style="margin-top:8px">
-          <div class="col"><label>Escalation Factor</label><input id="esc" type="number" value="1.5" step="0.1"/></div>
-          <div class="col"><label>Random Seed</label><input id="seed" type="number" value="42"/></div>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button id="runTrialBtn" class="btn w-full">Simulate Trial</button>
+          <button id="run100Btn" class="btn w-full">Run 100 Trials (summary)</button>
         </div>
-        <div class="row" style="margin-top:10px">
-          <button id="runTrialBtn">Simulate Trial</button>
-          <button id="run100Btn" type="button">Run 100 Trials (summary)</button>
-        </div>
-        <p class="hint">Implements canonical 3+3: 0/3 → escalate, 1/3 → expand to 6, ≥2/3 stop/de-escalate. MTD is highest dose with ≤1/6 DLTs.</p>
+        <p class="text-sm text-gray-600 mt-2">Rules: 0/3 → escalate; 1/3 → expand to 6; ≥2/3 → stop/de-escalate. MTD = highest dose with ≤1/6 DLTs.</p>
       </div>
-      <div class="panel">
-        <div class="row" style="align-items:center;justify-content:space-between">
-          <h3>Trial Visualization</h3>
-          <div id="trialBadge" class="badge" style="display:none"></div>
+      <div>
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold mb-1">Trial Visualization</h3>
+          <div id="trialBadge" class="chip hidden"></div>
         </div>
         <div class="canvas-wrap tall"><canvas id="trialChart"></canvas></div>
-        <div id="trialTableWrap" class="panel" style="margin-top:10px;background:#f9fafb">
-          <h4 style="margin:0 0 8px">Cohorts</h4>
-          <table class="table" id="trialTable"><thead><tr><th>#</th><th>Dose (mg)</th><th>DLTs</th><th>N</th></tr></thead><tbody></tbody></table>
+        <div class="glass panel mt-3">
+          <h4 class="font-semibold mb-2">Cohorts</h4>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-gray-600"><th class="py-1">#</th><th>Dose (mg)</th><th>DLTs</th><th>N</th></tr></thead>
+            <tbody id="trialTable"></tbody>
+          </table>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== MD Setup (fixed) ===== -->
-  <section id="mdsetup" class="section">
-    <div class="grid">
-      <div class="panel">
-        <h3>MD Simulation File Generator</h3>
-        <label>Output Prefix</label><input id="md-out" value="output"/>
-        <div class="row">
-          <div class="col"><label>Temperature (K)</label><input id="md-temp" type="number" value="310"/></div>
-          <div class="col"><label>Production Time (ns)</label><input id="md-ns" type="number" value="10"/></div>
+  <!-- MD Setup -->
+  <section id="mdsetup" class="glass panel section hidden">
+    <h2 class="text-xl font-bold mb-2">MD Simulation File Generator</h2>
+    <div class="split">
+      <div>
+        <label class="block text-sm font-semibold">Output Prefix</label><input id="md-out" value="output" class="input"/>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div><label class="block text-sm font-semibold">Temperature (K)</label><input id="md-temp" type="number" value="310" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Production Time (ns)</label><input id="md-ns" type="number" value="10" class="input"/></div>
         </div>
-        <div class="row">
-          <div class="col"><label>switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14"/></div>
-          <div class="col" style="display:flex;align-items:flex-end"><label style="width:100%"><input type="checkbox" id="md-restraints" checked/> Use Restraints</label></div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div><label class="block text-sm font-semibold">switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14" class="input"/></div>
+          <div class="flex items-end gap-2">
+            <input type="checkbox" id="md-restraints" checked class="w-5 h-5"/><label for="md-restraints" class="text-sm">Use Restraints</label>
+          </div>
         </div>
-        <div class="row" style="margin-top:10px">
-          <button id="generateMDFilesBtn">Generate Files</button>
-          <button id="zipBtn" disabled>Download ZIP</button>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button id="generateMDFilesBtn" class="btn w-full">Generate Files</button>
+          <button id="zipBtn" class="btn w-full" disabled>Download ZIP</button>
         </div>
-        <div id="mdStatus" class="hint" style="margin-top:6px"></div>
-        <div id="fileList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+        <div id="mdStatus" class="text-sm text-gray-600 mt-2"></div>
+        <div id="fileList" class="mt-3 flex flex-col gap-2"></div>
       </div>
-      <div class="panel">
-        <h3>In-Browser Restraints PDB Builder</h3>
-        <p class="hint">Backbone atoms (N, CA, C, O) receive B-factor = 2.0 (others 0.0). Save as <code>restraints.pdb</code>.</p>
-        <div class="row">
-          <div class="col"><label>Source PDB</label><input type="file" id="md-pdb" accept=".pdb"/></div>
-          <div class="col" style="display:flex;align-items:end"><button id="buildRestraints">Generate restraints.pdb</button></div>
+      <div>
+        <h3 class="font-semibold mb-1">In-Browser Restraints PDB Builder</h3>
+        <p class="text-sm text-gray-600">Backbone atoms (N, CA, C, O) get B-factor=2.0; others 0.0 → save as <code>restraints.pdb</code>.</p>
+        <div class="grid grid-cols-3 gap-2 mt-2">
+          <div class="col-span-2"><input type="file" id="md-pdb" accept=".pdb" class="input"/></div>
+          <div class="flex items-end"><button id="buildRestraints" class="btn w-full">Generate</button></div>
         </div>
-        <div id="restraintsStatus" class="hint" style="margin-top:8px"></div>
+        <div id="restraintsStatus" class="text-sm text-gray-700 mt-3"></div>
       </div>
     </div>
   </section>
 
-  <!-- ===== Publications (fixed) ===== -->
-  <section id="pub" class="section">
-    <div class="panel">
-      <h3>Create New Publication</h3>
-      <label>Title</label><input id="pub-title" placeholder="e.g., In Silico Analysis of Novel Kinase Inhibitors"/>
-      <label>Authors</label><input id="pub-authors" placeholder="Ferguson, D., et al."/>
-      <label>Abstract / Key Findings</label><textarea id="pub-abstract" rows="6" placeholder="Brief abstract or bullet points…"></textarea>
-      <div class="row" style="margin-top:8px"><button id="pubSubmit">Submit Publication</button></div>
-      <div id="pubError" class="hint" style="color:#9a3412;margin-top:8px"></div>
+  <!-- Community (Social Networking) -->
+  <section id="community" class="glass panel section hidden">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <h2 class="text-xl font-bold">Community Feed</h2>
+      <div class="flex items-center gap-2 w-full md:w-auto">
+        <input id="searchInput" placeholder="Search by protein or SMILES…" class="input md:w-80"/>
+        <select id="alphaFilter" class="input md:w-32">
+          <option value="">All A–Z</option>
+          <option value="#num"># (0–9)</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option>
+          <option>G</option><option>H</option><option>I</option><option>J</option><option>K</option><option>L</option>
+          <option>M</option><option>N</option><option>O</option><option>P</option><option>Q</option><option>R</option>
+          <option>S</option><option>T</option><option>U</option><option>V</option><option>W</option><option>X</option>
+          <option>Y</option><option>Z</option>
+        </select>
+        <button id="exportJsonBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Export DB (JSON)</button>
+        <button id="exportCsvBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Export Posts (CSV)</button>
+      </div>
     </div>
-    <div id="pub-list" style="margin-top:18px;display:grid;gap:12px"></div>
-    <div id="pub-empty" class="empty" style="display:none">No publications yet—add your first one above.</div>
+
+    <div class="grid lg:grid-cols-3 gap-4 mt-4">
+      <!-- Composer -->
+      <div class="glass panel">
+        <h3 class="font-semibold mb-2">Create a Post</h3>
+        <div class="grid gap-2">
+          <div>
+            <label class="block text-sm font-semibold">Protein Name</label>
+            <input id="postProtein" placeholder="e.g., Mpro (SARS-CoV-2)" class="input"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold">PDB ID (optional)</label>
+            <input id="postPdbId" placeholder="e.g., 6LU7" class="input"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold">Ligand (SMILES)</label>
+            <input id="postSmiles" placeholder="Paste SMILES" class="input"/>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-sm font-semibold">Docking ΔG (kcal/mol)</label>
+              <input id="postDG" type="number" step="0.01" placeholder="-7.85" class="input"/>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold">Mood / Framing</label>
+              <select id="postMood" class="input">
+                <option>Inspired ✨</option>
+                <option>Constructive: Needs validation</option>
+                <option>Encouraging 👍</option>
+                <option>Curious 🤔</option>
+                <option>Grateful 🙏</option>
+                <option>Optimistic 🌱</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold">Notes (optional)</label>
+            <textarea id="postNotes" rows="3" class="input" placeholder="Key interactions, pocket features, experimental next steps…"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="prefillFromDock" class="px-3 py-2 rounded-lg font-semibold bg-white">Use Current Dock</button>
+            <button id="createPostBtn" class="btn">Post</button>
+          </div>
+          <p class="text-xs text-gray-600">RDKit renders a 2D thumbnail from SMILES (client-side).</p>
+        </div>
+      </div>
+
+      <!-- Feed -->
+      <div class="lg:col-span-2">
+        <div id="feedGrid" class="feed-grid"></div>
+        <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result above.</div>
+      </div>
+    </div>
   </section>
 
-  <!-- ===== Learning (enhanced) ===== -->
-  <section id="learn" class="section">
-    <div class="panel">
-      <h3>Learning Center</h3>
-      <div class="row" style="gap:8px;margin:8px 0">
-        <button class="tab" style="width:auto" data-learn="pbpk">PBPK Basics</button>
-        <button class="tab" style="width:auto" data-learn="docking">Docking</button>
-        <button class="tab" style="width:auto" data-learn="md">MD Setup</button>
-        <button class="tab" style="width:auto" data-learn="threeplus">3+3 Design</button>
+  <!-- Publications -->
+  <section id="pub" class="glass panel section hidden">
+    <h2 class="text-xl font-bold mb-2">Publications</h2>
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="glass panel">
+        <h3 class="font-semibold mb-2">Create New Entry</h3>
+        <label class="block text-sm font-semibold">Title</label><input id="pub-title" class="input" placeholder="In Silico Analysis of…"/>
+        <label class="block text-sm font-semibold mt-2">Authors</label><input id="pub-authors" class="input" placeholder="Ferguson, D., et al."/>
+        <label class="block text-sm font-semibold mt-2">Abstract / Key Findings</label><textarea id="pub-abstract" rows="5" class="input"></textarea>
+        <button id="pubSubmit" class="btn w-full mt-3">Submit</button>
+        <div id="pubError" class="text-sm text-rose-700 mt-2"></div>
       </div>
-      <div id="tutorialBox" class="panel" style="margin-top:10px;background:#f9fafb"></div>
+      <div class="lg:col-span-2">
+        <div id="pub-list" class="grid gap-3"></div>
+        <div id="pub-empty" class="glass panel text-center hidden">No publications yet.</div>
+      </div>
     </div>
   </section>
+
+  <!-- Learning -->
+  <section id="learn" class="glass panel section hidden">
+    <h2 class="text-xl font-bold mb-2">Learning Center</h2>
+    <div class="flex flex-wrap gap-2">
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="pbpk">PBPK Basics</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="docking">Docking</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="md">MD Setup</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="threeplus">3+3 Design</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="community">Community Etiquette</button>
+    </div>
+    <div id="tutorialBox" class="glass panel mt-3 bg-white/70"></div>
+  </section>
+</main>
+
+<!-- Profile Modal -->
+<div id="profileModal" class="fixed inset-0 hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="relative glass p-4 w-full max-w-md">
+    <h3 class="font-bold text-lg mb-2">Sign In (Local)</h3>
+    <label class="block text-sm font-semibold">Display Name</label>
+    <input id="profName" class="input" placeholder="e.g., Dr. Ada"/>
+    <label class="block text-sm font-semibold mt-2">Avatar URL (optional)</label>
+    <input id="profAvatar" class="input" placeholder="https://…"/>
+    <div class="grid grid-cols-2 gap-2 mt-3">
+      <button id="saveProfileBtn" class="btn">Save</button>
+      <button id="closeProfileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Cancel</button>
+    </div>
+    <p class="text-xs text-gray-600 mt-2">This stores only in your browser (localStorage).</p>
+  </div>
 </div>
 
 <script>
-/* ===== Utilities ===== */
-const $ = (s)=>document.querySelector(s);
-const statusBox = $('#status');
-function setStatus(msg, ok=false){ statusBox.textContent=msg; statusBox.style.display='block'; statusBox.classList.toggle('ok', ok); }
-function waitFor(cond, timeoutMs=12000){
-  const start=Date.now(); return new Promise((res,rej)=>{
-    (function tick(){ try{ if(cond()) return res(true);}catch{} if(Date.now()-start>timeoutMs) return rej(new Error('timeout')); setTimeout(tick,80); })();
-  });
-}
+/* ===== Helpers & Globals ===== */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
 function hexToRgba(hex, alpha){ const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); if(!m) return hex; const r=parseInt(m[1],16),g=parseInt(m[2],16),b=parseInt(m[3],16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; }
-
-/* ===== Nav & init ===== */
-document.addEventListener('DOMContentLoaded', async () => {
-  // nav tabs
-  document.querySelectorAll('.tab[data-t]').forEach(t=>t.addEventListener('click',()=>{
-    const id=t.dataset.t;
-    document.querySelectorAll('.tab[data-t]').forEach(b=>b.classList.toggle('active', b===t));
-    document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active', s.id===id));
-  }));
-
-  // Docking listeners
-  $('#exampleSmiles').addEventListener('change', e => $('#smiles').value = e.target.value);
-  $('#fetchPdbBtn').addEventListener('click', fetchPdbById);
-  $('#dockBtn').addEventListener('click', runApproxDock);
-  $('#centerBtn').addEventListener('click', () => { if (proteinModel && ligandModel) placeLigandAndRender(); });
-
-  // PBPK & Clinical listeners
-  $('#runPBPKBtn').addEventListener('click', runPBPK);
-  $('#runTrialBtn').addEventListener('click', simulateOneThreePlusThree);
-  $('#run100Btn').addEventListener('click', simulateManyThreePlusThree);
-
-  // MD Setup listeners
-  $('#generateMDFilesBtn').addEventListener('click', generateMDFiles);
-  $('#zipBtn').addEventListener('click', downloadMDFiles);
-  $('#buildRestraints').addEventListener('click', buildRestraintsFile);
-
-  // Publications listeners
-  $('#pubSubmit').addEventListener('click', submitPub);
-  loadPubs(); updatePubEmpty();
-
-  // Learning
-  document.querySelectorAll('button[data-learn]').forEach(btn=>{
-    btn.addEventListener('click',()=>loadTutorial(btn.dataset.learn));
-  });
-
-  // Init libs for Docking
-  try{
-    await waitFor(()=> window.$3Dmol && window.initRDKitModule, 15000);
-    rdkit = await window.initRDKitModule();
-    $('#dockBtn').disabled = false; $('#centerBtn').disabled = false;
-    setStatus('Libraries ready. RDKit initialized. You can dock now.', true);
-  }catch(e){
-    setStatus('Failed to initialize required libraries; RDKit or 3Dmol not ready.', false);
-  }
-
-  // Viewer init
-  viewer = $3Dmol.createViewer($('#viewer'), { backgroundColor: 'white' });
-
-  // PDB file input
-  $('#pdbFile').addEventListener('change', async (e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    const pdb=await f.text();
-    loadProteinFromText(pdb);
-  });
-
-  // Model info text
-  updateModelInfo();
-  $('#scoringModel').addEventListener('change', updateModelInfo);
-
-  // Charts
-  buildCharts();
-});
-
-/* ===== Docking (unchanged from working version, trimmed) ===== */
+function trapz(x,y){ let a=0; for(let i=1;i<x.length;i++) a+=0.5*(y[i]+y[i-1])*(x[i]-x[i-1]); return a; }
 let viewer, rdkit, proteinModel=null, ligandModel=null, pocketResidues=[], pocketCenter=null;
+let charts={};
+let generatedMDFiles={};
+let latestDock = { proteinName:'', pdbId:'', smiles:'', dG:null };
 
+const dbKeyPosts = 'pharmsim_posts_v1';
+const dbKeyIndex = 'pharmsim_alpha_index_v1';
+const profileKey = 'pharmsim_profile_v1';
+
+/* ===== Nav ===== */
+function showSection(id){
+  $$('.section').forEach(s=>s.classList.add('hidden'));
+  $('#'+id).classList.remove('hidden');
+  $$('.nav-tab').forEach(b=> b.classList.toggle('bg-white', b.dataset.t!==id));
+  $$('.nav-tab').forEach(b=> b.classList.toggle('text-white', b.dataset.t===id));
+  $$('.nav-tab').forEach(b=> b.classList.toggle('bg-[linear-gradient(135deg,#2a5298,#1e3c72)]', b.dataset.t===id));
+}
+$$('.nav-tab').forEach(btn=>btn.addEventListener('click', ()=> showSection(btn.dataset.t)));
+
+/* ===== Status Badge ===== */
+function setStatus(msg, kind='warn'){
+  const b = $('#statusBadge');
+  b.textContent = msg;
+  b.classList.remove('hidden','warn','pos','err','info');
+  b.classList.add(kind==='ok'?'pos':kind);
+}
+
+/* ===== Docking ===== */
 function updateModelInfo(){
   const info = {
     balanced: "Balances size, H-bonding, hydrophobics, and flexibility.",
@@ -339,16 +417,80 @@ function updateModelInfo(){
   };
   $('#modelInfoText').textContent = info[$('#scoringModel').value] || '';
 }
-async function fetchPdbById(){
-  const id = ($('#pdbId').value || '').trim().toLowerCase();
-  if(!id){ alert('Enter a PDB ID'); return; }
+function getModelAtoms(model){
+  return (typeof model?.selectedAtoms==='function' && model.selectedAtoms({})) ||
+         (typeof model?.getAtoms==='function' && model.getAtoms()) ||
+         (Array.isArray(model?.atoms) && model.atoms) || [];
+}
+function centroid(list){ let x=0,y=0,z=0; for(const a of list){ x+=a.x;y+=a.y;z+=a.z; } const n=Math.max(1,list.length); return {x:x/n,y:y/n,z:z/n}; }
+function findPocketResidues(atoms){
+  if(!atoms.length) return [];
+  const byRes={}; for(const a of atoms){ const k=a.resi??a.resn??'0'; (byRes[k]=byRes[k]||[]).push(a); }
+  let best=null,bN=-1; for(const [resi,alist] of Object.entries(byRes)){
+    const c=centroid(alist); let n=0;
+    for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) n++; }
+    if(n>bN){bN=n;best=resi;}
+  }
+  if(!best) return [];
+  const core=byRes[best], c=centroid(core); const res=new Set();
+  for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) res.add(a.resi??a.resn??'0'); }
+  return [...res];
+}
+function centroidOfResidues(atoms, list){ if(!list?.length) return null; const pick=atoms.filter(a=>list.includes(a.resi??a.resn??'0')); return pick.length? centroid(pick): null; }
+function bindingContrib(l, type='balanced'){ const M={balanced:{I:-1.5,V:-0.035,H:-0.7,Hy:-0.25,R:0.3},hbond:{I:-1.0,V:-0.030,H:-1.2,Hy:-0.15,R:0.3},hydrophobic:{I:-1.2,V:-0.040,H:-0.5,Hy:-0.45,R:0.25}}[type]||M.balanced; const hb=Math.min(l.hDonors,l.hAcceptors); return { intercept:M.I, vdw:M.V*l.numHeavyAtoms, hbond:M.H*hb, hydrophobic:M.Hy*l.logp, rotational:M.R*l.numRotatableBonds }; }
+function scoreAndDisplay(l){
+  const base = bindingContrib(l, $('#scoringModel').value);
+  const prot=getModelAtoms(proteinModel), lat=getModelAtoms(ligandModel);
+  const het=new Set(['N','O','S']); let contacts=0, clashes=0;
+  for(const la of lat){ for(const pa of prot){ const dx=la.x-pa.x,dy=la.y-pa.y,dz=la.z-pa.z, r2=dx*dx+dy*dy+dz*dz; if(r2<3.5*3.5&&het.has(pa.elem)) contacts++; if(r2<1.8*1.8) clashes++; } }
+  const total=Object.values(base).reduce((s,v)=>s+v,0) + (-0.15*Math.min(contacts,50)) + (0.4*Math.min(clashes,25));
+  $('#aff').textContent=total.toFixed(2); $('#vdw_contrib').textContent=base.vdw.toFixed(2);
+  $('#hbond_contrib').textContent=base.hbond.toFixed(2); $('#hydro_contrib').textContent=base.hydrophobic.toFixed(2);
+  $('#rot_contrib').textContent=base.rotational.toFixed(2); $('#contacts').textContent=String(contacts); $('#clashes').textContent=String(clashes);
+  // capture for Community
+  latestDock.dG = Number(total.toFixed(2));
+}
+function addLigandToViewer(molblock){
+  if(ligandModel) try{ viewer.removeModel(ligandModel);}catch{}
+  ligandModel=viewer.addModel(molblock,'sdf'); ligandModel.setStyle({}, { stick:{ radius:0.22 } });
+}
+function placeLigandAndRender(){
+  const atomsProt=getModelAtoms(proteinModel); if(!atomsProt.length){ alert('Protein atoms unavailable.'); return; }
+  if(!pocketResidues.length) pocketResidues = findPocketResidues(atomsProt);
+  pocketCenter = centroidOfResidues(atomsProt, pocketResidues) || centroid(atomsProt);
+  const ligAtoms=getModelAtoms(ligandModel), ligCenter=centroid(ligAtoms);
+  const dx=pocketCenter.x-ligCenter.x, dy=pocketCenter.y-ligCenter.y, dz=pocketCenter.z-ligCenter.z;
+  for(const a of ligAtoms){ a.x+=dx+0.5; a.y+=dy+0.5; a.z+=dz+0.5; }
+  ligandModel.setCoordinates(ligAtoms);
+  viewer.setStyle({model:proteinModel},{cartoon:{color:'spectrum'}}); if(pocketResidues.length) viewer.addSurface($3Dmol.VDW,{opacity:0.6,color:'white'},{resi:pocketResidues});
+  ligandModel.setStyle({}, { stick:{ radius:0.22 } }); viewer.zoomTo({resi: pocketResidues.length? pocketResidues: undefined}); viewer.render();
+}
+async function runApproxDock(){
+  if(!proteinModel){ alert('Load a protein PDB first.'); return; }
+  const smi = ($('#smiles').value || '').trim(); if(!smi){ alert('Enter a SMILES.'); return; }
+  let lig;
   try{
-    setStatus(`Fetching PDB ${id}…`);
+    lig = rdkit.get_mol(smi); if(!lig) throw new Error('RDKit parse error');
+    lig.add_hs?.(); if (rdkit.EmbedMolecule) rdkit.EmbedMolecule(lig, JSON.stringify({ useRandomCoords:true, maxAttempts:500 }));
+    rdkit.UFFOptimizeMolecule?.(lig);
+  }catch(e){ console.error(e); alert('Ligand preparation failed.'); return; }
+  const d=JSON.parse(lig.get_descriptors());
+  const info={ molblock:lig.get_molblock(), mw:d.exactmw, logp:d.MolLogP, hDonors:d.NumHDonors, hAcceptors:d.NumHAcceptors, numRotatableBonds:d.NumRotatableBonds, numHeavyAtoms: typeof lig.get_n_heavy_atoms==='function'? lig.get_n_heavy_atoms(): (d.NumHeavyAtoms||0) };
+  lig.delete?.();
+  $('#mw').textContent=Number(info.mw).toFixed(2); $('#logp').textContent=Number(info.logp).toFixed(2);
+  addLigandToViewer(info.molblock); placeLigandAndRender(); scoreAndDisplay(info);
+  // capture for Community
+  latestDock.smiles = smi;
+}
+async function fetchPdbById(){
+  const id = ($('#pdbId').value || '').trim().toLowerCase(); if(!id){ alert('Enter a PDB ID'); return; }
+  try{
+    setStatus(`Fetching PDB ${id}…`,'info');
     const res = await fetch(`https://files.rcsb.org/download/${id}.pdb`);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const pdb = await res.text(); loadProteinFromText(pdb);
-    setStatus(`Loaded PDB ${id}.`, true);
-  }catch(err){ console.error(err); setStatus(`Failed to fetch ${id}: ${err.message}`, false); }
+    const pdb = await res.text(); loadProteinFromText(pdb); latestDock.pdbId = id.toUpperCase();
+    setStatus(`Loaded PDB ${id}.`,'ok');
+  }catch(err){ console.error(err); setStatus(`Failed to fetch ${id}: ${err.message}`,'err'); }
 }
 function loadProteinFromText(pdb){
   viewer.clear();
@@ -363,76 +505,20 @@ function loadProteinFromText(pdb){
   }
   viewer.zoomTo(pocketResidues.length ? { resi: pocketResidues } : {}); viewer.render();
 }
-function getModelAtoms(model){
-  return (typeof model.selectedAtoms==='function' && model.selectedAtoms({})) ||
-         (typeof model.getAtoms==='function' && model.getAtoms()) ||
-         (Array.isArray(model.atoms) && model.atoms) || [];
-}
-async function runApproxDock(){
-  if(!proteinModel){ alert('Load a protein PDB first.'); return; }
-  const smi = ($('#smiles').value || '').trim();
-  if(!smi){ alert('Enter a SMILES.'); return; }
-  let lig;
-  try{
-    lig = rdkit.get_mol(smi); if(!lig) throw new Error('RDKit parse error');
-    lig.add_hs?.(); if (rdkit.EmbedMolecule) rdkit.EmbedMolecule(lig, JSON.stringify({ useRandomCoords:true, maxAttempts:500 }));
-    rdkit.UFFOptimizeMolecule?.(lig);
-  }catch(e){ console.error(e); alert('Ligand preparation failed.'); return; }
-  const d=JSON.parse(lig.get_descriptors());
-  const info={ molblock:lig.get_molblock(), mw:d.exactmw, logp:d.MolLogP, hDonors:d.NumHDonors, hAcceptors:d.NumHAcceptors, numRotatableBonds:d.NumRotatableBonds, numHeavyAtoms: typeof lig.get_n_heavy_atoms==='function'? lig.get_n_heavy_atoms(): (d.NumHeavyAtoms||0) };
-  lig.delete?.();
-  $('#mw').textContent=Number(info.mw).toFixed(2); $('#logp').textContent=Number(info.logp).toFixed(2);
-  addLigandToViewer(info.molblock); placeLigandAndRender(); scoreAndDisplay(info);
-}
-function addLigandToViewer(molblock){ if(ligandModel) try{ viewer.removeModel(ligandModel);}catch{} ligandModel=viewer.addModel(molblock,'sdf'); ligandModel.setStyle({}, { stick:{ radius:0.22 } }); }
-function placeLigandAndRender(){
-  const atomsProt=getModelAtoms(proteinModel); if(!atomsProt.length){ alert('Protein atoms unavailable.'); return; }
-  if(!pocketResidues.length) pocketResidues = findPocketResidues(atomsProt);
-  pocketCenter = centroidOfResidues(atomsProt, pocketResidues) || centroid(atomsProt);
-  const ligAtoms=getModelAtoms(ligandModel), ligCenter=centroid(ligAtoms);
-  const dx=pocketCenter.x-ligCenter.x, dy=pocketCenter.y-ligCenter.y, dz=pocketCenter.z-ligCenter.z;
-  for(const a of ligAtoms){ a.x+=dx+0.5; a.y+=dy+0.5; a.z+=dz+0.5; }
-  ligandModel.setCoordinates(ligAtoms);
-  viewer.setStyle({model:proteinModel},{cartoon:{color:'spectrum'}}); if(pocketResidues.length) viewer.addSurface($3Dmol.VDW,{opacity:0.6,color:'white'},{resi:pocketResidues});
-  ligandModel.setStyle({}, { stick:{ radius:0.22 } }); viewer.zoomTo({resi: pocketResidues.length? pocketResidues: undefined}); viewer.render();
-}
-function scoreAndDisplay(lig){
-  const base = bindingContrib(lig, $('#scoringModel').value);
-  const prot=getModelAtoms(proteinModel), lat=getModelAtoms(ligandModel);
-  const het=new Set(['N','O','S']); let contacts=0, clashes=0;
-  for(const la of lat){ for(const pa of prot){ const dx=la.x-pa.x,dy=la.y-pa.y,dz=la.z-pa.z, r2=dx*dx+dy*dy+dz*dz; if(r2<3.5*3.5&&het.has(pa.elem)) contacts++; if(r2<1.8*1.8) clashes++; } }
-  const total=Object.values(base).reduce((s,v)=>s+v,0) + (-0.15*Math.min(contacts,50)) + (0.4*Math.min(clashes,25));
-  $('#aff').textContent=total.toFixed(2); $('#vdw_contrib').textContent=base.vdw.toFixed(2); $('#hbond_contrib').textContent=base.hbond.toFixed(2); $('#hydro_contrib').textContent=base.hydrophobic.toFixed(2); $('#rot_contrib').textContent=base.rotational.toFixed(2); $('#contacts').textContent=String(contacts); $('#clashes').textContent=String(clashes);
-}
-function findPocketResidues(atoms){
-  if(!atoms.length) return []; const byRes={};
-  for(const a of atoms){ const k=a.resi ?? a.resn ?? '0'; (byRes[k]=byRes[k]||[]).push(a); }
-  let best=null,bN=-1; for(const [resi,alist] of Object.entries(byRes)){ const c=centroid(alist); let n=0; for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) n++; } if(n>bN){bN=n; best=resi;} }
-  if(!best) return []; const core=byRes[best], c=centroid(core); const res=new Set(); for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) res.add(a.resi ?? a.resn ?? '0'); } return [...res];
-}
-function centroidOfResidues(atoms, list){ if(!list||!list.length) return null; const pick=atoms.filter(a=>list.includes(a.resi ?? a.resn ?? '0')); return pick.length? centroid(pick): null; }
-function centroid(list){ let x=0,y=0,z=0; for(const a of list){ x+=a.x;y+=a.y;z+=a.z; } const n=Math.max(1,list.length); return {x:x/n,y:y/n,z:z/n}; }
-function bindingContrib(l, type='balanced'){ const M={balanced:{I:-1.5,V:-0.035,H:-0.7,Hy:-0.25,R:0.3},hbond:{I:-1.0,V:-0.030,H:-1.2,Hy:-0.15,R:0.3},hydrophobic:{I:-1.2,V:-0.040,H:-0.5,Hy:-0.45,R:0.25}}[type]||M.balanced; const hb=Math.min(l.hDonors,l.hAcceptors); return { intercept:M.I, vdw:M.V*l.numHeavyAtoms, hbond:M.H*hb, hydrophobic:M.Hy*l.logp, rotational:M.R*l.numRotatableBonds }; }
 
-/* ===== PBPK/QSP (fixed) ===== */
-let charts={};
+/* ===== PBPK ===== */
 function buildCharts(){
-  if(!window.Chart) return;
   charts.pk=new Chart($('#pkChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (h)'}},y:{title:{display:true,text:'Plasma (mg/L)'}}}}});
   charts.occ=new Chart($('#occChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (h)'}},y:{title:{display:true,text:'Occupancy (%)'},min:0,max:100}}}});
-  // Clinical chart init here, too
   charts.trial=new Chart($('#trialChart'),{type:'scatter',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Patient Index'}},y:{title:{display:true,text:'Dose (mg)'}}}}});
 }
-function updateChart(chart,label,labels,data,color='#2a5298'){ if(!chart) return; chart.data={labels,datasets:[{label,data,borderColor:color,backgroundColor:hexToRgba(color,0.35),pointRadius:0,tension:0.1}]}; chart.update(); }
-function trapz(x,y){ let a=0; for(let i=1;i<x.length;i++) a+=0.5*(y[i]+y[i-1])*(x[i]-x[i-1]); return a; }
+function updateChart(chart,label,labels,data,color='#2a5298'){ chart.data={labels,datasets:[{label,data,borderColor:color,backgroundColor:hexToRgba(color,0.35),pointRadius:0,tension:0.1}]}; chart.update(); }
 function runPBPK(){
-  if(!charts.pk||!charts.occ){ alert('Charts not ready'); return; }
   const D=+$('#dose').value||100, Fv=(+$('#F').value||80)/100, ka=+$('#ka').value||1.2, ke=+$('#ke').value||0.2, V=+$('#Vd').value||50;
   if(ka<=0||ke<=0||V<=0||D<=0){ alert('All parameters must be positive.'); return; }
   if(Math.abs(ka-ke)<1e-9){ alert('ka and ke cannot be equal.'); return; }
   const t=[], c=[]; for(let h=0;h<=48;h++){ t.push(h); const ci=(Fv*D*ka/(V*(ka-ke)))*(Math.exp(-ke*h)-Math.exp(-ka*h)); c.push(Math.max(0,ci)); }
-  const occ=c.map(v=>100*v/(20+v)); // toy occupancy
-  // PK metrics
+  const occ=c.map(v=>100*v/(20+v));
   let cmax=-1,tmax=0; c.forEach((v,i)=>{ if(v>cmax){cmax=v;tmax=t[i];} });
   const auc=trapz(t,c);
   $('#cmax').textContent=cmax.toFixed(3); $('#tmax').textContent=tmax.toFixed(1); $('#auc').textContent=auc.toFixed(2);
@@ -440,60 +526,48 @@ function runPBPK(){
   updateChart(charts.occ,'Target Occupancy (%)',t,occ,'#e67e22');
 }
 
-/* ===== Clinical 3+3 (fixed) ===== */
+/* ===== Clinical 3+3 ===== */
 function seedRand(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return (s>>>8)/0x01000000; }; }
-function simulateThreePlusThree({levels=6, cohort=3, startDose=10, esc=1.5, toxTarget=0.25, seed=42}={}){
+function simulateThreePlusThree({levels=6,startDose=10,esc=1.5,seed=42}={}){
   const rnd = seedRand(seed);
   const doses = Array.from({length:levels},(_,i)=> startDose*Math.pow(esc,i));
-  // “true” toxicity curve increasing with dose index
-  const trueTox = doses.map((_,i)=> Math.min(0.05 + 0.45*(i/(levels-1)), 0.80));
+  const trueTox = doses.map((_,i)=> Math.min(0.05+0.45*(i/(levels-1)),0.80));
   const rows=[], timelineNo=[], timelineDLT=[];
   let i=0; let mtdIndex=null; let stopped=false;
   while(!stopped && i<levels){
-    // enroll 3
-    let dlt=0; for(let k=0;k<3;k++){ const has = rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
-    rows.push({dose:doses[i], n:3, dlt});
-    if(dlt===0){ i++; continue; } // escalate
-    if(dlt>=2){ mtdIndex = Math.max(0,i-1); stopped=true; break; } // de-escalate/stop
-    // dlt===1 → expand to 6
-    for(let k=0;k<3;k++){ const has = rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
+    let dlt=0; for(let k=0;k<3;k++){ const has=rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
+    rows.push({dose:doses[i],n:3,dlt});
+    if(dlt===0){ i++; continue; }
+    if(dlt>=2){ mtdIndex=Math.max(0,i-1); stopped=true; break; }
+    for(let k=0;k<3;k++){ const has=rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
     rows[rows.length-1].n=6; rows[rows.length-1].dlt=dlt;
     if(dlt<=1){ i++; } else { mtdIndex=Math.max(0,i-1); stopped=true; }
   }
-  if(!stopped){ // reached top without rule violation
-    // if last level had <=1/6 DLTs (or 0/3), call MTD as last
-    mtdIndex = Math.min(levels-1, Math.max(0, i-1));
-  }
-  return { doses, trueTox, timelineNo, timelineDLT, cohorts:rows, mtdIndex };
+  if(!stopped){ mtdIndex=Math.min(levels-1, Math.max(0,i-1)); }
+  return {doses,trueTox,timelineNo,timelineDLT,cohorts:rows,mtdIndex};
 }
 function simulateOneThreePlusThree(){
-  if(!charts.trial){ alert('Chart not ready'); return; }
-  const L=+$('#levels').value||6, C=+$('#cohort').value||3, S=+$('#startDose').value||10, T=(+$('#tox').value||25)/100, E=+$('#esc').value||1.5, seed=+$('#seed').value||42;
-  const res = simulateThreePlusThree({levels:L, cohort:C, startDose:S, esc:E, toxTarget:T, seed});
-  // chart
+  const L=+$('#levels').value||6, S=+$('#startDose').value||10, E=+$('#esc').value||1.5, seed=+$('#seed').value||42;
+  const res=simulateThreePlusThree({levels:L,startDose:S,esc:E,seed});
   charts.trial.data.datasets = [
     { label:'No DLT', data:res.timelineNo, backgroundColor:'#22c55e' },
     { label:'DLT',    data:res.timelineDLT, backgroundColor:'#ef4444' }
-  ];
-  charts.trial.update();
-  // table
-  const tb = $('#trialTable tbody'); tb.innerHTML='';
-  res.cohorts.forEach((r,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${idx+1}</td><td>${r.dose.toFixed(2)}</td><td>${r.dlt}</td><td>${r.n}</td>`; tb.appendChild(tr); });
-  const badge=$('#trialBadge'); badge.style.display='inline-block';
-  if(res.mtdIndex===null){ badge.className='badge warn'; badge.textContent='Stopped without MTD'; }
-  else { badge.className='badge ok'; badge.textContent=`MTD/RP2D ≈ Dose Level ${res.mtdIndex+1} (${res.doses[res.mtdIndex].toFixed(2)} mg)`; }
+  ]; charts.trial.update();
+  const tb=$('#trialTable'); tb.innerHTML='';
+  res.cohorts.forEach((r,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="py-1">${idx+1}</td><td>${r.dose.toFixed(2)}</td><td>${r.dlt}</td><td>${r.n}</td>`; tb.appendChild(tr); });
+  const badge=$('#trialBadge'); badge.classList.remove('hidden','pos','warn'); badge.classList.add('pos');
+  badge.textContent=`MTD/RP2D ≈ Level ${res.mtdIndex+1} (${res.doses[res.mtdIndex].toFixed(2)} mg)`;
 }
 function simulateManyThreePlusThree(){
-  const L=+$('#levels').value||6, C=+$('#cohort').value||3, S=+$('#startDose').value||10, T=(+$('#tox').value||25)/100, E=+$('#esc').value||1.5;
+  const L=+$('#levels').value||6, S=+$('#startDose').value||10, E=+$('#esc').value||1.5;
   let counts=Array(L).fill(0);
-  for(let k=0;k<100;k++){ const res=simulateThreePlusThree({levels:L, cohort:C, startDose:S, esc:E, toxTarget:T, seed:42+k}); if(res.mtdIndex!=null) counts[res.mtdIndex]++; }
+  for(let k=0;k<100;k++){ const res=simulateThreePlusThree({levels:L,startDose:S,esc:E,seed:42+k}); if(res.mtdIndex!=null) counts[res.mtdIndex]++; }
   const idx = counts.indexOf(Math.max(...counts));
-  const badge=$('#trialBadge'); badge.style.display='inline-block'; badge.className='badge ok';
-  badge.textContent = `Across 100 sims: MTD most often at L${idx+1} (${(counts[idx]||0)}%)`;
+  const badge=$('#trialBadge'); badge.classList.remove('hidden','pos','warn'); badge.classList.add('pos');
+  badge.textContent=`Across 100 sims: MTD most often L${idx+1} (${counts[idx]}%)`;
 }
 
-/* ===== MD Setup (fixed) ===== */
-let generatedMDFiles = {};
+/* ===== MD Setup ===== */
 function generateMDFiles(){
   const out=($('#md-out').value||'output').trim(), T=+$('#md-temp').value||310, ns=+$('#md-ns').value||10;
   const cuts=($('#md-cuts').value||'10/12/14').split(/[\/ ,]+/).map(Number); const rest=$('#md-restraints').checked;
@@ -551,13 +625,13 @@ constraintScaling 1.0
     'README.md':
 `# Generic MD Simulation Files
 
-Place your prepared system files alongside:
+Place prepared system files alongside:
 - system.psf
 - system.pdb
 - system.prm
 - restraints.pdb (if using constraints)
 
-Typical run:
+Run:
   md-engine min.conf  > min.log
   md-engine eq.conf   > eq.log
   md-engine prod.conf > prod.log
@@ -566,19 +640,19 @@ Typical run:
   const list=$('#fileList'); list.innerHTML='';
   Object.entries(generatedMDFiles).forEach(([name,txt])=>{
     const a=document.createElement('a'); a.textContent=`⬇ ${name}`;
-    a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=name; a.className='tab'; list.appendChild(a);
+    a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=name;
+    a.className='px-3 py-2 rounded-lg font-semibold bg-white'; list.appendChild(a);
   });
   $('#zipBtn').disabled=false;
   $('#mdStatus').textContent='Config files generated.';
 }
 async function downloadMDFiles(){
-  if(!Object.keys(generatedMDFiles).length){ return; }
-  if(typeof JSZip==='undefined'){ alert('JSZip not loaded.'); return; }
+  if(!Object.keys(generatedMDFiles).length) return;
   const zip=new JSZip(); for(const [k,v] of Object.entries(generatedMDFiles)) zip.file(k,v);
   const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click();
 }
 async function buildRestraintsFile(){
-  const f=$('#md-pdb').files[0]; if(!f){ alert('Select a PDB file first.'); return; }
+  const f=$('#md-pdb').files[0]; if(!f){ alert('Select a PDB first.'); return; }
   const txt=await f.text(); const out=[]; const bb=new Set(['N','CA','C','O']);
   for(const line of txt.split(/\r?\n/)){
     if(line.startsWith('ATOM')||line.startsWith('HETATM')){
@@ -587,28 +661,28 @@ async function buildRestraintsFile(){
     }else out.push(line);
   }
   const res=out.join('\n')+"\n";
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([res],{type:'text/plain'})); a.download='restraints.pdb'; a.textContent='⬇ Download restraints.pdb'; a.className='tab';
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([res],{type:'text/plain'})); a.download='restraints.pdb'; a.textContent='⬇ Download restraints.pdb'; a.className='px-3 py-2 rounded-lg font-semibold bg-white';
   const status=$('#restraintsStatus'); status.innerHTML=''; status.append(a);
   generatedMDFiles['restraints.pdb']=res;
 }
 
-/* ===== Publications (fixed) ===== */
+/* ===== Publications ===== */
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m])); }
 function renderPub(p, idx){
-  const card=document.createElement('div'); card.className='panel'; card.style.padding='14px';
-  card.innerHTML = `
-    <h4 style="margin:0 0 6px">${escapeHtml(p.title)}</h4>
-    <div style="color:#566;margin-bottom:6px">By ${escapeHtml(p.authors)} · ${p.date}</div>
-    <p style="margin:0 0 8px;white-space:pre-wrap">${escapeHtml(p.abstract)}</p>
-    <button data-del="${idx}" style="width:auto">Delete</button>
-  `;
+  const card=document.createElement('div'); card.className='feed-card';
+  card.innerHTML=`
+    <div class="flex items-center justify-between">
+      <h4 class="font-semibold">${escapeHtml(p.title)}</h4>
+      <button data-del="${idx}" class="px-3 py-1 rounded-lg font-semibold bg-white">Delete</button>
+    </div>
+    <div class="text-sm text-gray-600 mb-2">By ${escapeHtml(p.authors)} · ${p.date}</div>
+    <p class="text-sm whitespace-pre-wrap">${escapeHtml(p.abstract)}</p>`;
   card.querySelector('button[data-del]').addEventListener('click', ()=>{
-    const arr = JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]');
-    arr.splice(idx,1); localStorage.setItem('pharmsim_pubs', JSON.stringify(arr));
-    loadPubs();
+    const arr = JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'); arr.splice(idx,1);
+    localStorage.setItem('pharmsim_pubs', JSON.stringify(arr)); loadPubs();
   });
   return card;
 }
-function escapeHtml(s){ return String(s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m])); }
 function submitPub(){
   const title=$('#pub-title').value.trim(), authors=$('#pub-authors').value.trim(), abstract=$('#pub-abstract').value.trim();
   const err=$('#pubError'); err.textContent='';
@@ -623,32 +697,212 @@ function loadPubs(){
   const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]');
   const list=$('#pub-list'); list.innerHTML='';
   arr.forEach((p,i)=> list.appendChild(renderPub(p,i)));
-  updatePubEmpty();
+  $('#pub-empty').classList.toggle('hidden', !!arr.length);
 }
-function updatePubEmpty(){ const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'); $('#pub-empty').style.display = arr.length? 'none':'block'; }
 
-/* ===== Learning (enhanced) ===== */
+/* ===== Learning ===== */
 function loadTutorial(which){
   const box=$('#tutorialBox');
   const content={
-    pbpk:`<h4>PBPK Basics</h4>
-<p>We use a one-compartment oral absorption model (Bateman function). The curve shows plasma concentration vs. time. C<sub>max</sub>/T<sub>max</sub> and AUC summarize exposure. For multi-compartment behavior, extend with an additional distribution term or a transit compartment for absorption.</p>`,
-    docking:`<h4>Docking (Heuristic)</h4>
-<ol>
-<li><b>Pocket detection</b> by residue-neighborhood density (~10 Å).</li>
-<li><b>Ligand 3D</b> via RDKit.js (Embed + UFF).</li>
-<li><b>Placement</b> aligns ligand centroid to pocket centroid with a small offset.</li>
-<li><b>Scoring</b> = size + H-bond + hydrophobics + rotor penalty + contacts − clashes (structure-aware).</li>
-</ol>`,
-    md:`<h4>MD Setup</h4>
-<p>Generates NAMD-style config files (min/eq/prod) with PME and Langevin dynamics. Optional positional restraints via <code>restraints.pdb</code> (B-factor as force constant). Replace <code>system.*</code> with your prepared system.</p>`,
-    threeplus:`<h4>3+3 Design</h4>
-<p>Start with 3 patients at a dose. If 0/3 DLT → escalate; if 1/3 DLT → expand to 6; if ≥2/3 → stop and declare MTD at prior dose. The MTD is the highest dose with ≤1/6 DLTs.</p>`
+    pbpk:`<h4 class="font-semibold mb-1">PBPK Basics</h4><p>One-compartment oral model (Bateman). Tune Dose, F, ka, ke, Vd → simulate exposure. C<sub>max</sub>, T<sub>max</sub>, AUC summarize exposure.</p>`,
+    docking:`<h4 class="font-semibold mb-1">Heuristic Docking</h4><ol class="list-decimal pl-5"><li>Find dense pocket residues (~10Å)</li><li>RDKit 3D (Embed+UFF)</li><li>Place by centroids</li><li>Score: size + H-bond + hydrophobics + rotor penalty + contacts − clashes</li></ol>`,
+    md:`<h4 class="font-semibold mb-1">MD Setup</h4><p>NAMD-style configs (min/eq/prod). PME + Langevin. Optional positional restraints via <code>B-factor</code>.</p>`,
+    threeplus:`<h4 class="font-semibold mb-1">3+3</h4><p>0/3 escalate; 1/3 expand; ≥2/3 stop/de-escalate. Choose RP2D = highest dose with ≤1/6 DLTs.</p>`,
+    community:`<h4 class="font-semibold mb-1">Community Etiquette</h4><ul class="list-disc pl-5"><li>Share SMILES, pocket notes, and ΔG responsibly</li><li>Tag posts with constructive moods</li><li>No medical claims; cite sources when possible</li></ul>`
   };
   box.innerHTML = content[which] || '<p>Select a topic above.</p>';
 }
+$$('.learn').forEach(b=> b.addEventListener('click', ()=> loadTutorial(b.dataset.learn)));
 
-/* ===== Shared state for Docking (extracted helpers already above) ===== */
+/* ===== Community DB & Feed ===== */
+function readPosts(){ return JSON.parse(localStorage.getItem(dbKeyPosts) || '[]'); }
+function savePosts(arr){ localStorage.setItem(dbKeyPosts, JSON.stringify(arr)); buildAlphaIndex(arr); }
+function buildAlphaIndex(arr){
+  const idx={};
+  for(const p of arr){
+    const ch = (p.proteinName||'').trim()[0] || '#';
+    const key = /[A-Za-z]/.test(ch) ? ch.toUpperCase() : '#';
+    (idx[key]=idx[key]||[]).push(p.id);
+  }
+  // sort ids by protein name A–Z
+  for(const k of Object.keys(idx)){ idx[k].sort((a,b)=>{
+    const A = arr.find(x=>x.id===a)?.proteinName?.toLowerCase() || '';
+    const B = arr.find(x=>x.id===b)?.proteinName?.toLowerCase() || '';
+    return A.localeCompare(B);
+  });}
+  localStorage.setItem(dbKeyIndex, JSON.stringify(idx));
+}
+function renderPostCard(p){
+  const card = document.createElement('div'); card.className='feed-card';
+  const mood = p.mood?.includes('Constructive') ? 'warn' : 'pos';
+  const svgThumb = p.svg?.length ? p.svg : '';
+  card.innerHTML = `
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <div class="text-sm text-gray-600">${p.user?.name || 'Anonymous'}</div>
+        <h4 class="font-semibold text-lg">${escapeHtml(p.proteinName||'Untitled')}</h4>
+        <div class="flex flex-wrap gap-2 mt-1">
+          ${p.pdbId ? `<span class="chip info">PDB ${escapeHtml(p.pdbId)}</span>`:''}
+          <span class="chip ${mood}">${escapeHtml(p.mood||'')}</span>
+          <span class="chip info">ΔG ${p.dG!=null ? p.dG : '--'} kcal/mol</span>
+        </div>
+      </div>
+      <img src="${p.user?.avatar || 'https://i.pravatar.cc/40'}" class="w-10 h-10 rounded-full" alt="avatar"/>
+    </div>
+    <div class="mt-3 grid grid-cols-2 gap-3">
+      <div class="text-xs break-all"><span class="font-semibold">SMILES:</span><br>${escapeHtml(p.smiles||'')}</div>
+      <div class="border rounded-lg p-1 bg-white">${svgThumb || '<div class="text-xs text-gray-500 p-2">2D preview unavailable</div>'}</div>
+    </div>
+    ${p.notes ? `<p class="text-sm mt-3 whitespace-pre-wrap">${escapeHtml(p.notes)}</p>`:''}
+    <div class="text-xs text-gray-500 mt-2">${new Date(p.ts).toLocaleString()}</div>`;
+  return card;
+}
+function refreshFeed(){
+  const q = ($('#searchInput').value || '').toLowerCase();
+  const alpha = $('#alphaFilter').value;
+  const posts = readPosts();
+  let filtered = posts.filter(p =>
+    (p.proteinName||'').toLowerCase().includes(q) ||
+    (p.smiles||'').toLowerCase().includes(q)
+  );
+  if(alpha){
+    filtered = filtered.filter(p=>{
+      const ch=(p.proteinName||'').trim()[0]||'#';
+      const key = /[A-Za-z]/.test(ch) ? ch.toUpperCase() : '#';
+      return (alpha==='') ? true : (alpha==='#num' ? key==='#' : key===alpha);
+    });
+  }
+  // Sort alphabetically by protein, then newest
+  filtered.sort((a,b)=>{
+    const n = (a.proteinName||'').localeCompare(b.proteinName||'');
+    return n!==0 ? n : (b.ts - a.ts);
+  });
+  const grid = $('#feedGrid'); grid.innerHTML='';
+  filtered.forEach(p => grid.appendChild(renderPostCard(p)));
+  $('#emptyFeed').classList.toggle('hidden', !!filtered.length);
+}
+async function smilesToSvg(smiles){
+  try{
+    const m = rdkit.get_mol(smiles);
+    const svg = m.get_svg();
+    m.delete?.();
+    return svg;
+  }catch{ return ''; }
+}
+async function createPost(){
+  const proteinName = ($('#postProtein').value || '').trim();
+  const pdbId = ($('#postPdbId').value || '').trim().toUpperCase();
+  const smiles = ($('#postSmiles').value || '').trim();
+  const dG = $('#postDG').value === '' ? null : Number($('#postDG').value);
+  const mood = $('#postMood').value;
+  const notes = ($('#postNotes').value || '').trim();
+  if(!proteinName || !smiles){ alert('Protein name and SMILES are required.'); return; }
+  const profile = JSON.parse(localStorage.getItem(profileKey) || '{}');
+  const svg = smiles ? await smilesToSvg(smiles) : '';
+  const post = {
+    id: crypto.randomUUID(),
+    ts: Date.now(),
+    proteinName, pdbId, smiles, dG, mood, notes, svg,
+    user: { name: profile.name || 'Anonymous', avatar: profile.avatar || 'https://i.pravatar.cc/64' }
+  };
+  const arr = readPosts(); arr.push(post); savePosts(arr);
+  // clear minimal
+  $('#postSmiles').value=''; $('#postDG').value=''; $('#postNotes').value='';
+  refreshFeed();
+}
+function exportDBJson(){
+  const posts = readPosts();
+  const idx = JSON.parse(localStorage.getItem(dbKeyIndex)||'{}');
+  const blob = new Blob([JSON.stringify({index:idx, posts}, null, 2)], {type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pharmsim_social_db.json'; a.click();
+}
+function exportPostsCsv(){
+  const posts = readPosts();
+  const head = ['Timestamp','Protein','PDB_ID','SMILES','DeltaG','Mood','Notes','User'];
+  const rows = posts.map(p=>[
+    new Date(p.ts).toISOString(),
+    `"${(p.proteinName||'').replaceAll('"','""')}"`,
+    p.pdbId||'',
+    `"${(p.smiles||'').replaceAll('"','""')}"`,
+    p.dG==null?'':p.dG,
+    `"${(p.mood||'').replaceAll('"','""')}"`,
+    `"${(p.notes||'').replaceAll('"','""')}"`,
+    `"${((p.user?.name)||'').replaceAll('"','""')}"`
+  ].join(','));
+  const blob = new Blob([[head.join(',')].concat(rows).join('\n')], {type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pharmsim_posts.csv'; a.click();
+}
+
+/* Prefill from Docking into Community composer */
+function prefillFromDock(){
+  if(latestDock.dG==null && !$('#aff').textContent.includes('.') ){ alert('Run a dock first.'); return; }
+  $('#postSmiles').value = latestDock.smiles || ($('#smiles').value||'');
+  $('#postDG').value = latestDock.dG!=null ? latestDock.dG : ($('#aff').textContent||'');
+  $('#postPdbId').value = latestDock.pdbId || ($('#pdbId').value||'').toUpperCase();
+  // Try to infer protein name from PDB ID
+  if(!$('#postProtein').value && $('#postPdbId').value) $('#postProtein').value = `Protein ${$('#postPdbId').value}`;
+}
+
+/* ===== Profile (local) ===== */
+function openProfile(){ $('#profileModal').classList.remove('hidden'); $('#profileModal').classList.add('flex'); const p=JSON.parse(localStorage.getItem(profileKey)||'{}'); $('#profName').value=p.name||''; $('#profAvatar').value=p.avatar||''; }
+function closeProfile(){ $('#profileModal').classList.add('hidden'); $('#profileModal').classList.remove('flex'); }
+function saveProfile(){ const name=$('#profName').value.trim(); const avatar=$('#profAvatar').value.trim(); localStorage.setItem(profileKey, JSON.stringify({name,avatar})); closeProfile(); refreshFeed(); }
+
+/* ===== Init ===== */
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Buttons & listeners
+  $('#fetchPdbBtn').addEventListener('click', fetchPdbById);
+  $('#dockBtn').addEventListener('click', runApproxDock);
+  $('#centerBtn').addEventListener('click', ()=> (proteinModel&&ligandModel)&&placeLigandAndRender());
+  $('#exampleSmiles').addEventListener('change', e=> $('#smiles').value = e.target.value);
+  $('#scoringModel').addEventListener('change', updateModelInfo);
+  $('#useForPostBtn').addEventListener('click', ()=> showSection('community'));
+  $('#prefillFromDock').addEventListener('click', prefillFromDock);
+  $('#createPostBtn').addEventListener('click', createPost);
+  $('#exportJsonBtn').addEventListener('click', exportDBJson);
+  $('#exportCsvBtn').addEventListener('click', exportPostsCsv);
+  $('#searchInput').addEventListener('input', refreshFeed);
+  $('#alphaFilter').addEventListener('change', refreshFeed);
+  $('#runPBPKBtn').addEventListener('click', runPBPK);
+  $('#runTrialBtn').addEventListener('click', simulateOneThreePlusThree);
+  $('#run100Btn').addEventListener('click', simulateManyThreePlusThree);
+  $('#generateMDFilesBtn').addEventListener('click', generateMDFiles);
+  $('#zipBtn').addEventListener('click', downloadMDFiles);
+  $('#buildRestraints').addEventListener('click', buildRestraintsFile);
+  $('#pubSubmit').addEventListener('click', submitPub);
+  $('#profileBtn').addEventListener('click', openProfile);
+  $('#closeProfileBtn').addEventListener('click', closeProfile);
+  $('#saveProfileBtn').addEventListener('click', saveProfile);
+
+  // Charts + learning + pubs
+  buildCharts(); loadPubs(); loadTutorial('community');
+
+  // 3D viewer + libs
+  viewer = $3Dmol.createViewer($('#viewer'), { backgroundColor:'white' });
+  try{
+    await new Promise((res,rej)=>{
+      const start=Date.now();
+      (function poll(){
+        if(window.initRDKitModule){ res(); return;}
+        if(Date.now()-start>15000) return rej(new Error('timeout rdkit'));
+        setTimeout(poll,80);
+      })();
+    });
+    rdkit = await window.initRDKitModule();
+    $('#dockBtn').disabled=false; $('#centerBtn').disabled=false;
+    updateModelInfo();
+    setStatus('Libraries ready. RDKit initialized.','ok');
+  }catch(e){
+    console.error(e); setStatus('RDKit initialization failed. Some features disabled.','err');
+  }
+
+  // Seed feed
+  buildAlphaIndex(readPosts());
+  refreshFeed();
+
+  // Default visible tab
+  showSection('md');
+});
 </script>
 </body>
 </html>
