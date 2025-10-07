@@ -5,178 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PharmaSim Pro</title>
 
-  <!-- 3Dmol.js for protein visualization -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- RDKit.js for SMILES and molecule properties -->
-  <script src="https://unpkg.com/@rdkit/rdkit"></script>
-
-  <!-- Google Fonts and Base Styling -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
-    :root {
-      --ink: #0b1630;
-      --brand: #2a5298;
-      --brand2: #1e3c72;
-      --bg: #f4f7fa;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, var(--brand2) 0%, var(--brand) 50%, #7e8ba3 100%);
-      color: var(--ink);
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    button, input, select, textarea {
-      font-family: inherit;
-    }
-
-    .tab-button {
-      padding: 0.5rem 1rem;
-      background: #f5f5f5;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      margin: 0.25rem;
-      cursor: pointer;
-    }
-
-    .tab-button.active {
-      background-color: var(--brand);
-      color: white;
-      font-weight: 600;
-    }
-
-    .panel {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      margin: 1rem 0;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .metric-card {
-      background: #eaf0f6;
-      border-radius: 8px;
-      padding: 0.75rem;
-      text-align: center;
-      font-size: 0.85rem;
-    }
-
-    .metric-card strong {
-      font-size: 1.2rem;
-      color: #2a5298;
-    }
-
-    @media (max-width: 768px) {
-      .tab-button {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.8rem;
-      }
-    }
+    :root{--ink:#0b1630;--brand:#2a5298;--brand2:#1e3c72}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+      background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%)}
+    .glass{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 10px 26px rgba(0,0,0,.12);border-radius:16px}
+    .panel{padding:18px}
+    .section{display:none}
+    .section.active{display:block}
+    .btn{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;border-radius:10px;padding:.65rem .9rem}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .input,select,textarea{width:100%;padding:.65rem .8rem;border:2px solid #e5e7eb;border-radius:10px;background:#f8f9fa}
+    .input:focus,select:focus,textarea:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
+    .metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:12px;padding:12px;text-align:center}
+    .metric .v{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .feed-card{border:1px solid #e6eaf2;border-radius:16px;padding:14px;background:#fff}
+    .feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+    .split{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+    @media(max-width:1024px){.split{grid-template-columns:1fr}}
+    .split>div{min-width:0}
+    #viewer{width:100%;min-height:420px;height:420px;border-radius:12px;background:#eef2f7}
+    #pdbDrop{min-height:120px;max-height:160px;overflow:auto}
+    @media(max-width:640px){#pdbDrop{min-height:100px;max-height:120px}}
+    .chip{display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .6rem;border-radius:999px;font-weight:700;font-size:.75rem}
+    .chip.pos{background:#ecfdf5;color:#065f46}.chip.info{background:#eff6ff;color:#1e3a8a}.chip.warn{background:#fff7ed;color:#9a3412}.chip.err{background:#fee2e2;color:#991b1b}
+    #dock-right{max-height:740px;overflow:auto}
+    main{scroll-margin-top:84px}
+    a.hash { color:#1e3c72; font-weight:600; }
   </style>
-</head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PharmaSim Pro · Social Computational Chemistry</title>
-
-<!-- UI -->
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
-
-<!-- Science libs -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-<script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<style>
-:root{--ink:#0b1630;--brand:#2a5298;--brand2:#1e3c72}
-*{box-sizing:border-box}
-body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
-  background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%)}
-.glass{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 10px 26px rgba(0,0,0,.12);border-radius:16px}
-.panel{padding:18px}
-.section{display:none}
-.section.active{display:block}
-.btn{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;border-radius:10px;padding:.65rem .9rem}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-.input,select,textarea{width:100%;padding:.65rem .8rem;border:2px solid #e5e7eb;border-radius:10px;background:#f8f9fa}
-.input:focus,select:focus,textarea:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
-.metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:12px;padding:12px;text-align:center}
-.metric .v{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
-.feed-card{border:1px solid #e6eaf2;border-radius:16px;padding:14px;background:#fff}
-.feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.split{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
-@media(max-width:1024px){.split{grid-template-columns:1fr}}
-.split>div{min-width:0}
-#viewer{width:100%;min-height:420px;height:420px;border-radius:12px;background:#eef2f7}
-#pdbDrop{min-height:120px;max-height:160px;overflow:auto}
-@media(max-width:640px){#pdbDrop{min-height:100px;max-height:120px}}
-.chip{display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .6rem;border-radius:999px;font-weight:700;font-size:.75rem}
-.chip.pos{background:#ecfdf5;color:#065f46}.chip.info{background:#eff6ff;color:#1e3a8a}.chip.warn{background:#fff7ed;color:#9a3412}.chip.err{background:#fee2e2;color:#991b1b}
-#dock-right{max-height:740px;overflow:auto}
-main{scroll-margin-top:84px}
-a.hash { color:#1e3c72; font-weight:600; }
-</style>
-    <style>
-/* Sidebar-friendly docking layout */
-#md .split {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-#md .split > div {
-  flex: 1 1 100%;
-  min-width: 0;
-}
-
-@media (min-width: 1024px) {
-  #md .split > div:first-child {
-    flex: 0 0 380px;
-    max-width: 420px;
-  }
-  #md .split > div:last-child {
-    flex: 1 1 auto;
-  }
-}
-
-/* Maintain layout visibility */
-#viewer {
-  min-height: 400px;
-  max-height: 500px;
-  overflow: hidden;
-  border-radius: 12px;
-  background: #eef2f7;
-}
-
-#dock-right {
-  overflow-y: auto;
-  max-height: 800px;
-  padding-bottom: 1rem;
-}
-</style>
 </head>
 <body>
 
-<!-- NAV -->
 <header class="sticky top-0 z-40 glass">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
@@ -194,13 +61,12 @@ a.hash { color:#1e3c72; font-weight:600; }
       <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="learn">Learning</button>
     </nav>
     <div class="flex items-center gap-3">
-      <div id="statusBadge" class="chip warn hidden">Initializing…</div>
+      <div id="statusBadge" class="chip warn">Initializing…</div>
       <button id="profileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Sign In</button>
     </div>
   </div>
 </header>
 
-<!-- DISCLAIMER -->
 <div class="max-w-7xl mx-auto px-4 mt-3">
   <div class="glass panel text-sm leading-relaxed">
     <strong>Disclaimer:</strong> For <em>educational/research</em> use only. Docking scores, PBPK/QSP, and clinical simulations are approximations. Validate with experiments before decisions.
@@ -208,12 +74,10 @@ a.hash { color:#1e3c72; font-weight:600; }
 </div>
 
 <main class="max-w-7xl mx-auto px-4 my-4">
-  <!-- DOCKING -->
   <section id="md" class="glass panel section active">
     <h2 class="text-xl font-bold mb-4">Ligand Prep & Structure-Aware Heuristic Docking</h2>
     <div class="split">
       <div>
-        <!-- Protein -->
         <div class="mb-4">
           <label class="block text-sm font-semibold mb-2">Protein (PDB)</label>
           <div id="pdbDrop" class="w-full border-2 border-dashed border-gray-300 rounded-xl bg-white/70 p-4 text-center text-gray-600 hover:border-indigo-400 hover:bg-white transition">
@@ -230,7 +94,6 @@ a.hash { color:#1e3c72; font-weight:600; }
           </div>
         </div>
 
-        <!-- Ligand -->
         <div class="mb-4">
           <label class="block text-sm font-semibold mb-2">Ligand (SMILES)</label>
           <input id="smiles" class="input" placeholder="Paste SMILES here (e.g., CC(=O)OC1=CC=CC=C1C(=O)O)"/>
@@ -290,7 +153,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
   </section>
 
-  <!-- PBPK -->
   <section id="pbpk" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">PBPK/QSP (One-Compartment Oral)</h2>
     <div class="split">
@@ -317,7 +179,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
   </section>
 
-  <!-- Clinical -->
   <section id="clinical" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">3+3 Dose Escalation Simulator</h2>
     <div class="split">
@@ -350,7 +211,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
   </section>
 
-  <!-- MD Setup -->
   <section id="mdsetup" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">MD Simulation File Generator</h2>
     <div class="split">
@@ -383,7 +243,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
   </section>
 
-  <!-- Community (global feed + create post) -->
   <section id="community" class="glass panel section">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <h2 class="text-xl font-bold">Community Feed</h2>
@@ -396,7 +255,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
 
     <div class="grid lg:grid-cols-3 gap-4 mt-4">
-      <!-- Create Post -->
       <div class="glass panel">
         <h3 class="font-semibold mb-2">Create a Post</h3>
         <div class="grid gap-2">
@@ -443,7 +301,6 @@ a.hash { color:#1e3c72; font-weight:600; }
         </div>
       </div>
 
-      <!-- Feed -->
       <div class="lg:col-span-2">
         <div id="feedGrid" class="feed-grid"></div>
         <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result.</div>
@@ -451,7 +308,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
   </section>
 
-  <!-- Channels (protein pages) -->
   <section id="channels" class="glass panel section">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <h2 class="text-xl font-bold">Protein Channels</h2>
@@ -484,7 +340,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
   </section>
 
-  <!-- Publications -->
   <section id="pub" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">Publications</h2>
     <div class="grid lg:grid-cols-3 gap-4">
@@ -503,7 +358,6 @@ a.hash { color:#1e3c72; font-weight:600; }
     </div>
   </section>
 
-  <!-- Learning -->
   <section id="learn" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">Learning Center</h2>
     <div class="flex flex-wrap gap-2">
@@ -517,7 +371,6 @@ a.hash { color:#1e3c72; font-weight:600; }
   </section>
 </main>
 
-<!-- Profile Modal (reddit-like local sign up) -->
 <div id="profileModal" class="fixed inset-0 hidden items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/50"></div>
   <div class="relative glass p-4 w-full max-w-md">
@@ -556,7 +409,7 @@ const saved=(k)=>JSON.parse(localStorage.getItem(k)||'[]');
 const slugify=s=>s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 
 /* ===== Global state ===== */
-let viewer, rdkit, proteinModel=null, ligandModel=null, pocketResidues=[], pocketCenter=null;
+let viewer, rdkit, proteinModel=null, ligandModel=null, pocketResidues=[], pocketCenter=null, currentLigandProps=null;
 let charts={}, generatedMDFiles={}, latestDock={proteinName:'',pdbId:'',smiles:'',dG:null}, pdbFileFromDrop=null;
 
 /* ===== UI helpers ===== */
@@ -662,7 +515,7 @@ function scoreAndDisplay(l){const base=bindingContrib(l,$('#scoringModel').value
   $('#aff').textContent=total.toFixed(2);$('#vdw_contrib').textContent=base.vdw.toFixed(2);$('#hbond_contrib').textContent=base.hbond.toFixed(2);
   $('#hydro_contrib').textContent=base.hydrophobic.toFixed(2);$('#rot_contrib').textContent=base.rotational.toFixed(2);$('#contacts').textContent=String(contacts);$('#clashes').textContent=String(clashes);
   latestDock.dG=Number(total.toFixed(2))}
-function addLigandToViewer(molblock){if(ligandModel)try{viewer.removeModel(ligandModel)}catch{};ligandModel=viewer.addModel(molblock,'sdf');ligandModel.setStyle({}, {stick:{radius:0.22}})}
+
 function addLigandToViewer(molblock){
   if(ligandModel) try{viewer.removeModel(ligandModel);}catch(e){}
   ligandModel=viewer.addModel(molblock,'sdf');
@@ -677,7 +530,8 @@ function loadProteinFromText(txt){
   viewer.zoomTo();viewer.render();
   const at=getModelAtoms(proteinModel);
   pocketResidues=findPocketResidues(at); pocketCenter=centroidOfResidues(at,pocketResidues);
-  $('#dockBtn').disabled=false; $('#centerBtn').disabled=false;
+  $('#dockBtn').disabled=!currentLigandProps; // Enable if ligand is ready
+  $('#centerBtn').disabled=false;
 }
 
 function wirePdbDropZone(){
@@ -701,6 +555,45 @@ function wirePdbDropZone(){
   });
 }
 
+async function processSmiles() {
+    const smiles = $('#smiles').value.trim();
+    if (ligandModel) { try { viewer.removeModel(ligandModel); } catch(e){} ligandModel = null; }
+    ['mw','logp','aff','vdw_contrib','hbond_contrib','hydro_contrib','rot_contrib','contacts','clashes'].forEach(id => $('#'+id).textContent='--');
+    currentLigandProps = null;
+    $('#dockBtn').disabled = true;
+
+    if (!smiles || !rdkit) return;
+    
+    let mol = null;
+    try {
+        mol = rdkit.get_mol(smiles);
+        if (mol) {
+            const desc = JSON.parse(mol.get_descriptors());
+            currentLigandProps = {
+                numHeavyAtoms: desc.NumHeavyAtoms, hDonors: desc.NumHDonors,
+                hAcceptors: desc.NumHAcceptors, logp: desc.MolLogP,
+                numRotatableBonds: desc.NumRotatableBonds
+            };
+            
+            $('#mw').textContent = desc.exactmw.toFixed(2);
+            $('#logp').textContent = desc.MolLogP.toFixed(2);
+            
+            mol.add_hs();
+            mol.embed_molecule();
+            mol.remove_hs();
+            const molblock = mol.get_molblock();
+            addLigandToViewer(molblock);
+            
+            latestDock.smiles = smiles;
+            $('#dockBtn').disabled = !proteinModel;
+        }
+    } catch (e) {
+        console.error("RDKit error:", e);
+    } finally {
+        if (mol) mol.delete();
+    }
+}
+
 async function loadLocalPdb(){
   const input=$('#pdbFile');
   const file=pdbFileFromDrop||input.files?.[0];
@@ -709,27 +602,39 @@ async function loadLocalPdb(){
   loadProteinFromText(txt);pdbFileFromDrop=null;
   $('#pdbDrop').innerHTML=`<div class="font-semibold text-green-700">Loaded: ${file.name}</div>
   <div class="text-xs text-gray-600">You can drop a new file to replace it</div>`;
+  latestDock.proteinName = file.name.replace('.pdb','');
+  latestDock.pdbId = '';
 }
 
 async function fetchPdb(){
-  const id=$('#pdbId').value.trim();
+  const id=$('#pdbId').value.trim().toUpperCase();
   if(!id)return;
-  const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`);
-  if(!r.ok){alert('Could not fetch PDB');return}
-  const txt=await r.text();
-  loadProteinFromText(txt);
+  try {
+    const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`);
+    if(!r.ok) throw new Error(`PDB ${id} not found.`);
+    const txt=await r.text();
+    loadProteinFromText(txt);
+    latestDock.proteinName = id;
+    latestDock.pdbId = id;
+  } catch(e) {
+    alert(e.message);
+  }
 }
 
 function useExampleSmiles(){
   const sel=$('#exampleSmiles');
-  if(sel&&sel.value)$('#smiles').value=sel.value;
+  if(sel&&sel.value) {
+      $('#smiles').value=sel.value;
+      processSmiles();
+  }
 }
 
 function runDock(){
-  if(!ligandModel||!proteinModel)return;
-  // ligand props stub
-  const lig={numHeavyAtoms:25,hDonors:2,hAcceptors:3,logp:2.5,numRotatableBonds:3};
-  scoreAndDisplay(lig);
+  if(!currentLigandProps||!proteinModel) {
+      alert('Please load a protein and a valid ligand first.');
+      return;
+  }
+  scoreAndDisplay(currentLigandProps);
 }
 
 function prefillFromDock(){
@@ -744,13 +649,25 @@ function createDockPost(){
   const proteinName=$('#postProtein').value.trim();
   if(!proteinName){alert('Enter protein name');return}
   const channel=upsertChannel(proteinName);
+  const smiles=$('#postSmiles').value.trim();
+  let svg = '';
+  if (smiles && rdkit) {
+    let mol = null;
+    try {
+        mol = rdkit.get_mol(smiles);
+        if(mol) svg = mol.get_svg();
+    } catch(e) { console.error(e); } 
+    finally { if(mol) mol.delete(); }
+  }
+
   const p={
     id:crypto.randomUUID(),
     type:'dock',
     channelId:channel.id,
     proteinName,
     pdbId:$('#postPdbId').value.trim(),
-    smiles:$('#postSmiles').value.trim(),
+    smiles:smiles,
+    svg:svg,
     dG:parseFloat($('#postDG').value)||null,
     mood:$('#postMood').value,
     notes:$('#postNotes').value,
@@ -777,14 +694,28 @@ function createNonDockPost(){
   addPost(p);refreshFeed();refreshChannelList();alert('Published!');
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Initialize RDKit and make it globally available
+    window.RDKit = await initRDKitModule();
+    rdkit = window.RDKit;
+    setStatus('Libraries ready. RDKit initialized.', 'ok');
+  } catch (e) {
+    setStatus('RDKit failed to load.', 'err');
+    console.error(e);
+    return; // Stop if RDKit fails
+  }
+
+  // Initialize the rest of the app
   viewer=$3Dmol.createViewer('viewer',{backgroundColor:'#eef2f7'});
-  updateModelInfo();setStatus('Libraries ready. RDKit initialized.','ok');
+  updateModelInfo();
   wirePdbDropZone();
   $('#loadLocalPdbBtn').addEventListener('click',loadLocalPdb);
   $('#fetchPdbBtn').addEventListener('click',fetchPdb);
   $('#useExampleBtn').addEventListener('click',useExampleSmiles);
   $('#dockBtn').addEventListener('click',runDock);
+  $('#scoringModel').addEventListener('change', updateModelInfo);
+  $('#smiles').addEventListener('input', processSmiles);
   $('#prefillFromDock').addEventListener('click',prefillFromDock);
   $('#createPostBtn').addEventListener('click',createDockPost);
   $('#createNonDockBtn').addEventListener('click',createNonDockPost);
@@ -802,8 +733,3 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
-
-
-
-
-
