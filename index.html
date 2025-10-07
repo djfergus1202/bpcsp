@@ -1,55 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PharmaSim Pro</title>
+
+  <!-- 3Dmol.js for protein visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
+
+  <!-- RDKit.js for SMILES and molecule properties -->
+  <script src="https://unpkg.com/@rdkit/rdkit"></script>
+
+  <!-- Google Fonts and Base Styling -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --ink: #0b1630;
       --brand: #2a5298;
       --brand2: #1e3c72;
+      --bg: #f4f7fa;
     }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: system-ui, sans-serif;
-      ...
-    }
-    ...
-  </style>
-
-  <style>
-    /* Sidebar-friendly docking layout */
-    #md .split {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--brand2) 0%, var(--brand) 50%, #7e8ba3 100%);
+      color: var(--ink);
     }
 
-    #md .split > div {
-      flex: 1 1 100%;
-      min-width: 0;
+    a {
+      text-decoration: none;
+      color: inherit;
     }
 
-    @media (min-width: 1024px) {
-      #md .split > div:first-child {
-        flex: 0 0 380px;
-        max-width: 420px;
+    button, input, select, textarea {
+      font-family: inherit;
+    }
+
+    .tab-button {
+      padding: 0.5rem 1rem;
+      background: #f5f5f5;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin: 0.25rem;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background-color: var(--brand);
+      color: white;
+      font-weight: 600;
+    }
+
+    .panel {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      margin: 1rem 0;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .metric-card {
+      background: #eaf0f6;
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .metric-card strong {
+      font-size: 1.2rem;
+      color: #2a5298;
+    }
+
+    @media (max-width: 768px) {
+      .tab-button {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
       }
-      #md .split > div:last-child {
-        flex: 1 1 auto;
-      }
-    }
-
-    /* Maintain layout visibility */
-    #viewer {
-      min-height: 400px;
-      max-height: 500px;
-      overflow: hidden;
-      border-radius: 12px;
-      background: #eef2f7;
-    }
-
-    #dock-right {
-      overflow-y: auto;
-      max-height: 800px;
-      padding-bottom: 1rem;
     }
   </style>
 </head>
@@ -762,6 +802,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+
 
 
 
