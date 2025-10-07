@@ -643,50 +643,104 @@
     }
   }
 
-  /* ===== RDKit (SMILES → 3Dmol) ===== */
+  /* ===== RDKit (SMILES → 3Dmol) — hardened pipeline ===== */
   async function processSmilesString(smiles){
     const v=ensureViewer(); if(!v) return;
 
     safeRemoveModel(ligandModel); ligandModel=null;
     currentLigandProps=null; resetMetrics();
     if(exists('#dockBtn')) $('#dockBtn').disabled=true;
-    if(!smiles) return;
 
-    if(!RDKitModule){ setStatus('RDKit not ready yet…','warn'); return; }
+    smiles = (smiles||'').trim();
+    if(!smiles){ setStatus('Please enter a SMILES string.','warn'); return; }
+    if(!RDKitModule){ setStatus('RDKit not ready yet.','warn'); return; }
 
     let mol=null;
     try{
+      // 1) Parse
       mol = RDKitModule.get_mol(smiles);
-      if(!mol){ setStatus('Invalid SMILES (RDKit could not parse).','err'); return; }
+      if(!mol){ setStatus('Invalid SMILES: RDKit could not parse.','err'); return; }
 
-      const desc = JSON.parse(mol.get_descriptors());
-      currentLigandProps = {
-        numHeavyAtoms: desc.NumHeavyAtoms,
-        hDonors: desc.NumHDonors,
-        hAcceptors: desc.NumHAcceptors,
-        logp: desc.MolLogP,
-        numRotatableBonds: desc.NumRotatableBonds
-      };
-      const mw=$('#mw'); if(mw && typeof desc.exactmw==='number') mw.textContent = desc.exactmw.toFixed(2);
-      const lp=$('#logp'); if(lp && typeof desc.MolLogP==='number') lp.textContent = desc.MolLogP.toFixed(2);
+      // 2) Descriptors (safe JSON parse + key fallbacks)
+      let descRaw = '';
+      let desc = {};
+      try {
+        descRaw = mol.get_descriptors();
+        desc = JSON.parse(descRaw||'{}');
+      } catch(parseErr){
+        console.warn('Descriptor JSON parse failed:', parseErr);
+        desc = {};
+      }
 
-      // Make a quick 3D conformer
-      mol.add_hs(); mol.embed_molecule(); mol.remove_hs();
-      addLigandFromMolblock(mol.get_molblock());
+      // Fallback numeric helpers
+      const toNum = v => (typeof v === 'number' && isFinite(v)) ? v : null;
 
+      const NumHeavyAtoms     = toNum(desc.NumHeavyAtoms);
+      const NumHDonors        = toNum(desc.NumHDonors);
+      const NumHAcceptors     = toNum(desc.NumHAcceptors);
+      const MolLogP           = toNum(desc.MolLogP ?? desc.CalcLogP);
+      const NumRotatableBonds = toNum(desc.NumRotatableBonds);
+
+      const MolWt     = toNum(desc.MolWt ?? desc.Mol_Weight ?? desc.MolecularWeight);
+      const ExactMolW = toNum(desc.ExactMolWt ?? desc.exactmw);
+
+      if(MolWt || ExactMolW){
+        const mwEl=$('#mw'); if(mwEl) mwEl.textContent = (MolWt ?? ExactMolW).toFixed(2);
+      }
+      if(MolLogP!=null){
+        const lpEl=$('#logp'); if(lpEl) lpEl.textContent = MolLogP.toFixed(2);
+      }
+
+      // Save props only if present to avoid NaN scoring
+      if(NumHeavyAtoms!=null && NumHDonors!=null && NumHAcceptors!=null && MolLogP!=null && NumRotatableBonds!=null){
+        currentLigandProps = {
+          numHeavyAtoms: NumHeavyAtoms,
+          hDonors: NumHDonors,
+          hAcceptors: NumHAcceptors,
+          logp: MolLogP,
+          numRotatableBonds: NumRotatableBonds
+        };
+      } else {
+        currentLigandProps = null; // scoring disabled until descriptors available
+        console.warn('Some descriptors missing; docking score will be disabled.');
+      }
+
+      // 3) Try to embed to 3D; fallback to non-embedded molblock if embedding fails
+      let molblock = '';
+      try {
+        mol.add_hs();
+        const ok = mol.embed_molecule(); // returns 0 on success, nonzero on failure
+        mol.remove_hs();
+        molblock = mol.get_molblock();
+        if(ok !== 0){
+          console.warn('RDKit embedding reported failure, using non-ideal coordinates.');
+          setStatus('SMILES loaded (embedding fallback).','warn');
+        } else {
+          setStatus('SMILES loaded & embedded.','ok');
+        }
+      } catch (embedErr) {
+        console.warn('Embedding failed, using raw molblock:', embedErr);
+        try { mol.remove_hs(); } catch(_) {}
+        molblock = mol.get_molblock();
+        setStatus('SMILES loaded (no 3D conformer).','warn');
+      }
+
+      // 4) Display
+      addLigandFromMolblock(molblock);
       latestDock.smiles = smiles;
-      setStatus('SMILES loaded & embedded.','ok');
-    }catch(e){
-      console.error('RDKit error:', e);
-      setStatus('RDKit error while processing SMILES.','err');
-    }finally{
+
+    } catch(e){
+      console.error('RDKit SMILES pipeline error:', e);
+      setStatus((e && e.message) ? `SMILES error: ${e.message}` : 'SMILES processing failed.', 'err');
+    } finally {
       if(mol) mol.delete();
       refreshButtons();
     }
   }
+
   function loadSmilesBtn(){
-    const smiles = $('#smiles')?.value.trim() || '';
-    if(!smiles){ alert('Enter a SMILES string first.'); return; }
+    const smiles = $('#smiles')?.value || '';
+    if(!smiles.trim()){ alert('Enter a SMILES string first.'); return; }
     processSmilesString(smiles);
   }
   function useExampleSmiles(){
@@ -722,8 +776,12 @@
     }catch(_){} return [];
   }
   function runDock(){
-    if(!proteinModel || !ligandModel || !currentLigandProps){
+    if(!proteinModel || !ligandModel){
       alert('Please load a protein and a ligand first.');
+      return;
+    }
+    if(!currentLigandProps){
+      alert('Ligand descriptors unavailable; cannot score. Try another SMILES.');
       return;
     }
     const which = $('#scoringModel')?.value || 'balanced';
@@ -885,6 +943,25 @@
   }
 
   /* ===== Create posts ===== */
+  function getSession(){ return JSON.parse(localStorage.getItem(K_SESSION)||'null'); }
+  function openProfile(){ const m=$('#profileModal'); if(m){ $('#authMsg').textContent=''; m.classList.remove('hidden'); m.classList.add('flex'); } }
+  function closeProfile(){ const m=$('#profileModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
+  function setSession(u){ localStorage.setItem(K_SESSION, JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
+  function signUp(){
+    const username=$('#authUser').value.trim(), pass=$('#authPass').value, avatar=$('#authAvatar').value.trim();
+    if(!username||!pass){ $('#authMsg').textContent='Provide username & password.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
+    const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
+    users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem(K_USERS, JSON.stringify(users));
+    setSession({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm';
+  }
+  function signIn(){
+    const username=$('#authUser').value.trim(), pass=$('#authPass').value;
+    const users=userdb(); const u=users.find(u=>u.username===username && u.pass===pass);
+    if(!u){ $('#authMsg').textContent='Invalid credentials.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
+    setSession({username:u.username, avatar:u.avatar});
+  }
+  function signOut(){ localStorage.removeItem(K_SESSION); $('#profileBtn').textContent='Sign In'; closeProfile(); }
+
   function createDockPost(){
     const sess=getSession(); if(!sess){ alert('Sign in first'); return; }
     const proteinName=$('#postProtein').value.trim(); if(!proteinName){ alert('Enter protein name'); return; }
@@ -921,28 +998,9 @@
     addPost(p); buildAlphaIndex(readPosts()); refreshFeed(); refreshChannelList(); alert('Published!');
   }
 
-  /* ===== Fake auth (local) ===== */
-  function openProfile(){ const m=$('#profileModal'); if(m){ $('#authMsg').textContent=''; m.classList.remove('hidden'); m.classList.add('flex'); } }
-  function closeProfile(){ const m=$('#profileModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
-  function setSession(u){ localStorage.setItem('ps_session_v1', JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
-  function signUp(){
-    const username=$('#authUser').value.trim(), pass=$('#authPass').value, avatar=$('#authAvatar').value.trim();
-    if(!username||!pass){ $('#authMsg').textContent='Provide username & password.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem('ps_users_v1', JSON.stringify(users));
-    setSession({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm';
-  }
-  function signIn(){
-    const username=$('#authUser').value.trim(), pass=$('#authPass').value;
-    const users=userdb(); const u=users.find(u=>u.username===username && u.pass===pass);
-    if(!u){ $('#authMsg').textContent='Invalid credentials.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    setSession({username:u.username, avatar:u.avatar});
-  }
-  function signOut(){ localStorage.removeItem('ps_session_v1'); $('#profileBtn').textContent='Sign In'; closeProfile(); }
-
   /* ===== Wire up everything ===== */
   document.addEventListener('DOMContentLoaded', async ()=>{
-    // RDKit WASM: ensure .wasm loads on static hosts
+    // RDKit WASM: ensure .wasm loads on static hosts (GitHub Pages)
     const RD_BASE='https://unpkg.com/@rdkit/rdkit/dist/';
     try{
       RDKitModule = await initRDKitModule({ locateFile: file => RD_BASE + file });
