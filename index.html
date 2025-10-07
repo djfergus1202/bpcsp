@@ -27,56 +27,32 @@
       color: var(--ink);
       background: linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);
     }
-
-    /* “Brick” cards — responsive grid */
-    .bricks{
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
-      align-items: start;
-    }
-
+    .bricks{ display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:14px; align-items:start; }
     .glass{ background: rgba(255,255,255,.92); backdrop-filter: blur(10px); box-shadow: 0 10px 26px rgba(0,0,0,.12); border-radius: 16px; }
     .panel{ padding: 18px; }
-
     .btn{ background: linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; font-weight: 700; border-radius: 10px; padding: .65rem .9rem; }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
     .btn-plain{ background:#fff; border-radius:10px; padding:.6rem .9rem; font-weight:600; }
     .input, select, textarea{ width:100%; padding:.65rem .8rem; border:2px solid #e5e7eb; border-radius:10px; background:#f8f9fa; }
     .input:focus, select:focus, textarea:focus{ outline:none; border-color:#2a5298; background:#fff; box-shadow:0 0 0 3px rgba(42,82,152,.12); }
-
     .chip{ display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .6rem; border-radius:999px; font-weight:700; font-size:.75rem; }
-    .chip.pos{ background:#ecfdf5; color:#065f46; }
-    .chip.info{ background:#eff6ff; color:#1e3a8a; }
-    .chip.warn{ background:#fff7ed; color:#9a3412; }
-    .chip.err{ background:#fee2e2; color:#991b1b; }
-
+    .chip.pos{ background:#ecfdf5; color:#065f46; } .chip.info{ background:#eff6ff; color:#1e3a8a; }
+    .chip.warn{ background:#fff7ed; color:#9a3412; } .chip.err{ background:#fee2e2; color:#991b1b; }
     .metric{ background: linear-gradient(135deg,#f8f9fa,#e9eef6); border-radius: 12px; padding: 12px; text-align:center; }
     .metric .v{
       font-size:1.1rem; font-weight: 800;
       background: linear-gradient(135deg,#2a5298,#1e3c72);
       -webkit-background-clip:text; background-clip:text; color: transparent;
     }
-
     #viewer{ width:100%; min-height:420px; height:420px; border-radius:12px; background:#eef2f7; }
     #pdbDrop{ min-height:120px; max-height:160px; overflow:auto; }
     @media (max-width:640px){ #pdbDrop{ min-height:100px; max-height:120px; } }
-
-    /* Header / Nav */
     header{ position: sticky; top:0; z-index:40; }
-    .navlink{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:.5rem .75rem; border-radius:.75rem; font-weight:600; background:#fff;
-    }
-    .navlink[aria-current="page"]{
-      color:#fff; background: linear-gradient(135deg,#2a5298,#1e3c72);
-    }
-
+    .navlink{ display:inline-flex; align-items:center; justify-content:center; padding:.5rem .75rem; border-radius:.75rem; font-weight:600; background:#fff; }
+    .navlink[aria-current="page"]{ color:#fff; background: linear-gradient(135deg,#2a5298,#1e3c72); }
     main{ scroll-margin-top: 84px; }
     .feed-card{ border:1px solid #e6eaf2; border-radius:16px; padding:14px; background:#fff; }
     a.hash{ color:#1e3c72; font-weight:600; }
-
-    /* Hide/show sections via router */
     .section{ display:none; }
     .section.active{ display:block; }
   </style>
@@ -91,7 +67,6 @@
         <span class="chip info">Social Computational Chemistry</span>
       </div>
 
-      <!-- Accessible hash-nav (linkable routes) -->
       <nav class="flex flex-wrap gap-2" role="navigation" aria-label="Primary">
         <a href="#/md"        class="navlink" data-route="md">Docking</a>
         <a href="#/pbpk"      class="navlink" data-route="pbpk">PBPK/QSP</a>
@@ -122,7 +97,7 @@
     <!-- SECTION: DOCKING -->
     <section id="md" class="section active" data-title="Docking">
       <div class="bricks">
-        <!-- Brick: Protein input -->
+        <!-- Protein -->
         <div class="glass panel">
           <h2 class="text-lg font-bold mb-2">Protein (PDB)</h2>
           <div id="pdbDrop" class="w-full border-2 border-dashed border-gray-300 rounded-xl bg-white/70 p-4 text-center text-gray-600 hover:border-indigo-400 hover:bg-white transition">
@@ -143,7 +118,7 @@
           </div>
         </div>
 
-        <!-- Brick: Ligand input -->
+        <!-- Ligand -->
         <div class="glass panel">
           <h2 class="text-lg font-bold mb-2">Ligand (SMILES)</h2>
           <input id="smiles" class="input" placeholder="Paste SMILES here (e.g., CC(=O)OC1=CC=CC=C1C(=O)O)">
@@ -165,7 +140,7 @@
           </div>
         </div>
 
-        <!-- Brick: Model + scoring -->
+        <!-- Scoring / Controls -->
         <div class="glass panel">
           <h2 class="text-lg font-bold mb-2">Scoring & Controls</h2>
           <label class="block text-sm font-semibold mb-1">Scoring Model</label>
@@ -185,13 +160,13 @@
           </div>
         </div>
 
-        <!-- Brick: 3D Viewer -->
+        <!-- Viewer -->
         <div class="glass panel lg:col-span-2">
           <h2 class="text-lg font-bold mb-2">3D Visualization</h2>
           <div id="viewer"></div>
         </div>
 
-        <!-- Brick: Metrics A -->
+        <!-- Metrics -->
         <div class="glass panel">
           <h2 class="text-lg font-bold mb-2">Ligand/Score Summary</h2>
           <div class="grid grid-cols-3 gap-2">
@@ -201,7 +176,7 @@
           </div>
         </div>
 
-        <!-- Brick: Contributions -->
+        <!-- Contributions -->
         <div class="glass panel">
           <h2 class="text-lg font-bold mb-2">Contributions</h2>
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -431,7 +406,7 @@
     </section>
   </main>
 
-  <!-- Profile modal (local, optional) -->
+  <!-- Profile modal -->
   <div id="profileModal" class="fixed inset-0 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="absolute inset-0 bg-black/50"></div>
     <div class="relative glass p-4 w-full max-w-md">
@@ -459,23 +434,12 @@
        FULL APP SCRIPT
        ========================= -->
   <script>
-  /* ===== Tiny DOM helpers ===== */
   const $  = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
   const on = (s,ev,fn)=>{ const el=$(s); if(el) el.addEventListener(ev,fn); };
-  const exists = s => Boolean($(s));
 
-  /* ===== Router (hash-based) ===== */
-  const ROUTES = {
-    md: 'md',
-    pbpk: 'pbpk',
-    clinical: 'clinical',
-    mdsetup: 'mdsetup',
-    community: 'community',
-    channels: 'channels',
-    pub: 'pub',
-    learn: 'learn'
-  };
+  /* ===== Router ===== */
+  const ROUTES = { md:'md', pbpk:'pbpk', clinical:'clinical', mdsetup:'mdsetup', community:'community', channels:'channels', pub:'pub', learn:'learn' };
   function setActiveNav(routeKey){
     $$('.navlink').forEach(a=>{
       const isActive = a.getAttribute('data-route') === routeKey;
@@ -489,21 +453,12 @@
   }
   function navigateFromHash(){
     const hash = location.hash || '#/md';
-
-    // Channel deep link: #/p/<slug>
     const pm = hash.match(/^#\/p\/(.+)/);
-    if(pm){
-      openChannelBySlug(pm[1]);
-      setActiveNav('channels');
-      return;
-    }
-
-    // Normal route: #/route
+    if(pm){ openChannelBySlug(pm[1]); setActiveNav('channels'); return; }
     const m = hash.match(/^#\/([^/?#]+)/);
     const key = m ? m[1] : 'md';
     const sectionId = ROUTES[key] || 'md';
-    showSectionById(sectionId);
-    setActiveNav(key);
+    showSectionById(sectionId); setActiveNav(key);
   }
   window.addEventListener('hashchange', navigateFromHash);
 
@@ -511,9 +466,9 @@
   function setStatus(msg, kind='info'){
     const b = $('#statusBadge'); if(!b) return;
     b.textContent = msg;
-    b.classList.remove('hidden','pos','warn','err','info');
-    b.classList.add(kind === 'ok' ? 'pos' : kind);
+    b.className = 'chip ' + (kind==='ok' ? 'pos' : kind);
   }
+  function trapz(x,y){ let A=0; for(let i=1;i<x.length;i++) A += 0.5*(y[i]+y[i-1])*(x[i]-x[i-1]); return A; }
 
   /* ===== App state ===== */
   let RDKitModule = null;
@@ -521,21 +476,43 @@
   let proteinModel=null, ligandModel=null;
   let currentLigandProps=null;
   let pdbFileFromDrop=null;
-
   const latestDock = { proteinName:'', pdbId:'', smiles:'', dG:null };
 
-  /* ===== Metrics ===== */
+  // Charts registry
+  const charts = { pk:null, occ:null, trial:null };
+  function makeChart(id, cfg){
+    const ctx = document.getElementById(id);
+    if(!ctx) return null;
+    if(charts[id.replace('Chart','')] && charts[id.replace('Chart','')].destroy){
+      charts[id.replace('Chart','')].destroy();
+    }
+    const chart = new Chart(ctx.getContext('2d'), {
+      ...cfg,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: { mode:'nearest', intersect:false },
+        plugins: { legend: { display: true } },
+        ...cfg.options
+      }
+    });
+    charts[id.replace('Chart','')] = chart;
+    return chart;
+  }
+
   const metricIds = ['mw','logp','aff','vdw_contrib','hbond_contrib','hydro_contrib','rot_contrib','contacts','clashes'];
   function resetMetrics(){ metricIds.forEach(id=>{ const el=$('#'+id); if(el) el.textContent='--'; }); }
+
   function refreshButtons(){
     const hasProt = !!proteinModel;
     const hasLig  = !!ligandModel;
-    if(exists('#dockBtn'))    $('#dockBtn').disabled = !(hasProt && hasLig && currentLigandProps);
-    if(exists('#centerBtn'))  $('#centerBtn').disabled = !(hasProt || hasLig);
-    if(exists('#clearProteinBtn')) $('#clearProteinBtn').disabled = !hasProt;
-    if(exists('#clearLigandBtn'))  $('#clearLigandBtn').disabled  = !hasLig;
-    if(exists('#clearAllBtn'))     $('#clearAllBtn').disabled     = !(hasProt || hasLig);
-    if(exists('#resetViewBtn'))    $('#resetViewBtn').disabled    = !(hasProt || hasLig);
+    if($('#dockBtn'))    $('#dockBtn').disabled   = !(hasProt && hasLig);
+    if($('#centerBtn'))  $('#centerBtn').disabled = !(hasProt || hasLig);
+    if($('#clearProteinBtn')) $('#clearProteinBtn').disabled = !hasProt;
+    if($('#clearLigandBtn'))  $('#clearLigandBtn').disabled  = !hasLig;
+    if($('#clearAllBtn'))     $('#clearAllBtn').disabled     = !(hasProt || hasLig);
+    if($('#resetViewBtn'))    $('#resetViewBtn').disabled    = !(hasProt || hasLig);
   }
 
   /* ===== 3Dmol viewer ===== */
@@ -565,34 +542,14 @@
     setStatus('Ligand loaded.','ok');
     refreshButtons();
   }
-  function resetView(){
-    const v=ensureViewer(); if(!v) return;
-    v.zoomTo(); v.render();
-  }
-  function clearProtein(){
-    if(!viewer || !proteinModel) return;
-    try{ viewer.removeModel(proteinModel); }catch(_){}
-    proteinModel=null;
-    setStatus('Protein cleared.','info');
-    refreshButtons();
-  }
-  function clearLigand(){
-    if(!viewer || !ligandModel) return;
-    try{ viewer.removeModel(ligandModel); }catch(_){}
-    ligandModel=null;
-    currentLigandProps=null;
-    resetMetrics();
-    setStatus('Ligand cleared.','info');
-    refreshButtons();
-  }
-  function clearAll(){
-    clearLigand();
-    clearProtein();
-    resetView();
-    setStatus('Cleared all.','info');
-  }
+  function resetView(){ const v=ensureViewer(); if(!v) return; v.zoomTo(); v.render(); }
+  function clearProtein(){ if(!viewer || !proteinModel) return; try{ viewer.removeModel(proteinModel); }catch(_){}
+    proteinModel=null; setStatus('Protein cleared.','info'); refreshButtons(); }
+  function clearLigand(){ if(!viewer || !ligandModel) return; try{ viewer.removeModel(ligandModel); }catch(_){}
+    ligandModel=null; currentLigandProps=null; resetMetrics(); setStatus('Ligand cleared.','info'); refreshButtons(); }
+  function clearAll(){ clearLigand(); clearProtein(); resetView(); setStatus('Cleared all.','info'); }
 
-  /* ===== PDB: drop, file, fetch ===== */
+  /* ===== PDB: drop/file/fetch ===== */
   function wirePdbDropZone(){
     const dz=$('#pdbDrop'); if(!dz) return;
     ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{
@@ -643,13 +600,11 @@
     }
   }
 
-  /* ===== RDKit (SMILES → 3Dmol) — hardened pipeline ===== */
+  /* ===== RDKit (SMILES) ===== */
   async function processSmilesString(smiles){
     const v=ensureViewer(); if(!v) return;
-
-    safeRemoveModel(ligandModel); ligandModel=null;
-    currentLigandProps=null; resetMetrics();
-    if(exists('#dockBtn')) $('#dockBtn').disabled=true;
+    safeRemoveModel(ligandModel); ligandModel=null; currentLigandProps=null; resetMetrics();
+    $('#dockBtn') && ($('#dockBtn').disabled = !proteinModel);
 
     smiles = (smiles||'').trim();
     if(!smiles){ setStatus('Please enter a SMILES string.','warn'); return; }
@@ -657,75 +612,48 @@
 
     let mol=null;
     try{
-      // 1) Parse
       mol = RDKitModule.get_mol(smiles);
       if(!mol){ setStatus('Invalid SMILES: RDKit could not parse.','err'); return; }
 
-      // 2) Descriptors (safe JSON parse + key fallbacks)
-      let descRaw = '';
-      let desc = {};
+      // descriptors
       try {
-        descRaw = mol.get_descriptors();
-        desc = JSON.parse(descRaw||'{}');
-      } catch(parseErr){
-        console.warn('Descriptor JSON parse failed:', parseErr);
-        desc = {};
-      }
+        const desc = JSON.parse(mol.get_descriptors()||'{}');
+        const toNum = v => (typeof v === 'number' && isFinite(v)) ? v : null;
+        const NumHeavyAtoms     = toNum(desc.NumHeavyAtoms);
+        const NumHDonors        = toNum(desc.NumHDonors);
+        const NumHAcceptors     = toNum(desc.NumHAcceptors);
+        const MolLogP           = toNum(desc.MolLogP ?? desc.CalcLogP);
+        const NumRotatableBonds = toNum(desc.NumRotatableBonds);
+        const MolWt             = toNum(desc.MolWt ?? desc.MolecularWeight ?? desc.exactmw ?? desc.ExactMolWt);
 
-      // Fallback numeric helpers
-      const toNum = v => (typeof v === 'number' && isFinite(v)) ? v : null;
+        if(MolWt!=null) $('#mw').textContent = MolWt.toFixed(2);
+        if(MolLogP!=null) $('#logp').textContent = MolLogP.toFixed(2);
 
-      const NumHeavyAtoms     = toNum(desc.NumHeavyAtoms);
-      const NumHDonors        = toNum(desc.NumHDonors);
-      const NumHAcceptors     = toNum(desc.NumHAcceptors);
-      const MolLogP           = toNum(desc.MolLogP ?? desc.CalcLogP);
-      const NumRotatableBonds = toNum(desc.NumRotatableBonds);
+        if([NumHeavyAtoms,NumHDonors,NumHAcceptors,MolLogP,NumRotatableBonds].every(x=>x!=null)){
+          currentLigandProps = {
+            numHeavyAtoms: NumHeavyAtoms,
+            hDonors: NumHDonors,
+            hAcceptors: NumHAcceptors,
+            logp: MolLogP,
+            numRotatableBonds: NumRotatableBonds
+          };
+        }
+      } catch(parseErr){ console.warn('Descriptor parse failed', parseErr); }
 
-      const MolWt     = toNum(desc.MolWt ?? desc.Mol_Weight ?? desc.MolecularWeight);
-      const ExactMolW = toNum(desc.ExactMolWt ?? desc.exactmw);
-
-      if(MolWt || ExactMolW){
-        const mwEl=$('#mw'); if(mwEl) mwEl.textContent = (MolWt ?? ExactMolW).toFixed(2);
-      }
-      if(MolLogP!=null){
-        const lpEl=$('#logp'); if(lpEl) lpEl.textContent = MolLogP.toFixed(2);
-      }
-
-      // Save props only if present to avoid NaN scoring
-      if(NumHeavyAtoms!=null && NumHDonors!=null && NumHAcceptors!=null && MolLogP!=null && NumRotatableBonds!=null){
-        currentLigandProps = {
-          numHeavyAtoms: NumHeavyAtoms,
-          hDonors: NumHDonors,
-          hAcceptors: NumHAcceptors,
-          logp: MolLogP,
-          numRotatableBonds: NumRotatableBonds
-        };
-      } else {
-        currentLigandProps = null; // scoring disabled until descriptors available
-        console.warn('Some descriptors missing; docking score will be disabled.');
-      }
-
-      // 3) Try to embed to 3D; fallback to non-embedded molblock if embedding fails
+      // embed
       let molblock = '';
-      try {
+      try{
         mol.add_hs();
-        const ok = mol.embed_molecule(); // returns 0 on success, nonzero on failure
+        const ok = mol.embed_molecule();
         mol.remove_hs();
         molblock = mol.get_molblock();
-        if(ok !== 0){
-          console.warn('RDKit embedding reported failure, using non-ideal coordinates.');
-          setStatus('SMILES loaded (embedding fallback).','warn');
-        } else {
-          setStatus('SMILES loaded & embedded.','ok');
-        }
-      } catch (embedErr) {
-        console.warn('Embedding failed, using raw molblock:', embedErr);
-        try { mol.remove_hs(); } catch(_) {}
+        setStatus(ok===0 ? 'SMILES loaded & embedded.':'SMILES loaded (embedding fallback).', ok===0?'ok':'warn');
+      }catch(e){
+        try{ mol.remove_hs(); }catch(_){}
         molblock = mol.get_molblock();
         setStatus('SMILES loaded (no 3D conformer).','warn');
       }
 
-      // 4) Display
       addLigandFromMolblock(molblock);
       latestDock.smiles = smiles;
 
@@ -737,7 +665,6 @@
       refreshButtons();
     }
   }
-
   function loadSmilesBtn(){
     const smiles = $('#smiles')?.value || '';
     if(!smiles.trim()){ alert('Enter a SMILES string first.'); return; }
@@ -749,6 +676,35 @@
       $('#smiles').value=sel.value;
       processSmilesString(sel.value);
     }
+  }
+
+  /* ===== Fallback estimator for docking when descriptors missing ===== */
+  function getAtomsFromModel(m){
+    try{
+      if(!m) return [];
+      if(typeof m.selectedAtoms==='function') return m.selectedAtoms({});
+      if(typeof m.getAtoms==='function') return m.getAtoms();
+      if(Array.isArray(m.atoms)) return m.atoms;
+    }catch(_){} return [];
+  }
+  function estimateLigandPropsFromModel(){
+    const atoms = getAtomsFromModel(ligandModel);
+    if(!atoms.length) return null;
+    const heavy = atoms.filter(a=>a.elem!=='H').length;
+    const numC  = atoms.filter(a=>a.elem==='C').length;
+    const hetero = atoms.filter(a=>a.elem!=='H' && a.elem!=='C').length;
+    const donors = atoms.filter(a=>a.elem==='N' || a.elem==='O').length;
+    const accept = atoms.filter(a=>a.elem==='N' || a.elem==='O').length;
+    const logpRaw = 0.54*numC - 1.5*hetero;
+    const logp = Math.max(-2, Math.min(6, logpRaw));
+    const rotBonds = Math.round(0.3 * heavy);
+    return {
+      numHeavyAtoms: heavy,
+      hDonors: donors,
+      hAcceptors: accept,
+      logp: logp,
+      numRotatableBonds: Math.max(0, rotBonds)
+    };
   }
 
   /* ===== Heuristic docking score ===== */
@@ -767,25 +723,20 @@
       rotational: M.R*l.numRotatableBonds
     };
   }
-  function getAtomsFromModel(m){
-    try{
-      if(!m) return [];
-      if(typeof m.selectedAtoms==='function') return m.selectedAtoms({});
-      if(typeof m.getAtoms==='function') return m.getAtoms();
-      if(Array.isArray(m.atoms)) return m.atoms;
-    }catch(_){} return [];
-  }
+  function getLigandProps(){ return currentLigandProps || estimateLigandPropsFromModel(); }
+
   function runDock(){
     if(!proteinModel || !ligandModel){
       alert('Please load a protein and a ligand first.');
       return;
     }
-    if(!currentLigandProps){
-      alert('Ligand descriptors unavailable; cannot score. Try another SMILES.');
+    const ligProps = getLigandProps();
+    if(!ligProps){
+      alert('Could not derive ligand descriptors. Try another SMILES.');
       return;
     }
     const which = $('#scoringModel')?.value || 'balanced';
-    const base = bindingContrib(currentLigandProps, which);
+    const base = bindingContrib(ligProps, which);
     const prot = getAtomsFromModel(proteinModel);
     const lig  = getAtomsFromModel(ligandModel);
     const het=new Set(['N','O','S']);
@@ -811,12 +762,9 @@
     setStatus('Docking scored (heuristic).','ok');
     refreshButtons();
   }
-  function recenterAndRescore(){
-    resetView();
-    if(proteinModel && ligandModel && currentLigandProps) runDock();
-  }
+  function recenterAndRescore(){ resetView(); if(proteinModel && ligandModel) runDock(); }
 
-  /* ===== Minimal local “DB” for channels/posts (stubs) ===== */
+  /* ===== Local DB: users/channels/posts ===== */
   const K_USERS='ps_users_v1', K_SESSION='ps_session_v1';
   const K_CHANNELS='ps_channels_v1', K_POSTS='ps_posts_v1', K_IDX='pharmsim_alpha_index_v1';
   const userdb = ()=> JSON.parse(localStorage.getItem(K_USERS)||'[]');
@@ -938,12 +886,10 @@
     posts.slice(0,12).forEach(p=>feed.appendChild(renderPostCard(p)));
 
     $('#channelView').classList.remove('hidden');
-    showSectionById('channels');
-    setActiveNav('channels');
+    showSectionById('channels'); setActiveNav('channels');
   }
 
-  /* ===== Create posts ===== */
-  function getSession(){ return JSON.parse(localStorage.getItem(K_SESSION)||'null'); }
+  /* ===== Auth & Posts ===== */
   function openProfile(){ const m=$('#profileModal'); if(m){ $('#authMsg').textContent=''; m.classList.remove('hidden'); m.classList.add('flex'); } }
   function closeProfile(){ const m=$('#profileModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
   function setSession(u){ localStorage.setItem(K_SESSION, JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
@@ -961,7 +907,6 @@
     setSession({username:u.username, avatar:u.avatar});
   }
   function signOut(){ localStorage.removeItem(K_SESSION); $('#profileBtn').textContent='Sign In'; closeProfile(); }
-
   function createDockPost(){
     const sess=getSession(); if(!sess){ alert('Sign in first'); return; }
     const proteinName=$('#postProtein').value.trim(); if(!proteinName){ alert('Enter protein name'); return; }
@@ -998,28 +943,193 @@
     addPost(p); buildAlphaIndex(readPosts()); refreshFeed(); refreshChannelList(); alert('Published!');
   }
 
-  /* ===== Wire up everything ===== */
+  /* ===== PBPK/QSP ===== */
+  function runPBPK(){
+    const Dose = parseFloat($('#dose').value)||0;
+    const F    = (parseFloat($('#F').value)||0)/100;
+    let ka     = parseFloat($('#ka').value)||0;
+    let ke     = parseFloat($('#ke').value)||0;
+    const Vd   = parseFloat($('#Vd').value)||1;
+    if(ka===ke){ ka += 1e-6; } // avoid divide-by-zero
+
+    // time grid 0..48h
+    const dt=0.25, t=[], C=[], Occ=[];
+    const Kd=20; // mg/L demo
+    for(let x=0; x<=48+1e-6; x+=dt){ t.push(+x.toFixed(2)); }
+    const A = (F*Dose/Vd)*(ka/(ka-ke));
+    for(const ti of t){
+      const c = A*(Math.exp(-ke*ti) - Math.exp(-ka*ti));
+      const cc = Math.max(0,c);
+      C.push(cc);
+      Occ.push(cc/(cc+Kd));
+    }
+
+    // metrics
+    const Cmax = Math.max(...C);
+    const Tmax = t[C.indexOf(Cmax)];
+    const AUC  = trapz(t,C);
+
+    $('#cmax').textContent = Cmax.toFixed(2)+' mg/L';
+    $('#tmax').textContent = Tmax.toFixed(2)+' h';
+    $('#auc').textContent  = AUC.toFixed(2)+' mg·h/L';
+
+    // charts
+    makeChart('pkChart',{
+      type:'line',
+      data:{ labels:t, datasets:[{ label:'Plasma Concentration (mg/L)', data:C, borderWidth:2, fill:false }]},
+      options:{ scales:{ x:{ title:{display:true, text:'Time (h)'} }, y:{ beginAtZero:true, title:{display:true, text:'mg/L'} } } }
+    });
+    makeChart('occChart',{
+      type:'line',
+      data:{ labels:t, datasets:[{ label:'Target Occupancy', data:Occ, borderWidth:2, fill:false }]},
+      options:{ scales:{ x:{ title:{display:true, text:'Time (h)'} }, y:{ beginAtZero:true, max:1, title:{display:true, text:'Fraction'} } } }
+    });
+    setStatus('PBPK run complete.','ok');
+  }
+
+  /* ===== 3+3 Clinical Simulator ===== */
+  function mulberry32(a){ return function(){ let t=a+=0x6D2B79F5; t = Math.imul(t ^ t>>>15, t | 1); t ^= t + Math.imul(t ^ t>>>7, t | 61); return ((t ^ t>>>14) >>> 0) / 4294967296; } }
+  function simulateTrial(){
+    const levels = Math.max(1, parseInt($('#levels').value)||6);
+    const cohort = Math.max(1, parseInt($('#cohort').value)||3);
+    const startDose = Math.max(0.001, parseFloat($('#startDose').value)||10);
+    const target = Math.max(1, Math.min(90, parseFloat($('#tox').value)||25))/100; // target DLT at "MTD"
+    const esc = Math.max(1.01, parseFloat($('#esc').value)||1.5);
+    const seed = (parseInt($('#seed').value)||42) >>> 0;
+    const rand = mulberry32(seed);
+
+    // Construct dose ladder
+    const doses = Array.from({length:levels}, (_,i)=> startDose * Math.pow(esc, i));
+
+    // crude toxicity curve such that middle levels are near target, rising with dose
+    const base = target/2;
+    const pDLT = doses.map((_,i)=>{
+      const scale = Math.pow(esc, i - Math.floor(levels/2));
+      return Math.max(0.02, Math.min(0.90, base * scale));
+    });
+
+    const cohorts=[];
+    let level=0;
+    let mtdLevel=null;
+
+    function enroll(atLevel, n){
+      let dlt=0;
+      for(let i=0;i<n;i++){ if(rand() < pDLT[atLevel]) dlt++; }
+      cohorts.push({dose:doses[atLevel], level:atLevel+1, n, dlt});
+      return dlt;
+    }
+
+    // 3+3 rules
+    while(true){
+      const dlt1 = enroll(level, cohort);
+      if(dlt1===0){
+        if(level===levels-1){ mtdLevel=level+1; break; }
+        level++; // escalate
+      }else if(dlt1===1){
+        const dlt2 = enroll(level, cohort); // expand to 6
+        const total = dlt1 + dlt2;
+        if(total<=1){
+          if(level===levels-1){ mtdLevel=level+1; break; }
+          level++;
+        }else{
+          mtdLevel = level>0 ? level : 1;
+          break;
+        }
+      }else{ // >=2/3
+        mtdLevel = level>0 ? level : 1;
+        break;
+      }
+      if(cohorts.length>50){ mtdLevel = Math.max(1, level); break; } // guard
+    }
+
+    return { doses, pDLT, cohorts, mtdLevel };
+  }
+
+  function renderTrial(trial){
+    // table
+    const tb=$('#trialTable'); tb.innerHTML='';
+    trial.cohorts.forEach((c,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td class="py-1">${i+1}</td><td>${c.dose.toFixed(2)}</td><td>${c.dlt}</td><td>${c.n}</td>`;
+      tb.appendChild(tr);
+    });
+
+    // badge
+    const badge=$('#trialBadge');
+    badge.classList.remove('hidden');
+    const txt = trial.mtdLevel ? `MTD at level ${trial.mtdLevel} (dose ~${trial.doses[trial.mtdLevel-1].toFixed(2)} mg)` : 'No MTD';
+    badge.textContent = txt;
+    badge.className = 'chip ' + (trial.mtdLevel ? 'pos' : 'warn');
+
+    // chart: show DLTs per cohort + dose ladder reference
+    const labels = trial.cohorts.map((_,i)=>`C${i+1}`);
+    const dltData = trial.cohorts.map(c=>c.dlt);
+    const doseStep = trial.cohorts.map(c=>c.dose);
+
+    makeChart('trialChart',{
+      type:'bar',
+      data:{
+        labels,
+        datasets:[
+          { type:'bar', label:'DLTs', data:dltData, borderWidth:1 },
+          { type:'line', label:'Dose (mg)', data:doseStep, yAxisID:'y2', borderWidth:2 }
+        ]
+      },
+      options:{
+        scales:{
+          y:{ beginAtZero:true, title:{display:true, text:'DLTs'} },
+          y2:{ position:'right', beginAtZero:true, title:{display:true, text:'Dose (mg)'} }
+        }
+      }
+    });
+  }
+
+  function runOneTrial(){ const trial=simulateTrial(); renderTrial(trial); setStatus('3+3 trial simulated.','ok'); }
+  function runHundredTrials(){
+    const N=100, mtds=[];
+    for(let i=0;i<N;i++){ const t=simulateTrial(); mtds.push(t.mtdLevel||0); }
+    const avg = mtds.reduce((a,b)=>a+b,0)/N;
+    const badge=$('#trialBadge');
+    badge.classList.remove('hidden');
+    badge.textContent = `100 sims · Avg MTD level: ${avg.toFixed(2)}`;
+    badge.className = 'chip info';
+
+    // histogram of MTD levels
+    const levels = Math.max(1, parseInt($('#levels').value)||6);
+    const bins = Array.from({length:levels+1},()=>0); // 0=none
+    mtds.forEach(k=>bins[k]++);
+    const labels = ['None', ...Array.from({length:levels}, (_,i)=>String(i+1))];
+
+    makeChart('trialChart',{
+      type:'bar',
+      data:{ labels, datasets:[{ label:'MTD frequency (out of 100)', data:bins, borderWidth:1 }]},
+      options:{ scales:{ y:{ beginAtZero:true } } }
+    });
+    // clear table
+    $('#trialTable').innerHTML='';
+    setStatus('Ran 100 simulated trials.','ok');
+  }
+
+  /* ===== Wire up ===== */
   document.addEventListener('DOMContentLoaded', async ()=>{
-    // RDKit WASM: ensure .wasm loads on static hosts (GitHub Pages)
+    // RDKit WASM load
     const RD_BASE='https://unpkg.com/@rdkit/rdkit/dist/';
     try{
       RDKitModule = await initRDKitModule({ locateFile: file => RD_BASE + file });
       setStatus('Libraries ready. RDKit initialized.','ok');
     }catch(e){
-      console.error(e);
-      setStatus('RDKit failed to load.','err');
+      console.error(e); setStatus('RDKit failed to load.','err');
     }
 
-    ensureViewer(); // create 3Dmol viewer
-    wirePdbDropZone();
+    ensureViewer(); wirePdbDropZone();
 
-    // Buttons / inputs — protein
+    // Protein buttons
     on('#loadLocalPdbBtn','click',loadLocalPdb);
     on('#fetchPdbBtn','click',fetchPdb);
     on('#clearProteinBtn','click',clearProtein);
     on('#resetViewBtn','click',resetView);
 
-    // Buttons / inputs — ligand
+    // Ligand buttons
     on('#useExampleBtn','click',useExampleSmiles);
     on('#loadSmilesBtn','click',loadSmilesBtn);
     on('#clearLigandBtn','click',clearLigand);
@@ -1029,7 +1139,7 @@
     on('#centerBtn','click',recenterAndRescore);
     on('#clearAllBtn','click',clearAll);
 
-    // Community / posts
+    // Prefill post
     on('#prefillFromDock','click',()=>{
       const map = {
         postProtein: latestDock.proteinName || '',
@@ -1049,6 +1159,11 @@
     on('#signInBtn','click',signIn);
     on('#signOutBtn','click',signOut);
 
+    // PBPK / Clinical
+    on('#runPBPKBtn','click',runPBPK);
+    on('#runTrialBtn','click',runOneTrial);
+    on('#run100Btn','click',runHundredTrials);
+
     // Model info text
     const infoByModel={
       balanced:"Balances size, H-bonding, hydrophobics, flexibility.",
@@ -1061,14 +1176,10 @@
       smSel.dispatchEvent(new Event('change'));
     }
 
-    // Initialize route
+    // Init UI
     navigateFromHash();
-
-    // Initial UI state
     resetMetrics();
     refreshButtons();
-
-    // First render of feeds
     refreshFeed(); refreshChannelList();
   });
   </script>
