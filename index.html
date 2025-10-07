@@ -14,7 +14,44 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+/* Sidebar-friendly docking layout */
+#md .split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
 
+#md .split > div {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  #md .split > div:first-child {
+    flex: 0 0 380px;
+    max-width: 420px;
+  }
+  #md .split > div:last-child {
+    flex: 1 1 auto;
+  }
+}
+
+/* Maintain layout visibility */
+#viewer {
+  min-height: 400px;
+  max-height: 500px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #eef2f7;
+}
+
+#dock-right {
+  overflow-y: auto;
+  max-height: 800px;
+  padding-bottom: 1rem;
+}
+</style>
 <style>
 :root{--ink:#0b1630;--brand:#2a5298;--brand2:#1e3c72}
 *{box-sizing:border-box}
@@ -673,4 +710,5 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+
 
