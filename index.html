@@ -27,29 +27,61 @@
       color: var(--ink);
       background: linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);
     }
-    .bricks{ display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:14px; align-items:start; }
+
+    /* Bricks layout + comfy spacing */
+    .bricks{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap:18px;
+      align-items:start;
+    }
+
     .glass{ background: rgba(255,255,255,.92); backdrop-filter: blur(10px); box-shadow: 0 10px 26px rgba(0,0,0,.12); border-radius: 16px; }
     .panel{ padding: 18px; }
+
     .btn{ background: linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; font-weight: 700; border-radius: 10px; padding: .65rem .9rem; }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
     .btn-plain{ background:#fff; border-radius:10px; padding:.6rem .9rem; font-weight:600; }
+
     .input, select, textarea{ width:100%; padding:.65rem .8rem; border:2px solid #e5e7eb; border-radius:10px; background:#f8f9fa; }
     .input:focus, select:focus, textarea:focus{ outline:none; border-color:#2a5298; background:#fff; box-shadow:0 0 0 3px rgba(42,82,152,.12); }
+
     .chip{ display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .6rem; border-radius:999px; font-weight:700; font-size:.75rem; }
     .chip.pos{ background:#ecfdf5; color:#065f46; } .chip.info{ background:#eff6ff; color:#1e3a8a; }
     .chip.warn{ background:#fff7ed; color:#9a3412; } .chip.err{ background:#fee2e2; color:#991b1b; }
-    .metric{ background: linear-gradient(135deg,#f8f9fa,#e9eef6); border-radius: 12px; padding: 12px; text-align:center; }
+
+    /* Metric cards: room to breathe */
+    .metrics-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap:12px;
+    }
+    .metric{
+      background: linear-gradient(135deg,#f8f9fa,#e9eef6);
+      border-radius: 12px;
+      padding: 14px;
+      text-align:center;
+      min-height: 92px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+    }
     .metric .v{
-      font-size:1.1rem; font-weight: 800;
+      margin-top: 6px;
+      font-size:1.2rem; font-weight: 800;
       background: linear-gradient(135deg,#2a5298,#1e3c72);
       -webkit-background-clip:text; background-clip:text; color: transparent;
     }
+
     #viewer{ width:100%; min-height:420px; height:420px; border-radius:12px; background:#eef2f7; }
     #pdbDrop{ min-height:120px; max-height:160px; overflow:auto; }
     @media (max-width:640px){ #pdbDrop{ min-height:100px; max-height:120px; } }
+
     header{ position: sticky; top:0; z-index:40; }
     .navlink{ display:inline-flex; align-items:center; justify-content:center; padding:.5rem .75rem; border-radius:.75rem; font-weight:600; background:#fff; }
     .navlink[aria-current="page"]{ color:#fff; background: linear-gradient(135deg,#2a5298,#1e3c72); }
+
     main{ scroll-margin-top: 84px; }
     .feed-card{ border:1px solid #e6eaf2; border-radius:16px; padding:14px; background:#fff; }
     a.hash{ color:#1e3c72; font-weight:600; }
@@ -166,20 +198,20 @@
           <div id="viewer"></div>
         </div>
 
-        <!-- Metrics -->
-        <div class="glass panel">
+        <!-- Metrics (now roomy) -->
+        <div class="glass panel lg:col-span-2">
           <h2 class="text-lg font-bold mb-2">Ligand/Score Summary</h2>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="metrics-grid">
             <div class="metric"><div>Total ΔG</div><div id="aff" class="v">--</div></div>
             <div class="metric"><div>Ligand MW</div><div id="mw" class="v">--</div></div>
             <div class="metric"><div>Ligand LogP</div><div id="logp" class="v">--</div></div>
           </div>
         </div>
 
-        <!-- Contributions -->
-        <div class="glass panel">
+        <!-- Contributions (now roomy) -->
+        <div class="glass panel lg:col-span-2">
           <h2 class="text-lg font-bold mb-2">Contributions</h2>
-          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          <div class="metrics-grid">
             <div class="metric"><div class="text-xs">ΔG vdW</div><div id="vdw_contrib" class="v">--</div></div>
             <div class="metric"><div class="text-xs">ΔG H-Bond</div><div id="hbond_contrib" class="v">--</div></div>
             <div class="metric"><div class="text-xs">ΔG Hydroph.</div><div id="hydro_contrib" class="v">--</div></div>
@@ -208,7 +240,7 @@
         </div>
         <div class="glass panel">
           <h2 class="text-lg font-bold mb-2">PK Metrics</h2>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="metrics-grid">
             <div class="metric"><div>C<sub>max</sub></div><div id="cmax" class="v">--</div></div>
             <div class="metric"><div>T<sub>max</sub></div><div id="tmax" class="v">--</div></div>
             <div class="metric"><div>AUC<sub>0–48</sub></div><div id="auc" class="v">--</div></div>
