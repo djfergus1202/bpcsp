@@ -5,54 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>PharmaSim Pro · Social Computational Chemistry</title>
 
-<!-- Tailwind for modern UI -->
+<!-- UI -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-<!-- Core science libs -->
+<!-- Science libs -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <style>
-  :root {
-    --ink:#0b1630; --brand:#2a5298; --brand2:#1e3c72;
-  }
-  *{box-sizing:border-box}
-  body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink);
-       background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);}
-  .glass{background:rgba(255,255,255,.92); backdrop-filter:blur(10px); box-shadow:0 10px 26px rgba(0,0,0,.12); border-radius:16px;}
-  .chip{display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .6rem;border-radius:999px;font-weight:700;font-size:.75rem}
-  .chip.pos{background:#ecfdf5;color:#065f46}
-  .chip.info{background:#eff6ff;color:#1e3a8a}
-  .chip.warn{background:#fff7ed;color:#9a3412}
-  .chip.err{background:#fee2e2;color:#991b1b}
-  .panel{padding:18px}
-  .metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6); border-radius:12px; padding:12px; text-align:center}
-  .metric .v{font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .canvas-wrap{height:280px}
-  .canvas-wrap.tall{height:340px}
-  #viewer{width:100%;min-height:420px;border-radius:12px;background:#eef2f7}
-  .btn{background:linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; font-weight:700; border-radius:10px; padding:.65rem .9rem}
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  .btn:hover{filter:brightness(1.05)}
-  .input,select,textarea{width:100%; padding:.65rem .8rem; border:2px solid #e5e7eb; border-radius:10px; background:#f8f9fa}
-  .input:focus,select:focus,textarea:focus{outline:none;border-color:#2a5298; background:#fff; box-shadow:0 0 0 3px rgba(42,82,152,.12)}
-  .feed-card{border:1px solid #e6eaf2; border-radius:16px; padding:14px; background:#fff}
-  .feed-grid{display:grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap:14px}
-  .split{display:grid; grid-template-columns:360px 1fr; gap:20px}
-  @media (max-width:1024px){ .split{grid-template-columns:1fr} }
+:root{--ink:#0b1630;--brand:#2a5298;--brand2:#1e3c72}
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+  background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%)}
+.glass{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 10px 26px rgba(0,0,0,.12);border-radius:16px}
+.panel{padding:18px}
+.section{display:none}
+.section.active{display:block}
+.btn{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;border-radius:10px;padding:.65rem .9rem}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.input,select,textarea{width:100%;padding:.65rem .8rem;border:2px solid #e5e7eb;border-radius:10px;background:#f8f9fa}
+.input:focus,select:focus,textarea:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
+.metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:12px;padding:12px;text-align:center}
+.metric .v{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
+.feed-card{border:1px solid #e6eaf2;border-radius:16px;padding:14px;background:#fff}
+.feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.split{display:grid;grid-template-columns:360px 1fr;gap:20px}
+@media(max-width:1024px){.split{grid-template-columns:1fr}}
+#viewer{width:100%;min-height:420px;border-radius:12px;background:#eef2f7}
+.chip{display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .6rem;border-radius:999px;font-weight:700;font-size:.75rem}
+.chip.pos{background:#ecfdf5;color:#065f46}.chip.info{background:#eff6ff;color:#1e3a8a}.chip.warn{background:#fff7ed;color:#9a3412}.chip.err{background:#fee2e2;color:#991b1b}
+main{scroll-margin-top:84px}
 </style>
 </head>
 <body>
 
-<!-- Top Nav -->
+<!-- NAV -->
 <header class="sticky top-0 z-40 glass">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <div class="text-2xl font-extrabold" style="color:#1e3c72">PharmaSim Pro</div>
-      <span class="chip info">Social Computational Chemistry (in-browser)</span>
+      <span class="chip info">Social Computational Chemistry</span>
     </div>
     <nav class="hidden md:flex items-center gap-2">
       <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="md">Docking</button>
@@ -70,61 +65,71 @@
   </div>
 </header>
 
-<!-- Disclaimer -->
+<!-- DISCLAIMER -->
 <div class="max-w-7xl mx-auto px-4 mt-3">
   <div class="glass panel text-sm leading-relaxed">
-    <strong>Disclaimer:</strong> This platform is for <em>educational and research</em> purposes.
-    All docking scores, PBPK/QSP outputs, and clinical simulations are <em>approximations</em>.
-    Always validate computational results with appropriate experimental studies before making decisions.
+    <strong>Disclaimer:</strong> For <em>educational/research</em> use only. Docking scores, PBPK/QSP, and clinical simulations are approximations. Validate with experiments before decisions.
   </div>
 </div>
 
-<!-- Main Container -->
 <main class="max-w-7xl mx-auto px-4 my-4">
-  <!-- Docking -->
-  <section id="md" class="glass panel section">
-    <h2 class="text-xl font-bold mb-2">Ligand Prep & Structure-Aware Heuristic Docking</h2>
+  <!-- DOCKING -->
+  <section id="md" class="glass panel section active">
+    <h2 class="text-xl font-bold mb-4">Ligand Prep & Structure-Aware Heuristic Docking</h2>
     <div class="split">
       <div>
-        <label class="block text-sm font-semibold mb-1">Protein (PDB File)</label>
-        <input type="file" id="pdbFile" accept=".pdb" class="input" />
-        <div class="grid grid-cols-3 gap-2 mt-2">
-          <div class="col-span-2">
-            <label class="block text-sm font-semibold mb-1">…or Fetch by PDB ID</label>
-            <input id="pdbId" placeholder="e.g., 6LU7" class="input" />
+        <!-- Protein -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2">Protein (PDB)</label>
+
+          <div id="pdbDrop" class="w-full border-2 border-dashed border-gray-300 rounded-xl bg-white/70 p-4 text-center text-gray-600 hover:border-indigo-400 hover:bg-white transition">
+            <div class="font-semibold">Drag & Drop PDB here</div>
+            <div class="text-xs">or choose a file below</div>
           </div>
-          <div class="flex items-end">
+
+          <div class="mt-3 grid grid-cols-3 gap-2">
+            <input type="file" id="pdbFile" accept=".pdb" class="col-span-2 input file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700"/>
+            <button id="loadLocalPdbBtn" class="btn w-full">Load Local PDB</button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mt-3">
+            <input id="pdbId" placeholder="Fetch by PDB ID (e.g., 6LU7)" class="col-span-2 input"/>
             <button id="fetchPdbBtn" class="btn w-full">Fetch PDB</button>
           </div>
         </div>
 
-        <label class="block text-sm font-semibold mt-3 mb-1">Load Example from Paper</label>
-        <select id="exampleSmiles" class="input">
-          <option value="" disabled selected>Select a Drug Hit…</option>
-          <option value="O=P(O)(O)COC(=O)C1CCCN1C(=O)c1ccc(CNS(=O)(=O)c2ccc(C)cc2)cc1">Drug Hit 1 (Zn-Chelator)</option>
-          <option value="CC(C)NCc1ccc(S(=O)(=O)Nc2cccc(c2)C(=O)N2CCCC2C(=O)OCC)cc1">Drug Hit 2 (π-π)</option>
-          <option value="N1=C(N)N=C(C1)CCS(=O)(=O)NCc1ccc(C(=O)OCP(=O)(O)O)cc1">Drug Hit 3 (H-Bond)</option>
-          <option value="Cc1ccc(OCc2ccc(C(=O)OC[C@H]3O[C@H](O)[C@H](O)[C@@H](O)[C@@H]3CO)cc2)cc1">Drug Hit 4 (Allosteric)</option>
-          <option value="CC(C)NC(=O)C1CCN(CC1)c1cccc2OCOc12">Drug Hit 5 (Reversible)</option>
-          <option value="CC(C)CC(NC(=O)C1CCN(CC1)c1cccc2OCOc12)Cc1ccccc1">Drug Hit 6 (Irreversible)</option>
-        </select>
+        <!-- Ligand -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2">Ligand (SMILES)</label>
+          <input id="smiles" class="input" placeholder="Paste SMILES here (e.g., CC(=O)OC1=CC=CC=C1C(=O)O)"/>
+          <div class="grid grid-cols-3 gap-2 mt-2">
+            <select id="exampleSmiles" class="col-span-2 input">
+              <option value="" selected>Choose an example…</option>
+              <option value="O=P(O)(O)COC(=O)C1CCCN1C(=O)c1ccc(CNS(=O)(=O)c2ccc(C)cc2)cc1">Drug Hit 1 (Zn-Chelator)</option>
+              <option value="CC(C)NCc1ccc(S(=O)(=O)Nc2cccc(c2)C(=O)N2CCCC2C(=O)OCC)cc1">Drug Hit 2 (π-π)</option>
+              <option value="N1=C(N)N=C(C1)CCS(=O)(=O)NCc1ccc(C(=O)OCP(=O)(O)O)cc1">Drug Hit 3 (H-Bond)</option>
+              <option value="Cc1ccc(OCc2ccc(C(=O)OC[C@H]3O[C@H](O)[C@H](O)[C@@H](O)[C@@H]3CO)cc2)cc1">Drug Hit 4 (Allosteric)</option>
+              <option value="CC(C)NC(=O)C1CCN(CC1)c1cccc2OCOc12">Drug Hit 5 (Reversible)</option>
+              <option value="CC(C)CC(NC(=O)C1CCN(CC1)c1cccc2OCOc12)Cc1ccccc1">Drug Hit 6 (Irreversible)</option>
+            </select>
+            <button id="useExampleBtn" class="px-3 py-2 rounded-lg font-semibold bg-white w-full">Use Example</button>
+          </div>
+        </div>
 
-        <label class="block text-sm font-semibold mt-3 mb-1">Ligand (SMILES)</label>
-        <input id="smiles" value="CC(=O)OC1=CC=CC=C1C(=O)O" class="input"/>
-
-        <label class="block text-sm font-semibold mt-3 mb-1">Scoring Model</label>
-        <select id="scoringModel" class="input">
-          <option value="balanced" selected>Balanced</option>
-          <option value="hbond">H-Bond Focused</option>
-          <option value="hydrophobic">Hydrophobicity Focused</option>
-        </select>
+        <div class="mb-2">
+          <label class="block text-sm font-semibold mb-2">Scoring Model</label>
+          <select id="scoringModel" class="input">
+            <option value="balanced" selected>Balanced</option>
+            <option value="hbond">H-Bond Focused</option>
+            <option value="hydrophobic">Hydrophobicity Focused</option>
+          </select>
+          <p class="text-sm text-gray-600 mt-2" id="modelInfoText"></p>
+        </div>
 
         <div class="grid grid-cols-2 gap-2 mt-3">
           <button id="dockBtn" class="btn" disabled>Run Approximate Dock</button>
           <button id="centerBtn" class="btn" disabled>Re-center & Re-score</button>
         </div>
-
-        <p class="text-sm text-gray-600 mt-2" id="modelInfoText"></p>
 
         <div class="mt-4">
           <button id="useForPostBtn" class="px-3 py-2 rounded-lg font-semibold bg-white w-full">Use Current Dock in Community Post</button>
@@ -153,8 +158,8 @@
     </div>
   </section>
 
-  <!-- PBPK/QSP -->
-  <section id="pbpk" class="glass panel section hidden">
+  <!-- PBPK -->
+  <section id="pbpk" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">PBPK/QSP (One-Compartment Oral)</h2>
     <div class="split">
       <div>
@@ -166,22 +171,22 @@
           <div><label class="block text-sm font-semibold">Vd (L)</label><input id="Vd" type="number" value="50" class="input"/></div>
         </div>
         <button id="runPBPKBtn" class="btn w-full mt-3">Run PBPK Simulation</button>
-        <p class="text-sm text-gray-600 mt-2">Model uses Bateman function; Occupancy via E<sub>max</sub> with demo K<sub>d</sub>=20 mg/L.</p>
+        <p class="text-sm text-gray-600 mt-2">Bateman function; E<sub>max</sub> occupancy with demo K<sub>d</sub>=20 mg/L.</p>
       </div>
       <div>
         <div class="grid grid-cols-3 gap-2">
-          <div class="metric"><div>C<sub>max</sub> (mg/L)</div><div id="cmax" class="v">--</div></div>
-          <div class="metric"><div>T<sub>max</sub> (h)</div><div id="tmax" class="v">--</div></div>
-          <div class="metric"><div>AUC<sub>0-48</sub> (mg·h/L)</div><div id="auc" class="v">--</div></div>
+          <div class="metric"><div>C<sub>max</sub></div><div id="cmax" class="v">--</div></div>
+          <div class="metric"><div>T<sub>max</sub></div><div id="tmax" class="v">--</div></div>
+          <div class="metric"><div>AUC<sub>0–48</sub></div><div id="auc" class="v">--</div></div>
         </div>
-        <div class="canvas-wrap tall mt-2"><canvas id="pkChart"></canvas></div>
-        <div class="canvas-wrap mt-2"><canvas id="occChart"></canvas></div>
+        <div class="h-72 mt-2"><canvas id="pkChart"></canvas></div>
+        <div class="h-56 mt-2"><canvas id="occChart"></canvas></div>
       </div>
     </div>
   </section>
 
-  <!-- Clinical 3+3 -->
-  <section id="clinical" class="glass panel section hidden">
+  <!-- Clinical -->
+  <section id="clinical" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">3+3 Dose Escalation Simulator</h2>
     <div class="split">
       <div>
@@ -195,16 +200,13 @@
         </div>
         <div class="grid grid-cols-2 gap-2 mt-3">
           <button id="runTrialBtn" class="btn w-full">Simulate Trial</button>
-          <button id="run100Btn" class="btn w-full">Run 100 Trials (summary)</button>
+          <button id="run100Btn" class="btn w-full">Run 100 Trials</button>
         </div>
-        <p class="text-sm text-gray-600 mt-2">Rules: 0/3 → escalate; 1/3 → expand to 6; ≥2/3 → stop/de-escalate. MTD = highest dose with ≤1/6 DLTs.</p>
+        <p class="text-sm text-gray-600 mt-2">0/3 → escalate; 1/3 → expand; ≥2/3 → stop/de-escalate. MTD = highest with ≤1/6 DLTs.</p>
       </div>
       <div>
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold mb-1">Trial Visualization</h3>
-          <div id="trialBadge" class="chip hidden"></div>
-        </div>
-        <div class="canvas-wrap tall"><canvas id="trialChart"></canvas></div>
+        <div class="flex items-center justify-between"><h3 class="font-semibold mb-1">Trial Visualization</h3><div id="trialBadge" class="chip hidden"></div></div>
+        <div class="h-72"><canvas id="trialChart"></canvas></div>
         <div class="glass panel mt-3">
           <h4 class="font-semibold mb-2">Cohorts</h4>
           <table class="w-full text-sm">
@@ -217,7 +219,7 @@
   </section>
 
   <!-- MD Setup -->
-  <section id="mdsetup" class="glass panel section hidden">
+  <section id="mdsetup" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">MD Simulation File Generator</h2>
     <div class="split">
       <div>
@@ -228,9 +230,7 @@
         </div>
         <div class="grid grid-cols-2 gap-2 mt-2">
           <div><label class="block text-sm font-semibold">switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14" class="input"/></div>
-          <div class="flex items-end gap-2">
-            <input type="checkbox" id="md-restraints" checked class="w-5 h-5"/><label for="md-restraints" class="text-sm">Use Restraints</label>
-          </div>
+          <div class="flex items-end gap-2"><input type="checkbox" id="md-restraints" checked class="w-5 h-5"/><label for="md-restraints" class="text-sm">Use Restraints</label></div>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-3">
           <button id="generateMDFilesBtn" class="btn w-full">Generate Files</button>
@@ -241,7 +241,7 @@
       </div>
       <div>
         <h3 class="font-semibold mb-1">In-Browser Restraints PDB Builder</h3>
-        <p class="text-sm text-gray-600">Backbone atoms (N, CA, C, O) get B-factor=2.0; others 0.0 → save as <code>restraints.pdb</code>.</p>
+        <p class="text-sm text-gray-600">Backbone (N, CA, C, O) → B-factor 2.0; others 0.0.</p>
         <div class="grid grid-cols-3 gap-2 mt-2">
           <div class="col-span-2"><input type="file" id="md-pdb" accept=".pdb" class="input"/></div>
           <div class="flex items-end"><button id="buildRestraints" class="btn w-full">Generate</button></div>
@@ -251,15 +251,14 @@
     </div>
   </section>
 
-  <!-- Community (Social Networking) -->
-  <section id="community" class="glass panel section hidden">
+  <!-- Community -->
+  <section id="community" class="glass panel section">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <h2 class="text-xl font-bold">Community Feed</h2>
       <div class="flex items-center gap-2 w-full md:w-auto">
         <input id="searchInput" placeholder="Search by protein or SMILES…" class="input md:w-80"/>
         <select id="alphaFilter" class="input md:w-32">
-          <option value="">All A–Z</option>
-          <option value="#num"># (0–9)</option>
+          <option value="">All A–Z</option><option value="#num"># (0–9)</option>
           <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option>
           <option>G</option><option>H</option><option>I</option><option>J</option><option>K</option><option>L</option>
           <option>M</option><option>N</option><option>O</option><option>P</option><option>Q</option><option>R</option>
@@ -272,61 +271,41 @@
     </div>
 
     <div class="grid lg:grid-cols-3 gap-4 mt-4">
-      <!-- Composer -->
       <div class="glass panel">
         <h3 class="font-semibold mb-2">Create a Post</h3>
         <div class="grid gap-2">
-          <div>
-            <label class="block text-sm font-semibold">Protein Name</label>
-            <input id="postProtein" placeholder="e.g., Mpro (SARS-CoV-2)" class="input"/>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold">PDB ID (optional)</label>
-            <input id="postPdbId" placeholder="e.g., 6LU7" class="input"/>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold">Ligand (SMILES)</label>
-            <input id="postSmiles" placeholder="Paste SMILES" class="input"/>
-          </div>
+          <div><label class="block text-sm font-semibold">Protein Name</label><input id="postProtein" placeholder="e.g., Mpro (SARS-CoV-2)" class="input"/></div>
+          <div><label class="block text-sm font-semibold">PDB ID (optional)</label><input id="postPdbId" placeholder="e.g., 6LU7" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Ligand (SMILES)</label><input id="postSmiles" placeholder="Paste SMILES" class="input"/></div>
           <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-sm font-semibold">Docking ΔG (kcal/mol)</label>
-              <input id="postDG" type="number" step="0.01" placeholder="-7.85" class="input"/>
-            </div>
+            <div><label class="block text-sm font-semibold">Docking ΔG (kcal/mol)</label><input id="postDG" type="number" step="0.01" class="input"/></div>
             <div>
               <label class="block text-sm font-semibold">Mood / Framing</label>
               <select id="postMood" class="input">
-                <option>Inspired ✨</option>
-                <option>Constructive: Needs validation</option>
-                <option>Encouraging 👍</option>
-                <option>Curious 🤔</option>
-                <option>Grateful 🙏</option>
-                <option>Optimistic 🌱</option>
+                <option>Inspired ✨</option><option>Constructive: Needs validation</option>
+                <option>Encouraging 👍</option><option>Curious 🤔</option>
+                <option>Grateful 🙏</option><option>Optimistic 🌱</option>
               </select>
             </div>
           </div>
-          <div>
-            <label class="block text-sm font-semibold">Notes (optional)</label>
-            <textarea id="postNotes" rows="3" class="input" placeholder="Key interactions, pocket features, experimental next steps…"></textarea>
-          </div>
+          <div><label class="block text-sm font-semibold">Notes (optional)</label><textarea id="postNotes" rows="3" class="input" placeholder="Key interactions, pocket features, next steps…"></textarea></div>
           <div class="grid grid-cols-2 gap-2">
             <button id="prefillFromDock" class="px-3 py-2 rounded-lg font-semibold bg-white">Use Current Dock</button>
             <button id="createPostBtn" class="btn">Post</button>
           </div>
-          <p class="text-xs text-gray-600">RDKit renders a 2D thumbnail from SMILES (client-side).</p>
+          <p class="text-xs text-gray-600">RDKit renders 2D thumbnail client-side.</p>
         </div>
       </div>
 
-      <!-- Feed -->
       <div class="lg:col-span-2">
         <div id="feedGrid" class="feed-grid"></div>
-        <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result above.</div>
+        <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result.</div>
       </div>
     </div>
   </section>
 
   <!-- Publications -->
-  <section id="pub" class="glass panel section hidden">
+  <section id="pub" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">Publications</h2>
     <div class="grid lg:grid-cols-3 gap-4">
       <div class="glass panel">
@@ -345,7 +324,7 @@
   </section>
 
   <!-- Learning -->
-  <section id="learn" class="glass panel section hidden">
+  <section id="learn" class="glass panel section">
     <h2 class="text-xl font-bold mb-2">Learning Center</h2>
     <div class="flex flex-wrap gap-2">
       <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="pbpk">PBPK Basics</button>
@@ -371,208 +350,106 @@
       <button id="saveProfileBtn" class="btn">Save</button>
       <button id="closeProfileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Cancel</button>
     </div>
-    <p class="text-xs text-gray-600 mt-2">This stores only in your browser (localStorage).</p>
+    <p class="text-xs text-gray-600 mt-2">Stored only in your browser (localStorage).</p>
   </div>
 </div>
 
 <script>
-/* ===== Helpers & Globals ===== */
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-function hexToRgba(hex, alpha){ const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); if(!m) return hex; const r=parseInt(m[1],16),g=parseInt(m[2],16),b=parseInt(m[3],16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; }
-function trapz(x,y){ let a=0; for(let i=1;i<x.length;i++) a+=0.5*(y[i]+y[i-1])*(x[i]-x[i-1]); return a; }
-let viewer, rdkit, proteinModel=null, ligandModel=null, pocketResidues=[], pocketCenter=null;
-let charts={};
-let generatedMDFiles={};
-let latestDock = { proteinName:'', pdbId:'', smiles:'', dG:null };
+/* ===== Utilities ===== */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const profileKey='pharmsim_profile_v1', dbKeyPosts='pharmsim_posts_v1', dbKeyIndex='pharmsim_alpha_index_v1';
+function hexToRgba(hex,a){const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);if(!m)return hex;const r=parseInt(m[1],16),g=parseInt(m[2],16),b=parseInt(m[3],16);return`rgba(${r}, ${g}, ${b}, ${a})`}
+function trapz(x,y){let A=0;for(let i=1;i<x.length;i++)A+=0.5*(y[i]+y[i-1])*(x[i]-x[i-1]);return A}
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]))}
 
-const dbKeyPosts = 'pharmsim_posts_v1';
-const dbKeyIndex = 'pharmsim_alpha_index_v1';
-const profileKey = 'pharmsim_profile_v1';
+/* ===== State ===== */
+let viewer, rdkit, proteinModel=null, ligandModel=null, pocketResidues=[], pocketCenter=null;
+let charts={}, generatedMDFiles={}, latestDock={proteinName:'',pdbId:'',smiles:'',dG:null}, pdbFileFromDrop=null;
 
 /* ===== Nav ===== */
-function showSection(id){
-  $$('.section').forEach(s=>s.classList.add('hidden'));
-  $('#'+id).classList.remove('hidden');
-  $$('.nav-tab').forEach(b=> b.classList.toggle('bg-white', b.dataset.t!==id));
-  $$('.nav-tab').forEach(b=> b.classList.toggle('text-white', b.dataset.t===id));
-  $$('.nav-tab').forEach(b=> b.classList.toggle('bg-[linear-gradient(135deg,#2a5298,#1e3c72)]', b.dataset.t===id));
-}
-$$('.nav-tab').forEach(btn=>btn.addEventListener('click', ()=> showSection(btn.dataset.t)));
+function showSection(id){ $$('.section').forEach(s=>s.classList.remove('active')); $('#'+id).classList.add('active');
+  $$('.nav-tab').forEach(b=>{ const on=b.dataset.t===id; b.classList.toggle('bg-white',!on); b.classList.toggle('text-white',on);
+    b.classList.toggle('bg-[linear-gradient(135deg,#2a5298,#1e3c72)]',on) }) }
+$$('.nav-tab').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.t)));
 
-/* ===== Status Badge ===== */
-function setStatus(msg, kind='warn'){
-  const b = $('#statusBadge');
-  b.textContent = msg;
-  b.classList.remove('hidden','warn','pos','err','info');
-  b.classList.add(kind==='ok'?'pos':kind);
-}
+/* ===== Status ===== */
+function setStatus(msg,kind='warn'){const b=$('#statusBadge'); b.textContent=msg; b.classList.remove('hidden','warn','pos','err','info'); b.classList.add(kind==='ok'?'pos':kind)}
 
-/* ===== Docking ===== */
-function updateModelInfo(){
-  const info = {
-    balanced: "Balances size, H-bonding, hydrophobics, and flexibility.",
-    hbond: "Rewards donors/acceptors more; good for polar pockets.",
-    hydrophobic: "Rewards nonpolar fit; penalizes excessive polarity."
-  };
-  $('#modelInfoText').textContent = info[$('#scoringModel').value] || '';
-}
-function getModelAtoms(model){
-  return (typeof model?.selectedAtoms==='function' && model.selectedAtoms({})) ||
-         (typeof model?.getAtoms==='function' && model.getAtoms()) ||
-         (Array.isArray(model?.atoms) && model.atoms) || [];
-}
-function centroid(list){ let x=0,y=0,z=0; for(const a of list){ x+=a.x;y+=a.y;z+=a.z; } const n=Math.max(1,list.length); return {x:x/n,y:y/n,z:z/n}; }
-function findPocketResidues(atoms){
-  if(!atoms.length) return [];
-  const byRes={}; for(const a of atoms){ const k=a.resi??a.resn??'0'; (byRes[k]=byRes[k]||[]).push(a); }
-  let best=null,bN=-1; for(const [resi,alist] of Object.entries(byRes)){
-    const c=centroid(alist); let n=0;
-    for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) n++; }
-    if(n>bN){bN=n;best=resi;}
-  }
-  if(!best) return [];
-  const core=byRes[best], c=centroid(core); const res=new Set();
-  for(const a of atoms){ const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z; if(dx*dx+dy*dy+dz*dz<100) res.add(a.resi??a.resn??'0'); }
-  return [...res];
-}
-function centroidOfResidues(atoms, list){ if(!list?.length) return null; const pick=atoms.filter(a=>list.includes(a.resi??a.resn??'0')); return pick.length? centroid(pick): null; }
-function bindingContrib(l, type='balanced'){ const M={balanced:{I:-1.5,V:-0.035,H:-0.7,Hy:-0.25,R:0.3},hbond:{I:-1.0,V:-0.030,H:-1.2,Hy:-0.15,R:0.3},hydrophobic:{I:-1.2,V:-0.040,H:-0.5,Hy:-0.45,R:0.25}}[type]||M.balanced; const hb=Math.min(l.hDonors,l.hAcceptors); return { intercept:M.I, vdw:M.V*l.numHeavyAtoms, hbond:M.H*hb, hydrophobic:M.Hy*l.logp, rotational:M.R*l.numRotatableBonds }; }
-function scoreAndDisplay(l){
-  const base = bindingContrib(l, $('#scoringModel').value);
-  const prot=getModelAtoms(proteinModel), lat=getModelAtoms(ligandModel);
-  const het=new Set(['N','O','S']); let contacts=0, clashes=0;
-  for(const la of lat){ for(const pa of prot){ const dx=la.x-pa.x,dy=la.y-pa.y,dz=la.z-pa.z, r2=dx*dx+dy*dy+dz*dz; if(r2<3.5*3.5&&het.has(pa.elem)) contacts++; if(r2<1.8*1.8) clashes++; } }
-  const total=Object.values(base).reduce((s,v)=>s+v,0) + (-0.15*Math.min(contacts,50)) + (0.4*Math.min(clashes,25));
-  $('#aff').textContent=total.toFixed(2); $('#vdw_contrib').textContent=base.vdw.toFixed(2);
-  $('#hbond_contrib').textContent=base.hbond.toFixed(2); $('#hydro_contrib').textContent=base.hydrophobic.toFixed(2);
-  $('#rot_contrib').textContent=base.rotational.toFixed(2); $('#contacts').textContent=String(contacts); $('#clashes').textContent=String(clashes);
-  // capture for Community
-  latestDock.dG = Number(total.toFixed(2));
-}
-function addLigandToViewer(molblock){
-  if(ligandModel) try{ viewer.removeModel(ligandModel);}catch{}
-  ligandModel=viewer.addModel(molblock,'sdf'); ligandModel.setStyle({}, { stick:{ radius:0.22 } });
-}
-function placeLigandAndRender(){
-  const atomsProt=getModelAtoms(proteinModel); if(!atomsProt.length){ alert('Protein atoms unavailable.'); return; }
-  if(!pocketResidues.length) pocketResidues = findPocketResidues(atomsProt);
-  pocketCenter = centroidOfResidues(atomsProt, pocketResidues) || centroid(atomsProt);
-  const ligAtoms=getModelAtoms(ligandModel), ligCenter=centroid(ligAtoms);
-  const dx=pocketCenter.x-ligCenter.x, dy=pocketCenter.y-ligCenter.y, dz=pocketCenter.z-ligCenter.z;
-  for(const a of ligAtoms){ a.x+=dx+0.5; a.y+=dy+0.5; a.z+=dz+0.5; }
-  ligandModel.setCoordinates(ligAtoms);
+/* ===== Docking core ===== */
+function updateModelInfo(){const m={balanced:"Balances size, H-bonding, hydrophobics, flexibility.",hbond:"Rewards donors/acceptors; good for polar pockets.",hydrophobic:"Rewards nonpolar fit; penalizes excess polarity."};$('#modelInfoText').textContent=m[$('#scoringModel').value]||''}
+function getModelAtoms(model){return (typeof model?.selectedAtoms==='function'&&model.selectedAtoms({}))||(typeof model?.getAtoms==='function'&&model.getAtoms())||(Array.isArray(model?.atoms)&&model.atoms)||[]}
+function centroid(L){let x=0,y=0,z=0;for(const a of L){x+=a.x;y+=a.y;z+=a.z}const n=Math.max(1,L.length);return{x:x/n,y:y/n,z:z/n}}
+function findPocketResidues(atoms){if(!atoms.length)return[];const byRes={};for(const a of atoms){const k=a.resi??a.resn??'0';(byRes[k]=byRes[k]||[]).push(a)}let best=null,bN=-1;for(const [resi,alist] of Object.entries(byRes)){const c=centroid(alist);let n=0;for(const a of atoms){const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z;if(dx*dx+dy*dy+dz*dz<100)n++}if(n>bN){bN=n;best=resi}}if(!best)return[];const core=byRes[best],c=centroid(core),res=new Set();for(const a of atoms){const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z;if(dx*dx+dy*dy+dz*dz<100)res.add(a.resi??a.resn??'0')}return[...res]}
+function centroidOfResidues(atoms,list){if(!list?.length)return null;const pick=atoms.filter(a=>list.includes(a.resi??a.resn??'0'));return pick.length?centroid(pick):null}
+function bindingContrib(l,t='balanced'){const M={balanced:{I:-1.5,V:-0.035,H:-0.7,Hy:-0.25,R:0.3},hbond:{I:-1.0,V:-0.030,H:-1.2,Hy:-0.15,R:0.3},hydrophobic:{I:-1.2,V:-0.040,H:-0.5,Hy:-0.45,R:0.25}}[t];const hb=Math.min(l.hDonors,l.hAcceptors);return{intercept:M.I,vdw:M.V*l.numHeavyAtoms,hbond:M.H*hb,hydrophobic:M.Hy*l.logp,rotational:M.R*l.numRotatableBonds}}
+function scoreAndDisplay(l){const base=bindingContrib(l,$('#scoringModel').value);const prot=getModelAtoms(proteinModel),lat=getModelAtoms(ligandModel);
+  const het=new Set(['N','O','S']);let contacts=0,clashes=0;for(const la of lat){for(const pa of prot){const dx=la.x-pa.x,dy=la.y-pa.y,dz=la.z-pa.z,r2=dx*dx+dy*dy+dz*dz;if(r2<3.5*3.5&&het.has(pa.elem))contacts++;if(r2<1.8*1.8)clashes++}}
+  const total=Object.values(base).reduce((s,v)=>s+v,0)+(-0.15*Math.min(contacts,50))+(0.4*Math.min(clashes,25));
+  $('#aff').textContent=total.toFixed(2);$('#vdw_contrib').textContent=base.vdw.toFixed(2);$('#hbond_contrib').textContent=base.hbond.toFixed(2);
+  $('#hydro_contrib').textContent=base.hydrophobic.toFixed(2);$('#rot_contrib').textContent=base.rotational.toFixed(2);$('#contacts').textContent=String(contacts);$('#clashes').textContent=String(clashes);
+  latestDock.dG=Number(total.toFixed(2))}
+function addLigandToViewer(molblock){if(ligandModel)try{viewer.removeModel(ligandModel)}catch{};ligandModel=viewer.addModel(molblock,'sdf');ligandModel.setStyle({}, {stick:{radius:0.22}})}
+function placeLigandAndRender(){const atomsProt=getModelAtoms(proteinModel);if(!atomsProt.length){alert('Protein atoms unavailable.');return}
+  if(!pocketResidues.length)pocketResidues=findPocketResidues(atomsProt);pocketCenter=centroidOfResidues(atomsProt,pocketResidues)||centroid(atomsProt);
+  const ligAtoms=getModelAtoms(ligandModel),cLig=centroid(ligAtoms),dx=pocketCenter.x-cLig.x,dy=pocketCenter.y-cLig.y,dz=pocketCenter.z-cLig.z;
+  for(const a of ligAtoms){a.x+=dx+0.5;a.y+=dy+0.5;a.z+=dz+0.5}ligandModel.setCoordinates(ligAtoms);
   viewer.setStyle({model:proteinModel},{cartoon:{color:'spectrum'}}); if(pocketResidues.length) viewer.addSurface($3Dmol.VDW,{opacity:0.6,color:'white'},{resi:pocketResidues});
-  ligandModel.setStyle({}, { stick:{ radius:0.22 } }); viewer.zoomTo({resi: pocketResidues.length? pocketResidues: undefined}); viewer.render();
-}
-async function runApproxDock(){
-  if(!proteinModel){ alert('Load a protein PDB first.'); return; }
-  const smi = ($('#smiles').value || '').trim(); if(!smi){ alert('Enter a SMILES.'); return; }
-  let lig;
-  try{
-    lig = rdkit.get_mol(smi); if(!lig) throw new Error('RDKit parse error');
-    lig.add_hs?.(); if (rdkit.EmbedMolecule) rdkit.EmbedMolecule(lig, JSON.stringify({ useRandomCoords:true, maxAttempts:500 }));
-    rdkit.UFFOptimizeMolecule?.(lig);
-  }catch(e){ console.error(e); alert('Ligand preparation failed.'); return; }
-  const d=JSON.parse(lig.get_descriptors());
-  const info={ molblock:lig.get_molblock(), mw:d.exactmw, logp:d.MolLogP, hDonors:d.NumHDonors, hAcceptors:d.NumHAcceptors, numRotatableBonds:d.NumRotatableBonds, numHeavyAtoms: typeof lig.get_n_heavy_atoms==='function'? lig.get_n_heavy_atoms(): (d.NumHeavyAtoms||0) };
-  lig.delete?.();
-  $('#mw').textContent=Number(info.mw).toFixed(2); $('#logp').textContent=Number(info.logp).toFixed(2);
-  addLigandToViewer(info.molblock); placeLigandAndRender(); scoreAndDisplay(info);
-  // capture for Community
-  latestDock.smiles = smi;
-}
-async function fetchPdbById(){
-  const id = ($('#pdbId').value || '').trim().toLowerCase(); if(!id){ alert('Enter a PDB ID'); return; }
-  try{
-    setStatus(`Fetching PDB ${id}…`,'info');
-    const res = await fetch(`https://files.rcsb.org/download/${id}.pdb`);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const pdb = await res.text(); loadProteinFromText(pdb); latestDock.pdbId = id.toUpperCase();
-    setStatus(`Loaded PDB ${id}.`,'ok');
-  }catch(err){ console.error(err); setStatus(`Failed to fetch ${id}: ${err.message}`,'err'); }
-}
-function loadProteinFromText(pdb){
-  viewer.clear();
-  proteinModel = viewer.addModel(pdb, 'pdb');
-  proteinModel.setStyle({}, { cartoon: { color:'spectrum' } });
-  const atoms = getModelAtoms(proteinModel);
-  pocketResidues = findPocketResidues(atoms);
-  pocketCenter = centroidOfResidues(atoms, pocketResidues);
-  if (pocketResidues.length){
-    viewer.addSurface($3Dmol.VDW, { opacity:0.7, color:'white' }, { resi: pocketResidues });
-    proteinModel.setStyle({ resi: pocketResidues }, { stick:{ radius:0.25, colorscheme:'cyanCarbon' } });
-  }
-  viewer.zoomTo(pocketResidues.length ? { resi: pocketResidues } : {}); viewer.render();
-}
+  ligandModel.setStyle({}, {stick:{radius:0.22}}); viewer.zoomTo(pocketResidues.length?{resi:pocketResidues}:{ }); viewer.render()}
+async function runApproxDock(){ if(!proteinModel){alert('Load a protein PDB first.');return}
+  const smi=($('#smiles').value||'').trim(); if(!smi){alert('Enter a SMILES.');return}
+  let lig;try{lig=rdkit.get_mol(smi); if(!lig) throw new Error('RDKit parse error'); lig.add_hs?.(); if(rdkit.EmbedMolecule) rdkit.EmbedMolecule(lig,JSON.stringify({useRandomCoords:true,maxAttempts:500})); rdkit.UFFOptimizeMolecule?.(lig);}catch(e){console.error(e);alert('Ligand preparation failed.');return}
+  const d=JSON.parse(lig.get_descriptors()); const info={molblock:lig.get_molblock(),mw:d.exactmw,logp:d.MolLogP,hDonors:d.NumHDonors,hAcceptors:d.NumHAcceptors,numRotatableBonds:d.NumRotatableBonds,numHeavyAtoms:typeof lig.get_n_heavy_atoms==='function'?lig.get_n_heavy_atoms():(d.NumHeavyAtoms||0)}; lig.delete?.();
+  $('#mw').textContent=Number(info.mw).toFixed(2); $('#logp').textContent=Number(info.logp).toFixed(2); latestDock.smiles=smi;
+  addLigandToViewer(info.molblock); placeLigandAndRender(); scoreAndDisplay(info)}
+async function fetchPdbById(){const id=($('#pdbId').value||'').trim().toLowerCase(); if(!id){alert('Enter a PDB ID');return}
+  try{ setStatus(`Fetching PDB ${id}…`,'info'); const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`); if(!r.ok) throw new Error(`HTTP ${r.status}`); const pdb=await r.text(); loadProteinFromText(pdb); latestDock.pdbId=id.toUpperCase(); setStatus(`Loaded PDB ${id}.`,'ok') }catch(e){console.error(e); setStatus(`Failed to fetch ${id}: ${e.message}`,'err')}}
+function loadProteinFromText(pdb){ viewer.clear(); proteinModel=viewer.addModel(pdb,'pdb'); proteinModel.setStyle({}, {cartoon:{color:'spectrum'}});
+  const atoms=getModelAtoms(proteinModel); pocketResidues=findPocketResidues(atoms); pocketCenter=centroidOfResidues(atoms,pocketResidues);
+  if(pocketResidues.length){ viewer.addSurface($3Dmol.VDW,{opacity:0.7,color:'white'},{resi:pocketResidues}); proteinModel.setStyle({resi:pocketResidues},{stick:{radius:0.25,colorscheme:'cyanCarbon'}}) }
+  viewer.zoomTo(pocketResidues.length?{resi:pocketResidues}:{ }); viewer.render()}
+
+/* PDB Drop & Buttons */
+function wirePdbDropZone(){const dz=$('#pdbDrop'); if(!dz) return;
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();dz.classList.add('ring-2','ring-indigo-400')})); 
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();dz.classList.remove('ring-2','ring-indigo-400')})); 
+  dz.addEventListener('drop',async e=>{const f=e.dataTransfer?.files?.[0]; if(f&&f.name.toLowerCase().endsWith('.pdb')){pdbFileFromDrop=f; dz.innerHTML=`<div class="font-semibold text-indigo-700">Ready: ${f.name}</div><div class="text-xs text-gray-600">Click “Load Local PDB” to display</div>`} else {dz.innerHTML=`<div class="font-semibold text-rose-700">Not a .pdb file</div><div class="text-xs text-gray-600">Please drop a valid PDB</div>`}})}
+async function loadLocalPdb(){const input=$('#pdbFile'); const file=pdbFileFromDrop||input.files?.[0]; if(!file){alert('Choose or drop a .pdb file first.');return}
+  const txt=await file.text(); loadProteinFromText(txt); pdbFileFromDrop=null; $('#pdbDrop').innerHTML=`<div class="font-semibold text-green-700">Loaded: ${file.name}</div><div class="text-xs text-gray-600">Drop a new file to replace</div>`}
+function useExampleSmiles(){const sel=$('#exampleSmiles'); if(sel&&sel.value) $('#smiles').value=sel.value}
 
 /* ===== PBPK ===== */
-function buildCharts(){
-  charts.pk=new Chart($('#pkChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (h)'}},y:{title:{display:true,text:'Plasma (mg/L)'}}}}});
+function buildCharts(){charts.pk=new Chart($('#pkChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (h)'}},y:{title:{display:true,text:'Plasma (mg/L)'}}}}});
   charts.occ=new Chart($('#occChart'),{type:'line',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (h)'}},y:{title:{display:true,text:'Occupancy (%)'},min:0,max:100}}}});
-  charts.trial=new Chart($('#trialChart'),{type:'scatter',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Patient Index'}},y:{title:{display:true,text:'Dose (mg)'}}}}});
-}
-function updateChart(chart,label,labels,data,color='#2a5298'){ chart.data={labels,datasets:[{label,data,borderColor:color,backgroundColor:hexToRgba(color,0.35),pointRadius:0,tension:0.1}]}; chart.update(); }
-function runPBPK(){
-  const D=+$('#dose').value||100, Fv=(+$('#F').value||80)/100, ka=+$('#ka').value||1.2, ke=+$('#ke').value||0.2, V=+$('#Vd').value||50;
-  if(ka<=0||ke<=0||V<=0||D<=0){ alert('All parameters must be positive.'); return; }
-  if(Math.abs(ka-ke)<1e-9){ alert('ka and ke cannot be equal.'); return; }
-  const t=[], c=[]; for(let h=0;h<=48;h++){ t.push(h); const ci=(Fv*D*ka/(V*(ka-ke)))*(Math.exp(-ke*h)-Math.exp(-ka*h)); c.push(Math.max(0,ci)); }
-  const occ=c.map(v=>100*v/(20+v));
-  let cmax=-1,tmax=0; c.forEach((v,i)=>{ if(v>cmax){cmax=v;tmax=t[i];} });
-  const auc=trapz(t,c);
+  charts.trial=new Chart($('#trialChart'),{type:'scatter',options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Patient Index'}},y:{title:{display:true,text:'Dose (mg)'}}}}})}
+function updateChart(chart,label,labels,data,color='#2a5298'){chart.data={labels,datasets:[{label,data,borderColor:color,backgroundColor:hexToRgba(color,0.35),pointRadius:0,tension:0.1}]};chart.update()}
+function runPBPK(){const D=+$('#dose').value||100,Fv=(+$('#F').value||80)/100,ka=+$('#ka').value||1.2,ke=+$('#ke').value||0.2,V=+$('#Vd').value||50;
+  if([D,Fv,ka,ke,V].some(v=>!(v>0))){alert('All parameters must be positive.');return} if(Math.abs(ka-ke)<1e-9){alert('ka and ke cannot be equal.');return}
+  const t=[],c=[]; for(let h=0;h<=48;h++){t.push(h);const ci=(Fv*D*ka/(V*(ka-ke)))*(Math.exp(-ke*h)-Math.exp(-ka*h)); c.push(Math.max(0,ci))}
+  const occ=c.map(v=>100*v/(20+v)); let cmax=-1,tmax=0; c.forEach((v,i)=>{if(v>cmax){cmax=v;tmax=t[i]}}); const auc=trapz(t,c);
   $('#cmax').textContent=cmax.toFixed(3); $('#tmax').textContent=tmax.toFixed(1); $('#auc').textContent=auc.toFixed(2);
-  updateChart(charts.pk,'Plasma (mg/L)',t,c);
-  updateChart(charts.occ,'Target Occupancy (%)',t,occ,'#e67e22');
-}
+  updateChart(charts.pk,'Plasma (mg/L)',t,c); updateChart(charts.occ,'Target Occupancy (%)',t,occ,'#e67e22')}
 
 /* ===== Clinical 3+3 ===== */
-function seedRand(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return (s>>>8)/0x01000000; }; }
-function simulateThreePlusThree({levels=6,startDose=10,esc=1.5,seed=42}={}){
-  const rnd = seedRand(seed);
-  const doses = Array.from({length:levels},(_,i)=> startDose*Math.pow(esc,i));
-  const trueTox = doses.map((_,i)=> Math.min(0.05+0.45*(i/(levels-1)),0.80));
-  const rows=[], timelineNo=[], timelineDLT=[];
-  let i=0; let mtdIndex=null; let stopped=false;
-  while(!stopped && i<levels){
-    let dlt=0; for(let k=0;k<3;k++){ const has=rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
-    rows.push({dose:doses[i],n:3,dlt});
-    if(dlt===0){ i++; continue; }
-    if(dlt>=2){ mtdIndex=Math.max(0,i-1); stopped=true; break; }
-    for(let k=0;k<3;k++){ const has=rnd()<trueTox[i]; (has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has) dlt++; }
-    rows[rows.length-1].n=6; rows[rows.length-1].dlt=dlt;
-    if(dlt<=1){ i++; } else { mtdIndex=Math.max(0,i-1); stopped=true; }
-  }
-  if(!stopped){ mtdIndex=Math.min(levels-1, Math.max(0,i-1)); }
-  return {doses,trueTox,timelineNo,timelineDLT,cohorts:rows,mtdIndex};
-}
-function simulateOneThreePlusThree(){
-  const L=+$('#levels').value||6, S=+$('#startDose').value||10, E=+$('#esc').value||1.5, seed=+$('#seed').value||42;
-  const res=simulateThreePlusThree({levels:L,startDose:S,esc:E,seed});
-  charts.trial.data.datasets = [
-    { label:'No DLT', data:res.timelineNo, backgroundColor:'#22c55e' },
-    { label:'DLT',    data:res.timelineDLT, backgroundColor:'#ef4444' }
-  ]; charts.trial.update();
-  const tb=$('#trialTable'); tb.innerHTML='';
-  res.cohorts.forEach((r,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="py-1">${idx+1}</td><td>${r.dose.toFixed(2)}</td><td>${r.dlt}</td><td>${r.n}</td>`; tb.appendChild(tr); });
-  const badge=$('#trialBadge'); badge.classList.remove('hidden','pos','warn'); badge.classList.add('pos');
-  badge.textContent=`MTD/RP2D ≈ Level ${res.mtdIndex+1} (${res.doses[res.mtdIndex].toFixed(2)} mg)`;
-}
-function simulateManyThreePlusThree(){
-  const L=+$('#levels').value||6, S=+$('#startDose').value||10, E=+$('#esc').value||1.5;
-  let counts=Array(L).fill(0);
-  for(let k=0;k<100;k++){ const res=simulateThreePlusThree({levels:L,startDose:S,esc:E,seed:42+k}); if(res.mtdIndex!=null) counts[res.mtdIndex]++; }
-  const idx = counts.indexOf(Math.max(...counts));
-  const badge=$('#trialBadge'); badge.classList.remove('hidden','pos','warn'); badge.classList.add('pos');
-  badge.textContent=`Across 100 sims: MTD most often L${idx+1} (${counts[idx]}%)`;
-}
+function seedRand(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return (s>>>8)/0x01000000}}
+function simulateThreePlusThree({levels=6,startDose=10,esc=1.5,seed=42}={}){const rnd=seedRand(seed); const doses=Array.from({length:levels},(_,i)=>startDose*Math.pow(esc,i));
+  const trueTox=doses.map((_,i)=>Math.min(0.05+0.45*(i/(levels-1)),0.80)); const rows=[],timelineNo=[],timelineDLT=[]; let i=0,mtdIndex=null,stopped=false;
+  while(!stopped&&i<levels){let dlt=0;for(let k=0;k<3;k++){const has=rnd()<trueTox[i];(has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has)dlt++}
+    rows.push({dose:doses[i],n:3,dlt}); if(dlt===0){i++;continue} if(dlt>=2){mtdIndex=Math.max(0,i-1);stopped=true;break}
+    for(let k=0;k<3;k++){const has=rnd()<trueTox[i];(has?timelineDLT:timelineNo).push({x:timelineNo.length+timelineDLT.length+1,y:doses[i]}); if(has)dlt++}
+    rows[rows.length-1].n=6; rows[rows.length-1].dlt=dlt; if(dlt<=1){i++}else{mtdIndex=Math.max(0,i-1);stopped=true}}
+  if(!stopped)mtdIndex=Math.min(levels-1,Math.max(0,i-1)); return{doses:trueTox.map((_,i)=>doses[i]),trueTox,timelineNo,timelineDLT,cohorts:rows,mtdIndex}}
+function simulateOne(){const L=+$('#levels').value||6,S=+$('#startDose').value||10,E=+$('#esc').value||1.5,seed=+$('#seed').value||42;
+  const r=simulateThreePlusThree({levels:L,startDose:S,esc:E,seed});
+  charts.trial.data.datasets=[{label:'No DLT',data:r.timelineNo,backgroundColor:'#22c55e'},{label:'DLT',data:r.timelineDLT,backgroundColor:'#ef4444'}]; charts.trial.update();
+  const tb=$('#trialTable'); tb.innerHTML=''; r.cohorts.forEach((row,idx)=>{const tr=document.createElement('tr'); tr.innerHTML=`<td class="py-1">${idx+1}</td><td>${row.dose.toFixed(2)}</td><td>${row.dlt}</td><td>${row.n}</td>`; tb.appendChild(tr) });
+  const b=$('#trialBadge'); b.classList.remove('hidden','pos','warn'); b.classList.add('pos'); b.textContent=`MTD/RP2D ≈ L${r.mtdIndex+1} (${r.doses[r.mtdIndex].toFixed(2)} mg)`}
+function simulateMany(){const L=+$('#levels').value||6,S=+$('#startDose').value||10,E=+$('#esc').value||1.5; let counts=Array(L).fill(0);
+  for(let k=0;k<100;k++){const r=simulateThreePlusThree({levels:L,startDose:S,esc:E,seed:42+k}); if(r.mtdIndex!=null) counts[r.mtdIndex]++}
+  const idx=counts.indexOf(Math.max(...counts)); const b=$('#trialBadge'); b.classList.remove('hidden','pos','warn'); b.classList.add('pos'); b.textContent=`100 sims: MTD most often L${idx+1} (${counts[idx]} hits)`}
 
 /* ===== MD Setup ===== */
-function generateMDFiles(){
-  const out=($('#md-out').value||'output').trim(), T=+$('#md-temp').value||310, ns=+$('#md-ns').value||10;
-  const cuts=($('#md-cuts').value||'10/12/14').split(/[\/ ,]+/).map(Number); const rest=$('#md-restraints').checked;
-  const common =
-`structure system.psf
+function generateMDFiles(){const out=($('#md-out').value||'output').trim(),T=+$('#md-temp').value||310,ns=+$('#md-ns').value||10,cuts=($('#md-cuts').value||'10/12/14').split(/[\/ ,]+/).map(Number),rest=$('#md-restraints').checked;
+  const common=`structure system.psf
 coordinates system.pdb
 set outputname ${out}
 outputname $outputname
@@ -600,8 +477,7 @@ langevinDamping 1.0
 langevinTemp ${T}
 langevinHydrogen no
 `;
-  const pressure =
-`
+  const pressure=`
 useGroupPressure yes
 useFlexibleCell no
 langevinPiston on
@@ -610,298 +486,146 @@ langevinPistonPeriod 100
 langevinPistonDecay 50
 langevinPistonTemp ${T}
 `;
-  const restraints = rest ? `
+  const restraints=rest?`
 constraints on
 consRef restraints.pdb
 consKFile restraints.pdb
 consKCol B
 constraintScaling 1.0
-` : `constraints off
+`:`constraints off
 `;
-  generatedMDFiles = {
-    'min.conf': common + `minimization 10000\n`,
-    'eq.conf':  common + pressure + restraints + `run 250000\n`,
-    'prod.conf':common + pressure + `run ${Math.round((ns*1e6)/2)}\n`,
-    'README.md':
-`# Generic MD Simulation Files
+  generatedMDFiles={'min.conf':common+`minimization 10000\n`,'eq.conf':common+pressure+restraints+`run 250000\n`,'prod.conf':common+pressure+`run ${Math.round((ns*1e6)/2)}\n`,'README.md':`# Generic MD Simulation Files
 
-Place prepared system files alongside:
+Place alongside:
 - system.psf
 - system.pdb
 - system.prm
-- restraints.pdb (if using constraints)
+- restraints.pdb (if used)
 
 Run:
   md-engine min.conf  > min.log
   md-engine eq.conf   > eq.log
   md-engine prod.conf > prod.log
-`
-  };
-  const list=$('#fileList'); list.innerHTML='';
-  Object.entries(generatedMDFiles).forEach(([name,txt])=>{
-    const a=document.createElement('a'); a.textContent=`⬇ ${name}`;
-    a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=name;
-    a.className='px-3 py-2 rounded-lg font-semibold bg-white'; list.appendChild(a);
-  });
-  $('#zipBtn').disabled=false;
-  $('#mdStatus').textContent='Config files generated.';
-}
-async function downloadMDFiles(){
-  if(!Object.keys(generatedMDFiles).length) return;
-  const zip=new JSZip(); for(const [k,v] of Object.entries(generatedMDFiles)) zip.file(k,v);
-  const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click();
-}
-async function buildRestraintsFile(){
-  const f=$('#md-pdb').files[0]; if(!f){ alert('Select a PDB first.'); return; }
-  const txt=await f.text(); const out=[]; const bb=new Set(['N','CA','C','O']);
-  for(const line of txt.split(/\r?\n/)){
-    if(line.startsWith('ATOM')||line.startsWith('HETATM')){
-      const beta=bb.has(line.slice(12,16).trim())?2.0:0.0;
-      out.push(line.slice(0,60)+beta.toFixed(2).padStart(6,' ')+line.slice(66));
-    }else out.push(line);
-  }
-  const res=out.join('\n')+"\n";
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([res],{type:'text/plain'})); a.download='restraints.pdb'; a.textContent='⬇ Download restraints.pdb'; a.className='px-3 py-2 rounded-lg font-semibold bg-white';
-  const status=$('#restraintsStatus'); status.innerHTML=''; status.append(a);
-  generatedMDFiles['restraints.pdb']=res;
-}
+`};
+  const list=$('#fileList'); list.innerHTML=''; Object.entries(generatedMDFiles).forEach(([name,txt])=>{const a=document.createElement('a');a.textContent=`⬇ ${name}`;a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download=name;a.className='px-3 py-2 rounded-lg font-semibold bg-white';list.appendChild(a)});
+  $('#zipBtn').disabled=false; $('#mdStatus').textContent='Config files generated.'}
+async function downloadMDFiles(){if(!Object.keys(generatedMDFiles).length)return; const zip=new JSZip(); for(const [k,v] of Object.entries(generatedMDFiles)) zip.file(k,v);
+  const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='md_simulation_project.zip'; a.click()}
+async function buildRestraintsFile(){const f=$('#md-pdb').files[0]; if(!f){alert('Select a PDB first.');return} const txt=await f.text(); const out=[],bb=new Set(['N','CA','C','O']);
+  for(const line of txt.split(/\r?\n/)){if(line.startsWith('ATOM')||line.startsWith('HETATM')){const b=bb.has(line.slice(12,16).trim())?2.0:0.0; out.push(line.slice(0,60)+b.toFixed(2).padStart(6,' ')+line.slice(66))} else out.push(line)}
+  const res=out.join('\n')+"\n"; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([res],{type:'text/plain'})); a.download='restraints.pdb'; a.textContent='⬇ Download restraints.pdb'; a.className='px-3 py-2 rounded-lg font-semibold bg-white';
+  const status=$('#restraintsStatus'); status.innerHTML=''; status.append(a); generatedMDFiles['restraints.pdb']=res}
 
 /* ===== Publications ===== */
-function escapeHtml(s){ return String(s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m])); }
-function renderPub(p, idx){
-  const card=document.createElement('div'); card.className='feed-card';
-  card.innerHTML=`
-    <div class="flex items-center justify-between">
-      <h4 class="font-semibold">${escapeHtml(p.title)}</h4>
-      <button data-del="${idx}" class="px-3 py-1 rounded-lg font-semibold bg-white">Delete</button>
-    </div>
-    <div class="text-sm text-gray-600 mb-2">By ${escapeHtml(p.authors)} · ${p.date}</div>
-    <p class="text-sm whitespace-pre-wrap">${escapeHtml(p.abstract)}</p>`;
-  card.querySelector('button[data-del]').addEventListener('click', ()=>{
-    const arr = JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'); arr.splice(idx,1);
-    localStorage.setItem('pharmsim_pubs', JSON.stringify(arr)); loadPubs();
-  });
-  return card;
-}
-function submitPub(){
-  const title=$('#pub-title').value.trim(), authors=$('#pub-authors').value.trim(), abstract=$('#pub-abstract').value.trim();
-  const err=$('#pubError'); err.textContent='';
-  if(!title||!authors||!abstract){ err.textContent='Please complete Title, Authors, and Abstract.'; return; }
-  const p={title,authors,abstract,date:new Date().toLocaleDateString()};
-  const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'); arr.unshift(p);
-  localStorage.setItem('pharmsim_pubs', JSON.stringify(arr));
-  $('#pub-title').value=''; $('#pub-authors').value=''; $('#pub-abstract').value='';
-  loadPubs();
-}
-function loadPubs(){
-  const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]');
-  const list=$('#pub-list'); list.innerHTML='';
-  arr.forEach((p,i)=> list.appendChild(renderPub(p,i)));
-  $('#pub-empty').classList.toggle('hidden', !!arr.length);
-}
+function renderPub(p,idx){const card=document.createElement('div'); card.className='feed-card';
+  card.innerHTML=`<div class="flex items-center justify-between"><h4 class="font-semibold">${escapeHtml(p.title)}</h4><button data-del="${idx}" class="px-3 py-1 rounded-lg font-semibold bg-white">Delete</button></div>
+  <div class="text-sm text-gray-600 mb-2">By ${escapeHtml(p.authors)} · ${p.date}</div><p class="text-sm whitespace-pre-wrap">${escapeHtml(p.abstract)}</p>`;
+  card.querySelector('button[data-del]').addEventListener('click',()=>{const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]');arr.splice(idx,1);localStorage.setItem('pharmsim_pubs',JSON.stringify(arr));loadPubs()}); return card}
+function submitPub(){const t=$('#pub-title').value.trim(),a=$('#pub-authors').value.trim(),ab=$('#pub-abstract').value.trim(),err=$('#pubError'); err.textContent='';
+  if(!t||!a||!ab){err.textContent='Please complete Title, Authors, and Abstract.';return}
+  const p={title:t,authors:a,abstract:ab,date:new Date().toLocaleDateString()},arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]');arr.unshift(p);localStorage.setItem('pharmsim_pubs',JSON.stringify(arr));
+  $('#pub-title').value='';$('#pub-authors').value='';$('#pub-abstract').value='';loadPubs()}
+function loadPubs(){const arr=JSON.parse(localStorage.getItem('pharmsim_pubs')||'[]'), list=$('#pub-list'); list.innerHTML=''; arr.forEach((p,i)=>list.appendChild(renderPub(p,i))); $('#pub-empty').classList.toggle('hidden',!!arr.length)}
 
 /* ===== Learning ===== */
-function loadTutorial(which){
-  const box=$('#tutorialBox');
-  const content={
-    pbpk:`<h4 class="font-semibold mb-1">PBPK Basics</h4><p>One-compartment oral model (Bateman). Tune Dose, F, ka, ke, Vd → simulate exposure. C<sub>max</sub>, T<sub>max</sub>, AUC summarize exposure.</p>`,
-    docking:`<h4 class="font-semibold mb-1">Heuristic Docking</h4><ol class="list-decimal pl-5"><li>Find dense pocket residues (~10Å)</li><li>RDKit 3D (Embed+UFF)</li><li>Place by centroids</li><li>Score: size + H-bond + hydrophobics + rotor penalty + contacts − clashes</li></ol>`,
-    md:`<h4 class="font-semibold mb-1">MD Setup</h4><p>NAMD-style configs (min/eq/prod). PME + Langevin. Optional positional restraints via <code>B-factor</code>.</p>`,
-    threeplus:`<h4 class="font-semibold mb-1">3+3</h4><p>0/3 escalate; 1/3 expand; ≥2/3 stop/de-escalate. Choose RP2D = highest dose with ≤1/6 DLTs.</p>`,
-    community:`<h4 class="font-semibold mb-1">Community Etiquette</h4><ul class="list-disc pl-5"><li>Share SMILES, pocket notes, and ΔG responsibly</li><li>Tag posts with constructive moods</li><li>No medical claims; cite sources when possible</li></ul>`
-  };
-  box.innerHTML = content[which] || '<p>Select a topic above.</p>';
-}
-$$('.learn').forEach(b=> b.addEventListener('click', ()=> loadTutorial(b.dataset.learn)));
+function loadTutorial(which){const box=$('#tutorialBox'); const c={pbpk:`<h4 class="font-semibold mb-1">PBPK Basics</h4><p>One-compartment oral model (Bateman). Tune Dose, F, ka, ke, Vd → simulate. Metrics: C<sub>max</sub>, T<sub>max</sub>, AUC.</p>`,
+  docking:`<h4 class="font-semibold mb-1">Heuristic Docking</h4><ol class="list-decimal pl-5"><li>Find dense pocket residues (~10Å)</li><li>RDKit 3D (Embed+UFF)</li><li>Place by centroids</li><li>Score: size + H-bond + hydrophobics + rotor penalty + contacts − clashes</li></ol>`,
+  md:`<h4 class="font-semibold mb-1">MD Setup</h4><p>NAMD-style configs (min/eq/prod). PME + Langevin. Optional positional restraints via <code>B</code> factor.</p>`,
+  threeplus:`<h4 class="font-semibold mb-1">3+3 Design</h4><p>0/3 escalate; 1/3 expand; ≥2/3 stop/de-escalate. RP2D = highest dose with ≤1/6 DLTs.</p>`,
+  community:`<h4 class="font-semibold mb-1">Community</h4><ul class="list-disc pl-5"><li>Share SMILES, pocket notes, ΔG responsibly</li><li>Use constructive moods</li><li>No medical claims</li></ul>`};
+  box.innerHTML=c[which]||'<p>Select a topic above.</p>'}
+$$('.learn').forEach(b=>b.addEventListener('click',()=>loadTutorial(b.dataset.learn)))
 
-/* ===== Community DB & Feed ===== */
-function readPosts(){ return JSON.parse(localStorage.getItem(dbKeyPosts) || '[]'); }
-function savePosts(arr){ localStorage.setItem(dbKeyPosts, JSON.stringify(arr)); buildAlphaIndex(arr); }
-function buildAlphaIndex(arr){
-  const idx={};
-  for(const p of arr){
-    const ch = (p.proteinName||'').trim()[0] || '#';
-    const key = /[A-Za-z]/.test(ch) ? ch.toUpperCase() : '#';
-    (idx[key]=idx[key]||[]).push(p.id);
-  }
-  // sort ids by protein name A–Z
-  for(const k of Object.keys(idx)){ idx[k].sort((a,b)=>{
-    const A = arr.find(x=>x.id===a)?.proteinName?.toLowerCase() || '';
-    const B = arr.find(x=>x.id===b)?.proteinName?.toLowerCase() || '';
-    return A.localeCompare(B);
-  });}
-  localStorage.setItem(dbKeyIndex, JSON.stringify(idx));
-}
-function renderPostCard(p){
-  const card = document.createElement('div'); card.className='feed-card';
-  const mood = p.mood?.includes('Constructive') ? 'warn' : 'pos';
-  const svgThumb = p.svg?.length ? p.svg : '';
-  card.innerHTML = `
-    <div class="flex items-start justify-between gap-3">
-      <div>
-        <div class="text-sm text-gray-600">${p.user?.name || 'Anonymous'}</div>
-        <h4 class="font-semibold text-lg">${escapeHtml(p.proteinName||'Untitled')}</h4>
-        <div class="flex flex-wrap gap-2 mt-1">
-          ${p.pdbId ? `<span class="chip info">PDB ${escapeHtml(p.pdbId)}</span>`:''}
-          <span class="chip ${mood}">${escapeHtml(p.mood||'')}</span>
-          <span class="chip info">ΔG ${p.dG!=null ? p.dG : '--'} kcal/mol</span>
-        </div>
-      </div>
-      <img src="${p.user?.avatar || 'https://i.pravatar.cc/40'}" class="w-10 h-10 rounded-full" alt="avatar"/>
-    </div>
-    <div class="mt-3 grid grid-cols-2 gap-3">
-      <div class="text-xs break-all"><span class="font-semibold">SMILES:</span><br>${escapeHtml(p.smiles||'')}</div>
-      <div class="border rounded-lg p-1 bg-white">${svgThumb || '<div class="text-xs text-gray-500 p-2">2D preview unavailable</div>'}</div>
-    </div>
-    ${p.notes ? `<p class="text-sm mt-3 whitespace-pre-wrap">${escapeHtml(p.notes)}</p>`:''}
-    <div class="text-xs text-gray-500 mt-2">${new Date(p.ts).toLocaleString()}</div>`;
-  return card;
-}
-function refreshFeed(){
-  const q = ($('#searchInput').value || '').toLowerCase();
-  const alpha = $('#alphaFilter').value;
-  const posts = readPosts();
-  let filtered = posts.filter(p =>
-    (p.proteinName||'').toLowerCase().includes(q) ||
-    (p.smiles||'').toLowerCase().includes(q)
-  );
-  if(alpha){
-    filtered = filtered.filter(p=>{
-      const ch=(p.proteinName||'').trim()[0]||'#';
-      const key = /[A-Za-z]/.test(ch) ? ch.toUpperCase() : '#';
-      return (alpha==='') ? true : (alpha==='#num' ? key==='#' : key===alpha);
-    });
-  }
-  // Sort alphabetically by protein, then newest
-  filtered.sort((a,b)=>{
-    const n = (a.proteinName||'').localeCompare(b.proteinName||'');
-    return n!==0 ? n : (b.ts - a.ts);
-  });
-  const grid = $('#feedGrid'); grid.innerHTML='';
-  filtered.forEach(p => grid.appendChild(renderPostCard(p)));
-  $('#emptyFeed').classList.toggle('hidden', !!filtered.length);
-}
-async function smilesToSvg(smiles){
-  try{
-    const m = rdkit.get_mol(smiles);
-    const svg = m.get_svg();
-    m.delete?.();
-    return svg;
-  }catch{ return ''; }
-}
-async function createPost(){
-  const proteinName = ($('#postProtein').value || '').trim();
-  const pdbId = ($('#postPdbId').value || '').trim().toUpperCase();
-  const smiles = ($('#postSmiles').value || '').trim();
-  const dG = $('#postDG').value === '' ? null : Number($('#postDG').value);
-  const mood = $('#postMood').value;
-  const notes = ($('#postNotes').value || '').trim();
-  if(!proteinName || !smiles){ alert('Protein name and SMILES are required.'); return; }
-  const profile = JSON.parse(localStorage.getItem(profileKey) || '{}');
-  const svg = smiles ? await smilesToSvg(smiles) : '';
-  const post = {
-    id: crypto.randomUUID(),
-    ts: Date.now(),
-    proteinName, pdbId, smiles, dG, mood, notes, svg,
-    user: { name: profile.name || 'Anonymous', avatar: profile.avatar || 'https://i.pravatar.cc/64' }
-  };
-  const arr = readPosts(); arr.push(post); savePosts(arr);
-  // clear minimal
-  $('#postSmiles').value=''; $('#postDG').value=''; $('#postNotes').value='';
-  refreshFeed();
-}
-function exportDBJson(){
-  const posts = readPosts();
-  const idx = JSON.parse(localStorage.getItem(dbKeyIndex)||'{}');
-  const blob = new Blob([JSON.stringify({index:idx, posts}, null, 2)], {type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pharmsim_social_db.json'; a.click();
-}
-function exportPostsCsv(){
-  const posts = readPosts();
-  const head = ['Timestamp','Protein','PDB_ID','SMILES','DeltaG','Mood','Notes','User'];
-  const rows = posts.map(p=>[
-    new Date(p.ts).toISOString(),
-    `"${(p.proteinName||'').replaceAll('"','""')}"`,
-    p.pdbId||'',
-    `"${(p.smiles||'').replaceAll('"','""')}"`,
-    p.dG==null?'':p.dG,
-    `"${(p.mood||'').replaceAll('"','""')}"`,
-    `"${(p.notes||'').replaceAll('"','""')}"`,
-    `"${((p.user?.name)||'').replaceAll('"','""')}"`
-  ].join(','));
-  const blob = new Blob([[head.join(',')].concat(rows).join('\n')], {type:'text/csv'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pharmsim_posts.csv'; a.click();
-}
+/* ===== Community DB ===== */
+function readPosts(){return JSON.parse(localStorage.getItem(dbKeyPosts)||'[]')}
+function savePosts(arr){localStorage.setItem(dbKeyPosts,JSON.stringify(arr)); buildAlphaIndex(arr)}
+function buildAlphaIndex(arr){const idx={}; for(const p of arr){const ch=(p.proteinName||'').trim()[0]||'#'; const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#'; (idx[key]=idx[key]||[]).push(p.id)}
+  for(const k of Object.keys(idx)){idx[k].sort((a,b)=>{const A=arr.find(x=>x.id===a)?.proteinName?.toLowerCase()||'',B=arr.find(x=>x.id===b)?.proteinName?.toLowerCase()||'';return A.localeCompare(B)})}
+  localStorage.setItem(dbKeyIndex,JSON.stringify(idx))}
+function renderPostCard(p){const card=document.createElement('div'); card.className='feed-card'; const mood=p.mood?.includes('Constructive')?'warn':'pos'; const svg=p.svg?.length?p.svg:'';
+  card.innerHTML=`<div class="flex items-start justify-between gap-3">
+    <div><div class="text-sm text-gray-600">${p.user?.name||'Anonymous'}</div><h4 class="font-semibold text-lg">${escapeHtml(p.proteinName||'Untitled')}</h4>
+    <div class="flex flex-wrap gap-2 mt-1">${p.pdbId?`<span class="chip info">PDB ${escapeHtml(p.pdbId)}</span>`:''}<span class="chip ${mood}">${escapeHtml(p.mood||'')}</span>
+    <span class="chip info">ΔG ${p.dG!=null?p.dG:'--'} kcal/mol</span></div></div>
+    <img src="${p.user?.avatar||'https://i.pravatar.cc/40'}" class="w-10 h-10 rounded-full" alt="avatar"/></div>
+    <div class="mt-3 grid grid-cols-2 gap-3"><div class="text-xs break-all"><span class="font-semibold">SMILES:</span><br>${escapeHtml(p.smiles||'')}</div>
+    <div class="border rounded-lg p-1 bg-white">${svg||'<div class="text-xs text-gray-500 p-2">2D preview unavailable</div>'}</div></div>
+    ${p.notes?`<p class="text-sm mt-3 whitespace-pre-wrap">${escapeHtml(p.notes)}</p>`:''}
+    <div class="text-xs text-gray-500 mt-2">${new Date(p.ts).toLocaleString()}</div>`; return card}
+function refreshFeed(){const q=($('#searchInput').value||'').toLowerCase(), alpha=$('#alphaFilter').value, posts=readPosts();
+  let f=posts.filter(p=>(p.proteinName||'').toLowerCase().includes(q)||(p.smiles||'').toLowerCase().includes(q));
+  if(alpha){f=f.filter(p=>{const ch=(p.proteinName||'').trim()[0]||'#'; const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#'; return alpha===''?true:(alpha==='#num'?key==='#':key===alpha)})}
+  f.sort((a,b)=>{const n=(a.proteinName||'').localeCompare(b.proteinName||''); return n!==0?n:(b.ts-a.ts)}); const grid=$('#feedGrid'); grid.innerHTML=''; f.forEach(p=>grid.appendChild(renderPostCard(p))); $('#emptyFeed').classList.toggle('hidden',!!f.length)}
+async function smilesToSvg(smiles){try{const m=rdkit.get_mol(smiles); const svg=m.get_svg(); m.delete?.(); return svg}catch{return ''}}
+async function createPost(){const proteinName=($('#postProtein').value||'').trim(), pdbId=($('#postPdbId').value||'').trim().toUpperCase(), smiles=($('#postSmiles').value||'').trim(), dG=$('#postDG').value===''?null:Number($('#postDG').value), mood=$('#postMood').value, notes=($('#postNotes').value||'').trim();
+  if(!proteinName||!smiles){alert('Protein name and SMILES are required.');return}
+  const profile=JSON.parse(localStorage.getItem(profileKey)||'{}'); const svg=smiles?await smilesToSvg(smiles):''; const post={id:crypto.randomUUID(),ts:Date.now(),proteinName,pdbId,smiles,dG,mood,notes,svg,user:{name:profile.name||'Anonymous',avatar:profile.avatar||'https://i.pravatar.cc/64'}};
+  const arr=readPosts(); arr.push(post); savePosts(arr); $('#postSmiles').value=''; $('#postDG').value=''; $('#postNotes').value=''; refreshFeed()}
+function exportDBJson(){const posts=readPosts(), idx=JSON.parse(localStorage.getItem(dbKeyIndex)||'{}'); const blob=new Blob([JSON.stringify({index:idx,posts},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pharmsim_social_db.json'; a.click()}
+function exportPostsCsv(){const posts=readPosts(), head=['Timestamp','Protein','PDB_ID','SMILES','DeltaG','Mood','Notes','User'];
+  const rows=posts.map(p=>[new Date(p.ts).toISOString(),`"${(p.proteinName||'').replaceAll('"','""')}"`,p.pdbId||'',`"${(p.smiles||'').replaceAll('"','""')}"`,p.dG==null?'':p.dG,`"${(p.mood||'').replaceAll('"','""')}"`,`"${(p.notes||'').replaceAll('"','""')}"`,`"${((p.user?.name)||'').replaceAll('"','""')}"`].join(',')); 
+  const blob=new Blob([[head.join(',')].concat(rows).join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pharmsim_posts.csv'; a.click()}
+function prefillFromDock(){if(latestDock.dG==null && !$('#aff').textContent.includes('.')){alert('Run a dock first.');return}
+  $('#postSmiles').value=latestDock.smiles||($('#smiles').value||''); $('#postDG').value=latestDock.dG!=null?latestDock.dG:($('#aff').textContent||''); $('#postPdbId').value=latestDock.pdbId||($('#pdbId').value||'').toUpperCase(); if(!$('#postProtein').value&&$('#postPdbId').value) $('#postProtein').value=`Protein ${$('#postPdbId').value}`}
 
-/* Prefill from Docking into Community composer */
-function prefillFromDock(){
-  if(latestDock.dG==null && !$('#aff').textContent.includes('.') ){ alert('Run a dock first.'); return; }
-  $('#postSmiles').value = latestDock.smiles || ($('#smiles').value||'');
-  $('#postDG').value = latestDock.dG!=null ? latestDock.dG : ($('#aff').textContent||'');
-  $('#postPdbId').value = latestDock.pdbId || ($('#pdbId').value||'').toUpperCase();
-  // Try to infer protein name from PDB ID
-  if(!$('#postProtein').value && $('#postPdbId').value) $('#postProtein').value = `Protein ${$('#postPdbId').value}`;
-}
-
-/* ===== Profile (local) ===== */
-function openProfile(){ $('#profileModal').classList.remove('hidden'); $('#profileModal').classList.add('flex'); const p=JSON.parse(localStorage.getItem(profileKey)||'{}'); $('#profName').value=p.name||''; $('#profAvatar').value=p.avatar||''; }
-function closeProfile(){ $('#profileModal').classList.add('hidden'); $('#profileModal').classList.remove('flex'); }
-function saveProfile(){ const name=$('#profName').value.trim(); const avatar=$('#profAvatar').value.trim(); localStorage.setItem(profileKey, JSON.stringify({name,avatar})); closeProfile(); refreshFeed(); }
+/* ===== Profile ===== */
+function openProfile(){$('#profileModal').classList.remove('hidden');$('#profileModal').classList.add('flex');const p=JSON.parse(localStorage.getItem(profileKey)||'{}');$('#profName').value=p.name||'';$('#profAvatar').value=p.avatar||''}
+function closeProfile(){$('#profileModal').classList.add('hidden');$('#profileModal').classList.remove('flex')}
+function saveProfile(){const name=$('#profName').value.trim(), avatar=$('#profAvatar').value.trim(); localStorage.setItem(profileKey,JSON.stringify({name,avatar})); closeProfile(); refreshFeed()}
 
 /* ===== Init ===== */
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // Buttons & listeners
+  // Nav initial
+  showSection('md');
+
+  // Wire Docking UI
+  wirePdbDropZone();
+  $('#loadLocalPdbBtn').addEventListener('click', loadLocalPdb);
+  $('#useExampleBtn').addEventListener('click', useExampleSmiles);
   $('#fetchPdbBtn').addEventListener('click', fetchPdbById);
   $('#dockBtn').addEventListener('click', runApproxDock);
   $('#centerBtn').addEventListener('click', ()=> (proteinModel&&ligandModel)&&placeLigandAndRender());
-  $('#exampleSmiles').addEventListener('change', e=> $('#smiles').value = e.target.value);
+  $('#exampleSmiles').addEventListener('change', e=> $('#smiles').value=e.target.value);
   $('#scoringModel').addEventListener('change', updateModelInfo);
   $('#useForPostBtn').addEventListener('click', ()=> showSection('community'));
+
+  // PBPK/Clinical/MD
+  $('#runPBPKBtn').addEventListener('click', runPBPK);
+  $('#runTrialBtn').addEventListener('click', simulateOne);
+  $('#run100Btn').addEventListener('click', simulateMany);
+  $('#generateMDFilesBtn').addEventListener('click', generateMDFiles);
+  $('#zipBtn').addEventListener('click', downloadMDFiles);
+  $('#buildRestraints').addEventListener('click', buildRestraintsFile);
+
+  // Community
   $('#prefillFromDock').addEventListener('click', prefillFromDock);
   $('#createPostBtn').addEventListener('click', createPost);
   $('#exportJsonBtn').addEventListener('click', exportDBJson);
   $('#exportCsvBtn').addEventListener('click', exportPostsCsv);
   $('#searchInput').addEventListener('input', refreshFeed);
   $('#alphaFilter').addEventListener('change', refreshFeed);
-  $('#runPBPKBtn').addEventListener('click', runPBPK);
-  $('#runTrialBtn').addEventListener('click', simulateOneThreePlusThree);
-  $('#run100Btn').addEventListener('click', simulateManyThreePlusThree);
-  $('#generateMDFilesBtn').addEventListener('click', generateMDFiles);
-  $('#zipBtn').addEventListener('click', downloadMDFiles);
-  $('#buildRestraints').addEventListener('click', buildRestraintsFile);
+
+  // Publications & Learning
   $('#pubSubmit').addEventListener('click', submitPub);
+  loadPubs(); loadTutorial('community');
+
+  // Profile
   $('#profileBtn').addEventListener('click', openProfile);
   $('#closeProfileBtn').addEventListener('click', closeProfile);
   $('#saveProfileBtn').addEventListener('click', saveProfile);
 
-  // Charts + learning + pubs
-  buildCharts(); loadPubs(); loadTutorial('community');
+  // Charts
+  buildCharts();
 
-  // 3D viewer + libs
-  viewer = $3Dmol.createViewer($('#viewer'), { backgroundColor:'white' });
+  // Viewer & RDKit
+  viewer=$3Dmol.createViewer($('#viewer'),{backgroundColor:'white'});
   try{
-    await new Promise((res,rej)=>{
-      const start=Date.now();
-      (function poll(){
-        if(window.initRDKitModule){ res(); return;}
-        if(Date.now()-start>15000) return rej(new Error('timeout rdkit'));
-        setTimeout(poll,80);
-      })();
-    });
-    rdkit = await window.initRDKitModule();
-    $('#dockBtn').disabled=false; $('#centerBtn').disabled=false;
-    updateModelInfo();
-    setStatus('Libraries ready. RDKit initialized.','ok');
-  }catch(e){
-    console.error(e); setStatus('RDKit initialization failed. Some features disabled.','err');
-  }
+    await new Promise((res,rej)=>{const t0=Date.now();(function poll(){ if(window.initRDKitModule){res();return} if(Date.now()-t0>15000) return rej(new Error('rdkit timeout')); setTimeout(poll,80) })()});
+    rdkit=await window.initRDKitModule(); $('#dockBtn').disabled=false; $('#centerBtn').disabled=false; updateModelInfo(); setStatus('Libraries ready. RDKit initialized.','ok');
+  }catch(e){console.error(e); setStatus('RDKit initialization failed. Some features disabled.','err')}
 
-  // Seed feed
-  buildAlphaIndex(readPosts());
-  refreshFeed();
-
-  // Default visible tab
-  showSection('md');
+  // Community load
+  buildAlphaIndex(readPosts()); refreshFeed();
 });
 </script>
 </body>
