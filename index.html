@@ -9,16 +9,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Scientific Libraries -->
+  <!-- Scientific Libraries (client-side only) -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-
-  <!-- Cloud Sync (Firebase Compat SDKs for simple inline use) -->
-  <!-- NOTE: API key below is restricted by HTTP referrers and API scope in Google Cloud. -->
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <style>
     :root { --ink:#0b1630; --brand:#2a5298; --brand2:#1e3c72; --bg:#0f172a; }
@@ -514,23 +509,9 @@
   </footer>
 
   <!-- =========================
-       FULL APP SCRIPT
+       FULL APP SCRIPT (NO FIREBASE)
        ========================= -->
   <script>
-  /************** CLOUD SYNC CONFIG (RESTRICTED KEY) ***************
-   * This key is restricted by HTTP referrers & API scope in GCP.
-   * Add your GitHub Pages / custom domain to the key's allowed referrers.
-   ***************************************************************/
-  window.FIREBASE_CONFIG = {
-    apiKey: "AIzaSyDyS8F3qhMyDKTWatoyFUVlJ-aAA03N_hs", // restricted by referrer & scope
-    authDomain: "pharmsimfergpro.firebaseapp.com",
-    projectId: "pharmsimfergpro",
-    storageBucket: "pharmsimfergpro.firebasestorage.app",
-    messagingSenderId: "228496856805",
-    appId: "1:228496856805:web:07d0ae011906837c6ae60c",
-    measurementId: "G-2V7XMZ2ZXW"
-  };
-
   const $  = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
   const on = (s,ev,fn)=>{ const el=$(s); if(el) el.addEventListener(ev,fn); };
@@ -554,8 +535,7 @@
     if(pm){ openChannelBySlug(pm[1]); setActiveNav('channels'); return; }
     const m = hash.match(/^#\/([^/?#]+)/);
     const key = m ? m[1] : 'md';
-    const sectionId = ROUTES[key] || 'md';
-    showSectionById(sectionId); setActiveNav(key);
+    showSectionById(ROUTES[key] || 'md'); setActiveNav(key);
   }
   window.addEventListener('hashchange', navigateFromHash);
 
@@ -854,68 +834,17 @@
   }
   function recenterAndRescore(){ resetView(); if(proteinModel && ligandModel) runDock(); }
 
-  /* ===== Local DB + Cloud Firestore ===== */
+  /* ===== Local (no backend) “DB” ===== */
   const K_USERS='ps_users_v2', K_SESSION='ps_session_v2';
   const K_CHANNELS='ps_channels_v2', K_POSTS='ps_posts_v2', K_IDX='pharmsim_alpha_index_v2';
   const userdb = ()=> JSON.parse(localStorage.getItem(K_USERS)||'[]');
   const saved  = (k)=> JSON.parse(localStorage.getItem(k)||'[]');
   const slugify=s=>s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 
-  let SYNC_MODE='local';
-  let fs=null;
-
-  function initCloudIfAvailable(){
-    try{
-      if(window.FIREBASE_CONFIG){
-        const app=firebase.initializeApp(window.FIREBASE_CONFIG);
-        fs=firebase.firestore(app);
-        SYNC_MODE='cloud';
-        setStatus('Cloud sync enabled.','ok');
-      }
-    }catch(e){
-      console.warn('Cloud init failed, using local:', e);
-      SYNC_MODE='local';
-    }
-  }
-
-  async function cloudAdd(col, obj){
-    const ref = await fs.collection(col).add(obj);
-    return {...obj, _id: ref.id};
-  }
-  async function cloudGetAll(col){
-    const snap = await fs.collection(col).orderBy('createdAt','desc').get();
-    return snap.docs.map(d=>({ _id:d.id, ...d.data() }));
-  }
-  function cloudOnSnapshot(col, cb){
-    return fs.collection(col).orderBy('createdAt','desc').onSnapshot(snap=>{
-      const arr=snap.docs.map(d=>({ _id:d.id, ...d.data() }));
-      cb(arr);
-    });
-  }
-  async function cloudUpsertChannelBySlug(name){
-    const slug = slugify(name||'');
-    if(!slug) return null;
-    const q = await fs.collection('channels').where('slug','==',slug).get();
-    if(q.empty){
-      const s=getSession();
-      const c={slug,name,description:'',createdBy:s?.username||'anon',createdAt:Date.now()};
-      await fs.collection('channels').add(c);
-      return c;
-    }else{
-      return q.docs[0].data();
-    }
-  }
-  async function cloudGetChannels(){
-    const snap=await fs.collection('channels').orderBy('name','asc').get();
-    return snap.docs.map(d=>d.data());
-  }
-
-  /* Local fallbacks */
   function getSession(){ return JSON.parse(localStorage.getItem(K_SESSION)||'null'); }
   function setSessionLocal(u){ localStorage.setItem(K_SESSION, JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
 
   async function upsertChannel(name){
-    if(SYNC_MODE==='cloud') return await cloudUpsertChannelBySlug(name);
     const channels=saved(K_CHANNELS); const slug=slugify(name||''); if(!slug) return null;
     let c=channels.find(x=>x.slug===slug);
     if(!c){
@@ -926,7 +855,6 @@
     return c;
   }
   async function addPost(post){
-    if(SYNC_MODE==='cloud') return await cloudAdd('posts', post);
     const posts=saved(K_POSTS); posts.push(post); localStorage.setItem(K_POSTS, JSON.stringify(posts));
   }
   function readPosts(){ return saved(K_POSTS); }
@@ -934,7 +862,7 @@
     const idx={}; for(const p of arr){
       const ch=(p.proteinName||'').trim()[0]||'#';
       const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#';
-      (idx[key]=idx[key]||[]).push(p.id || p._id || ('local-'+Math.random()));
+      (idx[key]=idx[key]||[]).push(p.id || ('local-'+Math.random()));
     }
     localStorage.setItem(K_IDX, JSON.stringify(idx));
   }
@@ -968,12 +896,7 @@
   }
 
   async function refreshFeed(){
-    let posts = [];
-    if(SYNC_MODE==='cloud'){
-      posts = await cloudGetAll('posts');
-    }else{
-      posts = readPosts();
-    }
+    let posts = readPosts();
     const q=($('#searchInput')?.value||'').toLowerCase();
     const alpha=$('#alphaFilter')?.value||'';
     let f=posts.filter(p=>{
@@ -996,18 +919,13 @@
   }
 
   async function refreshChannelList(){
-    let channels=[];
-    if(SYNC_MODE==='cloud'){
-      channels = await cloudGetChannels();
-    }else{
-      const q=($('#channelSearch')?.value||'').toLowerCase();
-      channels=saved(K_CHANNELS).filter(c=>c.name.toLowerCase().includes(q));
-      channels.sort((a,b)=>a.name.localeCompare(b.name));
-    }
+    const q=($('#channelSearch')?.value||'').toLowerCase();
+    const channels=saved(K_CHANNELS).filter(c=>c.name.toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+
     const list=$('#channelList'); if(!list) return;
     list.innerHTML='';
     channels.forEach(c=>{
-      const postsLocal = SYNC_MODE==='local' ? readPosts().filter(p=>p.channelId===c.id) : [];
+      const postsLocal = readPosts().filter(p=>p.channelId===c.id);
       const docks = postsLocal.filter(p=>p.type==='dock');
       const best = docks.length?docks.reduce((a,b)=>(a.dG??999)<(b.dG??999)?a:b):null;
       const card=document.createElement('div'); card.className='feed-card';
@@ -1045,28 +963,18 @@
     showSectionById('channels'); setActiveNav('channels');
   }
 
-  /* ===== Auth ===== */
+  /* ===== Auth (local only) ===== */
   function openProfile(){ const m=$('#profileModal'); if(m){ $('#authMsg').textContent=''; m.classList.remove('hidden'); m.classList.add('flex'); } }
   function closeProfile(){ const m=$('#profileModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
   function signUp(){
     const username=$('#authUser').value.trim(), pass=$('#authPass').value, avatar=$('#authAvatar').value.trim();
     if(!username||!pass){ $('#authMsg').textContent='Provide username & password.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    if(SYNC_MODE==='cloud'){
-      // For demo: local session label. Use Firebase Auth for production logins.
-      setSessionLocal({username, avatar});
-      $('#authMsg').textContent='Account created (local session label).'; $('#authMsg').className='text-green-700 text-sm';
-    }else{
-      const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-      users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem(K_USERS, JSON.stringify(users));
-      setSessionLocal({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm';
-    }
+    const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
+    users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem(K_USERS, JSON.stringify(users));
+    setSessionLocal({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm';
   }
   function signIn(){
     const username=$('#authUser').value.trim(), pass=$('#authPass').value;
-    if(SYNC_MODE==='cloud'){
-      setSessionLocal({username, avatar:''});
-      return;
-    }
     const users=userdb(); const u=users.find(u=>u.username===username && u.pass===pass);
     if(!u){ $('#authMsg').textContent='Invalid credentials.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
     setSessionLocal({username:u.username, avatar:u.avatar});
@@ -1093,29 +1001,29 @@
       createdAt:Date.now()
     };
     await addPost(p);
-    buildAlphaIndex(SYNC_MODE==='cloud' ? [] : readPosts());
+    buildAlphaIndex(readPosts());
     await refreshFeed(); await refreshChannelList();
-    alert('Posted!');
+    alert('Posted! (Local only)');
   }
   async function createNonDockPost(){
     const sess=getSession(); if(!sess){ alert('Sign in first'); return; }
-    const proteinName=$('#postProtein').value.trim();
-    const channel=await upsertChannel(proteinName||'General');
+    const proteinName=$('#postProtein').value.trim() || 'General';
+    const channel=await upsertChannel(proteinName);
     const p={
       id:crypto.randomUUID(),
       type:$('#postType').value,
       channelId:channel.id || null,
       channelSlug:channel.slug,
-      proteinName:proteinName||'General',
+      proteinName,
       title:$('#postTitle').value,
       content:$('#postContent').value,
       user:sess,
       createdAt:Date.now()
     };
     await addPost(p);
-    buildAlphaIndex(SYNC_MODE==='cloud' ? [] : readPosts());
+    buildAlphaIndex(readPosts());
     await refreshFeed(); await refreshChannelList();
-    alert('Published!');
+    alert('Published! (Local only)');
   }
 
   /* ===== PBPK/QSP ===== */
@@ -1282,8 +1190,7 @@
 
   /* ===== Wire up ===== */
   document.addEventListener('DOMContentLoaded', async ()=>{
-    // Init Cloud (optional but enabled here with restricted key)
-    initCloudIfAvailable();
+    setStatus('Loading libraries…','info');
 
     // RDKit WASM load
     const RD_BASE='https://unpkg.com/@rdkit/rdkit/dist/';
@@ -1353,15 +1260,8 @@
     navigateFromHash();
     resetMetrics();
     refreshButtons();
-
-    // Live updates (cloud) / local fallback
-    if(SYNC_MODE==='cloud'){
-      cloudOnSnapshot('posts', async ()=>{ await refreshFeed(); });
-      await refreshChannelList();
-    }else{
-      await refreshFeed();
-      await refreshChannelList();
-    }
+    await refreshFeed();
+    await refreshChannelList();
 
     // Load Podcasts
     try{
@@ -1381,7 +1281,7 @@
     <div class="absolute inset-0 bg-black/50"></div>
     <div class="relative glass p-4 w-full max-w-md">
       <h3 id="authTitle" class="font-bold text-lg mb-2">Sign Up / Sign In</h3>
-      <p class="text-xs text-gray-600 -mt-1 mb-3">Local session; Firestore cloud sync is enabled with a restricted browser key.</p>
+      <p class="text-xs text-gray-600 -mt-1 mb-3">Local-only accounts; data is saved in your browser.</p>
       <label class="block text-sm font-semibold">Username</label>
       <input id="authUser" class="input" placeholder="e.g., ligand_lover">
       <label class="block text-sm font-semibold mt-2">Password</label>
