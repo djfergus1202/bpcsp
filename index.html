@@ -15,56 +15,101 @@
   <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
-  <!-- Firebase (compat) -->
+  <!-- Cloud Sync (Firebase Compat SDKs for simple inline use) -->
+  <!-- NOTE: API key below is restricted by HTTP referrers and API scope in Google Cloud. -->
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <style>
-    :root{--ink:#0b1630;--brand:#2a5298;--brand2:#1e3c72}
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
-      background:linear-gradient(135deg,#0b1225 0%,#172144 60%,#1f2e5c 100%)}
-    header{position:sticky;top:0;z-index:40}
+    :root { --ink:#0b1630; --brand:#2a5298; --brand2:#1e3c72; --bg:#0f172a; }
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
+    body{
+      font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(135deg,#0b1225 0%,#172144 60%,#1f2e5c 100%);
+    }
 
-    .glass{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 10px 26px rgba(0,0,0,.12);border-radius:16px}
-    .panel{padding:18px}
-    .btn{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;border-radius:10px;padding:.65rem .9rem}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .btn-plain{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:.6rem .9rem;font-weight:600}
-    .btn-ghost{background:transparent;border:1px dashed #cbd5e1;color:#0b1630;border-radius:10px;padding:.6rem .9rem;font-weight:600}
-    .input,select,textarea{width:100%;padding:.65rem .8rem;border:2px solid #e5e7eb;border-radius:10px;background:#f8f9fa}
-    .input:focus,select:focus,textarea:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
-    .chip{display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .6rem;border-radius:999px;font-weight:700;font-size:.75rem}
-    .chip.pos{background:#ecfdf5;color:#065f46}.chip.info{background:#eff6ff;color:#1e3a8a}.chip.warn{background:#fff7ed;color:#9a3412}.chip.err{background:#fee2e2;color:#991b1b}
-    .navlink{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .75rem;border-radius:.75rem;font-weight:600;background:#fff}
-    .navlink[aria-current="page"]{color:#fff;background:linear-gradient(135deg,#2a5298,#1e3c72)}
-    .section{display:none}.section.active{display:block}
-    .feed-card{border:1px solid #e6eaf2;border-radius:16px;padding:14px;background:#fff}
-    a.hash{color:#1e3c72;font-weight:600}
+    /* Modern social vibe */
+    .glass{ background: rgba(255,255,255,.92); backdrop-filter: blur(10px); box-shadow: 0 10px 26px rgba(0,0,0,.12); border-radius: 16px; }
+    .panel{ padding: 18px; }
+    .btn{ background: linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; font-weight: 700; border-radius: 10px; padding: .65rem .9rem; }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+    .btn-plain{ background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:.6rem .9rem; font-weight:600; }
+    .btn-ghost{ background:transparent; border:1px dashed #cbd5e1; color:#0b1630; border-radius:10px; padding:.6rem .9rem; font-weight:600; }
 
-    .bricks{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;align-items:start}
-    .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-    .metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:12px;padding:14px;text-align:center;min-height:92px;display:flex;flex-direction:column;justify-content:center;align-items:center}
-    .metric .v{margin-top:6px;font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .input, select, textarea{ width:100%; padding:.65rem .8rem; border:2px solid #e5e7eb; border-radius:10px; background:#f8f9fa; }
+    .input:focus, select:focus, textarea:focus{ outline:none; border-color:#2a5298; background:#fff; box-shadow:0 0 0 3px rgba(42,82,152,.12); }
 
-    #viewer{width:100%;min-height:440px;height:440px;border-radius:12px;background:#eef2f7}
-    #pdbDrop{min-height:120px;max-height:160px;overflow:auto}
-    @media(max-width:640px){#pdbDrop{min-height:100px;max-height:120px}}
-    main{scroll-margin-top:84px}
+    .chip{ display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .6rem; border-radius:999px; font-weight:700; font-size:.75rem; }
+    .chip.pos{ background:#ecfdf5; color:#065f46; } .chip.info{ background:#eff6ff; color:#1e3a8a; }
+    .chip.warn{ background:#fff7ed; color:#9a3412; } .chip.err{ background:#fee2e2; color:#991b1b; }
 
-    .player-bar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.95);box-shadow:0 -6px 24px rgba(0,0,0,.18);backdrop-filter:blur(6px)}
-    footer .tiny{font-size:.8rem;color:#e2e8f0}
+    .bricks{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap:18px;
+      align-items:start;
+    }
+
+    .metrics-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap:14px;
+    }
+    .metric{
+      background: linear-gradient(135deg,#f8f9fa,#e9eef6);
+      border-radius: 12px;
+      padding: 14px;
+      text-align:center;
+      min-height: 96px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+    }
+    .metric .v{
+      margin-top: 6px;
+      font-size:1.2rem; font-weight: 800;
+      background: linear-gradient(135deg,#2a5298,#1e3c72);
+      -webkit-background-clip:text; background-clip:text; color: transparent;
+    }
+
+    #viewer{ width:100%; min-height:420px; height:420px; border-radius:12px; background:#eef2f7; }
+    #pdbDrop{ min-height:120px; max-height:160px; overflow:auto; }
+    @media (max-width:640px){ #pdbDrop{ min-height:100px; max-height:120px; } }
+
+    header{ position: sticky; top:0; z-index:40; }
+    .navlink{ display:inline-flex; align-items:center; justify-content:center; padding:.5rem .75rem; border-radius:.75rem; font-weight:600; background:#fff; }
+    .navlink[aria-current="page"]{ color:#fff; background: linear-gradient(135deg,#2a5298,#1e3c72); }
+
+    main{ scroll-margin-top: 84px; }
+    .feed-card{ border:1px solid #e6eaf2; border-radius:16px; padding:14px; background:#fff; }
+    a.hash{ color:#1e3c72; font-weight:600; }
+    .section{ display:none; }
+    .section.active{ display:block; }
+
+    /* Podcast dock (multitask) */
+    .podcast-dock{ position: sticky; top: 84px; }
+    .player-bar{
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(255,255,255,.95); box-shadow: 0 -6px 24px rgba(0,0,0,.18); backdrop-filter: blur(6px);
+    }
+
+    /* Footer tiny text */
+    .tiny{ font-size: .8rem; color:#e2e8f0; }
   </style>
 </head>
 <body>
-  <!-- Header -->
+
+  <!-- Header / Nav -->
   <header class="glass">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="text-xl sm:text-2xl font-extrabold text-white">Ferguson’s Pharmaceutical Research Idea Platform</div>
         <span class="chip info">Modern Social Research</span>
       </div>
+
       <nav class="flex flex-wrap gap-2" role="navigation" aria-label="Primary">
         <a href="#/md"        class="navlink" data-route="md">Docking</a>
         <a href="#/pbpk"      class="navlink" data-route="pbpk">PBPK/QSP</a>
@@ -75,6 +120,7 @@
         <a href="#/pub"       class="navlink" data-route="pub">Publications</a>
         <a href="#/learn"     class="navlink" data-route="learn">Learning</a>
       </nav>
+
       <div class="flex items-center gap-3">
         <div id="statusBadge" class="chip warn">Initializing…</div>
         <button id="profileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Sign In</button>
@@ -82,37 +128,37 @@
     </div>
   </header>
 
-  <!-- Notice -->
+  <!-- Top Notice -->
   <div class="max-w-7xl mx-auto px-4 mt-3">
     <div class="glass panel text-sm leading-relaxed">
-      <strong>Heads up:</strong> For <em>educational & research</em> use. Docking scores, PBPK/QSP and clinical sims are approximations — verify with primary data before decisions.
+      <strong>Heads up:</strong> This platform is for <em>educational & research</em> purposes. Docking scores, PBPK/QSP and clinical sims are approximations—double-check against primary data before any decision-making.
     </div>
   </div>
 
   <!-- Main -->
   <main class="max-w-7xl mx-auto px-4 my-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-      <!-- Podcast rail -->
-      <aside class="glass panel lg:col-span-1" aria-label="Research Podcasts">
+      <!-- Left rail: Podcast (multitask) -->
+      <aside class="glass panel podcast-dock lg:col-span-1">
         <h2 class="text-lg font-bold mb-2">🎧 Research Podcasts</h2>
-        <p class="text-sm text-slate-600 mb-2">Play episodes while you work.</p>
-        <div id="podcastList" class="flex flex-col gap-2 max-h-[520px] overflow-auto" role="list"></div>
+        <p class="text-sm text-slate-600 mb-2">Browse episodes and keep them playing while you work.</p>
+        <div id="podcastList" class="flex flex-col gap-2 max-h-[520px] overflow-auto"></div>
       </aside>
 
-      <!-- Sections -->
+      <!-- Main content (sections) -->
       <div class="lg:col-span-3">
-        <!-- Docking -->
+        <!-- SECTION: DOCKING -->
         <section id="md" class="section active" data-title="Docking">
           <div class="bricks">
             <!-- Protein -->
             <div class="glass panel">
               <h2 class="text-lg font-bold mb-2">Protein (PDB)</h2>
-              <div id="pdbDrop" class="w-full border-2 border-dashed border-gray-300 rounded-xl bg-white/70 p-4 text-center text-gray-600 hover:border-indigo-400 hover:bg-white transition" aria-label="PDB Dropzone">
+              <div id="pdbDrop" class="w-full border-2 border-dashed border-gray-300 rounded-xl bg-white/70 p-4 text-center text-gray-600 hover:border-indigo-400 hover:bg-white transition">
                 <div class="font-semibold">Drag & Drop PDB here</div>
                 <div class="text-xs">or choose a file below</div>
               </div>
               <div class="mt-3 grid grid-cols-3 gap-2">
-                <input type="file" id="pdbFile" accept=".pdb" class="col-span-2 input file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700" aria-label="Choose PDB File">
+                <input type="file" id="pdbFile" accept=".pdb" class="col-span-2 input file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700">
                 <button id="loadLocalPdbBtn" class="btn w-full">Load Local PDB</button>
               </div>
               <div class="grid grid-cols-3 gap-2 mt-3">
@@ -128,7 +174,7 @@
             <!-- Ligand -->
             <div class="glass panel">
               <h2 class="text-lg font-bold mb-2">Ligand (SMILES)</h2>
-              <input id="smiles" class="input" placeholder="Paste SMILES (e.g., CC(=O)OC1=CC=CC=C1C(=O)O)">
+              <input id="smiles" class="input" placeholder="Paste SMILES here (e.g., CC(=O)OC1=CC=CC=C1C(=O)O)">
               <div class="grid grid-cols-3 gap-2 mt-2">
                 <select id="exampleSmiles" class="col-span-2 input">
                   <option value="" selected>Choose an example…</option>
@@ -145,14 +191,13 @@
                 <button id="loadSmilesBtn" class="btn w-full">Load SMILES</button>
                 <button id="clearLigandBtn" class="btn-plain w-full">Clear Ligand</button>
               </div>
-              <div id="smilesErr" class="text-rose-700 text-sm mt-2 hidden" role="alert"></div>
             </div>
 
-            <!-- Scoring -->
+            <!-- Scoring / Controls -->
             <div class="glass panel">
               <h2 class="text-lg font-bold mb-2">Scoring & Controls</h2>
               <label class="block text-sm font-semibold mb-1">Scoring Model</label>
-              <select id="scoringModel" class="input" aria-label="Scoring Model">
+              <select id="scoringModel" class="input">
                 <option value="balanced" selected>Balanced</option>
                 <option value="hbond">H-Bond Focused</option>
                 <option value="hydrophobic">Hydrophobicity Focused</option>
@@ -171,20 +216,19 @@
             <!-- Viewer -->
             <div class="glass panel lg:col-span-2">
               <h2 class="text-lg font-bold mb-2">3D Visualization</h2>
-              <div id="viewer" aria-label="3D Viewer"></div>
+              <div id="viewer"></div>
             </div>
 
-            <!-- Summary -->
+            <!-- Metrics -->
             <div class="glass panel lg:col-span-2">
-              <h2 class="text-lg font-bold mb-2">Ligand / Score Summary</h2>
+              <h2 class="text-lg font-bold mb-2">Ligand/Score Summary</h2>
               <div class="metrics-grid">
-                <div class="metric" aria-live="polite"><div>Total ΔG</div><div id="aff" class="v">--</div></div>
+                <div class="metric"><div>Total ΔG</div><div id="aff" class="v">--</div></div>
                 <div class="metric"><div>Ligand MW</div><div id="mw" class="v">--</div></div>
                 <div class="metric"><div>Ligand LogP</div><div id="logp" class="v">--</div></div>
               </div>
             </div>
 
-            <!-- Contributions -->
             <div class="glass panel lg:col-span-2">
               <h2 class="text-lg font-bold mb-2">Contributions</h2>
               <div class="metrics-grid">
@@ -199,7 +243,7 @@
           </div>
         </section>
 
-        <!-- PBPK -->
+        <!-- SECTION: PBPK -->
         <section id="pbpk" class="section" data-title="PBPK/QSP">
           <div class="bricks">
             <div class="glass panel">
@@ -222,12 +266,16 @@
                 <div class="metric"><div>AUC<sub>0–48</sub></div><div id="auc" class="v">--</div></div>
               </div>
             </div>
-            <div class="glass panel lg:col-span-2"><div class="h-72"><canvas id="pkChart"></canvas></div></div>
-            <div class="glass panel lg:col-span-2"><div class="h-56"><canvas id="occChart"></canvas></div></div>
+            <div class="glass panel lg:col-span-2">
+              <div class="h-72"><canvas id="pkChart"></canvas></div>
+            </div>
+            <div class="glass panel lg:col-span-2">
+              <div class="h-56"><canvas id="occChart"></canvas></div>
+            </div>
           </div>
         </section>
 
-        <!-- Clinical -->
+        <!-- SECTION: Clinical -->
         <section id="clinical" class="section" data-title="Clinical">
           <div class="bricks">
             <div class="glass panel">
@@ -263,7 +311,7 @@
           </div>
         </section>
 
-        <!-- MD Setup -->
+        <!-- SECTION: MD Setup -->
         <section id="mdsetup" class="section" data-title="MD Setup">
           <div class="bricks">
             <div class="glass panel">
@@ -297,7 +345,7 @@
           </div>
         </section>
 
-        <!-- Community -->
+        <!-- SECTION: Community -->
         <section id="community" class="section" data-title="Community">
           <div class="bricks">
             <div class="glass panel">
@@ -351,8 +399,8 @@
             <div class="glass panel">
               <h2 class="text-lg font-bold mb-2">Community Feed</h2>
               <div class="flex items-center gap-2 w-full flex-wrap mb-2">
-                <input id="searchInput" placeholder="Search by protein or SMILES…" class="input md:w-80" aria-label="Search posts">
-                <select id="alphaFilter" class="input md:w-32" aria-label="A–Z Filter">
+                <input id="searchInput" placeholder="Search by protein or SMILES…" class="input md:w-80">
+                <select id="alphaFilter" class="input md:w-32">
                   <option value="">All A–Z</option><option value="#num"># (0–9)</option>
                   <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
                   <option>F</option><option>G</option><option>H</option><option>I</option><option>J</option>
@@ -364,12 +412,12 @@
                 <button id="exportCsvBtn" class="btn-plain">Export Posts (CSV)</button>
               </div>
               <div id="feedGrid" class="bricks"></div>
-              <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet — share your first result.</div>
+              <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result.</div>
             </div>
           </div>
         </section>
 
-        <!-- Channels -->
+        <!-- SECTION: Channels -->
         <section id="channels" class="section" data-title="Channels">
           <div class="bricks">
             <div class="glass panel lg:col-span-2">
@@ -394,7 +442,7 @@
               <div class="overflow-auto">
                 <table class="w-full text-sm">
                   <thead>
-                    <tr class="text-left text-gray-600"><th class="py-1">Date</th><th>PDB</th><th>SMILES</th><th>ΔG</th><th>User</th></tr>
+                  <tr class="text-left text-gray-600"><th class="py-1">Date</th><th>PDB</th><th>SMILES</th><th>ΔG</th><th>User</th></tr>
                   </thead>
                   <tbody id="chTable"></tbody>
                 </table>
@@ -406,7 +454,7 @@
           </div>
         </section>
 
-        <!-- Publications -->
+        <!-- SECTION: Publications -->
         <section id="pub" class="section" data-title="Publications">
           <div class="bricks">
             <div class="glass panel">
@@ -425,7 +473,7 @@
           </div>
         </section>
 
-        <!-- Learning -->
+        <!-- SECTION: Learning -->
         <section id="learn" class="section" data-title="Learning">
           <div class="bricks">
             <div class="glass panel lg:col-span-2">
@@ -445,14 +493,14 @@
     </div>
   </main>
 
-  <!-- Podcast player -->
-  <div class="player-bar" role="region" aria-label="Podcast Player">
+  <!-- Sticky Podcast Player -->
+  <div class="player-bar">
     <div class="max-w-7xl mx-auto px-4 py-2 flex items-center gap-3">
       <div class="min-w-0 flex-1">
         <div class="text-sm font-semibold truncate" id="npTitle">Now Playing: —</div>
         <div class="text-xs text-slate-600 truncate" id="npMeta">Select an episode to start listening</div>
       </div>
-      <audio id="audioPlayer" controls preload="none" class="w-full md:w-[480px]" aria-label="Audio Player"></audio>
+      <audio id="audioPlayer" controls preload="none" class="w-full md:w-[480px]"></audio>
     </div>
   </div>
 
@@ -465,11 +513,16 @@
     </div>
   </footer>
 
-  <!-- ========================= APP SCRIPT ========================= -->
+  <!-- =========================
+       FULL APP SCRIPT
+       ========================= -->
   <script>
-  /* ========= FIREBASE CONFIG: PharmSimFergPro (live) ========= */
+  /************** CLOUD SYNC CONFIG (RESTRICTED KEY) ***************
+   * This key is restricted by HTTP referrers & API scope in GCP.
+   * Add your GitHub Pages / custom domain to the key's allowed referrers.
+   ***************************************************************/
   window.FIREBASE_CONFIG = {
-    apiKey: "AIzaSyC0jQFJKMSnPyjW0uiiW1E9EV-ww9zw-0w",
+    apiKey: "AIzaSyDyS8F3qhMyDKTWatoyFUVlJ-aAA03N_hs", // restricted by referrer & scope
     authDomain: "pharmsimfergpro.firebaseapp.com",
     projectId: "pharmsimfergpro",
     storageBucket: "pharmsimfergpro.firebasestorage.app",
@@ -477,174 +530,421 @@
     appId: "1:228496856805:web:07d0ae011906837c6ae60c",
     measurementId: "G-2V7XMZ2ZXW"
   };
-  /* ============================================================ */
 
-  /* ---------- Utils ---------- */
-  const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
-  const on=(s,ev,fn)=>{const el=$(s); if(el) el.addEventListener(ev,fn,{passive:true});};
-  const statusBadge=()=>$('#statusBadge');
-  const setStatus=(msg,kind='info')=>{const b=statusBadge(); if(!b) return; b.textContent=msg; b.className='chip '+(kind==='ok'?'pos':kind);};
-  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-  const trapz=(x,y)=>{let A=0;for(let i=1;i<x.length;i++)A+=0.5*(y[i]+y[i-1])*(x[i]-x[i-1]);return A};
-  const persist=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-  const recall=(k,def=null)=>{try{const v=localStorage.getItem(k); return v?JSON.parse(v):def;}catch{return def;}};
-  const slugify=s=>s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const $  = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const on = (s,ev,fn)=>{ const el=$(s); if(el) el.addEventListener(ev,fn); };
 
-  /* ---------- Router ---------- */
-  const ROUTES={md:'md',pbpk:'pbpk',clinical:'clinical',mdsetup:'mdsetup',community:'community',channels:'channels',pub:'pub',learn:'learn'};
-  const setActiveNav=key=>$$('.navlink').forEach(a=>a.getAttribute('data-route')===key?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
-  const showSectionById=id=>{$$('.section').forEach(s=>s.classList.remove('active')); const sec=$('#'+id); if(sec){sec.classList.add('active'); document.title='Ferguson’s Platform · '+(sec.dataset.title||''); persist('last_section',id);}}
-  const navigateFromHash=()=>{
-    const h=location.hash||('#/'+(recall('last_section','md'))); const pm=h.match(/^#\/p\/(.+)/);
-    if(pm){ openChannelBySlug(pm[1]); setActiveNav('channels'); return; }
-    const m=h.match(/^#\/([^/?#]+)/); const key=m?m[1]:'md'; showSectionById(ROUTES[key]||'md'); setActiveNav(key);
-  };
-  window.addEventListener('hashchange',navigateFromHash);
-
-  /* ---------- App State ---------- */
-  let RDKitModule=null, viewer=null, proteinModel=null, ligandModel=null, currentLigandProps=null, pdbFileFromDrop=null;
-  const charts={}; const chartMake=(id,cfg)=>{ try{ charts[id]?.destroy?.(); }catch{} const ctx=document.getElementById(id)?.getContext('2d'); if(!ctx) return null; charts[id]=new Chart(ctx,{...cfg,options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{display:true}},...cfg.options}}); return charts[id];};
-  const latestDock={proteinName:'',pdbId:'',smiles:'',dG:null};
-  const metricIds=['mw','logp','aff','vdw_contrib','hbond_contrib','hydro_contrib','rot_contrib','contacts','clashes'];
-  const resetMetrics=()=>metricIds.forEach(id=>{const el=$('#'+id); if(el) el.textContent='--';});
-  const toggleBtn=(id,on)=>{const b=$('#'+id); if(b) b.disabled=!on;};
-
-  /* ---------- Viewer ---------- */
-  const ensureViewer=()=> viewer || (viewer=$3Dmol.createViewer('viewer',{backgroundColor:'#eef2f7'}));
-  const safeRemoveModel=m=>{try{m && viewer.removeModel(m);}catch{}};
-  const refreshButtons=()=> {
-    const hasP=!!proteinModel, hasL=!!ligandModel;
-    toggleBtn('dockBtn',hasP&&hasL);
-    toggleBtn('centerBtn',hasP||hasL);
-    toggleBtn('clearProteinBtn',hasP);
-    toggleBtn('clearLigandBtn',hasL);
-    toggleBtn('clearAllBtn',hasP||hasL);
-    toggleBtn('resetViewBtn',hasP||hasL);
-  };
-  const addProteinFromPDB=txt=>{ensureViewer(); safeRemoveModel(proteinModel); proteinModel=viewer.addModel(txt,'pdb'); proteinModel.setStyle({hetflag:false},{cartoon:{color:'spectrum'}}); viewer.zoomTo(); viewer.render(); setStatus('Protein loaded.','ok'); refreshButtons();};
-  const addLigandFromMolblock=mb=>{ensureViewer(); safeRemoveModel(ligandModel); ligandModel=viewer.addModel(mb,'sdf'); ligandModel.setStyle({}, {stick:{radius:0.22}}); viewer.zoomTo(); viewer.render(); setStatus('Ligand loaded.','ok'); refreshButtons();};
-  const resetView=()=>{ensureViewer(); viewer.zoomTo(); viewer.render();};
-  const clearProtein=()=>{if(!viewer||!proteinModel) return; safeRemoveModel(proteinModel); proteinModel=null; setStatus('Protein cleared.','info'); refreshButtons();};
-  const clearLigand=()=>{if(!viewer||!ligandModel) return; safeRemoveModel(ligandModel); ligandModel=null; currentLigandProps=null; resetMetrics(); setStatus('Ligand cleared.','info'); refreshButtons();};
-  const clearAll=()=>{clearLigand(); clearProtein(); resetView(); setStatus('Cleared all.','info');};
-
-  /* ---------- PDB load ---------- */
-  const wirePdbDropZone=()=>{
-    const dz=$('#pdbDrop'); if(!dz) return;
-    ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('ring-2','ring-indigo-400');}));
-    ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('ring-2','ring-indigo-400');}));
-    dz.addEventListener('drop',async e=>{
-      const f=e.dataTransfer?.files?.[0];
-      if(f?.name?.toLowerCase().endsWith('.pdb')){ pdbFileFromDrop=f; dz.innerHTML=`<div class="font-semibold text-indigo-700">Ready: ${f.name}</div><div class="text-xs text-gray-600">Click “Load Local PDB”</div>`; }
-      else { dz.innerHTML=`<div class="font-semibold text-rose-700">Not a .pdb</div><div class="text-xs text-gray-600">Drop a valid PDB</div>`; }
+  /* ===== Router ===== */
+  const ROUTES = { md:'md', pbpk:'pbpk', clinical:'clinical', mdsetup:'mdsetup', community:'community', channels:'channels', pub:'pub', learn:'learn' };
+  function setActiveNav(routeKey){
+    $$('.navlink').forEach(a=>{
+      const isActive = a.getAttribute('data-route') === routeKey;
+      if(isActive) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
     });
-  };
-  const loadLocalPdb=async()=>{
-    const file=pdbFileFromDrop||$('#pdbFile')?.files?.[0]; if(!file){alert('Choose or drop a .pdb file first.');return;}
-    const txt=await file.text(); addProteinFromPDB(txt); pdbFileFromDrop=null; $('#pdbDrop').innerHTML=`<div class="font-semibold text-green-700">Loaded: ${file.name}</div><div class="text-xs text-gray-600">Drop a new file to replace it.</div>`;
-    latestDock.proteinName=file.name.replace(/\.pdb$/i,''); latestDock.pdbId=''; persist('last_pdb_name',latestDock.proteinName);
-  };
-  const fetchPdb=async()=>{
-    const id=$('#pdbId').value.trim().toUpperCase(); if(!id) return;
-    toggleBtn('fetchPdbBtn',false); setStatus(`Fetching PDB ${id}…`,'info');
+  }
+  function showSectionById(id){
+    $$('.section').forEach(s=>s.classList.remove('active'));
+    const sec = $('#'+id);
+    if(sec){ sec.classList.add('active'); document.title = 'Ferguson’s Platform · ' + (sec.dataset.title || ''); }
+  }
+  function navigateFromHash(){
+    const hash = location.hash || '#/md';
+    const pm = hash.match(/^#\/p\/(.+)/);
+    if(pm){ openChannelBySlug(pm[1]); setActiveNav('channels'); return; }
+    const m = hash.match(/^#\/([^/?#]+)/);
+    const key = m ? m[1] : 'md';
+    const sectionId = ROUTES[key] || 'md';
+    showSectionById(sectionId); setActiveNav(key);
+  }
+  window.addEventListener('hashchange', navigateFromHash);
+
+  /* ===== UI helpers ===== */
+  function setStatus(msg, kind='info'){
+    const b = $('#statusBadge'); if(!b) return;
+    b.textContent = msg;
+    b.className = 'chip ' + (kind==='ok' ? 'pos' : kind);
+  }
+  function trapz(x,y){ let A=0; for(let i=1;i<x.length;i++) A += 0.5*(y[i]+y[i-1])*(x[i]-x[i-1]); return A; }
+
+  /* ===== App state ===== */
+  let RDKitModule = null;
+  let viewer = null;
+  let proteinModel=null, ligandModel=null;
+  let currentLigandProps=null;
+  let pdbFileFromDrop=null;
+  const latestDock = { proteinName:'', pdbId:'', smiles:'', dG:null };
+
+  // Charts registry
+  const charts = { pk:null, occ:null, trial:null };
+  function makeChart(id, cfg){
+    const ctx = document.getElementById(id);
+    if(!ctx) return null;
+    const key = id.replace('Chart','');
+    if(charts[key] && charts[key].destroy){ charts[key].destroy(); }
+    const chart = new Chart(ctx.getContext('2d'), {
+      ...cfg,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: { mode:'nearest', intersect:false },
+        plugins: { legend: { display: true } },
+        ...cfg.options
+      }
+    });
+    charts[key] = chart;
+    return chart;
+  }
+
+  const metricIds = ['mw','logp','aff','vdw_contrib','hbond_contrib','hydro_contrib','rot_contrib','contacts','clashes'];
+  function resetMetrics(){ metricIds.forEach(id=>{ const el=$('#'+id); if(el) el.textContent='--'; }); }
+
+  function refreshButtons(){
+    const hasProt = !!proteinModel;
+    const hasLig  = !!ligandModel;
+    if($('#dockBtn'))    $('#dockBtn').disabled   = !(hasProt && hasLig);
+    if($('#centerBtn'))  $('#centerBtn').disabled = !(hasProt || hasLig);
+    if($('#clearProteinBtn')) $('#clearProteinBtn').disabled = !hasProt;
+    if($('#clearLigandBtn'))  $('#clearLigandBtn').disabled  = !hasLig;
+    if($('#clearAllBtn'))     $('#clearAllBtn').disabled     = !(hasProt || hasLig);
+    if($('#resetViewBtn'))    $('#resetViewBtn').disabled    = !(hasProt || hasLig);
+  }
+
+  /* ===== 3Dmol viewer ===== */
+  function ensureViewer(){
+    if(!viewer){
+      const v = $('#viewer'); if(!v) return null;
+      viewer = $3Dmol.createViewer(v,{backgroundColor:'#eef2f7'});
+    }
+    return viewer;
+  }
+  function safeRemoveModel(m){ try{ if(m) viewer.removeModel(m); }catch(e){} }
+  function addProteinFromPDB(txt){
+    const v=ensureViewer(); if(!v) return;
+    safeRemoveModel(proteinModel);
+    proteinModel = v.addModel(txt,'pdb');
+    proteinModel.setStyle({hetflag:false},{cartoon:{color:'spectrum'}});
+    v.zoomTo(); v.render();
+    setStatus('Protein loaded.','ok');
+    refreshButtons();
+  }
+  function addLigandFromMolblock(molblock){
+    const v=ensureViewer(); if(!v) return;
+    safeRemoveModel(ligandModel);
+    ligandModel = v.addModel(molblock,'sdf');
+    ligandModel.setStyle({}, {stick:{radius:0.22}});
+    v.zoomTo(); v.render();
+    setStatus('Ligand loaded.','ok');
+    refreshButtons();
+  }
+  function resetView(){ const v=ensureViewer(); if(!v) return; v.zoomTo(); v.render(); }
+  function clearProtein(){ if(!viewer || !proteinModel) return; try{ viewer.removeModel(proteinModel); }catch(_){}
+    proteinModel=null; setStatus('Protein cleared.','info'); refreshButtons(); }
+  function clearLigand(){ if(!viewer || !ligandModel) return; try{ viewer.removeModel(ligandModel); }catch(_){}
+    ligandModel=null; currentLigandProps=null; resetMetrics(); setStatus('Ligand cleared.','info'); refreshButtons(); }
+  function clearAll(){ clearLigand(); clearProtein(); resetView(); setStatus('Cleared all.','info'); }
+
+  /* ===== PDB: drop/file/fetch ===== */
+  function wirePdbDropZone(){
+    const dz=$('#pdbDrop'); if(!dz) return;
+    ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{
+      e.preventDefault(); e.stopPropagation(); dz.classList.add('ring-2','ring-indigo-400');
+    }));
+    ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{
+      e.preventDefault(); e.stopPropagation(); dz.classList.remove('ring-2','ring-indigo-400');
+    }));
+    dz.addEventListener('drop', async e=>{
+      const file=e.dataTransfer?.files?.[0];
+      if(file && file.name.toLowerCase().endsWith('.pdb')){
+        pdbFileFromDrop=file;
+        dz.innerHTML = `<div class="font-semibold text-indigo-700">Ready: ${file.name}</div>
+        <div class="text-xs text-gray-600">Click “Load Local PDB” to display</div>`;
+      }else{
+        dz.innerHTML = `<div class="font-semibold text-rose-700">Not a .pdb file</div>
+        <div class="text-xs text-gray-600">Please drop a valid PDB</div>`;
+      }
+    });
+  }
+  async function loadLocalPdb(){
+    const input=$('#pdbFile');
+    const file=pdbFileFromDrop || input?.files?.[0];
+    if(!file){ alert('Choose or drop a .pdb file first.'); return; }
+    const txt = await file.text();
+    addProteinFromPDB(txt);
+    pdbFileFromDrop=null;
+    const dz=$('#pdbDrop');
+    if(dz) dz.innerHTML = `<div class="font-semibold text-green-700">Loaded: ${file.name}</div>
+    <div class="text-xs text-gray-600">Drop a new file to replace it.</div>`;
+    latestDock.proteinName = file.name.replace(/\.pdb$/i,'');
+    latestDock.pdbId='';
+  }
+  async function fetchPdb(){
+    const el=$('#pdbId'); if(!el) return;
+    const id=el.value.trim().toUpperCase(); if(!id) return;
     try{
-      const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`,{cache:'no-store'});
-      if(!r.ok) throw new Error('HTTP '+r.status);
+      setStatus(`Fetching PDB ${id}…`,'info');
+      const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`);
+      if(!r.ok) throw new Error(`PDB ${id} not found.`);
       const txt=await r.text();
-      addProteinFromPDB(txt); latestDock.proteinName=id; latestDock.pdbId=id; persist('last_pdb_id',id);
-    }catch(e){ console.error(e); setStatus('PDB fetch failed.','err'); alert('Could not fetch PDB. Check ID or network.'); }
-    finally{ toggleBtn('fetchPdbBtn',true); }
-  };
+      addProteinFromPDB(txt);
+      latestDock.proteinName=id; latestDock.pdbId=id;
+    }catch(e){
+      console.error(e);
+      setStatus(e.message||'PDB fetch failed','err');
+      alert(e.message||'PDB fetch failed');
+    }
+  }
 
-  /* ---------- RDKit ---------- */
-  const RD_BASE='https://unpkg.com/@rdkit/rdkit/dist/';
-  const initRDKit=async()=>{ RDKitModule = await initRDKitModule({locateFile:file=>RD_BASE+file}); setStatus('Libraries ready. RDKit initialized.','ok'); };
-  const processSmilesString=async(smiles)=>{
-    $('#smilesErr').classList.add('hidden'); $('#smilesErr').textContent='';
-    safeRemoveModel(ligandModel); ligandModel=null; currentLigandProps=null; resetMetrics(); toggleBtn('dockBtn',!!proteinModel);
-    smiles=(smiles||'').trim(); if(!smiles){ setStatus('Enter a SMILES string.','warn'); return; }
+  /* ===== RDKit (SMILES) ===== */
+  async function processSmilesString(smiles){
+    const v=ensureViewer(); if(!v) return;
+    safeRemoveModel(ligandModel); ligandModel=null; currentLigandProps=null; resetMetrics();
+    $('#dockBtn') && ($('#dockBtn').disabled = !proteinModel);
+
+    smiles = (smiles||'').trim();
+    if(!smiles){ setStatus('Please enter a SMILES string.','warn'); return; }
     if(!RDKitModule){ setStatus('RDKit not ready yet.','warn'); return; }
-    persist('last_smiles',smiles);
 
-    toggleBtn('loadSmilesBtn',false);
     let mol=null;
     try{
-      mol=RDKitModule.get_mol(smiles); if(!mol){ throw new Error('RDKit could not parse SMILES'); }
-      const raw=mol.get_descriptors()||'{}'; let d={}; try{d=JSON.parse(raw);}catch{}
-      const toNum=v=>(typeof v==='number'&&isFinite(v))?v:null;
-      const props={
-        numHeavyAtoms: toNum(d.NumHeavyAtoms)??25,
-        hDonors: toNum(d.NumHDonors)??0,
-        hAcceptors: toNum(d.NumHAcceptors)??0,
-        logp: toNum(d.MolLogP??d.CalcLogP)??2.0,
-        numRotatableBonds: toNum(d.NumRotatableBonds)??0
-      };
-      currentLigandProps=props;
-      if(d.exactmw) $('#mw').textContent=d.exactmw.toFixed(2);
-      if(isFinite(props.logp)) $('#logp').textContent=props.logp.toFixed(2);
+      mol = RDKitModule.get_mol(smiles);
+      if(!mol){ setStatus('Invalid SMILES: RDKit could not parse.','err'); return; }
 
-      let molblock=''; try{ mol.add_hs(); const ok=mol.embed_molecule(); mol.remove_hs(); molblock=mol.get_molblock(); setStatus(ok===0?'SMILES loaded & embedded.':'SMILES loaded (fallback).', ok===0?'ok':'warn'); }catch(e){ try{mol.remove_hs();}catch{} molblock=mol.get_molblock(); setStatus('SMILES loaded (no 3D conformer).','warn'); }
-      addLigandFromMolblock(molblock); latestDock.smiles=smiles;
-      toggleBtn('dockBtn',!!proteinModel);
-    }catch(e){
-      console.error('RDKit error:',e);
-      const box=$('#smilesErr'); box.textContent='RDKit error while processing SMILES. Please check the string or try an example.'; box.classList.remove('hidden');
-      setStatus('SMILES processing failed.','err');
-    }finally{ try{mol?.delete?.();}catch{} toggleBtn('loadSmilesBtn',true); }
-  };
-  const runDock=()=>{
-    if(!proteinModel||!ligandModel){ alert('Load a protein and a ligand first.'); return; }
-    const atoms=m=>{try{if(m?.selectedAtoms) return m.selectedAtoms({}); if(m?.getAtoms) return m.getAtoms(); if(Array.isArray(m?.atoms)) return m.atoms;}catch{} return [];}
-    const ligProps=currentLigandProps || (()=>{ const A=atoms(ligandModel); if(!A.length) return null; const heavy=A.filter(a=>a.elem!=='H').length; const nC=A.filter(a=>a.elem==='C').length; const het=A.filter(a=>a.elem!=='H'&&a.elem!=='C').length; const donors=A.filter(a=>a.elem==='N'||a.elem==='O').length; const accept=donors; const logp=Math.max(-2,Math.min(6,0.54*nC-1.5*het)); const rot=Math.round(0.3*heavy); return {numHeavyAtoms:heavy,hDonors:donors,hAcceptors:accept,logp, numRotatableBonds:Math.max(0,rot)}; })();
-    if(!ligProps){ alert('Could not derive ligand descriptors. Try another SMILES.'); return; }
-    const M={balanced:{I:-1.5,V:-0.035,H:-0.70,Hy:-0.25,R:0.30},hbond:{I:-1.0,V:-0.030,H:-1.20,Hy:-0.15,R:0.30},hydrophobic:{I:-1.2,V:-0.040,H:-0.50,Hy:-0.45,R:0.25}}[$('#scoringModel')?.value||'balanced'];
-    const hb=Math.min(ligProps.hDonors,ligProps.hAcceptors); const base={vdw:M.V*ligProps.numHeavyAtoms,hbond:M.H*hb,hydrophobic:M.Hy*ligProps.logp,rotational:M.R*ligProps.numRotatableBonds};
-    const prot=atoms(proteinModel), lig=atoms(ligandModel); const hetSet=new Set(['N','O','S']); let contacts=0,clashes=0;
-    for(const la of lig){ for(const pa of prot){ const dx=la.x-pa.x,dy=la.y-pa.y,dz=la.z-pa.z,r2=dx*dx+dy*dy+dz*dz; if(r2<12.25 && hetSet.has(pa.elem)) contacts++; if(r2<3.24) clashes++; } }
-    const total=(M.I+base.vdw+base.hbond+base.hydrophobic+base.rotational)+(-0.15*Math.min(contacts,50))+(0.4*Math.min(clashes,25));
-    const set=(id,v)=>{$('#'+id).textContent=v}; set('aff',total.toFixed(2)); set('vdw_contrib',base.vdw.toFixed(2)); set('hbond_contrib',base.hbond.toFixed(2)); set('hydro_contrib',base.hydrophobic.toFixed(2)); set('rot_contrib',base.rotational.toFixed(2)); set('contacts',String(contacts)); set('clashes',String(clashes));
-    latestDock.dG=Number(total.toFixed(2)); setStatus('Docking scored (heuristic).','ok');
-  };
-  const recenterAndRescore=()=>{ resetView(); if(proteinModel&&ligandModel) runDock(); };
+      // descriptors (robust parse)
+      try {
+        const raw = mol.get_descriptors() || '{}';
+        let desc = {};
+        try { desc = JSON.parse(raw); } catch(_) { desc = {}; }
+        const toNum = v => (typeof v === 'number' && isFinite(v)) ? v : null;
+        const NumHeavyAtoms     = toNum(desc.NumHeavyAtoms);
+        const NumHDonors        = toNum(desc.NumHDonors);
+        const NumHAcceptors     = toNum(desc.NumHAcceptors);
+        const MolLogP           = toNum(desc.MolLogP ?? desc.CalcLogP);
+        const NumRotatableBonds = toNum(desc.NumRotatableBonds);
+        const MolWt             = toNum(desc.MolWt ?? desc.MolecularWeight ?? desc.exactmw ?? desc.ExactMolWt);
 
-  /* ---------- Local store ---------- */
-  const K_USERS='ps_users_v4', K_SESSION='ps_session_v4', K_CHANNELS='ps_channels_v4', K_POSTS='ps_posts_v4';
-  const saved=k=>recall(k,[]), getSession=()=>recall(K_SESSION,null);
-  const setSession=u=>{persist(K_SESSION,u); $('#profileBtn').textContent=u.username; closeProfile();};
-  const userdb=()=>recall(K_USERS,[]);
-  const upsertChannelLocal=name=>{const slug=slugify(name||''); if(!slug) return null; const arr=saved(K_CHANNELS); let c=arr.find(x=>x.slug===slug); if(!c){ const s=getSession(); c={id:crypto.randomUUID(),slug,name,description:'',createdBy:s?.username||'anon',createdAt:Date.now()}; arr.push(c); persist(K_CHANNELS,arr);} return c;};
-  const addPostLocal=p=>{const arr=saved(K_POSTS); arr.push(p); persist(K_POSTS,arr);};
+        if(MolWt!=null) $('#mw').textContent = MolWt.toFixed(2);
+        if(MolLogP!=null) $('#logp').textContent = MolLogP.toFixed(2);
 
-  /* ---------- Firebase (cloud) ---------- */
-  let SYNC_MODE='local', fs=null;
-  const initCloudIfAvailable=()=>{
+        if([NumHeavyAtoms,NumHDonors,NumHAcceptors,MolLogP,NumRotatableBonds].every(x=>x!=null)){
+          currentLigandProps = {
+            numHeavyAtoms: NumHeavyAtoms,
+            hDonors: NumHDonors,
+            hAcceptors: NumHAcceptors,
+            logp: MolLogP,
+            numRotatableBonds: NumRotatableBonds
+          };
+        }
+      } catch(parseErr){ console.warn('Descriptor parse failed', parseErr); }
+
+      // 3D conformer if possible
+      let molblock = '';
+      try{
+        mol.add_hs();
+        const ok = mol.embed_molecule();
+        mol.remove_hs();
+        molblock = mol.get_molblock();
+        setStatus(ok===0 ? 'SMILES loaded & embedded.':'SMILES loaded (embedding fallback).', ok===0?'ok':'warn');
+      }catch(e){
+        try{ mol.remove_hs(); }catch(_){}
+        molblock = mol.get_molblock();
+        setStatus('SMILES loaded (no 3D conformer).','warn');
+      }
+
+      addLigandFromMolblock(molblock);
+      latestDock.smiles = smiles;
+
+    } catch(e){
+      console.error('RDKit SMILES pipeline error:', e);
+      setStatus((e && e.message) ? `SMILES error: ${e.message}` : 'SMILES processing failed.', 'err');
+    } finally {
+      if(mol) mol.delete();
+      refreshButtons();
+    }
+  }
+  function loadSmilesBtn(){
+    const smiles = $('#smiles')?.value || '';
+    if(!smiles.trim()){ alert('Enter a SMILES string first.'); return; }
+    processSmilesString(smiles);
+  }
+  function useExampleSmiles(){
+    const sel=$('#exampleSmiles');
+    if(sel && sel.value){
+      $('#smiles').value=sel.value;
+      processSmilesString(sel.value);
+    }
+  }
+
+  /* ===== Heuristic docking score ===== */
+  function getAtomsFromModel(m){
     try{
-      if(window.FIREBASE_CONFIG && firebase?.initializeApp){
+      if(!m) return [];
+      if(typeof m.selectedAtoms==='function') return m.selectedAtoms({});
+      if(typeof m.getAtoms==='function') return m.getAtoms();
+      if(Array.isArray(m.atoms)) return m.atoms;
+    }catch(_){} return [];
+  }
+  function estimateLigandPropsFromModel(){
+    const atoms = getAtomsFromModel(ligandModel);
+    if(!atoms.length) return null;
+    const heavy = atoms.filter(a=>a.elem!=='H').length;
+    const numC  = atoms.filter(a=>a.elem==='C').length;
+    const hetero = atoms.filter(a=>a.elem!=='H' && a.elem!=='C').length;
+    const donors = atoms.filter(a=>a.elem==='N' || a.elem==='O').length;
+    const accept = atoms.filter(a=>a.elem==='N' || a.elem==='O').length;
+    const logpRaw = 0.54*numC - 1.5*hetero;
+    const logp = Math.max(-2, Math.min(6, logpRaw));
+    const rotBonds = Math.round(0.3 * heavy);
+    return {
+      numHeavyAtoms: heavy,
+      hDonors: donors,
+      hAcceptors: accept,
+      logp: logp,
+      numRotatableBonds: Math.max(0, rotBonds)
+    };
+  }
+  function bindingContrib(l, t='balanced'){
+    const M={
+      balanced:{I:-1.5,V:-0.035,H:-0.70,Hy:-0.25,R:0.30},
+      hbond:{I:-1.0,V:-0.030,H:-1.20,Hy:-0.15,R:0.30},
+      hydrophobic:{I:-1.2,V:-0.040,H:-0.50,Hy:-0.45,R:0.25}
+    }[t] || {I:-1.5,V:-0.035,H:-0.70,Hy:-0.25,R:0.30};
+    const hb=Math.min(l.hDonors,l.hAcceptors);
+    return { intercept:M.I, vdw:M.V*l.numHeavyAtoms, hbond:M.H*hb, hydrophobic:M.Hy*l.logp, rotational:M.R*l.numRotatableBonds };
+  }
+  function getLigandProps(){ return currentLigandProps || estimateLigandPropsFromModel(); }
+
+  function runDock(){
+    if(!proteinModel || !ligandModel){
+      alert('Please load a protein and a ligand first.');
+      return;
+    }
+    const ligProps = getLigandProps();
+    if(!ligProps){
+      alert('Could not derive ligand descriptors. Try another SMILES.');
+      return;
+    }
+    const which = $('#scoringModel')?.value || 'balanced';
+    const base = bindingContrib(ligProps, which);
+    const prot = getAtomsFromModel(proteinModel);
+    const lig  = getAtomsFromModel(ligandModel);
+    const het=new Set(['N','O','S']);
+    let contacts=0, clashes=0;
+    for(const la of lig){
+      for(const pa of prot){
+        const dx=la.x-pa.x, dy=la.y-pa.y, dz=la.z-pa.z;
+        const r2=dx*dx+dy*dy+dz*dz;
+        if(r2<3.5*3.5 && het.has(pa.elem)) contacts++;
+        if(r2<1.8*1.8) clashes++;
+      }
+    }
+    const total = Object.values(base).reduce((s,v)=>s+v,0) + (-0.15*Math.min(contacts,50)) + (0.4*Math.min(clashes,25));
+    const set=(id,val)=>{ const el=$('#'+id); if(el) el.textContent=val; };
+    set('aff', total.toFixed(2));
+    set('vdw_contrib', base.vdw.toFixed(2));
+    set('hbond_contrib', base.hbond.toFixed(2));
+    set('hydro_contrib', base.hydrophobic.toFixed(2));
+    set('rot_contrib', base.rotational.toFixed(2));
+    set('contacts', String(contacts));
+    set('clashes', String(clashes));
+    latestDock.dG = Number(total.toFixed(2));
+    setStatus('Docking scored (heuristic).','ok');
+    refreshButtons();
+  }
+  function recenterAndRescore(){ resetView(); if(proteinModel && ligandModel) runDock(); }
+
+  /* ===== Local DB + Cloud Firestore ===== */
+  const K_USERS='ps_users_v2', K_SESSION='ps_session_v2';
+  const K_CHANNELS='ps_channels_v2', K_POSTS='ps_posts_v2', K_IDX='pharmsim_alpha_index_v2';
+  const userdb = ()=> JSON.parse(localStorage.getItem(K_USERS)||'[]');
+  const saved  = (k)=> JSON.parse(localStorage.getItem(k)||'[]');
+  const slugify=s=>s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+
+  let SYNC_MODE='local';
+  let fs=null;
+
+  function initCloudIfAvailable(){
+    try{
+      if(window.FIREBASE_CONFIG){
         const app=firebase.initializeApp(window.FIREBASE_CONFIG);
         fs=firebase.firestore(app);
         SYNC_MODE='cloud';
         setStatus('Cloud sync enabled.','ok');
       }
-    }catch(e){ console.warn('Cloud init failed; using local only:', e); SYNC_MODE='local'; }
-  };
-  const cloudAdd=(col,obj)=>fs.collection(col).add(obj);
-  const cloudUpsertChannel=async name=>{
-    const slug=slugify(name||''); if(!slug) return null;
-    const q=await fs.collection('channels').where('slug','==',slug).limit(1).get();
-    if(q.empty){ const s=getSession(); const c={slug,name,description:'',createdBy:s?.username||'anon',createdAt:Date.now()}; await fs.collection('channels').add(c); return c; }
-    return q.docs[0].data();
-  };
-  const cloudGetChannels=async()=> (await fs.collection('channels').orderBy('name','asc').get()).docs.map(d=>d.data());
-  const cloudOnPosts=(cb)=> fs.collection('posts').orderBy('createdAt','desc').onSnapshot(s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))));
-  const cloudOnChannels=(cb)=> fs.collection('channels').orderBy('name','asc').onSnapshot(s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))));
+    }catch(e){
+      console.warn('Cloud init failed, using local:', e);
+      SYNC_MODE='local';
+    }
+  }
 
-  /* ---------- Community renderers ---------- */
-  const renderPostCard=p=>{
+  async function cloudAdd(col, obj){
+    const ref = await fs.collection(col).add(obj);
+    return {...obj, _id: ref.id};
+  }
+  async function cloudGetAll(col){
+    const snap = await fs.collection(col).orderBy('createdAt','desc').get();
+    return snap.docs.map(d=>({ _id:d.id, ...d.data() }));
+  }
+  function cloudOnSnapshot(col, cb){
+    return fs.collection(col).orderBy('createdAt','desc').onSnapshot(snap=>{
+      const arr=snap.docs.map(d=>({ _id:d.id, ...d.data() }));
+      cb(arr);
+    });
+  }
+  async function cloudUpsertChannelBySlug(name){
+    const slug = slugify(name||'');
+    if(!slug) return null;
+    const q = await fs.collection('channels').where('slug','==',slug).get();
+    if(q.empty){
+      const s=getSession();
+      const c={slug,name,description:'',createdBy:s?.username||'anon',createdAt:Date.now()};
+      await fs.collection('channels').add(c);
+      return c;
+    }else{
+      return q.docs[0].data();
+    }
+  }
+  async function cloudGetChannels(){
+    const snap=await fs.collection('channels').orderBy('name','asc').get();
+    return snap.docs.map(d=>d.data());
+  }
+
+  /* Local fallbacks */
+  function getSession(){ return JSON.parse(localStorage.getItem(K_SESSION)||'null'); }
+  function setSessionLocal(u){ localStorage.setItem(K_SESSION, JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
+
+  async function upsertChannel(name){
+    if(SYNC_MODE==='cloud') return await cloudUpsertChannelBySlug(name);
+    const channels=saved(K_CHANNELS); const slug=slugify(name||''); if(!slug) return null;
+    let c=channels.find(x=>x.slug===slug);
+    if(!c){
+      const s=getSession();
+      c={id:crypto.randomUUID(),slug,name,description:'',createdBy:s?.username||'anon',createdAt:Date.now()};
+      channels.push(c); localStorage.setItem(K_CHANNELS, JSON.stringify(channels));
+    }
+    return c;
+  }
+  async function addPost(post){
+    if(SYNC_MODE==='cloud') return await cloudAdd('posts', post);
+    const posts=saved(K_POSTS); posts.push(post); localStorage.setItem(K_POSTS, JSON.stringify(posts));
+  }
+  function readPosts(){ return saved(K_POSTS); }
+  function buildAlphaIndex(arr){
+    const idx={}; for(const p of arr){
+      const ch=(p.proteinName||'').trim()[0]||'#';
+      const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#';
+      (idx[key]=idx[key]||[]).push(p.id || p._id || ('local-'+Math.random()));
+    }
+    localStorage.setItem(K_IDX, JSON.stringify(idx));
+  }
+
+  function renderPostCard(p){
     const card=document.createElement('div'); card.className='feed-card';
     const mood=p.mood?.includes('Constructive')?'warn':'pos';
-    const chLink=p.channelSlug?`<a class="hash" href="#/p/${p.channelSlug}">#${p.proteinName||'General'}</a>`:`<span class="chip info">#${p.proteinName||'General'}</span>`;
+    const chLink = p.channelSlug ? `<a class="hash" href="#/p/${p.channelSlug}">#${p.proteinName}</a>` : (p.proteinName?`<span class="chip info">#${p.proteinName}</span>`:'');
     const user=p.user||{username:'Anonymous',avatar:'https://i.pravatar.cc/40'};
-    card.innerHTML=`
+    card.innerHTML = `
       <div class="flex items-start justify-between gap-3">
         <div>
           <div class="text-sm text-gray-600">${chLink} · ${user.username||''}</div>
@@ -656,231 +956,432 @@
         </div>
         <img src="${user.avatar||'https://i.pravatar.cc/40'}" class="w-10 h-10 rounded-full" alt="avatar">
       </div>
-      ${p.type==='dock'?`${p.smiles?`<div class="text-xs break-all mt-2"><span class="font-semibold">SMILES:</span> ${p.smiles}</div>`:''}${p.notes?`<p class="text-sm mt-2 whitespace-pre-wrap">${p.notes}</p>`:''}`:`<p class="text-sm mt-2 whitespace-pre-wrap">${p.content||''}</p>`}
-      <div class="text-xs text-gray-500 mt-2">${p.createdAt?new Date(p.createdAt).toLocaleString():''}</div>`;
+      ${p.type==='dock'?`
+        ${p.smiles?`<div class="text-xs break-all mt-2"><span class="font-semibold">SMILES:</span> ${p.smiles}</div>`:''}
+        ${p.notes?`<p class="text-sm mt-2 whitespace-pre-wrap">${p.notes}</p>`:''}
+      `:`
+        <p class="text-sm mt-2 whitespace-pre-wrap">${p.content||''}</p>
+      `}
+      <div class="text-xs text-gray-500 mt-2">${new Date(p.createdAt).toLocaleString()}</div>
+    `;
     return card;
-  };
+  }
 
-  let CHANNEL_CACHE = []; // for quick channel view in local/cloud
-
-  const refreshFeedLocal=()=>{
-    const posts=saved(K_POSTS);
-    const q=($('#searchInput')?.value||'').toLowerCase(); const alpha=$('#alphaFilter')?.value||'';
-    let f=posts.filter(p=>[(p.proteinName||''),(p.smiles||''),(p.title||'')].some(s=>s.toLowerCase().includes(q)));
-    if(alpha){ f=f.filter(p=>{const ch=(p.proteinName||'').trim()[0]||'#'; const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#'; return alpha===''?true:(alpha==='#num'?key==='#':key===alpha);}); }
+  async function refreshFeed(){
+    let posts = [];
+    if(SYNC_MODE==='cloud'){
+      posts = await cloudGetAll('posts');
+    }else{
+      posts = readPosts();
+    }
+    const q=($('#searchInput')?.value||'').toLowerCase();
+    const alpha=$('#alphaFilter')?.value||'';
+    let f=posts.filter(p=>{
+      const s1=(p.proteinName||'').toLowerCase().includes(q);
+      const s2=(p.smiles||'').toLowerCase().includes(q);
+      const s3=(p.title||'').toLowerCase().includes(q);
+      return s1||s2||s3;
+    });
+    if(alpha){
+      f=f.filter(p=>{
+        const ch=(p.proteinName||'').trim()[0]||'#';
+        const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#';
+        return alpha===''?true:(alpha==='#num'?key==='#':key===alpha);
+      });
+    }
     f.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0) );
-    const grid=$('#feedGrid'); grid.innerHTML=''; f.forEach(p=>grid.appendChild(renderPostCard(p))); $('#emptyFeed')?.classList.toggle('hidden',!!f.length);
-  };
+    const grid=$('#feedGrid'); if(!grid) return;
+    grid.innerHTML=''; f.forEach(p=>grid.appendChild(renderPostCard(p)));
+    $('#emptyFeed')?.classList.toggle('hidden', !!f.length);
+  }
 
-  const refreshFeedCloud=(posts)=>{
-    const q=($('#searchInput')?.value||'').toLowerCase(); const alpha=$('#alphaFilter')?.value||'';
-    let f=posts.filter(p=>[(p.proteinName||''),(p.smiles||''),(p.title||'')].some(s=>s.toLowerCase().includes(q)));
-    if(alpha){ f=f.filter(p=>{const ch=(p.proteinName||'').trim()[0]||'#'; const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#'; return alpha===''?true:(alpha==='#num'?key==='#':key===alpha);}); }
-    const grid=$('#feedGrid'); grid.innerHTML=''; f.forEach(p=>grid.appendChild(renderPostCard(p))); $('#emptyFeed')?.classList.toggle('hidden',!!f.length);
-  };
-
-  const refreshChannelListLocal=()=>{
-    const query=($('#channelSearch')?.value||'').toLowerCase();
-    const channels=saved(K_CHANNELS).filter(c=>c.name.toLowerCase().includes(query)).sort((a,b)=>a.name.localeCompare(b.name));
-    CHANNEL_CACHE = channels;
-    const list=$('#channelList'); list.innerHTML='';
+  async function refreshChannelList(){
+    let channels=[];
+    if(SYNC_MODE==='cloud'){
+      channels = await cloudGetChannels();
+    }else{
+      const q=($('#channelSearch')?.value||'').toLowerCase();
+      channels=saved(K_CHANNELS).filter(c=>c.name.toLowerCase().includes(q));
+      channels.sort((a,b)=>a.name.localeCompare(b.name));
+    }
+    const list=$('#channelList'); if(!list) return;
+    list.innerHTML='';
     channels.forEach(c=>{
-      const posts=saved(K_POSTS).filter(p=>p.channelId===c.id);
-      const docks=posts.filter(p=>p.type==='dock');
-      const best=docks.length?docks.reduce((a,b)=>(a.dG??999)<(b.dG??999)?a:b):null;
+      const postsLocal = SYNC_MODE==='local' ? readPosts().filter(p=>p.channelId===c.id) : [];
+      const docks = postsLocal.filter(p=>p.type==='dock');
+      const best = docks.length?docks.reduce((a,b)=>(a.dG??999)<(b.dG??999)?a:b):null;
       const card=document.createElement('div'); card.className='feed-card';
-      card.innerHTML=`<div class="flex items-center justify-between">
-        <a class="hash" href="#/p/${c.slug}"><h3 class="font-semibold text-lg">#${c.name}</h3></a>
-        <span class="chip info">${posts.length} posts</span></div>
-        <div class="text-sm text-gray-600">Started by ${c.createdBy} · ${new Date(c.createdAt).toLocaleDateString()}</div>
-        <div class="mt-2 text-sm">${best?`Best ΔG: <strong>${best.dG}</strong> (PDB ${best.pdbId||'—'})`:'No docking yet.'}</div>`;
+      card.innerHTML=`
+        <div class="flex items-center justify-between">
+          <a class="hash" href="#/p/${c.slug}"><h3 class="font-semibold text-lg">#${c.name}</h3></a>
+          <span class="chip info">${postsLocal.length || '—'} posts</span>
+        </div>
+        <div class="text-sm text-gray-600">Started by ${c.createdBy || '—'} · ${c.createdAt?new Date(c.createdAt).toLocaleDateString():'—'}</div>
+        <div class="mt-2 text-sm">${best?`Best ΔG: <strong>${best.dG}</strong> (PDB ${best.pdbId||'—'})`:'No docking yet.'}</div>
+      `;
       list.appendChild(card);
     });
-    $('#channelEmpty')?.classList.toggle('hidden',!!channels.length);
-  };
+    $('#channelEmpty')?.classList.toggle('hidden', !!channels.length);
+  }
 
-  const refreshChannelListCloud=(channels)=>{
-    const query=($('#channelSearch')?.value||'').toLowerCase();
-    const filtered=channels.filter(c=>(c.name||'').toLowerCase().includes(query)).sort((a,b)=>a.name.localeCompare(b.name));
-    CHANNEL_CACHE = filtered;
-    const list=$('#channelList'); list.innerHTML='';
-    filtered.forEach(c=>{
-      // posts count not pre-joined — show name and createdBy
-      const card=document.createElement('div'); card.className='feed-card';
-      card.innerHTML=`<div class="flex items-center justify-between">
-        <a class="hash" href="#/p/${c.slug}"><h3 class="font-semibold text-lg">#${c.name}</h3></a>
-        <span class="chip info">live</span></div>
-        <div class="text-sm text-gray-600">Started by ${c.createdBy||'—'} · ${c.createdAt?new Date(c.createdAt).toLocaleDateString():'—'}</div>
-        <div class="mt-2 text-sm">Open to contributions.</div>`;
-      list.appendChild(card);
-    });
-    $('#channelEmpty')?.classList.toggle('hidden',!!filtered.length);
-  };
-
-  const openChannelBySlug=(slug)=>{
-    const ch = CHANNEL_CACHE.find(c=>c.slug===slug) || saved(K_CHANNELS).find(c=>c.slug===slug);
+  function openChannelBySlug(slug){
+    const channels=saved(K_CHANNELS); const ch=channels.find(c=>c.slug===slug);
     if(!ch){ alert('Channel not found'); return; }
     $('#chName').textContent='#'+ch.name;
-    $('#chMeta').textContent=`Created by ${ch.createdBy||'—'} · ${ch.createdAt?new Date(ch.createdAt).toLocaleString():'—'}`;
+    $('#chMeta').textContent=`Created by ${ch.createdBy} · ${new Date(ch.createdAt).toLocaleString()}`;
     $('#chHash').href=`#/p/${ch.slug}`;
+    const posts=readPosts().filter(p=>p.channelId===ch.id).sort((a,b)=>b.createdAt-a.createdAt);
 
-    // In local mode we can read local posts; in cloud we just show recent feed (posts snapshot already in feed)
-    const postsLocal = saved(K_POSTS).filter(p=>p.channelId===ch.id).sort((a,b)=>b.createdAt-a.createdAt);
     const tb=$('#chTable'); tb.innerHTML='';
-    postsLocal.filter(p=>p.type==='dock').forEach(p=>{
+    posts.filter(p=>p.type==='dock').forEach(p=>{
       const tr=document.createElement('tr');
       tr.innerHTML = `<td class="py-1">${new Date(p.createdAt).toLocaleDateString()}</td><td>${p.pdbId||''}</td><td class="break-all">${p.smiles||''}</td><td>${p.dG==null?'':p.dG}</td><td>${p.user?.username||''}</td>`;
       tb.appendChild(tr);
     });
     const feed=$('#chFeed'); feed.innerHTML='';
-    postsLocal.slice(0,12).forEach(p=>feed.appendChild(renderPostCard(p)));
+    posts.slice(0,12).forEach(p=>feed.appendChild(renderPostCard(p)));
 
     $('#channelView').classList.remove('hidden');
     showSectionById('channels'); setActiveNav('channels');
-  };
+  }
 
-  /* ---------- Auth (local label) ---------- */
-  const openProfile=()=>{$('#profileModal')?.classList.remove('hidden'); $('#profileModal')?.classList.add('flex'); $('#authMsg').textContent='';};
-  const closeProfile=()=>{$('#profileModal')?.classList.add('hidden'); $('#profileModal')?.classList.remove('flex');};
-  const signUp=()=>{ const username=$('#authUser').value.trim(), pass=$('#authPass').value, avatar=$('#authAvatar').value.trim(); if(!username||!pass){$('#authMsg').textContent='Provide username & password.';$('#authMsg').className='text-rose-700 text-sm';return;} const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; } users.push({id:crypto.randomUUID(),username,pass,avatar}); persist(K_USERS,users); setSession({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm'; };
-  const signIn=()=>{ const username=$('#authUser').value.trim(), pass=$('#authPass').value; const u=userdb().find(u=>u.username===username&&u.pass===pass); if(!u){$('#authMsg').textContent='Invalid credentials.';$('#authMsg').className='text-rose-700 text-sm';return;} setSession({username:u.username,avatar:u.avatar});};
-  const signOut=()=>{ localStorage.removeItem(K_SESSION); $('#profileBtn').textContent='Sign In'; closeProfile(); };
-
-  /* ---------- Posts (create) ---------- */
-  const upsertChannel = async (name)=>{
-    if(SYNC_MODE==='cloud') return await cloudUpsertChannel(name);
-    return upsertChannelLocal(name);
-  };
-  const addPost = async (p)=>{
-    if(SYNC_MODE==='cloud'){ await cloudAdd('posts', p); return; }
-    addPostLocal(p);
-  };
-  const createDockPost=async()=>{
-    const sess=getSession(); if(!sess){alert('Sign in first');return;}
-    const proteinName=$('#postProtein').value.trim(); if(!proteinName){alert('Enter protein name');return;}
-    const channel=await upsertChannel(proteinName);
-    const p={type:'dock',channelId:channel.id||null,channelSlug:channel.slug,proteinName,pdbId:$('#postPdbId').value.trim(),smiles:$('#postSmiles').value.trim(),dG:parseFloat($('#postDG').value)||null,mood:$('#postMood').value,notes:$('#postNotes').value,user:sess,createdAt:Date.now()};
-    if(SYNC_MODE==='local'){ p.id=crypto.randomUUID(); }
-    await addPost(p);
-    if(SYNC_MODE==='local'){ // immediate local refresh
-      refreshFeedLocal(); refreshChannelListLocal(); 
+  /* ===== Auth ===== */
+  function openProfile(){ const m=$('#profileModal'); if(m){ $('#authMsg').textContent=''; m.classList.remove('hidden'); m.classList.add('flex'); } }
+  function closeProfile(){ const m=$('#profileModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
+  function signUp(){
+    const username=$('#authUser').value.trim(), pass=$('#authPass').value, avatar=$('#authAvatar').value.trim();
+    if(!username||!pass){ $('#authMsg').textContent='Provide username & password.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
+    if(SYNC_MODE==='cloud'){
+      // For demo: local session label. Use Firebase Auth for production logins.
+      setSessionLocal({username, avatar});
+      $('#authMsg').textContent='Account created (local session label).'; $('#authMsg').className='text-green-700 text-sm';
+    }else{
+      const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
+      users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem(K_USERS, JSON.stringify(users));
+      setSessionLocal({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm';
     }
-    alert('Posted!');
-  };
-  const createNonDockPost=async()=>{
-    const sess=getSession(); if(!sess){alert('Sign in first');return;}
-    const proteinName=$('#postProtein').value.trim()||'General';
+  }
+  function signIn(){
+    const username=$('#authUser').value.trim(), pass=$('#authPass').value;
+    if(SYNC_MODE==='cloud'){
+      setSessionLocal({username, avatar:''});
+      return;
+    }
+    const users=userdb(); const u=users.find(u=>u.username===username && u.pass===pass);
+    if(!u){ $('#authMsg').textContent='Invalid credentials.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
+    setSessionLocal({username:u.username, avatar:u.avatar});
+  }
+  function signOut(){ localStorage.removeItem(K_SESSION); $('#profileBtn').textContent='Sign In'; closeProfile(); }
+
+  /* ===== Posts ===== */
+  async function createDockPost(){
+    const sess=getSession(); if(!sess){ alert('Sign in first'); return; }
+    const proteinName=$('#postProtein').value.trim(); if(!proteinName){ alert('Enter protein name'); return; }
     const channel=await upsertChannel(proteinName);
-    const p={type:$('#postType').value,channelId:channel.id||null,channelSlug:channel.slug,proteinName,title:$('#postTitle').value,content:$('#postContent').value,user:sess,createdAt:Date.now()};
-    if(SYNC_MODE==='local'){ p.id=crypto.randomUUID(); }
+    const p={
+      id:crypto.randomUUID(),
+      type:'dock',
+      channelId:channel.id || null,
+      channelSlug:channel.slug,
+      proteinName,
+      pdbId:$('#postPdbId').value.trim(),
+      smiles:$('#postSmiles').value.trim(),
+      dG:parseFloat($('#postDG').value)||null,
+      mood:$('#postMood').value,
+      notes:$('#postNotes').value,
+      user:sess,
+      createdAt:Date.now()
+    };
     await addPost(p);
-    if(SYNC_MODE==='local'){ refreshFeedLocal(); refreshChannelListLocal(); }
+    buildAlphaIndex(SYNC_MODE==='cloud' ? [] : readPosts());
+    await refreshFeed(); await refreshChannelList();
+    alert('Posted!');
+  }
+  async function createNonDockPost(){
+    const sess=getSession(); if(!sess){ alert('Sign in first'); return; }
+    const proteinName=$('#postProtein').value.trim();
+    const channel=await upsertChannel(proteinName||'General');
+    const p={
+      id:crypto.randomUUID(),
+      type:$('#postType').value,
+      channelId:channel.id || null,
+      channelSlug:channel.slug,
+      proteinName:proteinName||'General',
+      title:$('#postTitle').value,
+      content:$('#postContent').value,
+      user:sess,
+      createdAt:Date.now()
+    };
+    await addPost(p);
+    buildAlphaIndex(SYNC_MODE==='cloud' ? [] : readPosts());
+    await refreshFeed(); await refreshChannelList();
     alert('Published!');
-  };
+  }
 
-  /* ---------- PBPK ---------- */
-  const runPBPK=()=>{
-    const Dose=+$('#dose').value||0, F=(+$('#F').value||0)/100, Vd=+$('#Vd').value||1; let ka=+$('#ka').value||0, ke=+$('#ke').value||0; if(ka===ke) ka+=1e-6;
-    const dt=0.25,t=[]; for(let x=0;x<=48;x+=dt) t.push(+x.toFixed(2));
-    const A=(F*Dose/Vd)*(ka/(ka-ke)), C=t.map(tt=>Math.max(0, A*(Math.exp(-ke*tt)-Math.exp(-ka*tt)))); const Kd=20, Occ=C.map(c=>c/(c+Kd));
-    const Cmax=Math.max(...C), Tmax=t[C.indexOf(Cmax)], AUC=trapz(t,C);
-    $('#cmax').textContent=Cmax.toFixed(2)+' mg/L'; $('#tmax').textContent=Tmax.toFixed(2)+' h'; $('#auc').textContent=AUC.toFixed(2)+' mg·h/L';
-    chartMake('pkChart',{type:'line',data:{labels:t,datasets:[{label:'Plasma (mg/L)',data:C,borderWidth:2,fill:false}]},options:{scales:{x:{title:{display:true,text:'Time (h)'}},y:{beginAtZero:true,title:{display:true,text:'mg/L'}}}}});
-    chartMake('occChart',{type:'line',data:{labels:t,datasets:[{label:'Target Occupancy',data:Occ,borderWidth:2,fill:false}]},options:{scales:{x:{title:{display:true,text:'Time (h)'}},y:{beginAtZero:true,max:1,title:{display:true,text:'Fraction'}}}}});
+  /* ===== PBPK/QSP ===== */
+  function runPBPK(){
+    const Dose = parseFloat($('#dose').value)||0;
+    const F    = (parseFloat($('#F').value)||0)/100;
+    let ka     = parseFloat($('#ka').value)||0;
+    let ke     = parseFloat($('#ke').value)||0;
+    const Vd   = parseFloat($('#Vd').value)||1;
+    if(ka===ke){ ka += 1e-6; }
+
+    const dt=0.25, t=[], C=[], Occ=[];
+    const Kd=20;
+    for(let x=0; x<=48+1e-6; x+=dt){ t.push(+x.toFixed(2)); }
+    const A = (F*Dose/Vd)*(ka/(ka-ke));
+    for(const ti of t){
+      const c = A*(Math.exp(-ke*ti) - Math.exp(-ka*ti));
+      const cc = Math.max(0,c);
+      C.push(cc);
+      Occ.push(cc/(cc+Kd));
+    }
+    const Cmax = Math.max(...C);
+    const Tmax = t[C.indexOf(Cmax)];
+    const AUC  = trapz(t,C);
+    $('#cmax').textContent = Cmax.toFixed(2)+' mg/L';
+    $('#tmax').textContent = Tmax.toFixed(2)+' h';
+    $('#auc').textContent  = AUC.toFixed(2)+' mg·h/L';
+    makeChart('pkChart',{ type:'line', data:{ labels:t, datasets:[{ label:'Plasma (mg/L)', data:C, borderWidth:2, fill:false }]},
+      options:{ scales:{ x:{ title:{display:true, text:'Time (h)'} }, y:{ beginAtZero:true, title:{display:true, text:'mg/L'} } } }});
+    makeChart('occChart',{ type:'line', data:{ labels:t, datasets:[{ label:'Target Occupancy', data:Occ, borderWidth:2, fill:false }]},
+      options:{ scales:{ x:{ title:{display:true, text:'Time (h)'} }, y:{ beginAtZero:true, max:1, title:{display:true, text:'Fraction'} } } }});
     setStatus('PBPK run complete.','ok');
-  };
+  }
 
-  /* ---------- Clinical ---------- */
-  const mulberry32=a=>()=>{let t=a+=0x6D2B79F5; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296;};
-  const simulateTrial=()=>{
-    const L=Math.max(1,+$('#levels').value||6), N=Math.max(1,+$('#cohort').value||3), start=Math.max(1e-3,+$('#startDose').value||10), target=Math.max(1,Math.min(90,+$('#tox').value||25))/100, esc=Math.max(1.01,+$('#esc').value||1.5), seed=(+$('#seed').value||42)>>>0, rnd=mulberry32(seed);
-    const doses=Array.from({length:L},(_,i)=>start*Math.pow(esc,i)), base=target/2, pDLT=doses.map((_,i)=>Math.max(0.02,Math.min(0.9, base*Math.pow(esc,i-Math.floor(L/2)))));
-    const cohorts=[]; let level=0, mtd=null;
-    const enroll=(lv,n)=>{let d=0; for(let i=0;i<n;i++) if(rnd()<pDLT[lv]) d++; cohorts.push({dose:doses[lv],n, dlt:d}); return d;};
-    while(true){ const d1=enroll(level,N); if(d1===0){ if(level===L-1){mtd=level+1;break;} level++; } else if(d1===1){ const d2=enroll(level,N); if(d1+d2<=1){ if(level===L-1){mtd=level+1;break;} level++; } else { mtd=level>0?level:1; break; } } else { mtd=level>0?level:1; break; } if(cohorts.length>50){mtd=Math.max(1,level); break;} }
-    return {doses,cohorts,mtd};
-  };
-  const renderTrial=t=>{
-    const tb=$('#trialTable'); tb.innerHTML=''; t.cohorts.forEach((c,i)=>{const tr=document.createElement('tr'); tr.innerHTML=`<td class="py-1">${i+1}</td><td>${c.dose.toFixed(2)}</td><td>${c.dlt}</td><td>${c.n}</td>`; tb.appendChild(tr);});
-    const badge=$('#trialBadge'); badge.classList.remove('hidden'); badge.textContent=t.mtd?`MTD at level ${t.mtd} (≈${t.doses[t.mtd-1].toFixed(2)} mg)`:'No MTD'; badge.className='chip '+(t.mtd?'pos':'warn');
-    chartMake('trialChart',{type:'bar',data:{labels:t.cohorts.map((_,i)=>`C${i+1}`),datasets:[{type:'bar',label:'DLTs',data:t.cohorts.map(c=>c.dlt),borderWidth:1},{type:'line',label:'Dose (mg)',data:t.cohorts.map(c=>c.dose),yAxisID:'y2',borderWidth:2}]},options:{scales:{y:{beginAtZero:true,title:{display:true,text:'DLTs'}},y2:{position:'right',beginAtZero:true,title:{display:true,text:'Dose (mg)'}}}}});
-  };
-  const runOneTrial=()=>{const t=simulateTrial(); renderTrial(t); setStatus('3+3 trial simulated.','ok');};
-  const runHundredTrials=()=>{const L=Math.max(1,+$('#levels').value||6); const N=100, m=[]; for(let i=0;i<N;i++) m.push(simulateTrial().mtd||0); const avg=m.reduce((a,b)=>a+b,0)/N; const bins=Array.from({length:L+1},()=>0); m.forEach(k=>bins[k]++); const badge=$('#trialBadge'); badge.classList.remove('hidden'); badge.textContent=`100 sims · Avg MTD level: ${avg.toFixed(2)}`; badge.className='chip info'; chartMake('trialChart',{type:'bar',data:{labels:['None',...Array.from({length:L},(_,i)=>String(i+1))],datasets:[{label:'MTD frequency (out of 100)',data:bins,borderWidth:1}]},options:{scales:{y:{beginAtZero:true}}}}); $('#trialTable').innerHTML=''; setStatus('Ran 100 simulated trials.','ok'); };
+  /* ===== 3+3 Clinical ===== */
+  function mulberry32(a){ return function(){ let t=a+=0x6D2B79F5; t = Math.imul(t ^ t>>>15, t | 1); t ^= t + Math.imul(t ^ t>>>7, t | 61); return ((t ^ t>>>14) >>> 0) / 4294967296; } }
+  function simulateTrial(){
+    const levels = Math.max(1, parseInt($('#levels').value)||6);
+    const cohort = Math.max(1, parseInt($('#cohort').value)||3);
+    const startDose = Math.max(0.001, parseFloat($('#startDose').value)||10);
+    const target = Math.max(1, Math.min(90, parseFloat($('#tox').value)||25))/100;
+    const esc = Math.max(1.01, parseFloat($('#esc').value)||1.5);
+    const seed = (parseInt($('#seed').value)||42) >>> 0;
+    const rand = mulberry32(seed);
 
-  /* ---------- Podcasts ---------- */
-  const RSS='https://anchor.fm/s/2ded5364/podcast/rss';
-  const fetchWithTimeout=(url,{ms=8000}={})=>Promise.race([fetch(url), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
-  const fetchRSS=async()=>{
-    try{ const r=await fetchWithTimeout(RSS); if(!r.ok) throw new Error('rss http '+r.status); return await r.text(); }
-    catch{ const r=await fetchWithTimeout('https://api.allorigins.win/raw?url='+encodeURIComponent(RSS)); if(!r.ok) throw new Error('proxy http '+r.status); return await r.text(); }
-  };
-  const parseRSS=xml=>{const doc=new DOMParser().parseFromString(xml,'application/xml'); const items=[...doc.querySelectorAll('item')].slice(0,60); return items.map(it=>({title:it.querySelector('title')?.textContent?.trim()||'Untitled', pubDate:it.querySelector('pubDate')?.textContent||'', url:it.querySelector('enclosure')?.getAttribute('url')||it.querySelector('link')?.textContent||'', author:it.querySelector('itunes\\:author, author')?.textContent||'', duration:it.querySelector('itunes\\:duration')?.textContent||''})); };
-  const renderPodcastList=list=>{ const box=$('#podcastList'); if(!box) return; box.innerHTML=''; list.forEach(ep=>{ const b=document.createElement('button'); b.className='text-left border rounded-lg p-3 bg-white hover:bg-slate-50 transition'; b.innerHTML=`<div class="font-semibold truncate">${ep.title}</div><div class="text-xs text-slate-600">${new Date(ep.pubDate).toLocaleString()} ${ep.duration?('· '+ep.duration):''}</div>`; b.addEventListener('click',()=>{ const ap=$('#audioPlayer'); if(ap){ ap.src=ep.url; ap.play().catch(()=>{});} $('#npTitle').textContent=ep.title; $('#npMeta').textContent=ep.author?`${ep.author} · ${new Date(ep.pubDate).toLocaleDateString()}`:new Date(ep.pubDate).toLocaleDateString();}); box.appendChild(b); }); };
+    const doses = Array.from({length:levels}, (_,i)=> startDose * Math.pow(esc, i));
+    const base = target/2;
+    const pDLT = doses.map((_,i)=>{
+      const scale = Math.pow(esc, i - Math.floor(levels/2));
+      return Math.max(0.02, Math.min(0.90, base * scale));
+    });
 
-  /* ---------- Wire up ---------- */
+    const cohorts=[];
+    let level=0, mtdLevel=null;
+    function enroll(atLevel, n){
+      let dlt=0;
+      for(let i=0;i<n;i++){ if(rand() < pDLT[atLevel]) dlt++; }
+      cohorts.push({dose:doses[atLevel], level:atLevel+1, n, dlt});
+      return dlt;
+    }
+    while(true){
+      const dlt1 = enroll(level, cohort);
+      if(dlt1===0){
+        if(level===levels-1){ mtdLevel=level+1; break; }
+        level++;
+      }else if(dlt1===1){
+        const dlt2 = enroll(level, cohort);
+        const total = dlt1 + dlt2;
+        if(total<=1){
+          if(level===levels-1){ mtdLevel=level+1; break; }
+          level++;
+        }else{ mtdLevel = level>0 ? level : 1; break; }
+      }else{ mtdLevel = level>0 ? level : 1; break; }
+      if(cohorts.length>50){ mtdLevel = Math.max(1, level); break; }
+    }
+    return { doses, pDLT, cohorts, mtdLevel };
+  }
+  function renderTrial(trial){
+    const tb=$('#trialTable'); tb.innerHTML='';
+    trial.cohorts.forEach((c,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td class="py-1">${i+1}</td><td>${c.dose.toFixed(2)}</td><td>${c.dlt}</td><td>${c.n}</td>`;
+      tb.appendChild(tr);
+    });
+    const badge=$('#trialBadge');
+    badge.classList.remove('hidden');
+    const txt = trial.mtdLevel ? `MTD at level ${trial.mtdLevel} (≈${trial.doses[trial.mtdLevel-1].toFixed(2)} mg)` : 'No MTD';
+    badge.textContent = txt;
+    badge.className = 'chip ' + (trial.mtdLevel ? 'pos' : 'warn');
+    const labels = trial.cohorts.map((_,i)=>`C${i+1}`);
+    const dltData = trial.cohorts.map(c=>c.dlt);
+    const doseStep = trial.cohorts.map(c=>c.dose);
+    makeChart('trialChart',{
+      type:'bar',
+      data:{ labels, datasets:[
+        { type:'bar', label:'DLTs', data:dltData, borderWidth:1 },
+        { type:'line', label:'Dose (mg)', data:doseStep, yAxisID:'y2', borderWidth:2 }
+      ]},
+      options:{ scales:{ y:{ beginAtZero:true, title:{display:true, text:'DLTs'} }, y2:{ position:'right', beginAtZero:true, title:{display:true, text:'Dose (mg)'} } } }
+    });
+  }
+  function runOneTrial(){ const t=simulateTrial(); renderTrial(t); setStatus('3+3 trial simulated.','ok'); }
+  function runHundredTrials(){
+    const N=100, mtds=[];
+    for(let i=0;i<N;i++){ const t=simulateTrial(); mtds.push(t.mtdLevel||0); }
+    const avg = mtds.reduce((a,b)=>a+b,0)/N;
+    const badge=$('#trialBadge');
+    badge.classList.remove('hidden');
+    badge.textContent = `100 sims · Avg MTD level: ${avg.toFixed(2)}`;
+    badge.className = 'chip info';
+    const levels = Math.max(1, parseInt($('#levels').value)||6);
+    const bins = Array.from({length:levels+1},()=>0);
+    mtds.forEach(k=>bins[k]++);
+    const labels = ['None', ...Array.from({length:levels}, (_,i)=>String(i+1))];
+    makeChart('trialChart',{ type:'bar', data:{ labels, datasets:[{ label:'MTD frequency (out of 100)', data:bins, borderWidth:1 }]}, options:{ scales:{ y:{ beginAtZero:true } } } });
+    $('#trialTable').innerHTML='';
+    setStatus('Ran 100 simulated trials.','ok');
+  }
+
+  /* ===== Podcast: RSS feed with CORS-safe fetch ===== */
+  const RSS_URL = 'https://anchor.fm/s/2ded5364/podcast/rss';
+  async function fetchRSS(url){
+    try{
+      const r=await fetch(url);
+      if(!r.ok) throw new Error('RSS fetch failed');
+      return await r.text();
+    }catch(_){
+      const r=await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+      if(!r.ok) throw new Error('RSS proxy fetch failed');
+      return await r.text();
+    }
+  }
+  function parseRSS(xmlText){
+    const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    const items = [...doc.querySelectorAll('item')].slice(0,50);
+    return items.map(it=>{
+      const title = it.querySelector('title')?.textContent?.trim() || 'Untitled';
+      const pubDate = it.querySelector('pubDate')?.textContent || '';
+      const enclosure = it.querySelector('enclosure')?.getAttribute('url') || '';
+      const link = enclosure || it.querySelector('link')?.textContent || '';
+      const author = it.querySelector('itunes\\:author, author')?.textContent || '';
+      const duration = it.querySelector('itunes\\:duration')?.textContent || '';
+      return { title, pubDate, url: link, author, duration };
+    });
+  }
+  function renderPodcastList(list){
+    const box = $('#podcastList'); if(!box) return;
+    box.innerHTML='';
+    list.forEach((ep)=>{
+      const card=document.createElement('button');
+      card.className='text-left border rounded-lg p-3 bg-white hover:bg-slate-50 transition';
+      card.innerHTML=`
+        <div class="font-semibold truncate">${ep.title}</div>
+        <div class="text-xs text-slate-600">${new Date(ep.pubDate).toLocaleString()} ${ep.duration?('· '+ep.duration):''}</div>
+      `;
+      card.addEventListener('click', ()=>{
+        const ap=$('#audioPlayer'); if(ap){ ap.src=ep.url; ap.play().catch(()=>{}); }
+        $('#npTitle').textContent = ep.title;
+        $('#npMeta').textContent  = ep.author ? `${ep.author} · ${new Date(ep.pubDate).toLocaleDateString()}` : new Date(ep.pubDate).toLocaleDateString();
+      });
+      box.appendChild(card);
+    });
+  }
+
+  /* ===== Wire up ===== */
   document.addEventListener('DOMContentLoaded', async ()=>{
-    // Init Cloud
+    // Init Cloud (optional but enabled here with restricted key)
     initCloudIfAvailable();
 
-    // RDKit
-    try{ await initRDKit(); }catch(e){ console.error(e); setStatus('RDKit failed to load.','err'); }
+    // RDKit WASM load
+    const RD_BASE='https://unpkg.com/@rdkit/rdkit/dist/';
+    try{
+      RDKitModule = await initRDKitModule({ locateFile: file => RD_BASE + file });
+      setStatus('Libraries ready. RDKit initialized.','ok');
+    }catch(e){
+      console.error(e); setStatus('RDKit failed to load.','err');
+    }
 
     ensureViewer(); wirePdbDropZone();
 
-    // Buttons
+    // Protein buttons
     on('#loadLocalPdbBtn','click',loadLocalPdb);
     on('#fetchPdbBtn','click',fetchPdb);
     on('#clearProteinBtn','click',clearProtein);
     on('#resetViewBtn','click',resetView);
-    on('#useExampleBtn','click',()=>{const s=$('#exampleSmiles'); if(s?.value){ $('#smiles').value=s.value; processSmilesString(s.value); }});
-    on('#loadSmilesBtn','click',()=>processSmilesString($('#smiles').value));
+
+    // Ligand buttons
+    on('#useExampleBtn','click',useExampleSmiles);
+    on('#loadSmilesBtn','click',loadSmilesBtn);
     on('#clearLigandBtn','click',clearLigand);
+
+    // Docking controls
     on('#dockBtn','click',runDock);
     on('#centerBtn','click',recenterAndRescore);
     on('#clearAllBtn','click',clearAll);
-    on('#prefillFromDock','click',()=>{const map={postProtein:latestDock.proteinName||'',postPdbId:latestDock.pdbId||'',postSmiles:latestDock.smiles||'',postDG:latestDock.dG||''}; Object.entries(map).forEach(([id,v])=>{$('#'+id).value=v}); showSectionById('community'); setActiveNav('community');});
+
+    // Prefill post
+    on('#prefillFromDock','click',()=>{
+      const map = {
+        postProtein: latestDock.proteinName || '',
+        postPdbId:   latestDock.pdbId || '',
+        postSmiles:  latestDock.smiles || '',
+        postDG:      latestDock.dG || ''
+      };
+      Object.entries(map).forEach(([id,val])=>{ const el=$('#'+id); if(el) el.value=val; });
+    });
     on('#createPostBtn','click',createDockPost);
     on('#createNonDockBtn','click',createNonDockPost);
+
+    // Auth
     on('#profileBtn','click',openProfile);
     on('#closeProfileBtn','click',closeProfile);
     on('#signUpBtn','click',signUp);
     on('#signInBtn','click',signIn);
     on('#signOutBtn','click',signOut);
+
+    // PBPK / Clinical
     on('#runPBPKBtn','click',runPBPK);
     on('#runTrialBtn','click',runOneTrial);
     on('#run100Btn','click',runHundredTrials);
 
-    // Scoring info
-    const infoByModel={balanced:"Balances size, H-bonding, hydrophobics, flexibility.",hbond:"Rewards donors/acceptors; good for polar pockets.",hydrophobic:"Rewards nonpolar fit; penalizes excess polarity."};
-    const smSel=$('#scoringModel'); smSel?.addEventListener('change',()=>$('#modelInfoText').textContent=infoByModel[smSel.value]||''); smSel?.dispatchEvent(new Event('change'));
-
-    // Routing
-    navigateFromHash(); resetMetrics(); refreshButtons();
-
-    // Live listeners (cloud) or local refresh
-    if(SYNC_MODE==='cloud'){
-      // Posts live
-      cloudOnPosts((posts)=>{ refreshFeedCloud(posts); });
-      // Channels live
-      cloudOnChannels((channels)=>{ refreshChannelListCloud(channels); });
-    }else{
-      // Local storage mode
-      refreshFeedLocal();
-      refreshChannelListLocal();
+    // Scoring model helper text
+    const infoByModel={
+      balanced:"Balances size, H-bonding, hydrophobics, flexibility.",
+      hbond:"Rewards donors/acceptors; good for polar pockets.",
+      hydrophobic:"Rewards nonpolar fit; penalizes excess polarity."
+    };
+    const smSel=$('#scoringModel');
+    if(smSel){
+      smSel.addEventListener('change',()=>{ $('#modelInfoText').textContent = infoByModel[smSel.value] || ''; });
+      smSel.dispatchEvent(new Event('change'));
     }
 
-    // Podcasts
-    try{ const xml=await fetchRSS(); renderPodcastList(parseRSS(xml)); }catch(e){ console.warn('Podcast load failed:',e); const box=$('#podcastList'); if(box) box.innerHTML=`<div class="text-sm text-rose-700">Couldn’t load RSS. You can still paste audio URLs into the player.</div>`; }
+    // Init UI
+    navigateFromHash();
+    resetMetrics();
+    refreshButtons();
+
+    // Live updates (cloud) / local fallback
+    if(SYNC_MODE==='cloud'){
+      cloudOnSnapshot('posts', async ()=>{ await refreshFeed(); });
+      await refreshChannelList();
+    }else{
+      await refreshFeed();
+      await refreshChannelList();
+    }
+
+    // Load Podcasts
+    try{
+      const xml = await fetchRSS(RSS_URL);
+      const eps = parseRSS(xml);
+      renderPodcastList(eps);
+    }catch(e){
+      console.warn('Podcast load failed:', e);
+      const box=$('#podcastList');
+      if(box) box.innerHTML = `<div class="text-sm text-rose-700">Couldn’t load RSS. You can still paste audio URLs into the player.</div>`;
+    }
   });
   </script>
 
-  <!-- Profile Modal -->
+  <!-- Profile modal -->
   <div id="profileModal" class="fixed inset-0 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="absolute inset-0 bg-black/50"></div>
     <div class="relative glass p-4 w-full max-w-md">
       <h3 id="authTitle" class="font-bold text-lg mb-2">Sign Up / Sign In</h3>
-      <p class="text-xs text-gray-600 -mt-1 mb-3">Local session; Firestore provides live multi-user feed. Add Firebase Auth later if desired.</p>
+      <p class="text-xs text-gray-600 -mt-1 mb-3">Local session; Firestore cloud sync is enabled with a restricted browser key.</p>
       <label class="block text-sm font-semibold">Username</label>
       <input id="authUser" class="input" placeholder="e.g., ligand_lover">
       <label class="block text-sm font-semibold mt-2">Password</label>
