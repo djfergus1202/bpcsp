@@ -1,159 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-  <title>PharmaSim Pro · Social Computational Chemistry</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Ferguson's Pharmaceutical Research Idea Platform</title>
 
-  <!-- Tailwind + Font -->
+  <!-- Tailwind + Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 
   <!-- Scientific Libraries -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <script defer src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
   <style>
-    :root { --ink:#0b1630; --brand:#2a5298; --brand2:#1e3c72; }
-    *{ box-sizing:border-box; }
-    html, body { height:100%; }
-    body{
-      font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color: var(--ink);
-      background: linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%);
+    :root{--ink:#0b1630;--brand:#2a5298;--brand2:#1e3c72}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+      background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#7e8ba3 100%)}
+    .glass{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 10px 26px rgba(0,0,0,.12);border-radius:16px}
+    .panel{padding:18px}
+    .section{display:none}
+    .section.active{display:block}
+    .btn{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;font-weight:700;border-radius:10px;padding:.65rem .9rem}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .input, select, textarea{width:100%;padding:.65rem .8rem;border:2px solid #e5e7eb;border-radius:10px;background:#f8f9fa}
+    .input:focus, select:focus, textarea:focus{outline:none;border-color:#2a5298;background:#fff;box-shadow:0 0 0 3px rgba(42,82,152,.12)}
+    .chip{display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .6rem;border-radius:999px;font-weight:700;font-size:.75rem}
+    .chip.pos{background:#ecfdf5;color:#065f46}.chip.info{background:#eff6ff;color:#1e3a8a}.chip.warn{background:#fff7ed;color:#9a3412}.chip.err{background:#fee2e2;color:#991b1b}
+    .feed-card{border:1px solid #e6eaf2;border-radius:16px;padding:14px;background:#fff}
+    .feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+
+    /* Bricks layout + roomy metric tiles */
+    .bricks{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .brick{grid-column:span 12}
+    @media(min-width:1024px){
+      .brick-4{grid-column:span 4}
+      .brick-8{grid-column:span 8}
+      .brick-6{grid-column:span 6}
+      .brick-3{grid-column:span 3}
+    }
+    .metric{background:linear-gradient(135deg,#f8f9fa,#e9eef6);border-radius:14px;padding:14px;text-align:center;min-height:84px;display:flex;flex-direction:column;justify-content:center}
+    .metric .title{font-size:.8rem;color:#475569;margin-bottom:4px}
+    .metric .v{font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,#2a5298,#1e3c72);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+    .split{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
+    @media(max-width:1024px){.split{grid-template-columns:1fr}}
+    .split>div{min-width:0}
+    #viewer{width:100%;min-height:460px;height:460px;border-radius:12px;background:#eef2f7}
+
+    #pdbDrop{min-height:120px;max-height:160px;overflow:auto}
+    @media(max-width:640px){#pdbDrop{min-height:100px;max-height:120px}}
+
+    main{scroll-margin-top:84px}
+    a.hash{color:#1e3c72;font-weight:600}
+    nav button{white-space:nowrap;font-size:.875rem}
+    nav{flex-wrap:wrap;gap:.5rem;justify-content:flex-end}
+    @media(max-width:768px){
+      nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.25rem}
     }
 
-    /* Bricks layout + comfy spacing */
-    .bricks{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap:18px;
-      align-items:start;
-    }
-
-    .glass{ background: rgba(255,255,255,.92); backdrop-filter: blur(10px); box-shadow: 0 10px 26px rgba(0,0,0,.12); border-radius: 16px; }
-    .panel{ padding: 18px; }
-
-    .btn{ background: linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; font-weight: 700; border-radius: 10px; padding: .65rem .9rem; }
-    .btn:disabled{ opacity:.6; cursor:not-allowed; }
-    .btn-plain{ background:#fff; border-radius:10px; padding:.6rem .9rem; font-weight:600; }
-
-    .input, select, textarea{ width:100%; padding:.65rem .8rem; border:2px solid #e5e7eb; border-radius:10px; background:#f8f9fa; }
-    .input:focus, select:focus, textarea:focus{ outline:none; border-color:#2a5298; background:#fff; box-shadow:0 0 0 3px rgba(42,82,152,.12); }
-
-    .chip{ display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .6rem; border-radius:999px; font-weight:700; font-size:.75rem; }
-    .chip.pos{ background:#ecfdf5; color:#065f46; } .chip.info{ background:#eff6ff; color:#1e3a8a; }
-    .chip.warn{ background:#fff7ed; color:#9a3412; } .chip.err{ background:#fee2e2; color:#991b1b; }
-
-    /* Metric cards: room to breathe */
-    .metrics-grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap:12px;
-    }
-    .metric{
-      background: linear-gradient(135deg,#f8f9fa,#e9eef6);
-      border-radius: 12px;
-      padding: 14px;
-      text-align:center;
-      min-height: 92px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-    }
-    .metric .v{
-      margin-top: 6px;
-      font-size:1.2rem; font-weight: 800;
-      background: linear-gradient(135deg,#2a5298,#1e3c72);
-      -webkit-background-clip:text; background-clip:text; color: transparent;
-    }
-
-    #viewer{ width:100%; min-height:420px; height:420px; border-radius:12px; background:#eef2f7; }
-    #pdbDrop{ min-height:120px; max-height:160px; overflow:auto; }
-    @media (max-width:640px){ #pdbDrop{ min-height:100px; max-height:120px; } }
-
-    header{ position: sticky; top:0; z-index:40; }
-    .navlink{ display:inline-flex; align-items:center; justify-content:center; padding:.5rem .75rem; border-radius:.75rem; font-weight:600; background:#fff; }
-    .navlink[aria-current="page"]{ color:#fff; background: linear-gradient(135deg,#2a5298,#1e3c72); }
-
-    main{ scroll-margin-top: 84px; }
-    .feed-card{ border:1px solid #e6eaf2; border-radius:16px; padding:14px; background:#fff; }
-    a.hash{ color:#1e3c72; font-weight:600; }
-    .section{ display:none; }
-    .section.active{ display:block; }
+    footer p{font-size:.8rem;color:#334155}
   </style>
+
+  <!-- Firebase: your exact config + SDKs (module imports) -->
+  <script>
+    window.FIREBASE_CONFIG = {
+      apiKey: "AIzaSyC0jQFJKMSnPyjW0uiiW1E9EV-ww9zw-0w",
+      authDomain: "pharmsimfergpro.firebaseapp.com",
+      projectId: "pharmsimfergpro",
+      storageBucket: "pharmsimfergpro.firebasestorage.app",
+      messagingSenderId: "228496856805",
+      appId: "1:228496856805:web:07d0ae011906837c6ae60c",
+      measurementId: "G-2V7XMZ2ZXW"
+    };
+  </script>
+
+  <script type="module">
+    // Firebase ESM SDKs from gstatic
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, setDoc, addDoc, getDoc,
+      onSnapshot, query, orderBy, where, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- Init ---
+    const app = initializeApp(window.FIREBASE_CONFIG);
+    // Analytics (will no-op if unsupported environment)
+    try { getAnalytics(app); } catch(e) { /* ignore */ }
+
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    async function ensureSignedIn(){
+      if(!auth.currentUser){
+        try{ await signInAnonymously(auth); }catch(e){ console.error(e); }
+      }
+    }
+    onAuthStateChanged(auth,(user)=>{
+      const btn=document.getElementById('profileBtn');
+      if(btn) btn.textContent = user ? (user.isAnonymous?'Anon User':(user.displayName||'User')) : 'Sign In';
+    });
+    await ensureSignedIn();
+
+    // --- Collections
+    const postsCol    = collection(db,"posts");
+    const channelsCol = collection(db,"channels");
+
+    // --- Cloud helpers exposed to window so regular script can use them
+    window.upsertChannelCloud = async function(name, createdBy="anon"){
+      const slug=(name||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      if(!slug) return null;
+      const ref=doc(channelsCol,slug);
+      const snap=await getDoc(ref);
+      if(!snap.exists()){
+        await setDoc(ref,{slug,name,description:"",createdBy,createdAt:serverTimestamp()});
+      }
+      return { id: slug, slug, name };
+    };
+
+    window.createPostCloud = async function(post){
+      await ensureSignedIn();
+      return await addDoc(postsCol,{...post,createdAt:serverTimestamp(),uid:auth.currentUser?.uid||null});
+    };
+
+    window.subscribeFeedCloud = function(cb){
+      const qy=query(postsCol,orderBy("createdAt","desc"));
+      return onSnapshot(qy,(snap)=>{
+        const arr=[]; snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+        cb(arr);
+      });
+    };
+
+    window.subscribeChannelsCloud = function(cb){
+      const qy=query(channelsCol,orderBy("name","asc"));
+      return onSnapshot(qy,(snap)=>{
+        const arr=[]; snap.forEach(d=>arr.push({id:d.id||d.data().slug,...d.data()}));
+        cb(arr);
+      });
+    };
+
+    window.subscribeChannelPostsCloud = function(slug,cb){
+      const qy=query(postsCol, where("channelSlug","==",slug), orderBy("createdAt","desc"));
+      return onSnapshot(qy,(snap)=>{
+        const arr=[]; snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+        cb(arr);
+      });
+    };
+
+    // Make Firebase objects available if you need advanced tweaks later
+    window.__firebase = { app, auth, db };
+  </script>
 </head>
 <body>
 
-  <!-- Header / Nav -->
-  <header class="glass">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="text-2xl font-extrabold" style="color:#1e3c72">PharmaSim Pro</div>
-        <span class="chip info">Social Computational Chemistry</span>
-      </div>
-
-      <nav class="flex flex-wrap gap-2" role="navigation" aria-label="Primary">
-        <a href="#/md"        class="navlink" data-route="md">Docking</a>
-        <a href="#/pbpk"      class="navlink" data-route="pbpk">PBPK/QSP</a>
-        <a href="#/clinical"  class="navlink" data-route="clinical">Clinical</a>
-        <a href="#/mdsetup"   class="navlink" data-route="mdsetup">MD Setup</a>
-        <a href="#/community" class="navlink" data-route="community">Community</a>
-        <a href="#/channels"  class="navlink" data-route="channels">Channels</a>
-        <a href="#/pub"       class="navlink" data-route="pub">Publications</a>
-        <a href="#/learn"     class="navlink" data-route="learn">Learning</a>
-      </nav>
-
-      <div class="flex items-center gap-3">
-        <div id="statusBadge" class="chip warn">Initializing…</div>
-        <button id="profileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Sign In</button>
-      </div>
+<!-- NAV -->
+<header class="sticky top-0 z-40 glass">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="text-2xl font-extrabold" style="color:#1e3c72">Ferguson's Pharmaceutical Research Idea Platform</div>
+      <span class="chip info">Social Computational Chemistry</span>
     </div>
-  </header>
-
-  <!-- Disclaimer -->
-  <div class="max-w-7xl mx-auto px-4 mt-3">
-    <div class="glass panel text-sm leading-relaxed">
-      <strong>Disclaimer:</strong> For <em>educational/research</em> use only. Docking scores, PBPK/QSP, and clinical simulations are approximations. Validate with experiments before decisions.
+    <nav class="hidden md:flex items-center gap-2">
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="md" data-anchor="#md">Docking</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="pbpk" data-anchor="#pbpk">PBPK/QSP</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="clinical" data-anchor="#clinical">Clinical</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="mdsetup" data-anchor="#mdsetup">MD Setup</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="community" data-anchor="#community">Community</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="channels" data-anchor="#channels">Channels</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="pub" data-anchor="#pub">Publications</button>
+      <button class="px-3 py-2 rounded-lg font-semibold nav-tab bg-white" data-t="learn" data-anchor="#learn">Learning</button>
+    </nav>
+    <div class="flex items-center gap-3">
+      <div id="statusBadge" class="chip warn">Initializing…</div>
+      <button id="profileBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Sign In</button>
     </div>
   </div>
+</header>
 
-  <!-- Main -->
-  <main class="max-w-7xl mx-auto px-4 my-4">
-    <!-- SECTION: DOCKING -->
-    <section id="md" class="section active" data-title="Docking">
-      <div class="bricks">
+<!-- DISCLAIMER -->
+<div class="max-w-7xl mx-auto px-4 mt-3">
+  <div class="glass panel text-sm leading-relaxed">
+    <strong>Disclaimer:</strong> For <em>educational/research</em> use only. Simulations and analytics are approximations; verify with experiments and qualified review before decisions.
+  </div>
+</div>
+
+<main class="max-w-7xl mx-auto px-4 my-4">
+  <!-- DOCKING -->
+  <section id="md" class="glass panel section active">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+      <h2 class="text-xl font-bold">Ligand Prep & Structure-Aware Heuristic Docking</h2>
+      <div class="text-sm text-slate-700">Load a PDB + SMILES, then run a quick scoring pass.</div>
+    </div>
+
+    <div class="split">
+      <!-- Left: Inputs -->
+      <div>
         <!-- Protein -->
-        <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">Protein (PDB)</h2>
+        <div class="mb-4 glass panel">
+          <h3 class="font-semibold mb-2">Protein (PDB)</h3>
           <div id="pdbDrop" class="w-full border-2 border-dashed border-gray-300 rounded-xl bg-white/70 p-4 text-center text-gray-600 hover:border-indigo-400 hover:bg-white transition">
             <div class="font-semibold">Drag & Drop PDB here</div>
             <div class="text-xs">or choose a file below</div>
           </div>
           <div class="mt-3 grid grid-cols-3 gap-2">
-            <input type="file" id="pdbFile" accept=".pdb" class="col-span-2 input file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700">
+            <input type="file" id="pdbFile" accept=".pdb" class="col-span-2 input file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700"/>
             <button id="loadLocalPdbBtn" class="btn w-full">Load Local PDB</button>
           </div>
           <div class="grid grid-cols-3 gap-2 mt-3">
-            <input id="pdbId" placeholder="Fetch by PDB ID (e.g., 6LU7)" class="col-span-2 input">
+            <input id="pdbId" placeholder="Fetch by PDB ID (e.g., 6LU7)" class="col-span-2 input"/>
             <button id="fetchPdbBtn" class="btn w-full">Fetch PDB</button>
-          </div>
-          <div class="grid grid-cols-2 gap-2 mt-3">
-            <button id="clearProteinBtn" class="btn-plain">Clear Protein</button>
-            <button id="resetViewBtn" class="btn-plain">Reset View</button>
           </div>
         </div>
 
         <!-- Ligand -->
-        <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">Ligand (SMILES)</h2>
-          <input id="smiles" class="input" placeholder="Paste SMILES here (e.g., CC(=O)OC1=CC=CC=C1C(=O)O)">
+        <div class="mb-4 glass panel">
+          <h3 class="font-semibold mb-2">Ligand (SMILES)</h3>
+          <input id="smiles" class="input" placeholder="Paste SMILES here (e.g., CC(=O)OC1=CC=CC=C1C(=O)O)"/>
           <div class="grid grid-cols-3 gap-2 mt-2">
             <select id="exampleSmiles" class="col-span-2 input">
               <option value="" selected>Choose an example…</option>
@@ -164,1056 +230,686 @@
               <option value="CC(C)NC(=O)C1CCN(CC1)c1cccc2OCOc12">Drug Hit 5 (Reversible)</option>
               <option value="CC(C)CC(NC(=O)C1CCN(CC1)c1cccc2OCOc12)Cc1ccccc1">Drug Hit 6 (Irreversible)</option>
             </select>
-            <button id="useExampleBtn" class="btn-plain w-full">Use Example</button>
+            <button id="useExampleBtn" class="px-3 py-2 rounded-lg font-semibold bg-white w-full">Use Example</button>
           </div>
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <button id="loadSmilesBtn" class="btn w-full">Load SMILES</button>
-            <button id="clearLigandBtn" class="btn-plain w-full">Clear Ligand</button>
+          <div class="mt-2">
+            <button id="loadSmilesBtn" class="btn w-full">Load SMILES (3D Embed)</button>
           </div>
+          <div id="smilesErr" class="text-rose-700 text-sm mt-2 hidden"></div>
         </div>
 
-        <!-- Scoring / Controls -->
+        <!-- Scoring model + actions -->
         <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">Scoring & Controls</h2>
-          <label class="block text-sm font-semibold mb-1">Scoring Model</label>
-          <select id="scoringModel" class="input">
-            <option value="balanced" selected>Balanced</option>
-            <option value="hbond">H-Bond Focused</option>
-            <option value="hydrophobic">Hydrophobicity Focused</option>
-          </select>
-          <p class="text-sm text-gray-600 mt-2" id="modelInfoText"></p>
+          <div class="mb-2">
+            <label class="block text-sm font-semibold mb-2">Scoring Model</label>
+            <select id="scoringModel" class="input">
+              <option value="balanced" selected>Balanced</option>
+              <option value="hbond">H-Bond Focused</option>
+              <option value="hydrophobic">Hydrophobicity Focused</option>
+            </select>
+            <p class="text-sm text-gray-600 mt-2" id="modelInfoText"></p>
+          </div>
           <div class="grid grid-cols-2 gap-2 mt-3">
             <button id="dockBtn" class="btn" disabled>Run Approximate Dock</button>
-            <button id="centerBtn" class="btn" disabled>Re-center &amp; Re-score</button>
+            <button id="centerBtn" class="btn" disabled>Re-center & Re-score</button>
           </div>
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <button id="clearAllBtn" class="btn-plain">Clear All</button>
-            <button id="prefillFromDock" class="btn-plain">Use Current Dock in Post</button>
+          <div class="mt-3">
+            <button id="useForPostBtn" class="px-3 py-2 rounded-lg font-semibold bg-white w-full">Use Current Dock in Community Post</button>
           </div>
         </div>
+      </div>
 
-        <!-- Viewer -->
-        <div class="glass panel lg:col-span-2">
-          <h2 class="text-lg font-bold mb-2">3D Visualization</h2>
+      <!-- Right: Viewer + metrics -->
+      <div id="dock-right">
+        <div class="glass panel mb-3">
+          <h3 class="font-semibold mb-2">3D Visualization</h3>
           <div id="viewer"></div>
         </div>
 
-        <!-- Metrics (now roomy) -->
-        <div class="glass panel lg:col-span-2">
-          <h2 class="text-lg font-bold mb-2">Ligand/Score Summary</h2>
-          <div class="metrics-grid">
-            <div class="metric"><div>Total ΔG</div><div id="aff" class="v">--</div></div>
-            <div class="metric"><div>Ligand MW</div><div id="mw" class="v">--</div></div>
-            <div class="metric"><div>Ligand LogP</div><div id="logp" class="v">--</div></div>
-          </div>
-        </div>
-
-        <!-- Contributions (now roomy) -->
-        <div class="glass panel lg:col-span-2">
-          <h2 class="text-lg font-bold mb-2">Contributions</h2>
-          <div class="metrics-grid">
-            <div class="metric"><div class="text-xs">ΔG vdW</div><div id="vdw_contrib" class="v">--</div></div>
-            <div class="metric"><div class="text-xs">ΔG H-Bond</div><div id="hbond_contrib" class="v">--</div></div>
-            <div class="metric"><div class="text-xs">ΔG Hydroph.</div><div id="hydro_contrib" class="v">--</div></div>
-            <div class="metric"><div class="text-xs">ΔS Rot.</div><div id="rot_contrib" class="v">--</div></div>
-            <div class="metric"><div class="text-xs">Contacts</div><div id="contacts" class="v">--</div></div>
-            <div class="metric"><div class="text-xs">Clashes</div><div id="clashes" class="v">--</div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: PBPK -->
-    <section id="pbpk" class="section" data-title="PBPK/QSP">
-      <div class="bricks">
         <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">PBPK/QSP (One-Compartment Oral)</h2>
-          <label class="block text-sm font-semibold">Dose (mg)</label><input id="dose" type="number" value="100" class="input">
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <div><label class="block text-sm font-semibold">F (%)</label><input id="F" type="number" value="80" class="input"></div>
-            <div><label class="block text-sm font-semibold">ka (h⁻¹)</label><input id="ka" type="number" value="1.2" step="0.1" class="input"></div>
-            <div><label class="block text-sm font-semibold">ke (h⁻¹)</label><input id="ke" type="number" value="0.2" step="0.05" class="input"></div>
-            <div><label class="block text-sm font-semibold">Vd (L)</label><input id="Vd" type="number" value="50" class="input"></div>
-          </div>
-          <button id="runPBPKBtn" class="btn w-full mt-3">Run PBPK Simulation</button>
-          <p class="text-sm text-gray-600 mt-2">Bateman function; E<sub>max</sub> occupancy with demo K<sub>d</sub>=20 mg/L.</p>
-        </div>
-        <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">PK Metrics</h2>
-          <div class="metrics-grid">
-            <div class="metric"><div>C<sub>max</sub></div><div id="cmax" class="v">--</div></div>
-            <div class="metric"><div>T<sub>max</sub></div><div id="tmax" class="v">--</div></div>
-            <div class="metric"><div>AUC<sub>0–48</sub></div><div id="auc" class="v">--</div></div>
-          </div>
-        </div>
-        <div class="glass panel lg:col-span-2">
-          <div class="h-72"><canvas id="pkChart"></canvas></div>
-        </div>
-        <div class="glass panel lg:col-span-2">
-          <div class="h-56"><canvas id="occChart"></canvas></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: Clinical -->
-    <section id="clinical" class="section" data-title="Clinical">
-      <div class="bricks">
-        <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">3+3 Dose Escalation Simulator</h2>
-          <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-sm font-semibold">Dose Levels</label><input id="levels" type="number" value="6" class="input"></div>
-            <div><label class="block text-sm font-semibold">Cohort Size</label><input id="cohort" type="number" value="3" class="input"></div>
-            <div><label class="block text-sm font-semibold">Start Dose (mg)</label><input id="startDose" type="number" value="10" class="input"></div>
-            <div><label class="block text-sm font-semibold">Target DLT Rate (%)</label><input id="tox" type="number" value="25" class="input"></div>
-            <div><label class="block text-sm font-semibold">Escalation Factor</label><input id="esc" type="number" value="1.5" step="0.1" class="input"></div>
-            <div><label class="block text-sm font-semibold">Random Seed</label><input id="seed" type="number" value="42" class="input"></div>
-          </div>
-          <div class="grid grid-cols-2 gap-2 mt-3">
-            <button id="runTrialBtn" class="btn w-full">Simulate Trial</button>
-            <button id="run100Btn" class="btn w-full">Run 100 Trials</button>
-          </div>
-          <p class="text-sm text-gray-600 mt-2">0/3 → escalate; 1/3 → expand; ≥2/3 → stop/de-escalate. MTD = highest with ≤1/6 DLTs.</p>
-        </div>
-        <div class="glass panel lg:col-span-2">
-          <div class="flex items-center justify-between">
-            <h3 class="font-semibold mb-1">Trial Visualization</h3>
-            <div id="trialBadge" class="chip hidden"></div>
-          </div>
-          <div class="h-72"><canvas id="trialChart"></canvas></div>
-          <div class="glass panel mt-3">
-            <h4 class="font-semibold mb-2">Cohorts</h4>
-            <table class="w-full text-sm">
-              <thead><tr class="text-left text-gray-600"><th class="py-1">#</th><th>Dose (mg)</th><th>DLTs</th><th>N</th></tr></thead>
-              <tbody id="trialTable"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: Community -->
-    <section id="community" class="section" data-title="Community">
-      <div class="bricks">
-        <div class="glass panel">
-          <h2 class="text-lg font-bold mb-2">Create a Post</h2>
-          <div class="grid gap-2">
-            <div>
-              <label class="block text-sm font-semibold">Post Type</label>
-              <select id="postType" class="input">
-                <option value="dock" selected>Docking Result</option>
-                <option value="blog">Blog</option>
-                <option value="discussion">Discussion</option>
-              </select>
+          <h3 class="font-semibold mb-2">Ligand / Score Summary</h3>
+          <div class="bricks">
+            <div class="brick brick-4">
+              <div class="metric"><div class="title">Total ΔG</div><div id="aff" class="v">--</div></div>
             </div>
-            <div>
-              <label class="block text-sm font-semibold">Protein (Channel)</label>
-              <input id="postProtein" placeholder="e.g., Mpro (SARS-CoV-2)" class="input">
-              <p class="text-xs text-gray-600 mt-1">If the channel doesn’t exist it will be created.</p>
+            <div class="brick brick-4">
+              <div class="metric"><div class="title">Ligand MW</div><div id="mw" class="v">--</div></div>
+            </div>
+            <div class="brick brick-4">
+              <div class="metric"><div class="title">Ligand LogP</div><div id="logp" class="v">--</div></div>
             </div>
 
-            <div class="dock-only grid gap-2">
-              <div><label class="block text-sm font-semibold">PDB ID (optional)</label><input id="postPdbId" placeholder="e.g., 6LU7" class="input"></div>
-              <div><label class="block text-sm font-semibold">Ligand (SMILES)</label><input id="postSmiles" placeholder="Paste SMILES" class="input"></div>
-              <div class="grid grid-cols-2 gap-2">
-                <div><label class="block text-sm font-semibold">Docking ΔG (kcal/mol)</label><input id="postDG" type="number" step="0.01" class="input"></div>
-                <div>
-                  <label class="block text-sm font-semibold">Mood / Framing</label>
-                  <select id="postMood" class="input">
-                    <option>Inspired ✨</option><option>Constructive: Needs validation</option>
-                    <option>Encouraging 👍</option><option>Curious 🤔</option>
-                    <option>Grateful 🙏</option><option>Optimistic 🌱</option>
-                  </select>
-                </div>
-              </div>
-              <div><label class="block text-sm font-semibold">Notes (optional)</label><textarea id="postNotes" rows="3" class="input" placeholder="Key interactions, pocket features, next steps…"></textarea></div>
-              <div class="grid grid-cols-2 gap-2">
-                <button id="prefillFromDock" class="btn-plain">Use Current Dock</button>
-                <button id="createPostBtn" class="btn">Post</button>
-              </div>
-            </div>
+            <div class="brick brick-3"><div class="metric"><div class="title">ΔG vdW</div><div id="vdw_contrib" class="v">--</div></div></div>
+            <div class="brick brick-3"><div class="metric"><div class="title">ΔG H-Bond</div><div id="hbond_contrib" class="v">--</div></div></div>
+            <div class="brick brick-3"><div class="metric"><div class="title">ΔG Hydroph.</div><div id="hydro_contrib" class="v">--</div></div></div>
+            <div class="brick brick-3"><div class="metric"><div class="title">ΔS Rot.</div><div id="rot_contrib" class="v">--</div></div></div>
 
-            <div class="non-dock-only hidden grid gap-2">
-              <div><label class="block text-sm font-semibold">Title</label><input id="postTitle" class="input" placeholder="Write a clear title"></div>
-              <div><label class="block text-sm font-semibold">Content</label><textarea id="postContent" rows="6" class="input" placeholder="Educational content, blog, or discussion…"></textarea></div>
-              <div class="grid grid-cols-2 gap-2">
-                <button id="createNonDockBtn" class="btn">Publish</button>
-                <button id="clearNonDockBtn" class="btn-plain">Clear</button>
-              </div>
-            </div>
+            <div class="brick brick-6"><div class="metric"><div class="title">Contacts</div><div id="contacts" class="v">--</div></div></div>
+            <div class="brick brick-6"><div class="metric"><div class="title">Clashes</div><div id="clashes" class="v">--</div></div></div>
           </div>
         </div>
-
-        <div class="glass panel lg:col-span-2">
-          <h2 class="text-lg font-bold mb-2">Community Feed</h2>
-          <div class="flex items-center gap-2 w-full flex-wrap mb-2">
-            <input id="searchInput" placeholder="Search by protein or SMILES…" class="input md:w-80">
-            <select id="alphaFilter" class="input md:w-32">
-              <option value="">All A–Z</option><option value="#num"># (0–9)</option>
-              <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
-              <option>F</option><option>G</option><option>H</option><option>I</option><option>J</option>
-              <option>K</option><option>L</option><option>M</option><option>N</option><option>O</option>
-              <option>P</option><option>Q</option><option>R</option><option>S</option><option>T</option>
-              <option>U</option><option>V</option><option>W</option><option>X</option><option>Y</option><option>Z</option>
-            </select>
-            <button id="exportJsonBtn" class="btn-plain">Export DB (JSON)</button>
-            <button id="exportCsvBtn" class="btn-plain">Export Posts (CSV)</button>
-          </div>
-          <div id="feedGrid" class="bricks"></div>
-          <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result.</div>
-        </div>
       </div>
-    </section>
-
-    <!-- SECTION: Channels -->
-    <section id="channels" class="section" data-title="Channels">
-      <div class="bricks">
-        <div class="glass panel lg:col-span-2">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <h2 class="text-lg font-bold">Protein Channels</h2>
-            <input id="channelSearch" placeholder="Search channels…" class="input md:w-80">
-          </div>
-          <div id="channelList" class="bricks mt-3"></div>
-          <div id="channelEmpty" class="text-white/90 text-sm mt-6 hidden">No channels yet. Create a docking post to start a channel.</div>
-        </div>
-
-        <div id="channelView" class="glass panel lg:col-span-2 hidden">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 id="chName" class="text-lg font-bold"></h3>
-              <div id="chMeta" class="text-sm text-gray-600"></div>
-            </div>
-            <a id="chHash" class="hash" href="#">Link</a>
-          </div>
-
-          <h4 class="font-semibold mt-4 mb-2">Docking Entries</h4>
-          <div class="overflow-auto">
-            <table class="w-full text-sm">
-              <thead>
-              <tr class="text-left text-gray-600"><th class="py-1">Date</th><th>PDB</th><th>SMILES</th><th>ΔG</th><th>User</th></tr>
-              </thead>
-              <tbody id="chTable"></tbody>
-            </table>
-          </div>
-
-          <h4 class="font-semibold mt-5 mb-2">Recent Posts</h4>
-          <div id="chFeed" class="bricks"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: Publications -->
-    <section id="pub" class="section" data-title="Publications">
-      <div class="bricks">
-        <div class="glass panel">
-          <h3 class="font-semibold mb-2">Create New Entry</h3>
-          <label class="block text-sm font-semibold">Title</label><input id="pub-title" class="input" placeholder="In Silico Analysis of…">
-          <label class="block text-sm font-semibold mt-2">Authors</label><input id="pub-authors" class="input" placeholder="Ferguson, D., et al.">
-          <label class="block text-sm font-semibold mt-2">Abstract / Key Findings</label><textarea id="pub-abstract" rows="5" class="input"></textarea>
-          <button id="pubSubmit" class="btn w-full mt-3">Submit</button>
-          <div id="pubError" class="text-sm text-rose-700 mt-2"></div>
-        </div>
-        <div class="glass panel lg:col-span-2">
-          <h3 class="font-semibold mb-2">Publications</h3>
-          <div id="pub-list" class="bricks"></div>
-          <div id="pub-empty" class="glass panel text-center hidden">No publications yet.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: Learning -->
-    <section id="learn" class="section" data-title="Learning">
-      <div class="bricks">
-        <div class="glass panel lg:col-span-2">
-          <h2 class="text-lg font-bold mb-2">Learning Center</h2>
-          <div class="flex flex-wrap gap-2">
-            <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="pbpk">PBPK Basics</button>
-            <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="docking">Docking</button>
-            <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="md">MD Setup</button>
-            <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="threeplus">3+3 Design</button>
-            <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="community">Community Etiquette</button>
-          </div>
-          <div id="tutorialBox" class="glass panel mt-3 bg-white/70"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Profile modal -->
-  <div id="profileModal" class="fixed inset-0 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <div class="absolute inset-0 bg-black/50"></div>
-    <div class="relative glass p-4 w-full max-w-md">
-      <h3 id="authTitle" class="font-bold text-lg mb-2">Sign Up / Sign In</h3>
-      <p class="text-xs text-gray-600 -mt-1 mb-3">Local-only (stored in your browser).</p>
-      <label class="block text-sm font-semibold">Username</label>
-      <input id="authUser" class="input" placeholder="e.g., ligand_lover">
-      <label class="block text-sm font-semibold mt-2">Password</label>
-      <input id="authPass" type="password" class="input" placeholder="••••••••">
-      <label class="block text-sm font-semibold mt-2">Avatar URL (optional)</label>
-      <input id="authAvatar" class="input" placeholder="https://…">
-      <div class="grid grid-cols-2 gap-2 mt-3">
-        <button id="signInBtn" class="btn">Sign In</button>
-        <button id="signUpBtn" class="btn-plain">Create Account</button>
-      </div>
-      <div class="grid grid-cols-2 gap-2 mt-2">
-        <button id="closeProfileBtn" class="btn-plain">Cancel</button>
-        <button id="signOutBtn" class="btn-plain">Sign Out</button>
-      </div>
-      <div id="authMsg" class="text-sm mt-2"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- =========================
-       FULL APP SCRIPT
-       ========================= -->
-  <script>
-  const $  = s => document.querySelector(s);
-  const $$ = s => document.querySelectorAll(s);
-  const on = (s,ev,fn)=>{ const el=$(s); if(el) el.addEventListener(ev,fn); };
+  <!-- PBPK -->
+  <section id="pbpk" class="glass panel section">
+    <h2 class="text-xl font-bold mb-2">PBPK/QSP (One-Compartment Oral)</h2>
+    <div class="split">
+      <div class="glass panel">
+        <label class="block text-sm font-semibold">Dose (mg)</label><input id="dose" type="number" value="100" class="input"/>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div><label class="block text-sm font-semibold">F (%)</label><input id="F" type="number" value="80" class="input"/></div>
+          <div><label class="block text-sm font-semibold">ka (h⁻¹)</label><input id="ka" type="number" value="1.2" step="0.1" class="input"/></div>
+          <div><label class="block text-sm font-semibold">ke (h⁻¹)</label><input id="ke" type="number" value="0.2" step="0.05" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Vd (L)</label><input id="Vd" type="number" value="50" class="input"/></div>
+        </div>
+        <button id="runPBPKBtn" class="btn w-full mt-3">Run PBPK Simulation</button>
+        <p class="text-sm text-gray-600 mt-2">Bateman function; E<sub>max</sub> occupancy with demo K<sub>d</sub>=20 mg/L.</p>
+      </div>
+      <div class="glass panel">
+        <div class="grid grid-cols-3 gap-2">
+          <div class="metric"><div class="title">C<sub>max</sub></div><div id="cmax" class="v">--</div></div>
+          <div class="metric"><div class="title">T<sub>max</sub></div><div id="tmax" class="v">--</div></div>
+          <div class="metric"><div class="title">AUC<sub>0–48</sub></div><div id="auc" class="v">--</div></div>
+        </div>
+        <div class="h-72 mt-2"><canvas id="pkChart"></canvas></div>
+        <div class="h-56 mt-2"><canvas id="occChart"></canvas></div>
+      </div>
+    </div>
+  </section>
 
-  /* ===== Router ===== */
-  const ROUTES = { md:'md', pbpk:'pbpk', clinical:'clinical', mdsetup:'mdsetup', community:'community', channels:'channels', pub:'pub', learn:'learn' };
-  function setActiveNav(routeKey){
-    $$('.navlink').forEach(a=>{
-      const isActive = a.getAttribute('data-route') === routeKey;
-      if(isActive) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
-    });
-  }
-  function showSectionById(id){
-    $$('.section').forEach(s=>s.classList.remove('active'));
-    const sec = $('#'+id);
-    if(sec){ sec.classList.add('active'); document.title = 'PharmaSim Pro · ' + (sec.dataset.title || ''); }
-  }
-  function navigateFromHash(){
-    const hash = location.hash || '#/md';
-    const pm = hash.match(/^#\/p\/(.+)/);
-    if(pm){ openChannelBySlug(pm[1]); setActiveNav('channels'); return; }
-    const m = hash.match(/^#\/([^/?#]+)/);
-    const key = m ? m[1] : 'md';
-    const sectionId = ROUTES[key] || 'md';
-    showSectionById(sectionId); setActiveNav(key);
-  }
-  window.addEventListener('hashchange', navigateFromHash);
+  <!-- Clinical -->
+  <section id="clinical" class="glass panel section">
+    <h2 class="text-xl font-bold mb-2">3+3 Dose Escalation Simulator</h2>
+    <div class="split">
+      <div class="glass panel">
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block text-sm font-semibold">Dose Levels</label><input id="levels" type="number" value="6" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Cohort Size</label><input id="cohort" type="number" value="3" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Start Dose (mg)</label><input id="startDose" type="number" value="10" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Target DLT Rate (%)</label><input id="tox" type="number" value="25" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Escalation Factor</label><input id="esc" type="number" value="1.5" step="0.1" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Random Seed</label><input id="seed" type="number" value="42" class="input"/></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button id="runTrialBtn" class="btn w-full">Simulate Trial</button>
+          <button id="run100Btn" class="btn w-full">Run 100 Trials</button>
+        </div>
+        <p class="text-sm text-gray-600 mt-2">0/3 → escalate; 1/3 → expand; ≥2/3 → stop/de-escalate. MTD = highest with ≤1/6 DLTs.</p>
+      </div>
+      <div class="glass panel">
+        <div class="flex items-center justify-between"><h3 class="font-semibold mb-1">Trial Visualization</h3><div id="trialBadge" class="chip hidden"></div></div>
+        <div class="h-72"><canvas id="trialChart"></canvas></div>
+        <div class="glass panel mt-3">
+          <h4 class="font-semibold mb-2">Cohorts</h4>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-gray-600"><th class="py-1">#</th><th>Dose (mg)</th><th>DLTs</th><th>N</th></tr></thead>
+            <tbody id="trialTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  /* ===== UI helpers ===== */
-  function setStatus(msg, kind='info'){
-    const b = $('#statusBadge'); if(!b) return;
-    b.textContent = msg;
-    b.className = 'chip ' + (kind==='ok' ? 'pos' : kind);
-  }
-  function trapz(x,y){ let A=0; for(let i=1;i<x.length;i++) A += 0.5*(y[i]+y[i-1])*(x[i]-x[i-1]); return A; }
+  <!-- MD Setup -->
+  <section id="mdsetup" class="glass panel section">
+    <h2 class="text-xl font-bold mb-2">MD Simulation File Generator</h2>
+    <div class="split">
+      <div class="glass panel">
+        <label class="block text-sm font-semibold">Output Prefix</label><input id="md-out" value="output" class="input"/>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div><label class="block text-sm font-semibold">Temperature (K)</label><input id="md-temp" type="number" value="310" class="input"/></div>
+          <div><label class="block text-sm font-semibold">Production Time (ns)</label><input id="md-ns" type="number" value="10" class="input"/></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div><label class="block text-sm font-semibold">switch/cut/pair (Å)</label><input id="md-cuts" value="10/12/14" class="input"/></div>
+          <div class="flex items-end gap-2"><input type="checkbox" id="md-restraints" checked class="w-5 h-5"/><label for="md-restraints" class="text-sm">Use Restraints</label></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button id="generateMDFilesBtn" class="btn w-full">Generate Files</button>
+          <button id="zipBtn" class="btn w-full" disabled>Download ZIP</button>
+        </div>
+        <div id="mdStatus" class="text-sm text-gray-600 mt-2"></div>
+        <div id="fileList" class="mt-3 flex flex-col gap-2"></div>
+      </div>
+      <div class="glass panel">
+        <h3 class="font-semibold mb-1">In-Browser Restraints PDB Builder</h3>
+        <p class="text-sm text-gray-600">Backbone (N, CA, C, O) → B-factor 2.0; others 0.0.</p>
+        <div class="grid grid-cols-3 gap-2 mt-2">
+          <div class="col-span-2"><input type="file" id="md-pdb" accept=".pdb" class="input"/></div>
+          <div class="flex items-end"><button id="buildRestraints" class="btn w-full">Generate</button></div>
+        </div>
+        <div id="restraintsStatus" class="text-sm text-gray-700 mt-3"></div>
+      </div>
+    </div>
+  </section>
 
-  /* ===== App state ===== */
-  let RDKitModule = null;
-  let viewer = null;
-  let proteinModel=null, ligandModel=null;
-  let currentLigandProps=null;
-  let pdbFileFromDrop=null;
-  const latestDock = { proteinName:'', pdbId:'', smiles:'', dG:null };
+  <!-- Community -->
+  <section id="community" class="glass panel section">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <h2 class="text-xl font-bold">Community Feed</h2>
+      <div class="flex items-center gap-2 w-full md:w-auto">
+        <input id="searchInput" placeholder="Search by protein or SMILES…" class="input md:w-80"/>
+        <select id="alphaFilter" class="input md:w-32"><option value="">All A–Z</option><option value="#num"># (0–9)</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option><option>L</option><option>M</option><option>N</option><option>O</option><option>P</option><option>Q</option><option>R</option><option>S</option><option>T</option><option>U</option><option>V</option><option>W</option><option>X</option><option>Y</option><option>Z</option></select>
+      </div>
+    </div>
 
-  // Charts registry
-  const charts = { pk:null, occ:null, trial:null };
-  function makeChart(id, cfg){
-    const ctx = document.getElementById(id);
-    if(!ctx) return null;
-    if(charts[id.replace('Chart','')] && charts[id.replace('Chart','')].destroy){
-      charts[id.replace('Chart','')].destroy();
-    }
-    const chart = new Chart(ctx.getContext('2d'), {
-      ...cfg,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        interaction: { mode:'nearest', intersect:false },
-        plugins: { legend: { display: true } },
-        ...cfg.options
-      }
-    });
-    charts[id.replace('Chart','')] = chart;
-    return chart;
-  }
+    <div class="grid lg:grid-cols-3 gap-4 mt-4">
+      <!-- Create Post -->
+      <div class="glass panel">
+        <h3 class="font-semibold mb-2">Create a Post</h3>
+        <div class="grid gap-2">
+          <div>
+            <label class="block text-sm font-semibold">Post Type</label>
+            <select id="postType" class="input">
+              <option value="dock" selected>Docking Result</option>
+              <option value="blog">Blog</option>
+              <option value="discussion">Discussion</option>
+            </select>
+          </div>
 
-  const metricIds = ['mw','logp','aff','vdw_contrib','hbond_contrib','hydro_contrib','rot_contrib','contacts','clashes'];
-  function resetMetrics(){ metricIds.forEach(id=>{ const el=$('#'+id); if(el) el.textContent='--'; }); }
+          <div>
+            <label class="block text-sm font-semibold">Protein (Channel)</label>
+            <input id="postProtein" placeholder="e.g., Mpro (SARS-CoV-2)" class="input"/>
+            <p class="text-xs text-gray-600 mt-1">If the channel doesn’t exist it will be created.</p>
+          </div>
 
-  function refreshButtons(){
-    const hasProt = !!proteinModel;
-    const hasLig  = !!ligandModel;
-    if($('#dockBtn'))    $('#dockBtn').disabled   = !(hasProt && hasLig);
-    if($('#centerBtn'))  $('#centerBtn').disabled = !(hasProt || hasLig);
-    if($('#clearProteinBtn')) $('#clearProteinBtn').disabled = !hasProt;
-    if($('#clearLigandBtn'))  $('#clearLigandBtn').disabled  = !hasLig;
-    if($('#clearAllBtn'))     $('#clearAllBtn').disabled     = !(hasProt || hasLig);
-    if($('#resetViewBtn'))    $('#resetViewBtn').disabled    = !(hasProt || hasLig);
-  }
+          <div class="dock-only grid gap-2">
+            <div><label class="block text-sm font-semibold">PDB ID (optional)</label><input id="postPdbId" placeholder="e.g., 6LU7" class="input"/></div>
+            <div><label class="block text-sm font-semibold">Ligand (SMILES)</label><input id="postSmiles" placeholder="Paste SMILES" class="input"/></div>
+            <div class="grid grid-cols-2 gap-2">
+              <div><label class="block text-sm font-semibold">Docking ΔG (kcal/mol)</label><input id="postDG" type="number" step="0.01" class="input"/></div>
+              <div><label class="block text-sm font-semibold">Mood / Framing</label>
+                <select id="postMood" class="input">
+                  <option>Inspired ✨</option><option>Constructive: Needs validation</option>
+                  <option>Encouraging 👍</option><option>Curious 🤔</option>
+                  <option>Grateful 🙏</option><option>Optimistic 🌱</option>
+                </select></div>
+            </div>
+            <div><label class="block text-sm font-semibold">Notes (optional)</label><textarea id="postNotes" rows="3" class="input" placeholder="Key interactions, pocket features, next steps…"></textarea></div>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="prefillFromDock" class="px-3 py-2 rounded-lg font-semibold bg-white">Use Current Dock</button>
+              <button id="createPostBtn" class="btn">Post</button>
+            </div>
+          </div>
 
-  /* ===== 3Dmol viewer ===== */
-  function ensureViewer(){
-    if(!viewer){
-      const v = $('#viewer'); if(!v) return null;
-      viewer = $3Dmol.createViewer(v,{backgroundColor:'#eef2f7'});
-    }
-    return viewer;
-  }
-  function safeRemoveModel(m){ try{ if(m) viewer.removeModel(m); }catch(e){} }
-  function addProteinFromPDB(txt){
-    const v=ensureViewer(); if(!v) return;
-    safeRemoveModel(proteinModel);
-    proteinModel = v.addModel(txt,'pdb');
-    proteinModel.setStyle({hetflag:false},{cartoon:{color:'spectrum'}});
-    v.zoomTo(); v.render();
-    setStatus('Protein loaded.','ok');
-    refreshButtons();
-  }
-  function addLigandFromMolblock(molblock){
-    const v=ensureViewer(); if(!v) return;
-    safeRemoveModel(ligandModel);
-    ligandModel = v.addModel(molblock,'sdf');
-    ligandModel.setStyle({}, {stick:{radius:0.22}});
-    v.zoomTo(); v.render();
-    setStatus('Ligand loaded.','ok');
-    refreshButtons();
-  }
-  function resetView(){ const v=ensureViewer(); if(!v) return; v.zoomTo(); v.render(); }
-  function clearProtein(){ if(!viewer || !proteinModel) return; try{ viewer.removeModel(proteinModel); }catch(_){}
-    proteinModel=null; setStatus('Protein cleared.','info'); refreshButtons(); }
-  function clearLigand(){ if(!viewer || !ligandModel) return; try{ viewer.removeModel(ligandModel); }catch(_){}
-    ligandModel=null; currentLigandProps=null; resetMetrics(); setStatus('Ligand cleared.','info'); refreshButtons(); }
-  function clearAll(){ clearLigand(); clearProtein(); resetView(); setStatus('Cleared all.','info'); }
-
-  /* ===== PDB: drop/file/fetch ===== */
-  function wirePdbDropZone(){
-    const dz=$('#pdbDrop'); if(!dz) return;
-    ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{
-      e.preventDefault(); e.stopPropagation(); dz.classList.add('ring-2','ring-indigo-400');
-    }));
-    ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{
-      e.preventDefault(); e.stopPropagation(); dz.classList.remove('ring-2','ring-indigo-400');
-    }));
-    dz.addEventListener('drop', async e=>{
-      const file=e.dataTransfer?.files?.[0];
-      if(file && file.name.toLowerCase().endsWith('.pdb')){
-        pdbFileFromDrop=file;
-        dz.innerHTML = `<div class="font-semibold text-indigo-700">Ready: ${file.name}</div>
-        <div class="text-xs text-gray-600">Click “Load Local PDB” to display</div>`;
-      }else{
-        dz.innerHTML = `<div class="font-semibold text-rose-700">Not a .pdb file</div>
-        <div class="text-xs text-gray-600">Please drop a valid PDB</div>`;
-      }
-    });
-  }
-  async function loadLocalPdb(){
-    const input=$('#pdbFile');
-    const file=pdbFileFromDrop || input?.files?.[0];
-    if(!file){ alert('Choose or drop a .pdb file first.'); return; }
-    const txt = await file.text();
-    addProteinFromPDB(txt);
-    pdbFileFromDrop=null;
-    const dz=$('#pdbDrop');
-    if(dz) dz.innerHTML = `<div class="font-semibold text-green-700">Loaded: ${file.name}</div>
-    <div class="text-xs text-gray-600">Drop a new file to replace it.</div>`;
-    latestDock.proteinName = file.name.replace(/\.pdb$/i,'');
-    latestDock.pdbId='';
-  }
-  async function fetchPdb(){
-    const el=$('#pdbId'); if(!el) return;
-    const id=el.value.trim().toUpperCase(); if(!id) return;
-    try{
-      setStatus(`Fetching PDB ${id}…`,'info');
-      const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`);
-      if(!r.ok) throw new Error(`PDB ${id} not found.`);
-      const txt=await r.text();
-      addProteinFromPDB(txt);
-      latestDock.proteinName=id; latestDock.pdbId=id;
-    }catch(e){
-      console.error(e);
-      setStatus(e.message||'PDB fetch failed','err');
-      alert(e.message||'PDB fetch failed');
-    }
-  }
-
-  /* ===== RDKit (SMILES) ===== */
-  async function processSmilesString(smiles){
-    const v=ensureViewer(); if(!v) return;
-    safeRemoveModel(ligandModel); ligandModel=null; currentLigandProps=null; resetMetrics();
-    $('#dockBtn') && ($('#dockBtn').disabled = !proteinModel);
-
-    smiles = (smiles||'').trim();
-    if(!smiles){ setStatus('Please enter a SMILES string.','warn'); return; }
-    if(!RDKitModule){ setStatus('RDKit not ready yet.','warn'); return; }
-
-    let mol=null;
-    try{
-      mol = RDKitModule.get_mol(smiles);
-      if(!mol){ setStatus('Invalid SMILES: RDKit could not parse.','err'); return; }
-
-      // descriptors
-      try {
-        const desc = JSON.parse(mol.get_descriptors()||'{}');
-        const toNum = v => (typeof v === 'number' && isFinite(v)) ? v : null;
-        const NumHeavyAtoms     = toNum(desc.NumHeavyAtoms);
-        const NumHDonors        = toNum(desc.NumHDonors);
-        const NumHAcceptors     = toNum(desc.NumHAcceptors);
-        const MolLogP           = toNum(desc.MolLogP ?? desc.CalcLogP);
-        const NumRotatableBonds = toNum(desc.NumRotatableBonds);
-        const MolWt             = toNum(desc.MolWt ?? desc.MolecularWeight ?? desc.exactmw ?? desc.ExactMolWt);
-
-        if(MolWt!=null) $('#mw').textContent = MolWt.toFixed(2);
-        if(MolLogP!=null) $('#logp').textContent = MolLogP.toFixed(2);
-
-        if([NumHeavyAtoms,NumHDonors,NumHAcceptors,MolLogP,NumRotatableBonds].every(x=>x!=null)){
-          currentLigandProps = {
-            numHeavyAtoms: NumHeavyAtoms,
-            hDonors: NumHDonors,
-            hAcceptors: NumHAcceptors,
-            logp: MolLogP,
-            numRotatableBonds: NumRotatableBonds
-          };
-        }
-      } catch(parseErr){ console.warn('Descriptor parse failed', parseErr); }
-
-      // embed
-      let molblock = '';
-      try{
-        mol.add_hs();
-        const ok = mol.embed_molecule();
-        mol.remove_hs();
-        molblock = mol.get_molblock();
-        setStatus(ok===0 ? 'SMILES loaded & embedded.':'SMILES loaded (embedding fallback).', ok===0?'ok':'warn');
-      }catch(e){
-        try{ mol.remove_hs(); }catch(_){}
-        molblock = mol.get_molblock();
-        setStatus('SMILES loaded (no 3D conformer).','warn');
-      }
-
-      addLigandFromMolblock(molblock);
-      latestDock.smiles = smiles;
-
-    } catch(e){
-      console.error('RDKit SMILES pipeline error:', e);
-      setStatus((e && e.message) ? `SMILES error: ${e.message}` : 'SMILES processing failed.', 'err');
-    } finally {
-      if(mol) mol.delete();
-      refreshButtons();
-    }
-  }
-  function loadSmilesBtn(){
-    const smiles = $('#smiles')?.value || '';
-    if(!smiles.trim()){ alert('Enter a SMILES string first.'); return; }
-    processSmilesString(smiles);
-  }
-  function useExampleSmiles(){
-    const sel=$('#exampleSmiles');
-    if(sel && sel.value){
-      $('#smiles').value=sel.value;
-      processSmilesString(sel.value);
-    }
-  }
-
-  /* ===== Fallback estimator for docking when descriptors missing ===== */
-  function getAtomsFromModel(m){
-    try{
-      if(!m) return [];
-      if(typeof m.selectedAtoms==='function') return m.selectedAtoms({});
-      if(typeof m.getAtoms==='function') return m.getAtoms();
-      if(Array.isArray(m.atoms)) return m.atoms;
-    }catch(_){} return [];
-  }
-  function estimateLigandPropsFromModel(){
-    const atoms = getAtomsFromModel(ligandModel);
-    if(!atoms.length) return null;
-    const heavy = atoms.filter(a=>a.elem!=='H').length;
-    const numC  = atoms.filter(a=>a.elem==='C').length;
-    const hetero = atoms.filter(a=>a.elem!=='H' && a.elem!=='C').length;
-    const donors = atoms.filter(a=>a.elem==='N' || a.elem==='O').length;
-    const accept = atoms.filter(a=>a.elem==='N' || a.elem==='O').length;
-    const logpRaw = 0.54*numC - 1.5*hetero;
-    const logp = Math.max(-2, Math.min(6, logpRaw));
-    const rotBonds = Math.round(0.3 * heavy);
-    return {
-      numHeavyAtoms: heavy,
-      hDonors: donors,
-      hAcceptors: accept,
-      logp: logp,
-      numRotatableBonds: Math.max(0, rotBonds)
-    };
-  }
-
-  /* ===== Heuristic docking score ===== */
-  function bindingContrib(l, t='balanced'){
-    const M={
-      balanced:{I:-1.5,V:-0.035,H:-0.70,Hy:-0.25,R:0.30},
-      hbond:{I:-1.0,V:-0.030,H:-1.20,Hy:-0.15,R:0.30},
-      hydrophobic:{I:-1.2,V:-0.040,H:-0.50,Hy:-0.45,R:0.25}
-    }[t] || {I:-1.5,V:-0.035,H:-0.70,Hy:-0.25,R:0.30};
-    const hb=Math.min(l.hDonors,l.hAcceptors);
-    return {
-      intercept:M.I,
-      vdw: M.V*l.numHeavyAtoms,
-      hbond: M.H*hb,
-      hydrophobic: M.Hy*l.logp,
-      rotational: M.R*l.numRotatableBonds
-    };
-  }
-  function getLigandProps(){ return currentLigandProps || estimateLigandPropsFromModel(); }
-
-  function runDock(){
-    if(!proteinModel || !ligandModel){
-      alert('Please load a protein and a ligand first.');
-      return;
-    }
-    const ligProps = getLigandProps();
-    if(!ligProps){
-      alert('Could not derive ligand descriptors. Try another SMILES.');
-      return;
-    }
-    const which = $('#scoringModel')?.value || 'balanced';
-    const base = bindingContrib(ligProps, which);
-    const prot = getAtomsFromModel(proteinModel);
-    const lig  = getAtomsFromModel(ligandModel);
-    const het=new Set(['N','O','S']);
-    let contacts=0, clashes=0;
-    for(const la of lig){
-      for(const pa of prot){
-        const dx=la.x-pa.x, dy=la.y-pa.y, dz=la.z-pa.z;
-        const r2=dx*dx+dy*dy+dz*dz;
-        if(r2<3.5*3.5 && het.has(pa.elem)) contacts++;
-        if(r2<1.8*1.8) clashes++;
-      }
-    }
-    const total = Object.values(base).reduce((s,v)=>s+v,0) + (-0.15*Math.min(contacts,50)) + (0.4*Math.min(clashes,25));
-    const set=(id,val)=>{ const el=$('#'+id); if(el) el.textContent=val; };
-    set('aff', total.toFixed(2));
-    set('vdw_contrib', base.vdw.toFixed(2));
-    set('hbond_contrib', base.hbond.toFixed(2));
-    set('hydro_contrib', base.hydrophobic.toFixed(2));
-    set('rot_contrib', base.rotational.toFixed(2));
-    set('contacts', String(contacts));
-    set('clashes', String(clashes));
-    latestDock.dG = Number(total.toFixed(2));
-    setStatus('Docking scored (heuristic).','ok');
-    refreshButtons();
-  }
-  function recenterAndRescore(){ resetView(); if(proteinModel && ligandModel) runDock(); }
-
-  /* ===== Local DB: users/channels/posts ===== */
-  const K_USERS='ps_users_v1', K_SESSION='ps_session_v1';
-  const K_CHANNELS='ps_channels_v1', K_POSTS='ps_posts_v1', K_IDX='pharmsim_alpha_index_v1';
-  const userdb = ()=> JSON.parse(localStorage.getItem(K_USERS)||'[]');
-  const saved  = (k)=> JSON.parse(localStorage.getItem(k)||'[]');
-  const slugify=s=>s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-
-  function getSession(){ return JSON.parse(localStorage.getItem(K_SESSION)||'null'); }
-  function upsertChannel(name){
-    const channels=saved(K_CHANNELS); const slug=slugify(name||''); if(!slug) return null;
-    let c=channels.find(x=>x.slug===slug);
-    if(!c){
-      const s=getSession();
-      c={id:crypto.randomUUID(),slug,name,description:'',createdBy:s?.username||'anon',createdAt:Date.now()};
-      channels.push(c); localStorage.setItem(K_CHANNELS, JSON.stringify(channels));
-    }
-    return c;
-  }
-  function addPost(post){ const posts=saved(K_POSTS); posts.push(post); localStorage.setItem(K_POSTS, JSON.stringify(posts)); }
-  function readPosts(){ return saved(K_POSTS); }
-  function buildAlphaIndex(arr){
-    const idx={}; for(const p of arr){
-      const ch=(p.proteinName||'').trim()[0]||'#';
-      const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#';
-      (idx[key]=idx[key]||[]).push(p.id);
-    }
-    localStorage.setItem(K_IDX, JSON.stringify(idx));
-  }
-
-  function renderPostCard(p){
-    const card=document.createElement('div'); card.className='feed-card';
-    const mood=p.mood?.includes('Constructive')?'warn':'pos';
-    const ch=saved(K_CHANNELS).find(c=>c.id===p.channelId); const chLink=ch?`<a class="hash" href="#/p/${ch.slug}">#${p.proteinName}</a>`:'';
-    const user=p.user||{username:'Anonymous',avatar:'https://i.pravatar.cc/40'};
-    card.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <div class="text-sm text-gray-600">${chLink} · ${user.username||''}</div>
-          <h4 class="font-semibold text-lg">${p.title||p.proteinName||'Untitled'}</h4>
-          <div class="flex flex-wrap gap-2 mt-1">
-            ${p.pdbId?`<span class="chip info">PDB ${p.pdbId}</span>`:''}
-            ${p.type==='dock'?`<span class="chip ${mood}">ΔG ${p.dG!=null?p.dG:'--'}</span>`:`<span class="chip info">${p.type}</span>`}
+          <div class="non-dock-only hidden grid gap-2">
+            <div><label class="block text-sm font-semibold">Title</label><input id="postTitle" class="input" placeholder="Write a clear title"/></div>
+            <div><label class="block text-sm font-semibold">Content</label><textarea id="postContent" rows="6" class="input" placeholder="Educational content, blog, or discussion…"></textarea></div>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="createNonDockBtn" class="btn">Publish</button>
+              <button id="clearNonDockBtn" class="px-3 py-2 rounded-lg font-semibold bg-white">Clear</button>
+            </div>
           </div>
         </div>
-        <img src="${user.avatar||'https://i.pravatar.cc/40'}" class="w-10 h-10 rounded-full" alt="avatar">
       </div>
-      ${p.type==='dock'?`
-        ${p.smiles?`<div class="text-xs break-all mt-2"><span class="font-semibold">SMILES:</span> ${p.smiles}</div>`:''}
-        ${p.notes?`<p class="text-sm mt-2 whitespace-pre-wrap">${p.notes}</p>`:''}
-      `:`
-        <p class="text-sm mt-2 whitespace-pre-wrap">${p.content||''}</p>
-      `}
-      <div class="text-xs text-gray-500 mt-2">${new Date(p.createdAt).toLocaleString()}</div>
-    `;
-    return card;
-  }
-  function refreshFeed(){
-    const q=($('#searchInput')?.value||'').toLowerCase();
-    const alpha=$('#alphaFilter')?.value||'';
-    const posts=readPosts();
-    let f=posts.filter(p=>{
-      const s1=(p.proteinName||'').toLowerCase().includes(q);
-      const s2=(p.smiles||'').toLowerCase().includes(q);
-      const s3=(p.title||'').toLowerCase().includes(q);
-      return s1||s2||s3;
-    });
-    if(alpha){
-      f=f.filter(p=>{
-        const ch=(p.proteinName||'').trim()[0]||'#';
-        const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#';
-        return alpha===''?true:(alpha==='#num'?key==='#':key===alpha);
-      });
-    }
-    f.sort((a,b)=>b.createdAt-a.createdAt);
-    const grid=$('#feedGrid'); if(!grid) return;
-    grid.innerHTML=''; f.forEach(p=>grid.appendChild(renderPostCard(p)));
-    $('#emptyFeed')?.classList.toggle('hidden', !!f.length);
-  }
 
-  function renderChannelCard(ch){
-    const posts=readPosts().filter(p=>p.channelId===ch.id);
-    const docks=posts.filter(p=>p.type==='dock');
-    const best=docks.length?docks.reduce((a,b)=>(a.dG??999)<(b.dG??999)?a:b):null;
-    const card=document.createElement('div'); card.className='feed-card';
-    card.innerHTML=`
+      <!-- Feed -->
+      <div class="lg:col-span-2">
+        <div id="feedGrid" class="feed-grid"></div>
+        <div id="emptyFeed" class="text-center text-sm text-white/90 mt-6 hidden">No posts yet—share your first result.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Channels -->
+  <section id="channels" class="glass panel section">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <h2 class="text-xl font-bold">Protein Channels</h2>
+      <input id="channelSearch" placeholder="Search channels…" class="input md:w-80"/>
+    </div>
+    <div id="channelList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3"></div>
+    <div id="channelEmpty" class="text-white/90 text-sm mt-6 hidden">No channels yet. Create a docking post to start a channel.</div>
+
+    <div id="channelView" class="glass panel mt-6 hidden">
       <div class="flex items-center justify-between">
-        <a class="hash" href="#/p/${ch.slug}"><h3 class="font-semibold text-lg">#${ch.name}</h3></a>
-        <span class="chip info">${posts.length} posts</span>
+        <div>
+          <h3 id="chName" class="text-lg font-bold"></h3>
+          <div id="chMeta" class="text-sm text-gray-600"></div>
+        </div>
+        <a id="chHash" class="hash" href="#">Link</a>
       </div>
-      <div class="text-sm text-gray-600">Started by ${ch.createdBy} · ${new Date(ch.createdAt).toLocaleDateString()}</div>
-      <div class="mt-2 text-sm">${best?`Best ΔG: <strong>${best.dG}</strong> (PDB ${best.pdbId||'—'})`:'No docking yet.'}</div>
-    `;
-    return card;
-  }
-  function refreshChannelList(){
-    const q=($('#channelSearch')?.value||'').toLowerCase();
-    const channels=saved(K_CHANNELS).filter(c=>c.name.toLowerCase().includes(q));
-    const list=$('#channelList'); if(!list) return;
-    list.innerHTML='';
-    channels.sort((a,b)=>a.name.localeCompare(b.name));
-    channels.forEach(c=>list.appendChild(renderChannelCard(c)));
-    $('#channelEmpty')?.classList.toggle('hidden', !!channels.length);
-  }
-  function openChannelBySlug(slug){
-    const channels=saved(K_CHANNELS); const ch=channels.find(c=>c.slug===slug);
-    if(!ch){ alert('Channel not found'); return; }
-    $('#chName').textContent='#'+ch.name;
-    $('#chMeta').textContent=`Created by ${ch.createdBy} · ${new Date(ch.createdAt).toLocaleString()}`;
-    $('#chHash').href=`#/p/${ch.slug}`;
-    const posts=readPosts().filter(p=>p.channelId===ch.id).sort((a,b)=>b.createdAt-a.createdAt);
 
-    const tb=$('#chTable'); tb.innerHTML='';
-    posts.filter(p=>p.type==='dock').forEach(p=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = `<td class="py-1">${new Date(p.createdAt).toLocaleDateString()}</td><td>${p.pdbId||''}</td><td class="break-all">${p.smiles||''}</td><td>${p.dG==null?'':p.dG}</td><td>${p.user?.username||''}</td>`;
-      tb.appendChild(tr);
+      <h4 class="font-semibold mt-4 mb-2">Docking Entries</h4>
+      <div class="overflow-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-600"><th class="py-1">Date</th><th>PDB</th><th>SMILES</th><th>ΔG</th><th>User</th></tr>
+          </thead>
+          <tbody id="chTable"></tbody>
+        </table>
+      </div>
+
+      <h4 class="font-semibold mt-5 mb-2">Recent Posts</h4>
+      <div id="chFeed" class="feed-grid"></div>
+    </div>
+  </section>
+
+  <!-- Publications -->
+  <section id="pub" class="glass panel section">
+    <h2 class="text-xl font-bold mb-2">Publications</h2>
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="glass panel">
+        <h3 class="font-semibold mb-2">Create New Entry</h3>
+        <label class="block text-sm font-semibold">Title</label><input id="pub-title" class="input" placeholder="In Silico Analysis of…"/>
+        <label class="block text-sm font-semibold mt-2">Authors</label><input id="pub-authors" class="input" placeholder="Ferguson, D., et al."/>
+        <label class="block text-sm font-semibold mt-2">Abstract / Key Findings</label><textarea id="pub-abstract" rows="5" class="input"></textarea>
+        <button id="pubSubmit" class="btn w-full mt-3">Submit</button>
+        <div id="pubError" class="text-sm text-rose-700 mt-2"></div>
+      </div>
+      <div class="lg:col-span-2">
+        <div id="pub-list" class="grid gap-3"></div>
+        <div id="pub-empty" class="glass panel text-center hidden">No publications yet.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Learning -->
+  <section id="learn" class="glass panel section">
+    <h2 class="text-xl font-bold mb-2">Learning Center</h2>
+    <div class="flex flex-wrap gap-2">
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="pbpk">PBPK Basics</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="docking">Docking</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="md">MD Setup</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="threeplus">3+3 Design</button>
+      <button class="px-3 py-2 rounded-lg font-semibold bg-white learn" data-learn="community">Community Etiquette</button>
+    </div>
+    <div id="tutorialBox" class="glass panel mt-3 bg-white/70"></div>
+  </section>
+</main>
+
+<footer class="max-w-7xl mx-auto px-4 my-6">
+  <div class="glass panel">
+    <p><strong>By Mr. David Ferguson, MS, PharmD Candidate, RSci MRSB MRSC</strong> — powered by Gemini, Anthropic AI, and OpenAI.</p>
+    <p class="mt-2">Disclaimer: Results are experimental. Always double-check with primary literature and consult qualified professionals before acting on any insight.</p>
+  </div>
+</footer>
+
+<script>
+/* ===== Shortcuts ===== */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const escapeHtml=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]))
+const trapz=(x,y)=>{let A=0;for(let i=1;i<x.length;i++)A+=0.5*(y[i]+y[i-1])*(x[i]-x[i-1]);return A}
+
+/* ===== Global state ===== */
+let viewer, rdkit, proteinModel=null, ligandModel=null, pocketResidues=[], pocketCenter=null, currentLigandProps=null;
+let charts={}, latestDock={proteinName:'',pdbId:'',smiles:'',dG:null}, pdbFileFromDrop=null;
+
+/* ===== UI helpers ===== */
+function setStatus(msg,kind='warn'){const b=$('#statusBadge'); b.textContent=msg; b.classList.remove('hidden','warn','pos','err','info'); b.classList.add(kind==='ok'?'pos':kind)}
+function showSection(id){
+  $$('.section').forEach(s=>s.classList.remove('active'));
+  $('#'+id).classList.add('active');
+  $$('.nav-tab').forEach(b=>{
+    const on=b.dataset.t===id;
+    b.classList.toggle('bg-white',!on);
+    b.classList.toggle('text-white',on);
+    b.classList.toggle('bg-[linear-gradient(135deg,#2a5298,#1e3c72)]',on);
+  });
+  // Update hash for direct nav
+  history.replaceState(null,'',`#/${id}`);
+}
+function updateModelInfo(){
+  const m={
+    balanced:"Balances size, H-bonding, hydrophobics, flexibility.",
+    hbond:"Rewards donors/acceptors; good for polar pockets.",
+    hydrophobic:"Rewards nonpolar fit; penalizes excess polarity."
+  };
+  $('#modelInfoText').textContent=m[$('#scoringModel').value]||'';
+}
+
+/* ===== RDKit + 3Dmol helpers ===== */
+const getModelAtoms=m=>(typeof m?.selectedAtoms==='function'&&m.selectedAtoms({}))||(typeof m?.getAtoms==='function'&&m.getAtoms())||(Array.isArray(m?.atoms)&&m.atoms)||[]
+const centroid=L=>{let x=0,y=0,z=0;for(const a of L){x+=a.x;y+=a.y;z+=a.z}const n=Math.max(1,L.length);return{x:x/n,y:y/n,z:z/n}}
+function findPocketResidues(at){
+  if(!at.length)return[];
+  const R={};for(const a of at){const k=a.resi??a.resn??'0';(R[k]=R[k]||[]).push(a)}
+  let best=null,bN=-1;
+  for(const [resi,alist] of Object.entries(R)){
+    const c=centroid(alist);let n=0;
+    for(const a of at){const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z;if(dx*dx+dy*dy+dz*dz<100)n++}
+    if(n>bN){bN=n;best=resi}
+  }
+  if(!best)return[];
+  const core=R[best],c=centroid(core),res=new Set();
+  for(const a of at){const dx=a.x-c.x,dy=a.y-c.y,dz=a.z-c.z;if(dx*dx+dy*dy+dz*dz<100)res.add(a.resi??a.resn??'0')}
+  return[...res]
+}
+const centroidOfResidues=(at,list)=>{if(!list?.length)return null;const pick=at.filter(a=>list.includes(a.resi??a.resn??'0'));return pick.length?centroid(pick):null}
+function bindingContrib(l,t='balanced'){
+  const M={balanced:{I:-1.5,V:-0.035,H:-0.7,Hy:-0.25,R:0.3},hbond:{I:-1.0,V:-0.030,H:-1.2,Hy:-0.15,R:0.3},hydrophobic:{I:-1.2,V:-0.040,H:-0.5,Hy:-0.45,R:0.25}}[t];
+  const hb=Math.min(l.hDonors,l.hAcceptors);
+  return {intercept:M.I,vdw:M.V*l.numHeavyAtoms,hbond:M.H*hb,hydrophobic:M.Hy*l.logp,rotational:M.R*l.numRotatableBonds}
+}
+function scoreAndDisplay(l){
+  const base=bindingContrib(l,$('#scoringModel').value);
+  const prot=getModelAtoms(proteinModel),lat=getModelAtoms(ligandModel);
+  const het=new Set(['N','O','S']);let contacts=0,clashes=0;
+  for(const la of lat){for(const pa of prot){const dx=la.x-pa.x,dy=la.y-pa.y,dz=la.z-pa.z,r2=dx*dx+dy*dy+dz*dz;if(r2<3.5*3.5&&het.has(pa.elem))contacts++;if(r2<1.8*1.8)clashes++}}
+  const total=Object.values(base).reduce((s,v)=>s+v,0)+(-0.15*Math.min(contacts,50))+(0.4*Math.min(clashes,25));
+  $('#aff').textContent=total.toFixed(2);$('#vdw_contrib').textContent=base.vdw.toFixed(2);$('#hbond_contrib').textContent=base.hbond.toFixed(2);
+  $('#hydro_contrib').textContent=base.hydrophobic.toFixed(2);$('#rot_contrib').textContent=base.rotational.toFixed(2);
+  $('#contacts').textContent=String(contacts);$('#clashes').textContent=String(clashes);
+  latestDock.dG=Number(total.toFixed(2))
+}
+function addLigandToViewer(molblock){
+  if(!viewer) return;
+  if(ligandModel) try{viewer.removeModel(ligandModel);}catch(e){}
+  ligandModel=viewer.addModel(molblock,'sdf');
+  ligandModel.setStyle({}, {stick:{radius:0.22}});
+  viewer.zoomTo();viewer.render();
+}
+
+/* ===== File & network loaders ===== */
+function wirePdbDropZone(){
+  const dz=$('#pdbDrop');if(!dz)return;
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{
+    e.preventDefault();e.stopPropagation();dz.classList.add('ring-2','ring-indigo-400');
+  }));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{
+    e.preventDefault();e.stopPropagation();dz.classList.remove('ring-2','ring-indigo-400');
+  }));
+  dz.addEventListener('drop',async e=>{
+    const file=e.dataTransfer?.files?.[0];
+    if(file&&file.name.toLowerCase().endsWith('.pdb')){
+      pdbFileFromDrop=file;
+      dz.innerHTML=`<div class="font-semibold text-indigo-700">Ready: ${file.name}</div>
+      <div class="text-xs text-gray-600">Click “Load Local PDB” to display</div>`;
+    }else{
+      dz.innerHTML=`<div class="font-semibold text-rose-700">Not a .pdb file</div>
+      <div class="text-xs text-gray-600">Please drop a valid PDB</div>`;
+    }
+  });
+}
+async function loadLocalPdb(){
+  const input=$('#pdbFile');
+  const file=pdbFileFromDrop||input.files?.[0];
+  if(!file){alert('Choose or drop a .pdb file first.');return}
+  const txt=await file.text();
+  if(proteinModel)try{viewer.removeModel(proteinModel);}catch(e){}
+  proteinModel=viewer.addModel(txt,'pdb');
+  proteinModel.setStyle({hetflag:false},{cartoon:{color:'spectrum'}});
+  viewer.zoomTo();viewer.render();
+  const at=getModelAtoms(proteinModel);
+  pocketResidues=findPocketResidues(at); pocketCenter=centroidOfResidues(at,pocketResidues);
+  $('#dockBtn').disabled=!(!(!currentLigandProps)); // enable if ligand props exist
+  $('#centerBtn').disabled=false;
+  $('#pdbDrop').innerHTML=`<div class="font-semibold text-green-700">Loaded: ${file.name}</div>
+  <div class="text-xs text-gray-600">Drop a new file to replace it</div>`;
+  latestDock.proteinName=file.name.replace('.pdb',''); latestDock.pdbId='';
+}
+async function fetchPdb(){
+  const id=$('#pdbId').value.trim().toUpperCase();
+  if(!id) return;
+  const r=await fetch(`https://files.rcsb.org/download/${id}.pdb`);
+  if(!r.ok){alert('Could not fetch PDB'); return}
+  const txt=await r.text();
+  if(proteinModel)try{viewer.removeModel(proteinModel);}catch(e){}
+  proteinModel=viewer.addModel(txt,'pdb');
+  proteinModel.setStyle({hetflag:false},{cartoon:{color:'spectrum'}});
+  viewer.zoomTo();viewer.render();
+  const at=getModelAtoms(proteinModel);
+  pocketResidues=findPocketResidues(at); pocketCenter=centroidOfResidues(at,pocketResidues);
+  $('#dockBtn').disabled=!(!(!currentLigandProps)); $('#centerBtn').disabled=false;
+  latestDock.proteinName=id; latestDock.pdbId=id;
+}
+
+/* ===== Ligand (SMILES) processing with RDKit guardrails ===== */
+async function processSmiles(smiles){
+  const err=$('#smilesErr'); err.classList.add('hidden'); err.textContent='';
+  if(ligandModel) { try{viewer.removeModel(ligandModel);}catch(e){} ligandModel=null; }
+  ['mw','logp','aff','vdw_contrib','hbond_contrib','hydro_contrib','rot_contrib','contacts','clashes'].forEach(id => $('#'+id).textContent='--');
+  currentLigandProps=null; $('#dockBtn').disabled=true;
+  if(!smiles || !rdkit) return;
+
+  let mol=null;
+  try{
+    mol=rdkit.get_mol(smiles);
+    if(!mol) throw new Error("RDKit failed to parse SMILES");
+    const desc=JSON.parse(mol.get_descriptors());
+    currentLigandProps={
+      numHeavyAtoms: desc.NumHeavyAtoms || 25,
+      hDonors: desc.NumHDonors || 0,
+      hAcceptors: desc.NumHAcceptors || 0,
+      logp: isFinite(desc.MolLogP)?desc.MolLogP:2.5,
+      numRotatableBonds: desc.NumRotatableBonds || 0
+    };
+    $('#mw').textContent=(desc.exactmw?desc.exactmw.toFixed(2):'—');
+    $('#logp').textContent=(isFinite(desc.MolLogP)?desc.MolLogP.toFixed(2):'—');
+
+    mol.add_hs(); mol.embed_molecule(); mol.remove_hs();
+    const molblock = mol.get_molblock();
+    addLigandToViewer(molblock);
+    latestDock.smiles=smiles;
+    if(proteinModel) $('#dockBtn').disabled=false;
+  }catch(e){
+    console.error("RDKit error:",e);
+    err.textContent="RDKit error while processing SMILES. Please check the string or try another example.";
+    err.classList.remove('hidden');
+  }finally{
+    if(mol) mol.delete();
+  }
+}
+
+/* ===== Community (Renderers) ===== */
+function renderPostCard(p){
+  const card=document.createElement('div'); card.className='feed-card';
+  const mood=p.mood?.includes('Constructive')?'warn':'pos';
+  card.innerHTML=`<div class="flex items-start justify-between gap-3">
+    <div><div class="text-sm text-gray-600"><span class="hash">#${escapeHtml(p.proteinName||'General')}</span> · ${escapeHtml(p.user?.username||'')}</div>
+    <h4 class="font-semibold text-lg">${escapeHtml(p.title||p.proteinName||'Untitled')}</h4>
+    <div class="flex flex-wrap gap-2 mt-1">
+      ${p.pdbId?`<span class="chip info">PDB ${escapeHtml(p.pdbId)}</span>`:''}
+      ${p.type==='dock'?`<span class="chip ${mood}">ΔG ${p.dG!=null?p.dG:'--'}</span>`:''}
+      ${p.type!=='dock'?`<span class="chip info">${p.type}</span>`:''}
+    </div></div>
+    <img src="${p.user?.avatar||'https://i.pravatar.cc/40'}" class="w-10 h-10 rounded-full" alt="avatar"/></div>
+    ${p.type==='dock'?`
+      <div class="mt-3 grid grid-cols-2 gap-3">
+        <div class="text-xs break-all"><span class="font-semibold">SMILES:</span><br>${escapeHtml(p.smiles||'')}</div>
+        <div class="border rounded-lg p-1 bg-white">${p.svg||'<div class="text-xs text-gray-500 p-2">2D preview unavailable</div>'}</div>
+      </div>
+      ${p.notes?`<p class="text-sm mt-3 whitespace-pre-wrap">${escapeHtml(p.notes)}</p>`:''}
+    `:`<p class="text-sm mt-3 whitespace-pre-wrap">${escapeHtml(p.content||'')}</p>`}
+    <div class="text-xs text-gray-500 mt-2">${p.createdAt?.toDate?new Date(p.createdAt.toDate()).toLocaleString():''}</div>`;
+  return card
+}
+function renderChannelCard(ch, posts){
+  const docks=posts.filter(p=>p.channelSlug===ch.slug && p.type==='dock');
+  const best=docks.length?docks.reduce((a,b)=> (a.dG??999)<(b.dG??999)?a:b):null;
+  const card=document.createElement('div'); card.className='feed-card';
+  card.innerHTML=`<div class="flex items-center justify-between">
+      <a class="hash" href="#/channels/${ch.slug}"><h3 class="font-semibold text-lg">#${escapeHtml(ch.name)}</h3></a>
+      <span class="chip info">${posts.filter(p=>p.channelSlug===ch.slug).length} posts</span>
+    </div>
+    <div class="text-sm text-gray-600">Started by ${escapeHtml(ch.createdBy||'anon')}</div>
+    <div class="mt-2 text-sm">${best?`Best ΔG: <strong>${best.dG}</strong> (PDB ${best.pdbId||'—'})`:'No docking yet.'}</div>`;
+  return card
+}
+
+/* ===== App bootstrap ===== */
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Initialize RDKit
+  try{
+    window.RDKit = await initRDKitModule();
+    rdkit = window.RDKit;
+    setStatus('Libraries ready. RDKit initialized.','ok');
+  }catch(e){
+    setStatus('RDKit failed to load.','err'); console.error(e);
+  }
+
+  // 3Dmol viewer
+  viewer=$3Dmol.createViewer('viewer',{backgroundColor:'#eef2f7'});
+
+  // Wire UI
+  wirePdbDropZone();
+  $('#loadLocalPdbBtn').addEventListener('click',loadLocalPdb);
+  $('#fetchPdbBtn').addEventListener('click',fetchPdb);
+  $('#useExampleBtn').addEventListener('click',()=>{ const sel=$('#exampleSmiles'); if(sel.value) $('#smiles').value=sel.value; });
+  $('#loadSmilesBtn').addEventListener('click',()=>processSmiles($('#smiles').value.trim()));
+  $('#scoringModel').addEventListener('change',updateModelInfo);
+  $('#dockBtn').addEventListener('click',()=>{
+    if(!currentLigandProps||!proteinModel){alert('Load a protein AND a ligand first.');return}
+    scoreAndDisplay(currentLigandProps);
+  });
+  $('#centerBtn').addEventListener('click',()=>{
+    if(proteinModel){viewer.zoomTo(proteinModel); viewer.render();}
+    if(currentLigandProps) scoreAndDisplay(currentLigandProps);
+  });
+  $('#useForPostBtn').addEventListener('click',()=>{
+    $('#postProtein').value=latestDock.proteinName||'';
+    $('#postPdbId').value=latestDock.pdbId||'';
+    $('#postSmiles').value=latestDock.smiles||'';
+    $('#postDG').value=latestDock.dG||'';
+    showSection('community');
+  });
+
+  // Nav buttons
+  $$('.nav-tab').forEach(b=>b.addEventListener('click',()=>{
+    showSection(b.dataset.t);
+    const anc=b.getAttribute('data-anchor'); if(anc) { const el=document.querySelector(anc); if(el) el.scrollIntoView({behavior:'smooth'}); }
+  }));
+
+  // Hash router (channels deep link)
+  window.addEventListener('hashchange',()=>{
+    const h=location.hash;
+    const m=h.match(/^#\/(md|pbpk|clinical|mdsetup|community|channels|pub|learn)/);
+    if(m){ showSection(m[1]); return; }
+  });
+  // Initial section from hash
+  const m0=location.hash.match(/^#\/(md|pbpk|clinical|mdsetup|community|channels|pub|learn)/);
+  if(m0) showSection(m0[1]); else showSection('md');
+
+  // ===== Community + Firestore live subscriptions =====
+  let allPostsCache=[];
+  let unsubFeed=null, unsubChannels=null;
+
+  // Feed live
+  if(window.subscribeFeedCloud){
+    unsubFeed = window.subscribeFeedCloud((items)=>{
+      allPostsCache = items;
+      const q=($('#searchInput').value||'').toLowerCase(), alpha=$('#alphaFilter').value;
+      let f=items.filter(p=>{
+        const s1=(p.proteinName||'').toLowerCase().includes(q);
+        const s2=(p.smiles||'').toLowerCase().includes(q);
+        const s3=(p.title||'').toLowerCase().includes(q);
+        return s1||s2||s3;
+      });
+      if(alpha){
+        f=f.filter(p=>{
+          const ch=(p.proteinName||'').trim()[0]||'#';
+          const key=/[A-Za-z]/.test(ch)?ch.toUpperCase():'#';
+          return alpha===''?true:(alpha==='#num'?key==='#':key===alpha)
+        })
+      }
+      const grid=$('#feedGrid'); grid.innerHTML='';
+      f.forEach(p=>grid.appendChild(renderPostCard(p)));
+      $('#emptyFeed').classList.toggle('hidden',!!f.length);
     });
-
-    const feed=$('#chFeed'); feed.innerHTML='';
-    posts.slice(0,12).forEach(p=>feed.appendChild(renderPostCard(p)));
-
-    $('#channelView').classList.remove('hidden');
-    showSectionById('channels'); setActiveNav('channels');
   }
 
-  /* ===== Auth & Posts ===== */
-  function openProfile(){ const m=$('#profileModal'); if(m){ $('#authMsg').textContent=''; m.classList.remove('hidden'); m.classList.add('flex'); } }
-  function closeProfile(){ const m=$('#profileModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
-  function setSession(u){ localStorage.setItem(K_SESSION, JSON.stringify(u)); $('#profileBtn').textContent=u.username; closeProfile(); }
-  function signUp(){
-    const username=$('#authUser').value.trim(), pass=$('#authPass').value, avatar=$('#authAvatar').value.trim();
-    if(!username||!pass){ $('#authMsg').textContent='Provide username & password.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    const users=userdb(); if(users.find(u=>u.username===username)){ $('#authMsg').textContent='Username already exists.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    users.push({id:crypto.randomUUID(),username,pass,avatar}); localStorage.setItem(K_USERS, JSON.stringify(users));
-    setSession({username,avatar}); $('#authMsg').textContent='Account created.'; $('#authMsg').className='text-green-700 text-sm';
+  // Channels live
+  if(window.subscribeChannelsCloud){
+    unsubChannels = window.subscribeChannelsCloud((channels)=>{
+      const q=($('#channelSearch').value||'').toLowerCase();
+      const list=$('#channelList'); list.innerHTML='';
+      const filtered=channels.filter(c=>c.name.toLowerCase().includes(q));
+      filtered.forEach(c=>list.appendChild(renderChannelCard(c, allPostsCache)));
+      $('#channelEmpty').classList.toggle('hidden',!!filtered.length);
+    });
   }
-  function signIn(){
-    const username=$('#authUser').value.trim(), pass=$('#authPass').value;
-    const users=userdb(); const u=users.find(u=>u.username===username && u.pass===pass);
-    if(!u){ $('#authMsg').textContent='Invalid credentials.'; $('#authMsg').className='text-rose-700 text-sm'; return; }
-    setSession({username:u.username, avatar:u.avatar});
-  }
-  function signOut(){ localStorage.removeItem(K_SESSION); $('#profileBtn').textContent='Sign In'; closeProfile(); }
-  function createDockPost(){
-    const sess=getSession(); if(!sess){ alert('Sign in first'); return; }
-    const proteinName=$('#postProtein').value.trim(); if(!proteinName){ alert('Enter protein name'); return; }
-    const channel=upsertChannel(proteinName);
-    const p={
-      id:crypto.randomUUID(),
+
+  // Create posts (dock)
+  $('#prefillFromDock').addEventListener('click',()=>{
+    $('#postProtein').value=latestDock.proteinName||'';
+    $('#postPdbId').value=latestDock.pdbId||'';
+    $('#postSmiles').value=latestDock.smiles||'';
+    $('#postDG').value=latestDock.dG||'';
+  });
+  $('#createPostBtn').addEventListener('click', async ()=>{
+    const proteinName=$('#postProtein').value.trim();
+    if(!proteinName){alert('Enter protein name');return}
+    const ch=await window.upsertChannelCloud(proteinName,'anon');
+    const smiles=$('#postSmiles').value.trim();
+    let svg='';
+    try{
+      if(smiles && rdkit){ const m=rdkit.get_mol(smiles); if(m){ svg=m.get_svg(); m.delete(); } }
+    }catch(e){}
+    await window.createPostCloud({
       type:'dock',
-      channelId:channel.id,
+      channelSlug: ch.slug,
       proteinName,
       pdbId:$('#postPdbId').value.trim(),
-      smiles:$('#postSmiles').value.trim(),
+      smiles,
+      svg,
       dG:parseFloat($('#postDG').value)||null,
       mood:$('#postMood').value,
       notes:$('#postNotes').value,
-      user:sess,
-      createdAt:Date.now()
-    };
-    addPost(p); buildAlphaIndex(readPosts()); refreshFeed(); refreshChannelList(); alert('Posted!');
-  }
-  function createNonDockPost(){
-    const sess=getSession(); if(!sess){ alert('Sign in first'); return; }
-    const proteinName=$('#postProtein').value.trim();
-    const channel=upsertChannel(proteinName||'General');
-    const p={
-      id:crypto.randomUUID(),
-      type:$('#postType').value,
-      channelId:channel.id,
-      proteinName:proteinName||'General',
-      title:$('#postTitle').value,
-      content:$('#postContent').value,
-      user:sess,
-      createdAt:Date.now()
-    };
-    addPost(p); buildAlphaIndex(readPosts()); refreshFeed(); refreshChannelList(); alert('Published!');
-  }
-
-  /* ===== PBPK/QSP ===== */
-  function runPBPK(){
-    const Dose = parseFloat($('#dose').value)||0;
-    const F    = (parseFloat($('#F').value)||0)/100;
-    let ka     = parseFloat($('#ka').value)||0;
-    let ke     = parseFloat($('#ke').value)||0;
-    const Vd   = parseFloat($('#Vd').value)||1;
-    if(ka===ke){ ka += 1e-6; } // avoid divide-by-zero
-
-    // time grid 0..48h
-    const dt=0.25, t=[], C=[], Occ=[];
-    const Kd=20; // mg/L demo
-    for(let x=0; x<=48+1e-6; x+=dt){ t.push(+x.toFixed(2)); }
-    const A = (F*Dose/Vd)*(ka/(ka-ke));
-    for(const ti of t){
-      const c = A*(Math.exp(-ke*ti) - Math.exp(-ka*ti));
-      const cc = Math.max(0,c);
-      C.push(cc);
-      Occ.push(cc/(cc+Kd));
-    }
-
-    // metrics
-    const Cmax = Math.max(...C);
-    const Tmax = t[C.indexOf(Cmax)];
-    const AUC  = trapz(t,C);
-
-    $('#cmax').textContent = Cmax.toFixed(2)+' mg/L';
-    $('#tmax').textContent = Tmax.toFixed(2)+' h';
-    $('#auc').textContent  = AUC.toFixed(2)+' mg·h/L';
-
-    // charts
-    makeChart('pkChart',{
-      type:'line',
-      data:{ labels:t, datasets:[{ label:'Plasma Concentration (mg/L)', data:C, borderWidth:2, fill:false }]},
-      options:{ scales:{ x:{ title:{display:true, text:'Time (h)'} }, y:{ beginAtZero:true, title:{display:true, text:'mg/L'} } } }
+      user:{username:'Anonymous'}
     });
-    makeChart('occChart',{
-      type:'line',
-      data:{ labels:t, datasets:[{ label:'Target Occupancy', data:Occ, borderWidth:2, fill:false }]},
-      options:{ scales:{ x:{ title:{display:true, text:'Time (h)'} }, y:{ beginAtZero:true, max:1, title:{display:true, text:'Fraction'} } } }
-    });
-    setStatus('PBPK run complete.','ok');
-  }
-
-  /* ===== 3+3 Clinical Simulator ===== */
-  function mulberry32(a){ return function(){ let t=a+=0x6D2B79F5; t = Math.imul(t ^ t>>>15, t | 1); t ^= t + Math.imul(t ^ t>>>7, t | 61); return ((t ^ t>>>14) >>> 0) / 4294967296; } }
-  function simulateTrial(){
-    const levels = Math.max(1, parseInt($('#levels').value)||6);
-    const cohort = Math.max(1, parseInt($('#cohort').value)||3);
-    const startDose = Math.max(0.001, parseFloat($('#startDose').value)||10);
-    const target = Math.max(1, Math.min(90, parseFloat($('#tox').value)||25))/100; // target DLT at "MTD"
-    const esc = Math.max(1.01, parseFloat($('#esc').value)||1.5);
-    const seed = (parseInt($('#seed').value)||42) >>> 0;
-    const rand = mulberry32(seed);
-
-    // Construct dose ladder
-    const doses = Array.from({length:levels}, (_,i)=> startDose * Math.pow(esc, i));
-
-    // crude toxicity curve such that middle levels are near target, rising with dose
-    const base = target/2;
-    const pDLT = doses.map((_,i)=>{
-      const scale = Math.pow(esc, i - Math.floor(levels/2));
-      return Math.max(0.02, Math.min(0.90, base * scale));
-    });
-
-    const cohorts=[];
-    let level=0;
-    let mtdLevel=null;
-
-    function enroll(atLevel, n){
-      let dlt=0;
-      for(let i=0;i<n;i++){ if(rand() < pDLT[atLevel]) dlt++; }
-      cohorts.push({dose:doses[atLevel], level:atLevel+1, n, dlt});
-      return dlt;
-    }
-
-    // 3+3 rules
-    while(true){
-      const dlt1 = enroll(level, cohort);
-      if(dlt1===0){
-        if(level===levels-1){ mtdLevel=level+1; break; }
-        level++; // escalate
-      }else if(dlt1===1){
-        const dlt2 = enroll(level, cohort); // expand to 6
-        const total = dlt1 + dlt2;
-        if(total<=1){
-          if(level===levels-1){ mtdLevel=level+1; break; }
-          level++;
-        }else{
-          mtdLevel = level>0 ? level : 1;
-          break;
-        }
-      }else{ // >=2/3
-        mtdLevel = level>0 ? level : 1;
-        break;
-      }
-      if(cohorts.length>50){ mtdLevel = Math.max(1, level); break; } // guard
-    }
-
-    return { doses, pDLT, cohorts, mtdLevel };
-  }
-
-  function renderTrial(trial){
-    // table
-    const tb=$('#trialTable'); tb.innerHTML='';
-    trial.cohorts.forEach((c,i)=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = `<td class="py-1">${i+1}</td><td>${c.dose.toFixed(2)}</td><td>${c.dlt}</td><td>${c.n}</td>`;
-      tb.appendChild(tr);
-    });
-
-    // badge
-    const badge=$('#trialBadge');
-    badge.classList.remove('hidden');
-    const txt = trial.mtdLevel ? `MTD at level ${trial.mtdLevel} (dose ~${trial.doses[trial.mtdLevel-1].toFixed(2)} mg)` : 'No MTD';
-    badge.textContent = txt;
-    badge.className = 'chip ' + (trial.mtdLevel ? 'pos' : 'warn');
-
-    // chart: show DLTs per cohort + dose ladder reference
-    const labels = trial.cohorts.map((_,i)=>`C${i+1}`);
-    const dltData = trial.cohorts.map(c=>c.dlt);
-    const doseStep = trial.cohorts.map(c=>c.dose);
-
-    makeChart('trialChart',{
-      type:'bar',
-      data:{
-        labels,
-        datasets:[
-          { type:'bar', label:'DLTs', data:dltData, borderWidth:1 },
-          { type:'line', label:'Dose (mg)', data:doseStep, yAxisID:'y2', borderWidth:2 }
-        ]
-      },
-      options:{
-        scales:{
-          y:{ beginAtZero:true, title:{display:true, text:'DLTs'} },
-          y2:{ position:'right', beginAtZero:true, title:{display:true, text:'Dose (mg)'} }
-        }
-      }
-    });
-  }
-
-  function runOneTrial(){ const trial=simulateTrial(); renderTrial(trial); setStatus('3+3 trial simulated.','ok'); }
-  function runHundredTrials(){
-    const N=100, mtds=[];
-    for(let i=0;i<N;i++){ const t=simulateTrial(); mtds.push(t.mtdLevel||0); }
-    const avg = mtds.reduce((a,b)=>a+b,0)/N;
-    const badge=$('#trialBadge');
-    badge.classList.remove('hidden');
-    badge.textContent = `100 sims · Avg MTD level: ${avg.toFixed(2)}`;
-    badge.className = 'chip info';
-
-    // histogram of MTD levels
-    const levels = Math.max(1, parseInt($('#levels').value)||6);
-    const bins = Array.from({length:levels+1},()=>0); // 0=none
-    mtds.forEach(k=>bins[k]++);
-    const labels = ['None', ...Array.from({length:levels}, (_,i)=>String(i+1))];
-
-    makeChart('trialChart',{
-      type:'bar',
-      data:{ labels, datasets:[{ label:'MTD frequency (out of 100)', data:bins, borderWidth:1 }]},
-      options:{ scales:{ y:{ beginAtZero:true } } }
-    });
-    // clear table
-    $('#trialTable').innerHTML='';
-    setStatus('Ran 100 simulated trials.','ok');
-  }
-
-  /* ===== Wire up ===== */
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    // RDKit WASM load
-    const RD_BASE='https://unpkg.com/@rdkit/rdkit/dist/';
-    try{
-      RDKitModule = await initRDKitModule({ locateFile: file => RD_BASE + file });
-      setStatus('Libraries ready. RDKit initialized.','ok');
-    }catch(e){
-      console.error(e); setStatus('RDKit failed to load.','err');
-    }
-
-    ensureViewer(); wirePdbDropZone();
-
-    // Protein buttons
-    on('#loadLocalPdbBtn','click',loadLocalPdb);
-    on('#fetchPdbBtn','click',fetchPdb);
-    on('#clearProteinBtn','click',clearProtein);
-    on('#resetViewBtn','click',resetView);
-
-    // Ligand buttons
-    on('#useExampleBtn','click',useExampleSmiles);
-    on('#loadSmilesBtn','click',loadSmilesBtn);
-    on('#clearLigandBtn','click',clearLigand);
-
-    // Docking controls
-    on('#dockBtn','click',runDock);
-    on('#centerBtn','click',recenterAndRescore);
-    on('#clearAllBtn','click',clearAll);
-
-    // Prefill post
-    on('#prefillFromDock','click',()=>{
-      const map = {
-        postProtein: latestDock.proteinName || '',
-        postPdbId:   latestDock.pdbId || '',
-        postSmiles:  latestDock.smiles || '',
-        postDG:      latestDock.dG || ''
-      };
-      Object.entries(map).forEach(([id,val])=>{ const el=$('#'+id); if(el) el.value=val; });
-    });
-    on('#createPostBtn','click',createDockPost);
-    on('#createNonDockBtn','click',createNonDockPost);
-
-    // Auth
-    on('#profileBtn','click',openProfile);
-    on('#closeProfileBtn','click',closeProfile);
-    on('#signUpBtn','click',signUp);
-    on('#signInBtn','click',signIn);
-    on('#signOutBtn','click',signOut);
-
-    // PBPK / Clinical
-    on('#runPBPKBtn','click',runPBPK);
-    on('#runTrialBtn','click',runOneTrial);
-    on('#run100Btn','click',runHundredTrials);
-
-    // Model info text
-    const infoByModel={
-      balanced:"Balances size, H-bonding, hydrophobics, flexibility.",
-      hbond:"Rewards donors/acceptors; good for polar pockets.",
-      hydrophobic:"Rewards nonpolar fit; penalizes excess polarity."
-    };
-    const smSel=$('#scoringModel');
-    if(smSel){
-      smSel.addEventListener('change',()=>{ $('#modelInfoText').textContent = infoByModel[smSel.value] || ''; });
-      smSel.dispatchEvent(new Event('change'));
-    }
-
-    // Init UI
-    navigateFromHash();
-    resetMetrics();
-    refreshButtons();
-    refreshFeed(); refreshChannelList();
+    alert('Posted!');
   });
-  </script>
+
+  // ===== PBPK Charts =====
+  const pkCtx=document.getElementById('pkChart').getContext('2d');
+  const occCtx=document.getElementById('occChart').getContext('2d');
+  charts.pk=new Chart(pkCtx,{type:'line',data:{labels:[],datasets:[{label:'Plasma (mg/L)',data:[]}]},options:{responsive:true,maintainAspectRatio:false}});
+  charts.occ=new Chart(occCtx,{type:'line',data:{labels:[],datasets:[{label:'Receptor Occupancy',data:[]}]},options:{responsive:true,maintainAspectRatio:false}});
+  $('#runPBPKBtn').addEventListener('click',()=>{
+    const Dose=Number($('#dose').value)||0, F=(Number($('#F').value)||0)/100, ka=Number($('#ka').value)||0, ke=Number($('#ke').value)||0, Vd=Number($('#Vd').value)||1;
+    const t=[...Array(49).keys()].map(i=>i); // 0..48 h
+    const C=t.map(tt=> (F*Dose*ka/(Vd*(ka-ke)))*(Math.exp(-ke*tt)-Math.exp(-ka*tt)) );
+    const KD=20; const Occ=C.map(c=> c/(c+KD));
+    // metrics
+    let cmax=Math.max(...C), tmax=C.indexOf(cmax), auc=trapz(t,C);
+    $('#cmax').textContent=cmax.toFixed(2); $('#tmax').textContent=tmax+' h'; $('#auc').textContent=auc.toFixed(2);
+    charts.pk.data.labels=t; charts.pk.data.datasets[0].data=C; charts.pk.update();
+    charts.occ.data.labels=t; charts.occ.data.datasets[0].data=Occ; charts.occ.update();
+  });
+
+  // ===== Clinical charts =====
+  const trialCtx=document.getElementById('trialChart').getContext('2d');
+  charts.trial=new Chart(trialCtx,{type:'bar',data:{labels:[],datasets:[{label:'DLTs',data:[]}]},options:{responsive:true,maintainAspectRatio:false}});
+  function rand(seed){ let x=Math.sin(seed++)*10000; return x - Math.floor(x); }
+  function simulateOnce(){
+    const L=Number($('#levels').value)||6, n=Number($('#cohort').value)||3, start=Number($('#startDose').value)||10, tox=(Number($('#tox').value)||25)/100, esc=Number($('#esc').value)||1.5, seed=Number($('#seed').value)||42;
+    const doses=[...Array(L).keys()].map(i=>start*Math.pow(esc,i));
+    const cohorts=[]; let level=0, i=0, s=seed;
+    while(level<L && level>=0 && i<20){
+      // probability of DLT increases with log-dose (toy model)
+      const p=Math.min(0.95, tox*(1+Math.log10(doses[level]/start+1)));
+      let dlt=0; for(let k=0;k<n;k++){ if(rand(s++)<p) dlt++; }
+      cohorts.push({dose:doses[level], dlt, n});
+      if(dlt===0){ level++; } else if(dlt===1){ /* expand */ } else { level=Math.max(0,level-1); break; }
+      i++;
+    }
+    return cohorts;
+  }
+  function renderCohorts(tbl,data){
+    tbl.innerHTML=''; data.forEach((c,idx)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td class="py-1">${idx+1}</td><td>${c.dose.toFixed(1)}</td><td>${c.dlt}</td><td>${c.n}</td>`;
+      tbl.appendChild(tr);
+    });
+  }
+  $('#runTrialBtn').addEventListener('click',()=>{
+    const res=simulateOnce();
+    charts.trial.data.labels=res.map((_,i)=>`C${i+1}`); charts.trial.data.datasets[0].data=res.map(r=>r.dlt); charts.trial.update();
+    renderCohorts($('#trialTable'),res);
+  });
+  $('#run100Btn').addEventListener('click',()=>{
+    const sims=[...Array(100)].map(()=>simulateOnce());
+    const lenMax=Math.max(...sims.map(s=>s.length));
+    const avg=new Array(lenMax).fill(0);
+    sims.forEach(s=>s.forEach((c,i)=>avg[i]+=c.dlt));
+    avg.forEach((v,i)=>avg[i]=v/sims.length);
+    charts.trial.data.labels=avg.map((_,i)=>`C${i+1}`); charts.trial.data.datasets[0].data=avg; charts.trial.update();
+    renderCohorts($('#trialTable'),sims[sims.length-1]);
+  });
+
+  updateModelInfo();
+});
+</script>
 </body>
 </html>
