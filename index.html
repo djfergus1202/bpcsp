@@ -2,34 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Antibody Docking + MM/GBSA Toolkit</title>
+<title>Vipokibart Ab–Ag Modeling Suite • Docking • PK/QSP • MD • Clinical • Publishing</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="description" content="One-file site for antibody–antigen docking workflows and MM/GBSA scoring (OpenMM GBSA-OBC2). Includes live downloads for environment.yml, prepare_structures.py, mmgbsa_openmm.py, and run_example.sh." />
+<meta name="description" content="All-in-one toolkit for antibody–antigen docking, MM/GBSA scoring, PK/QSP modeling, OpenMM MD, clinical statistics, and publication templates — delivered in a single HTML page with one-click downloads." />
 <meta name="theme-color" content="#0f172a" />
 <style>
   :root{
     --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;
-    --accent:#60a5fa;--line:#1f2937;--green:#34d399;--red:#f87171;--yellow:#fbbf24;
+    --accent:#60a5fa;--line:#1f2937;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--violet:#a78bfa;
     --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
     --sans: Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
   }
   *{box-sizing:border-box}html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
   a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-  header{padding:56px 20px;background:radial-gradient(1200px 600px at 20% -10%,#1d2a4a,transparent 60%),
-                               radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%)}
-  .wrap{max-width:1040px;margin:0 auto}
-  .hero h1{font-size:40px;margin:0 0 8px}
-  .hero p{color:var(--muted);margin:10px 0 20px}
+  .wrap{max-width:1140px;margin:0 auto}
+  header{padding:56px 20px;background:
+    radial-gradient(1200px 600px at 15% -10%,#1d2a4a,transparent 60%),
+    radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%);}
+  .hero h1{font-size:38px;margin:0 0 8px}
+  .hero p{color:var(--muted);margin:8px 0 16px}
   .cta{display:flex;gap:10px;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;font-weight:600;border:1px solid var(--line);background:#0b1220}
   .btn.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
   .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0}
+  .btn.violet{background:linear-gradient(180deg,#7c3aed,#6d28d9);border:0}
   section{padding:28px 20px;border-top:1px solid var(--line);background:var(--panel)}
   h2{margin:0 0 12px;font-size:28px}h3{margin:18px 0 8px;font-size:20px}
-  .grid{display:grid;grid-template-columns:1fr;gap:16px}@media(min-width:900px){.grid{grid-template-columns:1.2fr .8fr}}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media (min-width: 980px){ .grid{ grid-template-columns: 1.2fr 0.8fr } }
   .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:16px}
-  .muted{color:var(--muted)}.tag{display:inline-block;font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .tag{display:inline-block;font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
   pre{position:relative;background:#0a0f1a;border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto}
   code,pre{font-family:var(--mono);font-size:13px}
   .copy{position:absolute;top:8px;right:8px;border:1px solid var(--line);background:#0b1220;color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer}
@@ -39,39 +43,46 @@
   .anchor{float:right;font-size:13px;color:var(--muted)}
   details{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#0b1220}
   details summary{cursor:pointer;font-weight:600}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .kpi .tag{border-color:#334155}
+  .warn{border-left:4px solid var(--yellow);padding-left:12px;margin:10px 0;color:#eab308}
+  .ok{border-left:4px solid var(--green);padding-left:12px;margin:10px 0;color:#34d399}
+  .danger{border-left:4px solid var(--red);padding-left:12px;margin:10px 0;color:#f87171}
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap hero">
-    <h1>Antibody Docking + MM/GBSA Toolkit</h1>
-    <p>Prep PDBs, dock externally (HADDOCK / ClusPro / Rosetta), then rank poses with fast
-       <strong>MM/GBSA</strong> using <strong>OpenMM</strong> (GBSA-OBC2). This single file ships everything: docs, code, and one-click downloads.</p>
+    <h1>Vipokibart Ab–Ag Modeling Suite</h1>
+    <p>Docking &amp; MM/GBSA • PK/QSP • OpenMM MD • Clinical stats • Publications &amp; posting — all in one page. Click to download any file; each is generated client-side.</p>
     <div class="cta">
       <a class="btn primary" href="#quickstart">🚀 Quick Start</a>
-      <a class="btn" href="#files">📦 Files</a>
-      <a class="btn green" href="#advanced">🧪 Advanced</a>
-      <a class="btn" href="#faq">❓ FAQ</a>
+      <a class="btn" href="#docking">🧷 Docking + MM/GBSA</a>
+      <a class="btn" href="#pkqsp">🧪 PK &amp; QSP</a>
+      <a class="btn green" href="#md">🌊 MD Pipeline</a>
+      <a class="btn" href="#clinical">📊 Clinical Stats</a>
+      <a class="btn violet" href="#pubs">📰 Publications &amp; Posting</a>
     </div>
-    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-      <span class="tag">OpenMM</span><span class="tag">PDBFixer</span><span class="tag">MDTraj</span><span class="tag">ParmEd</span><span class="tag">MM/GBSA (OBC2)</span>
+    <div class="kpi">
+      <span class="tag">OpenMM</span><span class="tag">PDBFixer</span><span class="tag">MDTraj</span>
+      <span class="tag">ParmEd</span><span class="tag">SciPy/Statsmodels</span><span class="tag">Matplotlib</span>
     </div>
   </div>
 </header>
 
+<!-- QUICK START -->
 <section id="quickstart">
   <div class="wrap grid">
     <div class="card">
       <h2>Quick Start <a class="anchor" href="#quickstart">#</a></h2>
-      <p class="muted">Create the conda environment, prepare structures, dock externally, then score poses with <code>mmgbsa_openmm.py</code>.</p>
-
+      <p class="muted">Create the conda env, prep structures, dock externally, then score poses; run PK/QSP, MD, and clinical utilities as needed.</p>
       <h3>1) Create environment</h3>
       <div class="row">
-        <button class="btn" onclick="downloadFile('environment.yml')">⬇ Download environment.yml</button>
+        <button class="btn" onclick="downloadFile('environment.yml')">⬇ environment.yml</button>
         <button class="btn" onclick="copyTextFrom('env-yml')">📋 Copy</button>
       </div>
-      <pre><code id="env-yml">name: abdock
+      <pre><code id="env-yml">name: vipokibart-suite
 channels:
   - conda-forge
 dependencies:
@@ -79,32 +90,34 @@ dependencies:
   - openmm>=8.0
   - pdbfixer>=1.9
   - mdtraj>=1.9.9
-  - biopython>=1.83
+  - parmed>=4.2.2
   - numpy>=1.26
+  - scipy>=1.12
   - pandas>=2.2
+  - statsmodels>=0.14
+  - matplotlib>=3.8
   - tqdm
   - pip
   - pip:
-    - parmed>=4.2.2
+    - biopython>=1.83
 </code></pre>
 
       <h3>2) Prepare structures</h3>
       <div class="row">
-        <button class="btn" onclick="downloadFile('prepare_structures.py')">⬇ Download prepare_structures.py</button>
+        <button class="btn" onclick="downloadFile('prepare_structures.py')">⬇ prepare_structures.py</button>
         <button class="btn" onclick="copyTextFrom('prep-py')">📋 Copy</button>
       </div>
       <pre><code id="prep-py">#!/usr/bin/env python3
 """
-Prepare antibody (Ab) and antigen (Ag) PDBs for docking/energy work:
-- Keep only specified chains
+Prepare antibody (Ab) and antigen (Ag) PDBs for docking/energy/MD:
+- Keep specified chains
 - Remove waters/hetero ligands
-- Fix missing heavy atoms and assign reasonable positions
+- Fix missing heavy atoms; add H (pH 7.4)
 - Save cleaned PDBs
 
 Usage:
-  python prepare_structures.py --pdb input.pdb --chains H,L --out cleaned.pdb
-
-Run separately for Ab and Ag.
+  python prepare_structures.py --pdb input.pdb --chains H,L --out antibody_clean.pdb
+  python prepare_structures.py --pdb input.pdb --chains A   --out antigen_clean.pdb
 """
 import argparse
 from pdbfixer import PDBFixer
@@ -114,10 +127,9 @@ from io import StringIO
 def subset_chains(pdb_stream, keep_chains):
     out = []
     for line in pdb_stream.splitlines():
-        if line.startswith(("ATOM", "HETATM")):
-            chain = line[21].strip()
-            if chain in keep_chains:
-                out.append(line)
+        if line.startswith(("ATOM","HETATM")):
+            ch = line[21].strip()
+            if ch in keep_chains: out.append(line)
         elif line.startswith(("TER","END")):
             continue
     out.append("END")
@@ -126,11 +138,11 @@ def subset_chains(pdb_stream, keep_chains):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pdb", required=True)
-    ap.add_argument("--chains", required=True, help="comma sep chain IDs, e.g., H,L or A")
+    ap.add_argument("--chains", required=True, help="comma sep, e.g., H,L or A")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
-
     keep = set([c.strip() for c in args.chains.split(",") if c.strip()])
+
     with open(args.pdb,"r") as f: pdb_txt = f.read()
     sub_txt = subset_chains(pdb_txt, keep)
 
@@ -139,7 +151,6 @@ def main():
     fixer.findMissingResidues()
     fixer.findMissingAtoms(); fixer.addMissingAtoms()
     fixer.addMissingHydrogens(pH=7.4)
-
     with open(args.out,"w") as out:
         PDBFile.writeFile(fixer.topology, fixer.positions, out, keepIds=True)
     print(f"[OK] Wrote {args.out}")
@@ -147,40 +158,47 @@ def main():
 if __name__ == "__main__":
     main()
 </code></pre>
+      <p class="small">Dock with HADDOCK/ClusPro/Rosetta, or your local pipeline, then use the scoring/MD tools below.</p>
+    </div>
+    <div class="card">
+      <h2>What’s inside? <a class="anchor" href="#contents">#</a></h2>
+      <ul>
+        <li>Docking + pose scoring (MM/GBSA)</li>
+        <li>PK (1C/2C/TMDD/FcRn) and QSP (TL1A–DR3) ODE models</li>
+        <li>OpenMM MD pipeline (min → eq → prod) + frame export</li>
+        <li>Clinical sample-size/power and CI helpers</li>
+        <li>Paper/poster templates &amp; posting checklists</li>
+      </ul>
+      <div class="warn">Remember to cite any external docking servers and software used.</div>
+    </div>
+  </div>
+</section>
 
-      <h3>3) Dock externally (HADDOCK / ClusPro / Rosetta)</h3>
-      <p class="muted">Generate <code>complex.pdb</code> with chains <strong>H,L</strong> (antibody) and <strong>A</strong> (antigen). Then score:</p>
-
-      <h3>4) Score poses (MM/GBSA)</h3>
+<!-- DOCKING -->
+<section id="docking">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>Docking + MM/GBSA <a class="anchor" href="#docking">#</a></h2>
+      <p>Generate poses with your engine of choice, then score ΔH-like terms via MM/GBSA (GBSA-OBC2) and estimate ΔG with optional entropy.</p>
       <div class="row">
-        <button class="btn" onclick="downloadFile('mmgbsa_openmm.py')">⬇ Download mmgbsa_openmm.py</button>
+        <button class="btn" onclick="downloadFile('mmgbsa_openmm.py')">⬇ mmgbsa_openmm.py</button>
         <button class="btn" onclick="copyTextFrom('mmgbsa-py')">📋 Copy</button>
       </div>
       <pre><code id="mmgbsa-py">#!/usr/bin/env python3
 """
-Rigid complex energy + GBSA (OBC2) evaluation to estimate binding enthalpy-like term:
+ΔH-like MM/GBSA for Ab–Ag docked pose (OpenMM + GBSA-OBC2)
+ΔH_approx ≈ ΔE_MM + ΔG_solv_GB;  ΔG ≈ ΔH_approx - TΔS (entropy optional)
 
-ΔH_approx ≈ ΔE_MM + ΔG_solv_GB  (potential + implicit-solvent polar + surface area)
-ΔG_binding ≈ ΔH_approx - TΔS   (entropy default 0; add if available)
-
-Input:
-  --complex  complex.pdb      (Ab+Ag docked pose)
-  --ab_chains H,L             (comma sep chain IDs for antibody)
-  --ag_chains A               (comma sep chain IDs for antigen)
-
-Output: CSV with energies (kcal/mol).
-
-Requires: OpenMM >=8, PDBFixer, MDTraj, ParmEd.
+Usage:
+  python mmgbsa_openmm.py --complex complex.pdb --ab_chains H,L --ag_chains A --temp 300 --entropy 0
 """
-import argparse, io, numpy as np, mdtraj as md, pandas as pd
+import argparse, io, csv, numpy as np, pandas as pd, mdtraj as md
 from openmm import unit, LangevinIntegrator, Platform
 from openmm.app import PDBFile, Modeller, ForceField, Simulation, NoCutoff
-from pdbfixer import PDBFixer
 
 def select_chains(top, chain_ids):
     idx = [c.index for c in top.chains if c.chain_id in chain_ids]
-    atom_idx = [a.index for a in top.atoms if a.residue.chain.index in idx]
-    return atom_idx
+    return [a.index for a in top.atoms if a.residue.chain.index in idx]
 
 def build_system(pdb, implicit=True):
     ff = ForceField("amber14-all.xml","implicit/gbsa_obc2.xml") if implicit else ForceField("amber14-all.xml")
@@ -190,17 +208,15 @@ def build_system(pdb, implicit=True):
     return modeller, system
 
 def energy_kcal(system, modeller, minimize=True):
-    integrator = LangevinIntegrator(300*unit.kelvin, 1.0/unit.picosecond, 0.004*unit.picoseconds)
-    sim = Simulation(modeller.topology, system, integrator, Platform.getPlatformByName("Reference"))
+    integ = LangevinIntegrator(300*unit.kelvin, 1.0/unit.picosecond, 0.004*unit.picoseconds)
+    sim = Simulation(modeller.topology, system, integ, Platform.getPlatformByName("Reference"))
     sim.context.setPositions(modeller.positions)
     if minimize: sim.minimizeEnergy(maxIterations=200)
-    E = sim.context.getState(getEnergy=True).getPotentialEnergy().value_in_unit(unit.kilocalories_per_mole)
-    return E
+    return sim.context.getState(getEnergy=True).getPotentialEnergy().value_in_unit(unit.kilocalories_per_mole)
 
 def split_components(traj, ab_chains, ag_chains):
     top = traj.topology
-    ab_idx = select_chains(top, set(ab_chains))
-    ag_idx = select_chains(top, set(ag_chains))
+    ab_idx = select_chains(top, set(ab_chains)); ag_idx = select_chains(top, set(ag_chains))
     complex_pdb = PDBFile(io.StringIO(traj.to_pdb_string()))
     ab_pdb = PDBFile(io.StringIO(traj.atom_slice(ab_idx).to_pdb_string()))
     ag_pdb = PDBFile(io.StringIO(traj.atom_slice(ag_idx).to_pdb_string()))
@@ -212,168 +228,509 @@ def main():
     ap.add_argument("--ab_chains", required=True)
     ap.add_argument("--ag_chains", required=True)
     ap.add_argument("--temp", type=float, default=300.0)
-    ap.add_argument("--entropy", type=float, default=0.0, help="TΔS (kcal/mol) if you have it")
+    ap.add_argument("--entropy", type=float, default=0.0, help="TΔS (kcal/mol), optional")
     args = ap.parse_args()
 
-    ab_ch = [c.strip() for c in args.ab_chains.split(",") if c.strip()]
-    ag_ch = [c.strip() for c in args.ag_chains.split(",") if c.strip()]
+    ab = [x.strip() for x in args.ab_chains.split(",") if x.strip()]
+    ag = [x.strip() for x in args.ag_chains.split(",") if x.strip()]
 
     traj = md.load(args.complex)
-    complex_pdb, ab_pdb, ag_pdb = split_components(traj, ab_ch, ag_ch)
+    complex_pdb, ab_pdb, ag_pdb = split_components(traj, ab, ag)
 
     m_c, s_c = build_system(complex_pdb, implicit=True)
     m_a, s_a = build_system(ab_pdb, implicit=True)
     m_b, s_b = build_system(ag_pdb, implicit=True)
 
-    Ec = energy_kcal(s_c, m_c, minimize=True)
-    Ea = energy_kcal(s_a, m_a, minimize=True)
-    Eb = energy_kcal(s_b, m_b, minimize=True)
+    Ec, Ea, Eb = energy_kcal(s_c, m_c), energy_kcal(s_a, m_a), energy_kcal(s_b, m_b)
+    dH = Ec - (Ea + Eb); dG = dH - args.entropy
 
-    dH = Ec - (Ea + Eb)
-    dG = dH - args.entropy
-
-    import csv
     with open("mmgbsa_result.csv","w",newline="") as f:
         w = csv.DictWriter(f, fieldnames=["E_complex_kcal","E_ab_kcal","E_ag_kcal","DeltaH_approx_kcal","T_deltaS_input_kcal","DeltaG_est_kcal","Temp_K"])
-        w.writeheader()
-        w.writerow({"E_complex_kcal":Ec,"E_ab_kcal":Ea,"E_ag_kcal":Eb,"DeltaH_approx_kcal":dH,"T_deltaS_input_kcal":args.entropy,"DeltaG_est_kcal":dG,"Temp_K":args.temp})
-    print(f"E_complex={Ec:.2f}  E_ab={Ea:.2f}  E_ag={Eb:.2f}  ΔH≈{dH:.2f} kcal/mol  ΔG≈{dG:.2f} (TΔS={args.entropy:.2f})")
-    print("[NOTE] This ΔH-like term is MM + GBSA at minimized geometry; average over MD frames + add entropy for robust ΔG.")
+        w.writeheader(); w.writerow({"E_complex_kcal":Ec,"E_ab_kcal":Ea,"E_ag_kcal":Eb,"DeltaH_approx_kcal":dH,"T_deltaS_input_kcal":args.entropy,"DeltaG_est_kcal":dG,"Temp_K":args.temp})
+    print(f"E_complex={Ec:.2f}  E_ab={Ea:.2f}  E_ag={Eb:.2f}  ΔH≈{dH:.2f}  ΔG≈{dG:.2f} (TΔS={args.entropy:.2f})")
 
 if __name__ == "__main__":
     main()
 </code></pre>
 
-      <h3>5) (Optional) Helper script</h3>
+      <h3>Batch scoring helper</h3>
       <div class="row">
-        <button class="btn" onclick="downloadFile('run_example.sh')">⬇ Download run_example.sh</button>
-        <button class="btn" onclick="copyTextFrom('run-sh')">📋 Copy</button>
+        <button class="btn" onclick="downloadFile('batch_score.sh')">⬇ batch_score.sh</button>
+        <button class="btn" onclick="copyTextFrom('batch-sh')">📋 Copy</button>
       </div>
-      <pre><code id="run-sh">#!/usr/bin/env bash
+      <pre><code id="batch-sh">#!/usr/bin/env bash
 set -e
-# 1) Create env:
-#    conda env create -f environment.yml
-#    conda activate abdock
-#
-# 2) Prepare structures:
-#    python prepare_structures.py --pdb antibody_raw.pdb --chains H,L --out antibody_clean.pdb
-#    python prepare_structures.py --pdb antigen_raw.pdb  --chains A   --out antigen_clean.pdb
-#
-# 3) Dock externally (HADDOCK/ClusPro/Rosetta) → complex.pdb with chains H,L (Ab) and A (Ag)
-#
-# 4) MM/GBSA on the pose:
-#    python mmgbsa_openmm.py --complex complex.pdb --ab_chains H,L --ag_chains A --temp 300 --entropy 0
-#
-# Output: mmgbsa_result.csv with ΔH_approx and ΔG_est (kcal/mol).
-</code></pre>
-      <p class="small">Tip: Commit this index.html alone; users can download all files from this page.</p>
-    </div>
-
-    <div class="card">
-      <h2>Why this approach? <a class="anchor" href="#why">#</a></h2>
-      <ul>
-        <li><strong>Fast ranking:</strong> score many poses quickly with MM/GBSA (OBC2).</li>
-        <li><strong>Flexible:</strong> use any docking engine (HADDOCK, ClusPro-Ab, RosettaDock/SnugDock).</li>
-        <li><strong>Extensible:</strong> add MD sampling + entropy for stronger ΔG estimates.</li>
-      </ul>
-      <details open>
-        <summary>TL;DR</summary>
-        <p>Dock Ab–Ag → minimize → compute ΔE_MM + GBSA. For robust ΔG, average over MD snapshots and add TΔS (quasi-harmonic/normal-mode).</p>
-      </details>
-    </div>
-  </div>
-</section>
-
-<section id="files">
-  <div class="wrap">
-    <div class="card">
-      <h2>Repository Layout <a class="anchor" href="#files">#</a></h2>
-      <ul>
-        <li><code>environment.yml</code> — conda env (OpenMM, PDBFixer, MDTraj, ParmEd)</li>
-        <li><code>prepare_structures.py</code> — trim/clean PDBs (chains, add atoms/H)</li>
-        <li><code>mmgbsa_openmm.py</code> — ΔH<sub>approx</sub> & ΔG<sub>est</sub> from a docked pose</li>
-        <li><code>run_example.sh</code> — quick how-to</li>
-      </ul>
-      <details>
-        <summary>Assumptions</summary>
-        <ul>
-          <li>Antibody chains labeled <code>H,L</code>; antigen <code>A</code> in <code>complex.pdb</code>.</li>
-          <li>Implicit solvent GBSA-OBC2; no PME (NoCutoff) for speed.</li>
-          <li>Enthalpy-like estimate at minimized geometry; improve with MD sampling + entropy.</li>
-        </ul>
-      </details>
-    </div>
-  </div>
-</section>
-
-<section id="advanced">
-  <div class="wrap grid">
-    <div class="card">
-      <h2>Advanced: Batch & MD Sampling <a class="anchor" href="#advanced">#</a></h2>
-      <h3>Batch score multiple poses</h3>
-      <pre><code>for f in poses/*.pdb; do
-  python mmgbsa_openmm.py --complex "$f" --ab_chains H,L --ag_chains A --temp 300 --entropy 0
+for f in poses/*.pdb; do
+  python mmgbsa_openmm.py --complex "$f" --ab_chains H,L --ag_chains A --temp 300 --entropy 0 > /dev/null
   awk 'NR==2{print FILENAME, $4, $6}' mmgbsa_result.csv
-done | sort -k2,2n</code></pre>
-
-      <h3>Framewise averaging (pseudo-workflow)</h3>
-      <pre><code># (1) Minimize & equilibrate in OpenMM
-# (2) 1–5 ns restrained MD; save 100–500 frames
-# (3) For each frame → compute ΔH_approx; average ± SE
-# (4) Estimate entropy (quasi-harmonic/normal-mode) and subtract TΔS for ΔG</code></pre>
+done | sort -k2,2n
+</code></pre>
+      <div class="muted small">Note: For robust ΔG, average ΔH over MD frames (below) and add entropy (quasi-harmonic or normal-mode).</div>
     </div>
 
     <div class="card">
-      <h2>Notes on Ab Docking <a class="anchor" href="#advanced2">#</a></h2>
+      <h2>Docking Tips</h2>
       <ul>
-        <li>Model multiple CDR-H3 conformers (IgFold/ABodyBuilder2/RosettaAntibody) and dock each.</li>
-        <li>Use the correct antigen oligomer (e.g., TL1A trimer) for neutralization.</li>
-        <li>Refine top clusters (Rosetta SnugDock / HADDOCK water-refine) before scoring.</li>
+        <li>Use restraints (HADDOCK) or antibody mode (ClusPro-Ab); refine with Rosetta SnugDock.</li>
+        <li>Dock to the biologically relevant oligomer (e.g., TL1A trimer) when modeling neutralization.</li>
+        <li>Sample multiple CDR-H3 ensembles (IgFold/ABodyBuilder2/RosettaAntibody) and score all.</li>
       </ul>
     </div>
   </div>
 </section>
 
-<section id="faq">
+<!-- PK & QSP -->
+<section id="pkqsp">
   <div class="wrap grid">
     <div class="card">
-      <h2>FAQ <a class="anchor" href="#faq">#</a></h2>
-      <h3>Which docking engine?</h3>
-      <p>HADDOCK (restraints), ClusPro-Ab (antibody mode), RosettaDock/SnugDock (refinement). Global→local works well.</p>
-      <h3>What about entropy?</h3>
-      <p>Default is 0. Add quasi-harmonic (from MD covariance) or normal-mode to estimate TΔS → ΔG.</p>
+      <h2>PK &amp; QSP Modeling <a class="anchor" href="#pkqsp">#</a></h2>
+      <p>Run classic PK (1C/2C), TMDD, FcRn recycling, and a compact TL1A–DR3 QSP module. Plot concentration–time, occupancy, and sensitivity.</p>
+
+      <h3>PK/QSP models</h3>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('pk_qsp_models.py')">⬇ pk_qsp_models.py</button>
+        <button class="btn" onclick="copyTextFrom('pkqsp-py')">📋 Copy</button>
+      </div>
+      <pre><code id="pkqsp-py">#!/usr/bin/env python3
+"""
+PK & QSP models for Vipokibart-like mAbs:
+- 1C, 2C, TMDD, FcRn recycling (minimal)
+- TL1A–DR3 QSP (ligand/receptor/complex) with cytokine output proxy
+- Plotters & simple sensitivity scan
+
+Usage:
+  python pk_qsp_models.py --model 1c --dose 600 --tau 28 --tend 168
+  python pk_qsp_models.py --model tmdd --dose 600 --tau 28 --tend 168
+  python pk_qsp_models.py --model tl1a --dose 600 --tau 28 --tend 168
+"""
+import argparse, numpy as np, pandas as pd, matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
+
+def dose_events(t, tau, n=3):
+    return [i*tau for i in range(n+1) if i*tau<=t]
+
+def simulate_1c(dose=600, V=3.0, CL=0.2, tau=28, tend=168):
+    # mg, L, L/day; returns concentration mg/L
+    dt=0.1; t=np.arange(0,tend+dt,dt); A=0.0; C=[]
+    next_doses=dose_events(tend,tau,10)
+    j=0
+    for ti in t:
+        if j < len(next_doses) and abs(ti-next_doses[j])<1e-9: A+=dose; j+=1
+        dA = -CL*(A/V)
+        A += dA*dt
+        C.append(A/V)
+    return t,np.array(C)
+
+def simulate_2c(dose=600, Vc=3.0, Vp=2.0, CL=0.2, Q=0.3, tau=28, tend=168):
+    dt=0.1; t=np.arange(0,tend+dt,dt); Ac=0.0; Ap=0.0; C=[]
+    doses=dose_events(tend,tau,10); j=0
+    for ti in t:
+        if j < len(doses) and abs(ti-doses[j])<1e-9: Ac+=dose; j+=1
+        dAc = -(CL/Vc)*(Ac) - (Q/Vc)*Ac + (Q/Vp)*Ap
+        dAp =  (Q/Vc)*Ac - (Q/Vp)*Ap
+        Ac += dAc*dt; Ap += dAp*dt
+        C.append(Ac/Vc)
+    return t,np.array(C)
+
+def simulate_tmdd(dose=600, V=3.0, CL=0.1, R0=0.05, kon=0.1, koff=0.01, kint=0.05, tau=28, tend=168):
+    # A: drug (mg), R: receptor (uM eq), Cx: complex; simplified units for teaching
+    dt=0.05; t=np.arange(0,tend+dt,dt); A=0.0; R=R0; Cx=0.0; C=[]
+    doses=dose_events(tend,tau,10); j=0
+    for ti in t:
+        if j < len(doses) and abs(ti-doses[j])<1e-9: A+=dose; j+=1
+        D = A/V
+        dA = -CL*D - kon*D*R + koff*Cx  # apparent loss by binding
+        dR = -kon*D*R + koff*Cx + (-kint*R) + (kint*R0) # simple turnover
+        dCx=  kon*D*R - (koff+kint)*Cx
+        A += dA*dt*V; R += dR*dt; Cx += dCx*dt
+        C.append(D)
+    return t,np.array(C)
+
+def simulate_fcrn(dose=600, V=3.0, CLbase=0.2, krec=0.9, kdeg=0.1, tau=28, tend=168):
+    # crude FcRn salvage: CL_eff = CLbase/(1+alpha) where alpha ∝ krec/kdeg when C>0
+    dt=0.1; t=np.arange(0,tend+dt,dt); A=0.0; C=[]
+    doses=dose_events(tend,tau,10); j=0
+    for ti in t:
+        if j < len(doses) and abs(ti-doses[j])<1e-9: A+=dose; j+=1
+        D = A/V
+        CL_eff = CLbase/(1.0 + 4.0*(krec/(kdeg+1e-6)))
+        dA = -CL_eff*D
+        A += dA*dt*V
+        C.append(D)
+    return t,np.array(C)
+
+def simulate_tl1a(dose=600, V=3.0, TL=1.0, DR3=1.0, kon=0.5, koff=0.05, prod=1.0, kclear=0.2, tau=28, tend=84):
+    # QSP: Drug (D) binds TL1A (L): DL, L binds DR3 (R): LR; proxy cytokine ~ LR
+    dt=0.05; t=np.arange(0,tend+dt,dt); A=0.0; L=TL; R=DR3; DL=0.0; LR=0.5; Ccyto=[]
+    doses=dose_events(tend,tau,10); j=0
+    for ti in t:
+        if j < len(doses) and abs(ti-doses[j])<1e-9: A+=dose; j+=1
+        D = A/V
+        # D + L <-> DL  (drug neutralizes L)
+        fwd1 = kon*D*L; rev1 = koff*DL
+        # L + R <-> LR  (signal proxy)
+        fwd2 = kon*L*R; rev2 = koff*LR
+        # Update (toy turnover on L)
+        dD  = -fwd1 + rev1 - kclear*D
+        dL  =  prod - kclear*L - fwd1 + rev1 - fwd2 + rev2
+        dDL =  fwd1 - rev1 - kclear*DL
+        dLR =  fwd2 - rev2 - kclear*LR
+        A += dD*dt*V; L += dL*dt; DL += dDL*dt; LR += dLR*dt
+        Ccyto.append(max(LR,0))
+    return t,np.array(Ccyto)
+
+def plot_xy(t, y, title, ylabel, out="plot.png"):
+    plt.figure(figsize=(7.5,4)); plt.plot(t,y)
+    plt.xlabel("Time (days)"); plt.ylabel(ylabel); plt.title(title); plt.tight_layout(); plt.savefig(out,dpi=180)
+    print(f"[OK] Wrote {out}")
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", choices=["1c","2c","tmdd","fcrn","tl1a"], required=True)
+    ap.add_argument("--dose", type=float, default=600)
+    ap.add_argument("--tau", type=float, default=28)
+    ap.add_argument("--tend", type=float, default=168)
+    args = ap.parse_args()
+    if args.model=="1c":
+        t,C=simulate_1c(args.dose, tau=args.tau, tend=args.tend); plot_xy(t,C,"1C PK","C (mg/L)","pk_1c.png")
+    elif args.model=="2c":
+        t,C=simulate_2c(args.dose, tau=args.tau, tend=args.tend); plot_xy(t,C,"2C PK","C (mg/L)","pk_2c.png")
+    elif args.model=="tmdd":
+        t,C=simulate_tmdd(args.dose, tau=args.tau, tend=args.tend); plot_xy(t,C,"TMDD PK","C (mg/L)","pk_tmdd.png")
+    elif args.model=="fcrn":
+        t,C=simulate_fcrn(args.dose, tau=args.tau, tend=args.tend); plot_xy(t,C,"FcRn PK (toy)","C (mg/L)","pk_fcrn.png")
+    elif args.model=="tl1a":
+        t,C=simulate_tl1a(args.dose, tau=args.tau, tend=args.tend); plot_xy(t,C,"TL1A–DR3 signaling proxy","LR (a.u.)","qsp_tl1a.png")
+
+if __name__=="__main__":
+    main()
+</code></pre>
+
+      <h3>Parameter examples (YAML)</h3>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('pk_params.yml')">⬇ pk_params.yml</button>
+        <button class="btn" onclick="copyTextFrom('pk-yml')">📋 Copy</button>
+      </div>
+      <pre><code id="pk-yml"># Example PK parameters for teaching (units in comments)
+one_comp:
+  V: 3.0      # L
+  CL: 0.2     # L/day
+  dose: 600   # mg
+  tau: 28     # days
+
+two_comp:
+  Vc: 3.0
+  Vp: 2.0
+  CL: 0.2
+  Q: 0.3
+  dose: 600
+  tau: 28
+
+tmdd:
+  V: 3.0
+  CL: 0.1
+  R0: 0.05
+  kon: 0.1
+  koff: 0.01
+  kint: 0.05
+  dose: 600
+  tau: 28
+
+tl1a:
+  TL: 1.0
+  DR3: 1.0
+  kon: 0.5
+  koff: 0.05
+  prod: 1.0
+  kclear: 0.2
+  dose: 600
+  tau: 28
+</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>Notes</h2>
+      <ul>
+        <li>These ODEs are **didactic**; calibrate to your data for decision support.</li>
+        <li>Add covariates (body weight, albumin) or Bayesian updating if you need pop-PK.</li>
+        <li>Export CSVs &amp; figures for inclusion in clinical/stat/reg docs.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- MD PIPELINE -->
+<section id="md">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>OpenMM MD Pipeline <a class="anchor" href="#md">#</a></h2>
+      <p>Minimize → NVT eq → NPT eq → production; saves DCD trajectory &amp; reports energies. Works on protein–protein complexes.</p>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('md_pipeline.py')">⬇ md_pipeline.py</button>
+        <button class="btn" onclick="copyTextFrom('md-py')">📋 Copy</button>
+      </div>
+      <pre><code id="md-py">#!/usr/bin/env python3
+"""
+OpenMM MD pipeline for protein/protein complexes
+Input: PDB (complex), YAML config (box, steps, T/P)
+Output: minimized PDB, DCD trajectory, log CSV
+
+Usage:
+  python md_pipeline.py --pdb complex.pdb --config md_config.yml
+"""
+import argparse, yaml, numpy as np, pandas as pd
+from openmm import unit, Platform
+from openmm.app import PDBFile, Modeller, ForceField, Simulation, DCDReporter, StateDataReporter, PME, HBonds
+from openmm import LangevinIntegrator, MonteCarloBarostat
+
+def run_md(pdb_path, cfg_path):
+    with open(cfg_path,"r") as f: cfg=yaml.safe_load(f)
+    ff = ForceField("amber14-all.xml","amber14/tip3pfb.xml")
+
+    pdb = PDBFile(pdb_path)
+    modeller = Modeller(pdb.topology, pdb.positions)
+    modeller.addHydrogens(ff, pH=7.4)
+    modeller.addSolvent(ff, model="tip3p", padding=cfg["box_padding"]*unit.nanometer, ionicStrength=cfg["ionic_strength"]*unit.molar)
+
+    system = ff.createSystem(modeller.topology,
+             nonbondedMethod=PME, nonbondedCutoff=1.0*unit.nanometer,
+             constraints=HBonds)
+    integrator = LangevinIntegrator(cfg["temperature"]*unit.kelvin, 1.0/unit.picosecond, cfg["timestep_ps"]*unit.picoseconds)
+    system.addForce(MonteCarloBarostat(cfg["pressure_atm"]*unit.atmospheres, cfg["temperature"]*unit.kelvin))
+
+    sim = Simulation(modeller.topology, system, integrator, Platform.getPlatformByName("CPU"))
+    sim.context.setPositions(modeller.positions)
+
+    # Minimize
+    sim.minimizeEnergy(maxIterations=cfg["min_steps"])
+    with open(cfg["out_min_pdb"],"w") as f: PDBFile.writeFile(modeller.topology, sim.context.getState(getPositions=True).getPositions(), f)
+
+    # NVT
+    sim.reporters.append(StateDataReporter(cfg["out_log_csv"], cfg["report_interval"], step=True, potentialEnergy=True, temperature=True, progress=True, remainingTime=True, speed=True, totalSteps=cfg["nvt_steps"]+cfg["npt_steps"]+cfg["prod_steps"], separator=","))
+    sim.step(cfg["nvt_steps"])
+
+    # NPT
+    sim.step(cfg["npt_steps"])
+
+    # Production
+    sim.reporters.append(DCDReporter(cfg["out_dcd"], cfg["traj_interval"]))
+    sim.step(cfg["prod_steps"])
+    print("[OK] MD finished")
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--pdb", required=True)
+    ap.add_argument("--config", required=True)
+    args = ap.parse_args()
+    run_md(args.pdb, args.config)
+
+if __name__=="__main__":
+    main()
+</code></pre>
+
+      <h3>MD config</h3>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('md_config.yml')">⬇ md_config.yml</button>
+        <button class="btn" onclick="copyTextFrom('md-yml')">📋 Copy</button>
+      </div>
+      <pre><code id="md-yml"># OpenMM MD config (example)
+temperature: 300            # K
+pressure_atm: 1.0           # atm
+timestep_ps: 0.004          # ps
+box_padding: 1.0            # nm
+ionic_strength: 0.15        # M
+
+min_steps: 200
+nvt_steps: 5000
+npt_steps: 10000
+prod_steps: 50000
+
+report_interval: 500
+traj_interval: 500
+
+out_min_pdb: minimized.pdb
+out_dcd: traj.dcd
+out_log_csv: md_log.csv
+</code></pre>
     </div>
     <div class="card">
-      <h2>License <a class="anchor" href="#license">#</a></h2>
-      <p class="muted">MIT License (replace owner/year in your repo LICENSE):</p>
-      <pre><code>MIT License
-Copyright (c) 2025 Your Name
-Permission is hereby granted, free of charge, to any person obtaining a copy...
+      <h2>MD Notes</h2>
+      <ul>
+        <li>Switch to **GPU** by changing platform if available.</li>
+        <li>Use frames from `traj.dcd` to compute average ΔH (MM/GBSA) over snapshots.</li>
+        <li>Consider restraints early (heavy atoms) for stability; relax later.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CLINICAL STATS -->
+<section id="clinical">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>Clinical Power / Sample Size <a class="anchor" href="#clinical">#</a></h2>
+      <p>Compute quick power/sample size for binary endpoints (e.g., Week-12 remission), plus CI utilities.</p>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('clinical_power.py')">⬇ clinical_power.py</button>
+        <button class="btn" onclick="copyTextFrom('clin-py')">📋 Copy</button>
+      </div>
+      <pre><code id="clin-py">#!/usr/bin/env python3
+"""
+Binary endpoint sample-size/power utilities for parallel arms.
+Examples:
+  python clinical_power.py --p_ctrl 0.20 --p_trt 0.40 --alpha 0.05 --power 0.80
+"""
+import argparse, math
+from statsmodels.stats.power import NormalIndPower
+from statsmodels.stats.proportion import proportion_confint
+
+def ss_2prop(p1, p2, alpha=0.05, power=0.8, ratio=1.0):
+    effect = abs(p2 - p1)
+    # approximate with pooled variance; using NormalIndPower for two-proportion test
+    analysis = NormalIndPower()
+    n1 = analysis.solve_power(effect_size=analysis._effect_size_prop(p1, p2, ratio=ratio), alpha=alpha, power=power, ratio=ratio, alternative='two-sided')
+    n2 = n1*ratio
+    return math.ceil(n1), math.ceil(n2)
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--p_ctrl", type=float, required=True)
+    ap.add_argument("--p_trt", type=float, required=True)
+    ap.add_argument("--alpha", type=float, default=0.05)
+    ap.add_argument("--power", type=float, default=0.8)
+    ap.add_argument("--ratio", type=float, default=1.0)
+    args = ap.parse_args()
+    n1, n2 = ss_2prop(args.p_ctrl, args.p_trt, args.alpha, args.power, args.ratio)
+    print(f"Sample size per group: n_treatment≈{n1}, n_control≈{n2} (ratio={args.ratio})")
+    # 95% CI demo (x/n)
+    x_ctrl = round(args.p_ctrl*100); n_ctrl = 100
+    lo,hi = proportion_confint(x_ctrl, n_ctrl, method="wilson")
+    print(f"Example CI (control, Wilson, n=100): {lo:.3f}–{hi:.3f}")
+
+if __name__=="__main__":
+    main()
+</code></pre>
+    </div>
+    <div class="card">
+      <h2>Clinical Notes</h2>
+      <ul>
+        <li>Pre-specify primary/keys; use CMH stratification if needed.</li>
+        <li>Consider **non-responder imputation** for binary endpoints.</li>
+        <li>Control **type-I error** across multiple endpoints (gatekeeping or alpha-spend).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PUBLICATIONS & POSTING -->
+<section id="pubs">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>Publications &amp; Posting <a class="anchor" href="#pubs">#</a></h2>
+      <p>Ready-to-fill templates and checklists for manuscripts, posters, and preprints/data posting.</p>
+
+      <h3>Manuscript template (Markdown)</h3>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('manuscript_template.md')">⬇ manuscript_template.md</button>
+        <button class="btn" onclick="copyTextFrom('ms-md')">📋 Copy</button>
+      </div>
+      <pre><code id="ms-md"># Title: Vipokibart Neutralization of TL1A—Docking, PK/QSP, and MD Integration
+## Authors
+- First Last¹, …
+## Abstract
+_Short abstract here (200–250 words)._
+## Introduction
+- Background on TL1A–DR3 and fibrosis rationale.
+## Methods
+- Docking engines, pose selection, MM/GBSA; PK/QSP ODEs; MD parameters.
+## Results
+- Pose ranking, ΔH/ΔG estimates; PK exposure; QSP LR proxy; MD stability.
+## Discussion
+- Clinical relevance, limitations, future work.
+## References
+- …
+</code></pre>
+
+      <h3>Poster template (Markdown)</h3>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('poster_template.md')">⬇ poster_template.md</button>
+        <button class="btn" onclick="copyTextFrom('poster-md')">📋 Copy</button>
+      </div>
+      <pre><code id="poster-md"># Vipokibart: Ab–Ag Docking + PK/QSP + MD
+## Problem
+_Unmet need in UC/CD; TL1A rationale._
+## Methods
+_Docking, MM/GBSA, PK/QSP, MD._
+## Results
+_Key figures: best pose, PK curves, QSP LR, MD RMSD/E._
+## Conclusions
+_Topline takeaways; clinical implications._
+</code></pre>
+
+      <h3>Preprint & Data Posting Checklist</h3>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('posting_checklist.md')">⬇ posting_checklist.md</button>
+        <button class="btn" onclick="copyTextFrom('post-md')">📋 Copy</button>
+      </div>
+      <pre><code id="post-md"># Preprint/Data Posting Checklist
+- [ ] Remove secrets/identifiers; confirm licenses.
+- [ ] Include environment.yml; scripts; sample data or links.
+- [ ] Describe docking engines & parameters clearly.
+- [ ] Provide MD config; trajectory subset or link.
+- [ ] Add README with reproduction steps; version tags.
+</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>Project Scaffold (README)</h2>
+      <div class="row">
+        <button class="btn" onclick="downloadFile('README_scaffold.md')">⬇ README_scaffold.md</button>
+        <button class="btn" onclick="copyTextFrom('readme-md')">📋 Copy</button>
+      </div>
+      <pre><code id="readme-md"># Vipokibart Ab–Ag Modeling Suite
+## Overview
+Docking+MM/GBSA, PK/QSP, MD, clinical stats, and publishing scaffolds.
+## Quickstart
+- `conda env create -f environment.yml && conda activate vipokibart-suite`
+- Prep PDBs → Dock externally → Score with `mmgbsa_openmm.py`
+- PK/QSP via `pk_qsp_models.py`; MD via `md_pipeline.py`
+## Structure
+- `prepare_structures.py`, `mmgbsa_openmm.py`, `pk_qsp_models.py`, `md_pipeline.py`, `clinical_power.py`
+- `md_config.yml`, `pk_params.yml`
+## Reproducibility
+- Cite engines; record seeds; pin versions.
 </code></pre>
     </div>
   </div>
 </section>
 
 <footer>
-  One-file site for reproducible Ab–Ag docking/energy workflows. Questions? Open an issue on your GitHub repo.
+  Built for reproducible Ab–Ag modeling. Questions or suggestions? Open an issue in your GitHub repo.
 </footer>
 
 <script>
-  // Map file names to code block IDs
+  // Map downloadable files to code block IDs
   const files = {
     "environment.yml": "env-yml",
     "prepare_structures.py": "prep-py",
     "mmgbsa_openmm.py": "mmgbsa-py",
-    "run_example.sh": "run-sh"
+    "batch_score.sh": "batch-sh",
+    "pk_qsp_models.py": "pkqsp-py",
+    "pk_params.yml": "pk-yml",
+    "md_pipeline.py": "md-py",
+    "md_config.yml": "md-yml",
+    "clinical_power.py": "clin-py",
+    "manuscript_template.md": "ms-md",
+    "poster_template.md": "poster-md",
+    "posting_checklist.md": "post-md",
+    "README_scaffold.md": "readme-md"
   };
 
   function copyTextFrom(id){
     const el = document.getElementById(id);
     if(!el) return;
     const text = el.innerText;
-    navigator.clipboard.writeText(text).then(()=>{
-      toast("Copied to clipboard");
-    });
+    navigator.clipboard.writeText(text).then(()=>toast("Copied to clipboard"));
   }
 
   function downloadFile(name){
