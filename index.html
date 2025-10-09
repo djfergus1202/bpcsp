@@ -2,497 +2,472 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>In-Browser Docking • TriPredict • QA & Screening</title>
+<title>In-Browser Antibody & Ligand Docking Studio • Reproducible, Visual, Client-Side</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Client-side protein docking, ligand docking, TriPredict, QA mode (reproducible runs), audit bundles, and throughput screening." />
+<meta name="description" content="Antibody–antigen docking, ligand docking, and throughput screening — fully client-side with 3D visualization, QA/audit logging, and exportable bundles." />
 <style>
- :root{
-  --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--accent:#60a5fa;--line:#1f2937;
-  --green:#34d399;--red:#f87171;--yellow:#fbbf24;--orange:#f59e0b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial
- }
- *{box-sizing:border-box}
- body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
- a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
- header{padding:40px 16px;background:
+  :root{
+    --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;
+    --accent:#60a5fa;--line:#1f2937;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--orange:#f59e0b;
+    --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --sans: Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.55}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  header{padding:36px 16px;background:
     radial-gradient(1200px 600px at 15% -10%,#1d2a4a,transparent 60%),
-    radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%)}
- .wrap{max-width:1400px;margin:0 auto}
- h1{margin:0 0 8px;font-size:32px}
- p.lead{color:var(--muted);margin:6px 0 0}
- section{padding:22px 16px;border-top:1px solid var(--line);background:var(--panel)}
- h2{margin:0 0 10px;font-size:24px} h3{margin:14px 0 6px;font-size:18px}
- .grid{display:grid;gap:16px} @media(min-width:1020px){.grid{grid-template-columns:1.1fr .9fr}}
- .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:14px}
- .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
- label{font-weight:600}
- input[type="number"],input[type="text"],textarea,select{
-  background:#0a0f1a;color:var(--text);border:1px solid #1f2937;border-radius:8px;
-  padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:80px
- }
- textarea{width:100%;min-height:110px}
- .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-weight:600;
-  border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:13px}
- .btn.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
- .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0}
- .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0}
- .btn.orange{background:linear-gradient(180deg,#f59e0b,#d97706);border:0}
- .btn.purple{background:linear-gradient(180deg,#7c3aed,#6d28d9);border:0}
- .btn[disabled]{opacity:.5;cursor:not-allowed}
- .muted{color:var(--muted)} .small{font-size:12px;color:var(--muted)}
- .pill{padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#93c5fd}
- .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
- .tabbtn{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:14px}
- .tabbtn.active{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
- .tabsec{display:none} .tabsec.active{display:block}
- .two{display:grid;gap:12px} @media(min-width:780px){.two{grid-template-columns:1fr 1fr}}
- .trigrid{display:grid;gap:12px} @media(min-width:980px){.trigrid{grid-template-columns:1fr 1fr 1fr}}
- .score{font-family:var(--mono);background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;font-size:12px}
- .warn{border-left:4px solid var(--yellow);padding-left:10px;margin:10px 0;color:#fbbf24}
- .info{border-left:4px solid var(--accent);padding-left:10px;margin:10px 0;color:#93c5fd}
- .success{border-left:4px solid var(--green);padding-left:10px;margin:10px 0;color:#34d399}
- .error{border-left:4px solid var(--red);padding-left:10px;margin:10px 0;color:#fecaca}
- .chainchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
- .chainchip{border:1px solid #334155;border-radius:999px;padding:2px 8px;display:inline-flex;align-items:center;gap:6px}
- .chainchip input{accent-color:#60a5fa}
- progress{width:260px;height:10px;border:1px solid #1f2937;border-radius:999px;background:#0b1220}
- progress::-webkit-progress-bar{background:#0b1220;border-radius:999px}
- progress::-webkit-progress-value{background:#60a5fa;border-radius:999px}
- #viewer,#ligViewer,#seqViewer,.triview,#screenViewer{position:relative;width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
- #viewer,#ligViewer,#screenViewer{height:560px} .triview,#seqViewer{height:300px}
- table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line)} th{color:var(--muted);font-weight:600;cursor:pointer}
- .flex-between{display:flex;justify-content:space-between;align-items:center}
- .legend{display:flex;gap:8px;flex-wrap:wrap}
- .legend .dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:4px}
- .kbd{font-family:var(--mono);font-size:11px;border:1px solid #334155;border-radius:6px;padding:2px 6px;color:#cbd5e1}
+    radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%);}
+  .wrap{max-width:1320px;margin:0 auto}
+  h1{margin:0 0 8px;font-size:30px}
+  p.lead{color:var(--muted);margin:6px 0 0}
+  section{padding:22px 16px;border-top:1px solid var(--line);background:var(--panel)}
+  h2{margin:0 0 10px;font-size:22px}
+  h3{margin:14px 0 6px;font-size:18px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:980px){.grid{grid-template-columns:1.1fr .9fr}}
+  .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  label{font-weight:600}
+  input[type="number"], input[type="text"], textarea, select{
+    background:#0a0f1a;color:var(--text);border:1px solid #1f2937;border-radius:8px;
+    padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:80px
+  }
+  textarea{width:100%;min-height:120px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-weight:600;border:1px solid var(--line);background:#0b1220;cursor:pointer}
+  .btn.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
+  .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0}
+  .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0}
+  .btn.orange{background:linear-gradient(180deg,#f59e0b,#b45309);border:0}
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+  .muted{color:var(--muted)}
+  .small{font-size:12px;color:var(--muted)}
+  .pill{padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#93c5fd}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .tabbtn{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1220;cursor:pointer}
+  .tabbtn.active{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
+  .tabsec{display:none}
+  .tabsec.active{display:block}
+  .two{display:grid;gap:12px}
+  @media(min-width:760px){.two{grid-template-columns:1fr 1fr}}
+  .score{font-family:var(--mono);background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;font-size:12px;white-space:pre-wrap}
+  .warn{border-left:4px solid var(--yellow);padding-left:10px;margin:10px 0;color:#fbbf24}
+  .info{border-left:4px solid var(--accent);padding-left:10px;margin:10px 0;color:#93c5fd}
+  .success{border-left:4px solid var(--green);padding-left:10px;margin:10px 0;color:#34d399}
+  progress{width:260px;height:10px;border:1px solid #1f2937;border-radius:999px;background:#0b1220}
+  progress::-webkit-progress-bar{background:#0b1220;border-radius:999px}
+  progress::-webkit-progress-value{background:#60a5fa;border-radius:999px}
+  #viewer,#ligViewer,#seqViewer{position:relative;width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{border:1px solid #334155;border-radius:999px;padding:2px 8px;display:inline-flex;align-items:center;gap:6px}
+  .chip input{accent-color:#60a5fa}
+  .panelbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600}
+  /* Modal (legal) */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999}
+  .modal.open{display:flex}
+  .modal .box{background:#0b1220;border:1px solid var(--line);border-radius:16px;max-width:760px;width:92%;padding:16px;max-height:80vh;overflow:auto}
+  .modal .box h2{margin-top:0}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>🧷 In-Browser Docking • 🧪 TriPredict • ✅ QA • 📊 Screening</h1>
-    <p class="lead">Deterministic seeds • CDR-aware Ab docking • Ligand docking • Throughput screening • Stored runs & audit bundles</p>
+    <h1>🧷 In-Browser Docking Studio</h1>
+    <p class="lead">Antibody–Antigen Docking • Ligand Docking • Throughput Screening • QA/Audit • Reproducible Exports • Sequence→PDB (toy)</p>
     <div class="tabs">
-      <button class="tabbtn active" data-tab="dockTab">Protein–Protein Docking</button>
+      <button class="tabbtn active" data-tab="dockTab">Antibody Docking</button>
       <button class="tabbtn" data-tab="ligTab">Ligand Docking</button>
-      <button class="tabbtn" data-tab="screenTab">Screening</button>
-      <button class="tabbtn" data-tab="triTab">TriPredict (3 folds)</button>
-      <button class="tabbtn" data-tab="seqTab">Seq→PDB</button>
-      <button class="tabbtn" data-tab="qaTab">QA & Runs</button>
+      <button class="tabbtn" data-tab="scrTab">Screening</button>
+      <button class="tabbtn" data-tab="seqTab">Seq→PDB (toy)</button>
+      <button class="tabbtn" data-tab="qaTab">QA/Audit</button>
       <button class="tabbtn" data-tab="aboutTab">About & Safety</button>
     </div>
   </div>
 </header>
 
-<!-- =============== Protein–Protein Docking =============== -->
+<!-- Antibody Docking -->
 <section id="dockTab" class="tabsec active">
   <div class="wrap grid">
     <div class="card">
-      <div class="flex-between">
-        <h2>Step 1 — Load Proteins</h2>
-        <div class="legend small">
-          <span><span class="dot" style="background:#60a5fa"></span>Protein A</span>
-          <span><span class="dot" style="background:#f97316"></span>Protein B</span>
-        </div>
-      </div>
+      <h2>1) Load Antibody & Antigen</h2>
       <div class="two">
         <div>
-          <h3>Protein A</h3>
-          <div class="row"><input type="file" id="pdbAFile" accept=".pdb,.ent,.txt" /><button class="btn" onclick="useExample('A')">Example</button></div>
-          <textarea id="pdbAText" placeholder="Paste PDB text for Protein A"></textarea>
-          <div class="row"><label>Chains</label><div id="chainsABox" class="chainchips"></div><button class="btn" onclick="selectAllChains('A')">All</button><button class="btn" onclick="clearChains('A')">None</button></div>
-          <div id="chainInfoA" class="small muted">Parse to populate chain chips.</div>
-          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseOne('A')">🔎 Parse A</button></div>
+          <h3>Protein A (antibody)</h3>
+          <div class="row">
+            <input type="file" id="pdbAFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+            <button class="btn" onclick="useExample('A')">Use example</button>
+          </div>
+          <textarea id="pdbAText" placeholder="Paste PDB text (optional)"></textarea>
+          <div class="row">
+            <label>Chains</label><div id="chainsABox" class="chips"></div>
+            <button class="btn small" onclick="selectAllChains('A')">All</button>
+          </div>
+          <div id="chainInfoA" class="small muted">Parse to detect chains.</div>
         </div>
         <div>
-          <h3>Protein B</h3>
-          <div class="row"><input type="file" id="pdbBFile" accept=".pdb,.ent,.txt" /><button class="btn" onclick="useExample('B')">Example</button></div>
-          <textarea id="pdbBText" placeholder="Paste PDB text for Protein B"></textarea>
-          <div class="row"><label>Chains</label><div id="chainsBBox" class="chainchips"></div><button class="btn" onclick="selectAllChains('B')">All</button><button class="btn" onclick="clearChains('B')">None</button></div>
-          <div id="chainInfoB" class="small muted">Parse to populate chain chips.</div>
-          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseOne('B')">🔎 Parse B</button></div>
+          <h3>Protein B (antigen)</h3>
+          <div class="row">
+            <input type="file" id="pdbBFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+            <button class="btn" onclick="useExample('B')">Use example</button>
+          </div>
+          <textarea id="pdbBText" placeholder="Paste PDB text (optional)"></textarea>
+          <div class="row">
+            <label>Chains</label><div id="chainsBBox" class="chips"></div>
+            <button class="btn small" onclick="selectAllChains('B')">All</button>
+          </div>
+          <div id="chainInfoB" class="small muted">Parse to detect chains.</div>
         </div>
       </div>
+      <div class="panelbar">
+        <button class="btn" onclick="parseOne('A')">🔎 Parse A</button>
+        <button class="btn" onclick="parseOne('B')">🔎 Parse B</button>
+        <span class="pill" id="pairStatus">inputs: idle</span>
+      </div>
 
-      <h2 style="margin-top:14px">Step 2 — Parameters</h2>
+      <h2 style="margin-top:14px">2) Docking Parameters</h2>
       <div class="row">
-        <label>Samples</label><input type="number" id="samples" value="20000" min="500" step="500" />
-        <label>Max Δ (Å)</label><input type="number" id="maxTrans" value="12" min="0" step="1" />
-        <label>Atom mode</label><select id="atomMode"><option value="CA">Cα</option><option value="BB">Backbone</option><option value="HEAVY">Heavy</option></select>
-        <label>Top poses</label><input type="number" id="topN" value="20" min="1" max="100" />
+        <label>Samples</label><input type="number" id="samples" value="20000" min="500" step="100" />
+        <label>Max Δ (Å)</label><input type="number" id="maxTrans" value="12" min="0" />
+        <label>Atom mode</label><select id="atomMode"><option value="CA">Cα (fast)</option><option value="BB">Backbone</option><option value="HEAVY">Heavy (slow)</option></select>
       </div>
       <div class="row">
         <label>Contact cutoff (Å)</label><input type="number" id="contactCut" value="4.8" step="0.1" />
         <label>Clash factor</label><input type="number" id="clashFactor" value="0.85" step="0.05" />
-        <label>Contact weight</label><input type="number" id="wContact" value="1.0" step="0.1" />
-        <label>Clash penalty</label><input type="number" id="wClash" value="6.0" step="0.1" />
+        <label>wContact</label><input type="number" id="wContact" value="1.0" step="0.1" />
+        <label>wClash</label><input type="number" id="wClash" value="6.0" step="0.1" />
         <label>Softening</label><input type="number" id="soft" value="0.5" step="0.1" />
-        <label>Rescore</label><select id="rescoreMode"><option value="NONE">Skip</option><option value="HEAVY">Heavy</option><option value="HEAVY_REFINE">Heavy+refine</option></select>
       </div>
       <div class="row">
-        <label>Diversity (°/Å)</label><input type="number" id="dupAngle" value="10" step="1" /><input type="number" id="dupTrans" value="2" step="0.5" />
-        <label class="small"><input type="checkbox" id="abMode"> Antibody mode (CDR-weighted)</label>
+        <label>Top poses</label><input type="number" id="topN" value="20" min="1" max="100" />
+        <label>Rescore</label><select id="rescoreMode"><option value="NONE">Skip</option><option value="HEAVY">Heavy</option><option value="HEAVY_REFINE">Heavy+refine</option></select>
+        <label>Seed</label><input type="number" id="seed" value="42" />
       </div>
-      <details id="cdrBox" style="margin-top:6px" open>
-        <summary><b>Antibody CDR masks (optional)</b></summary>
-        <div class="row small">
-          <label>Heavy chain</label><input id="Hchain" value="H" style="width:60px"/>
-          <label>H1</label><input id="H1" value="26-32" style="width:90px"/>
-          <label>H2</label><input id="H2" value="52-56" style="width:90px"/>
-          <label>H3</label><input id="H3" value="95-102" style="width:90px"/>
-        </div>
-        <div class="row small">
-          <label>Light chain</label><input id="Lchain" value="L" style="width:60px"/>
-          <label>L1</label><input id="L1" value="24-34" style="width:90px"/>
-          <label>L2</label><input id="L2" value="50-56" style="width:90px"/>
-          <label>L3</label><input id="L3" value="89-97" style="width:90px"/>
-          <label>CDR weight</label><input id="cdrW" type="number" value="1.5" step="0.1" style="width:80px"/>
-        </div>
-      </details>
-
-      <details style="margin-top:8px">
-        <summary><b>Reproducibility</b> & Audit</summary>
-        <div class="row" style="margin-top:6px">
-          <label><input type="checkbox" id="seedDet" checked /> Deterministic seed</label>
-          <label>Seed</label><input type="number" id="seed" value="42" />
-          <button class="btn" onclick="deriveSeed()">Derive from inputs</button>
-          <span class="small muted" id="seedMsg">SHA-256(inputs+params) → seed.</span>
-        </div>
-        <div class="row">
-          <button class="btn" onclick="exportPoseRecipes()">⬇ Pose Recipes (JSON)</button>
-          <button class="btn" onclick="importPoseRecipes()">⬆ Import Recipes</button>
-          <button class="btn orange" onclick="exportAuditBundle()">🧾 Export Audit Bundle (.zip)</button>
-        </div>
-        <div id="runLog" class="score" style="max-height:120px;margin-top:6px"></div>
-      </details>
-
-      <div class="row" style="margin-top:10px">
-        <button class="btn primary" id="dockBtn" onclick="runDocking()">▶️ Run Docking</button>
+      <div class="row">
+        <label>Diversity (°/Å)</label>
+        <input type="number" id="dupAngle" value="10" step="1" title="Max rotation diff (deg)" />
+        <input type="number" id="dupTrans" value="2" step="0.5" title="Max translation diff (Å)" />
+        <span class="small">Filters near-duplicates to keep diverse top poses.</span>
+      </div>
+      <div class="panelbar">
+        <button class="btn primary" id="dockBtn" onclick="runDocking()" data-requires-legal="1">▶️ Run Docking</button>
         <button class="btn red" id="cancelBtn" onclick="cancelDocking()" disabled>✖ Cancel</button>
+        <button class="btn" onclick="resetDocking()">Reset</button>
         <span class="pill" id="statusPill">idle</span>
         <progress id="prog" value="0" max="1"></progress>
       </div>
-      <div id="preflightMsg" class="info small" style="margin-top:8px">If chain filtering removes all atoms, the app auto-falls back to “all chains” and flags the fix.</div>
+      <div class="info small">Scoring = contacts − vdW-aware clash penalty (educational). Use heavy rescore for better ranking.</div>
     </div>
 
     <div class="card">
-      <h2>Step 3 — Results & Viewer</h2>
+      <h2>3) Results & 3D Viewer</h2>
       <div id="viewer"></div>
-      <div class="row" style="margin-top:8px;flex-wrap:wrap">
+      <div class="panelbar">
+        <button class="btn green" onclick="downloadAllPoses()">⬇ Multi-model PDB (top N)</button>
+        <button class="btn" onclick="downloadCSV()">⬇ Summary CSV</button>
+        <button class="btn" onclick="downloadJSON()">⬇ Interface JSON</button>
+        <button class="btn" onclick="snapshotPNG()">📸 PNG Snapshot</button>
+        <button class="btn orange" onclick="exportAuditBundle()">📦 Export QA Bundle</button>
+      </div>
+      <div class="panelbar">
         <label class="small"><input type="checkbox" id="toggleContacts" onchange="refreshOverlays()"> Contacts</label>
         <label class="small"><input type="checkbox" id="toggleHB" onchange="refreshOverlays()"> H-bonds</label>
         <label class="small"><input type="checkbox" id="toggleSB" onchange="refreshOverlays()"> Salt bridges</label>
-        <button class="btn green" onclick="snapshotPNG()">📸 Snapshot</button>
       </div>
-
-      <h3 style="margin-top:10px">Pose Table</h3>
-      <table id="poseTable" style="margin-top:6px">
-        <thead>
-          <tr>
-            <th data-key="rank">#</th><th data-key="score">Score</th><th data-key="contacts">Contacts</th><th data-key="clash">Clash</th>
-            <th data-key="hb">HB</th><th data-key="sb">SB</th><th data-key="hyd">Hyd</th><th data-key="bsa">BSA≈Å²</th>
-            <th data-key="elec">Elec</th><th data-key="enth">Pseudo-ΔH</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="poseBody"></tbody>
-      </table>
-
-      <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="downloadAllPoses()">⬇ Multi-model PDB</button>
-        <button class="btn" onclick="downloadCSV()">⬇ Summary CSV</button>
-        <button class="btn" onclick="downloadJSON()">⬇ Interface JSON</button>
-      </div>
-      <div id="scoreBox" class="score" style="margin-top:8px"></div>
+      <div id="poseControls" class="panelbar" style="flex-wrap:wrap"></div>
+      <div class="score" id="scoreBox" style="margin-top:8px"></div>
     </div>
   </div>
 </section>
 
-<!-- =============== Ligand Docking =============== -->
+<!-- Ligand Docking -->
 <section id="ligTab" class="tabsec">
   <div class="wrap grid">
     <div class="card">
-      <h2>Receptor + Ligand</h2>
+      <h2>Rigid Ligand Docking (toy)</h2>
       <div class="two">
         <div>
-          <h3>Receptor (PDB)</h3>
-          <div class="row"><input type="file" id="recFile" accept=".pdb,.ent,.txt"/><button class="btn" onclick="ligUseExampleReceptor()">Example</button></div>
-          <textarea id="recText" placeholder="Paste receptor PDB"></textarea>
-          <div class="row"><label>Chains</label><div id="recChainsBox" class="chainchips"></div><button class="btn" onclick="selectAllChains('REC')">All</button><button class="btn" onclick="clearChains('REC')">None</button></div>
-          <div id="recInfo" class="small muted">Parse to populate chain chips.</div>
-          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseReceptor()">🔎 Parse receptor</button></div>
+          <h3>Receptor (Protein)</h3>
+          <div class="row">
+            <input type="file" id="recFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+            <button class="btn" onclick="useExampleRec()">Use example</button>
+          </div>
+          <textarea id="recText" placeholder="Paste receptor PDB (optional)"></textarea>
+          <div class="row"><label>Chains</label><div id="chainsRBox" class="chips"></div><button class="btn small" onclick="selectAllChains('R')">All</button></div>
+          <div id="chainInfoR" class="small muted">Parse to detect chains.</div>
         </div>
         <div>
-          <h3>Ligand (SDF/MOL/PDB)</h3>
-          <div class="row"><input type="file" id="ligFile" accept=".sdf,.mol,.pdb,.mol2,.txt"/><button class="btn" onclick="ligUseExampleLigand()">Example</button></div>
-          <textarea id="ligText" placeholder="Paste ligand SDF/MOL/PDB"></textarea>
-          <div id="ligInfo" class="small muted">Supports SDF V2000 (multi-molecule SDF loads first molecule here; use Screening tab for full batch).</div>
-          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseLigand()">🔎 Parse ligand</button></div>
+          <h3>Ligand (PDB; rigid)</h3>
+          <div class="row">
+            <input type="file" id="ligFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+            <button class="btn" onclick="useExampleLig()">Use example</button>
+          </div>
+          <textarea id="ligText" placeholder="Paste ligand PDB (optional)"></textarea>
+          <div class="small muted">For demo, ligand is treated as a rigid set of heavy atoms.</div>
         </div>
       </div>
-
-      <h3 style="margin-top:10px">Parameters</h3>
-      <div class="row">
-        <label>Samples</label><input type="number" id="ligSamples" value="12000" min="500" step="500" />
-        <label>Max Δ (Å)</label><input type="number" id="ligMaxTrans" value="8" min="0" step="1" />
-        <label>Contact cutoff (Å)</label><input type="number" id="ligCut" value="4.2" step="0.1" />
-        <label>Clash factor</label><input type="number" id="ligClash" value="0.80" step="0.05" />
-        <label>Top poses</label><input type="number" id="ligTopN" value="30" min="1" max="100" />
-      </div>
-      <div class="row">
-        <label>Diversity (°/Å)</label><input type="number" id="ligDupA" value="12" step="1" /><input type="number" id="ligDupT" value="1.5" step="0.5" />
-        <label><input type="checkbox" id="ligSeedDet" checked/> Deterministic seed</label><label>Seed</label><input id="ligSeed" type="number" value="99"/>
-      </div>
       <div class="row" style="margin-top:10px">
-        <button class="btn primary" id="ligRunBtn" onclick="runLigDock()">▶️ Dock Ligand</button>
-        <button class="btn red" id="ligCancelBtn" onclick="cancelLig()" disabled>✖ Cancel</button>
+        <label>Samples</label><input type="number" id="ligSamples" value="15000" min="1000" step="500" />
+        <label>Contact cutoff (Å)</label><input type="number" id="ligContact" value="4.2" step="0.1" />
+        <label>Clash factor</label><input type="number" id="ligClashF" value="0.85" step="0.05" />
+        <label>Seed</label><input type="number" id="ligSeed" value="7" />
+      </div>
+      <div class="panelbar">
+        <button class="btn" onclick="parseLigandSystem()">🔎 Parse</button>
+        <button class="btn primary" id="ligRunBtn" onclick="runLigDock()" data-requires-legal="1">▶️ Dock Ligand</button>
+        <button class="btn red" id="ligCancelBtn" onclick="cancelLigDock()" disabled>✖ Cancel</button>
         <span class="pill" id="ligStatus">idle</span>
         <progress id="ligProg" value="0" max="1"></progress>
       </div>
     </div>
 
     <div class="card">
-      <h2>Ligand Viewer & Poses</h2>
+      <h2>Ligand Result Viewer</h2>
       <div id="ligViewer"></div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn green" onclick="ligSnapshot()">📸 Snapshot</button>
-        <button class="btn" onclick="ligDownloadAll()">⬇ PDB (multi-model)</button>
-        <button class="btn" onclick="ligDownloadCSV()">⬇ CSV</button>
-      </div>
-      <h3 style="margin-top:10px">Pose Table</h3>
-      <table id="ligPoseTable"><thead>
-        <tr><th>#</th><th>Score</th><th>Contacts</th><th>Clash</th><th>HB</th><th>Hyd</th><th>Elec</th><th>Pseudo-ΔH</th><th>Actions</th></tr>
-      </thead><tbody id="ligPoseBody"></tbody></table>
+      <div id="ligPoseControls" class="panelbar"></div>
+      <div class="score" id="ligScoreBox" style="margin-top:8px"></div>
     </div>
   </div>
 </section>
 
-<!-- =============== Screening =============== -->
-<section id="screenTab" class="tabsec">
-  <div class="wrap grid">
-    <div class="card">
-      <h2>Throughput Screening (Ligand set → Receptor)</h2>
-      <div class="two">
-        <div>
-          <h3>Receptor (PDB)</h3>
-          <div class="row"><input type="file" id="scrRecFile" accept=".pdb,.ent,.txt"/><button class="btn" onclick="ligUseExampleReceptor(true)">Example</button></div>
-          <textarea id="scrRecText" placeholder="Paste receptor PDB"></textarea>
-          <div class="row"><label>Chains</label><div id="scrRecChainsBox" class="chainchips"></div><button class="btn" onclick="selectAllChains('SCRREC')">All</button><button class="btn" onclick="clearChains('SCRREC')">None</button></div>
-          <div id="scrRecInfo" class="small muted">Parse to populate chain chips.</div>
-          <div class="row" style="margin-top:6px"><button class="btn" onclick="scrParseReceptor()">🔎 Parse receptor</button></div>
-        </div>
-        <div>
-          <h3>Ligand Library</h3>
-          <div class="row"><input type="file" id="scrLigFile" accept=".sdf,.mol,.zip"/><button class="btn" onclick="scrUseExampleLib()">Example</button></div>
-          <div class="small muted">Upload multi-molecule <b>SDF</b> (recommended) or a <b>ZIP of SDFs</b>.</div>
-        </div>
-      </div>
-
-      <h3 style="margin-top:10px">Parameters</h3>
-      <div class="row">
-        <label>Samples per ligand</label><input type="number" id="scrSamples" value="6000" min="1000" step="500" />
-        <label>Max Δ (Å)</label><input type="number" id="scrMaxTrans" value="8" min="0" step="1" />
-        <label>Cutoff (Å)</label><input type="number" id="scrCut" value="4.2" step="0.1" />
-        <label>Clash</label><input type="number" id="scrClash" value="0.8" step="0.05" />
-        <label>Top per ligand</label><input type="number" id="scrTopN" value="3" min="1" max="10" />
-      </div>
-      <div class="row">
-        <label><input type="checkbox" id="scrSeedDet" checked/> Deterministic seed</label>
-        <label>Seed</label><input id="scrSeed" type="number" value="777"/>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <button class="btn primary" id="scrRunBtn" onclick="runScreen()">▶️ Run Screening</button>
-        <button class="btn red" id="scrCancelBtn" onclick="cancelScreen()" disabled>✖ Cancel</button>
-        <span class="pill" id="scrStatus">idle</span>
-        <progress id="scrProg" value="0" max="1"></progress>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Screening Viewer & Results</h2>
-      <div id="screenViewer"></div>
-      <h3 style="margin-top:10px">Top Hits</h3>
-      <table id="scrTable"><thead>
-        <tr><th>Rank</th><th>Ligand</th><th>Top Score</th><th>Contacts</th><th>Clash</th><th>HB</th><th>Hyd</th><th>Elec</th><th>Actions</th></tr>
-      </thead><tbody id="scrBody"></tbody></table>
-      <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="scrDownloadReport()">⬇ Screening Report (CSV)</button>
-        <button class="btn" onclick="scrDownloadBundle()">⬇ Results Bundle (.zip)</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =============== TriPredict (unchanged core) =============== -->
-<section id="triTab" class="tabsec">
+<!-- Screening -->
+<section id="scrTab" class="tabsec">
   <div class="wrap">
-    <div class="card">
-      <h2>TriPredict — Three Theoretical Folds (educational)</h2>
-      <div class="two">
-        <div>
-          <textarea id="triSeq" placeholder="Protein sequence (one letter; spaces/newlines ok)"></textarea>
-          <div class="row" style="margin-top:6px">
-            <label>Method</label><select id="triMethod"><option value="SSMC">SSMC</option><option value="DG">Distance geometry</option><option value="HC">Hydrophobic collapse</option></select>
-            <button class="btn primary" onclick="triGenerate()">Generate 3 models</button>
+    <div class="grid">
+      <div class="card">
+        <h2>Throughput Screening (toy)</h2>
+        <div class="two">
+          <div>
+            <h3>Receptor</h3>
+            <div class="row">
+              <input type="file" id="scrRecFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+              <button class="btn" onclick="useExampleRec(true)">Use example</button>
+            </div>
+            <textarea id="scrRecText" placeholder="Paste receptor PDB (optional)"></textarea>
           </div>
-          <div class="row"><button class="btn" onclick="triSendToDock('A')">⬅ Send → A</button><button class="btn" onclick="triSendToDock('B')">Send → B ➡</button><span id="triSelMsg" class="small pill">none selected</span></div>
+          <div>
+            <h3>Ligand Library (multi-PDB)</h3>
+            <div class="row">
+              <input type="file" id="scrLigFiles" multiple accept=".pdb,.ent,.txt,.pdb.gz" />
+            </div>
+            <textarea id="scrLigText" placeholder="Paste multiple ligands; separate with 'END' lines"></textarea>
+          </div>
         </div>
-        <div>
-          <div class="trigrid">
-            <div><div class="small muted">Model 1</div><div id="triView1" class="triview" data-idx="0" onclick="selectTri(0)"></div></div>
-            <div><div class="small muted">Model 2</div><div id="triView2" class="triview" data-idx="1" onclick="selectTri(1)"></div></div>
-            <div><div class="small muted">Model 3</div><div id="triView3" class="triview" data-idx="2" onclick="selectTri(2)"></div></div>
-          </div>
-          <div class="row" style="margin-top:8px"><button class="btn" onclick="triDownloadAll()">⬇ PDBs</button><button class="btn green" onclick="triDockAll()">Dock all vs current B</button></div>
+        <div class="row" style="margin-top:10px">
+          <label>Per-ligand samples</label><input type="number" id="scrSamples" value="5000" min="1000" step="500" />
+          <label>Top per ligand</label><input type="number" id="scrTop" value="3" min="1" max="10" />
+          <label>Cutoff (Å)</label><input type="number" id="scrContact" value="4.2" step="0.1" />
+          <label>ClashF</label><input type="number" id="scrClashF" value="0.85" step="0.05" />
+          <label>Seed</label><input type="number" id="scrSeed" value="11" />
+        </div>
+        <div class="panelbar">
+          <button class="btn primary" id="scrRunBtn" onclick="runScreen()" data-requires-legal="1">▶️ Run Screening</button>
+          <button class="btn red" id="scrCancelBtn" onclick="cancelScreen()" disabled>✖ Cancel</button>
+          <span class="pill" id="scrStatus">idle</span>
+          <progress id="scrProg" value="0" max="1"></progress>
+          <button class="btn orange" onclick="scrDownloadBundle()">📦 Export Screen Bundle</button>
         </div>
       </div>
-      <div class="warn small">TriPredict is didactic (not AlphaFold). Validate externally for decisions.</div>
+      <div class="card">
+        <h2>Screen Results</h2>
+        <table>
+          <thead><tr><th>#</th><th>Ligand</th><th>Best Score</th><th>Contacts</th><th>Clash</th></tr></thead>
+          <tbody id="scrTable"></tbody>
+        </table>
+        <div class="score" id="scrLog" style="margin-top:8px;max-height:260px"></div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- =============== Seq→PDB =============== -->
+<!-- Seq to PDB (toy) -->
 <section id="seqTab" class="tabsec">
   <div class="wrap grid">
     <div class="card">
-      <h2>Sequence → PDB (quick builder)</h2>
-      <textarea id="seqInput" placeholder=">optional FASTA header
-EVQLVESGGGLVQPGGSLRLSC..."></textarea>
-      <div class="row" style="margin-top:6px">
-        <label>Chain</label><input type="text" id="seqChain" value="A" style="width:70px"/>
-        <label>Start</label><input type="number" id="seqStart" value="1" min="1"/>
-        <label>Atoms</label><select id="seqAtoms"><option value="CA">CA</option><option value="BB">Backbone</option></select>
-      </div>
-      <div class="row">
-        <label>Preset</label><select id="ssPreset"><option value="HELIX">Helix</option><option value="STRAND">Strand</option><option value="COIL">Coil</option></select>
-        <label>Helix radius</label><input type="number" id="seqRadius" value="2.3" step="0.1"/>
-        <label>Rise/res (Å)</label><input type="number" id="seqRise" value="1.5" step="0.1"/>
-      </div>
-      <div class="row" style="margin-top:8px"><button class="btn" onclick="seqPreview()">👁️ Preview</button><button class="btn primary" onclick="seqDownload()">⬇ Download PDB</button></div>
-    </div>
-    <div class="card"><div id="seqViewer"></div></div>
-  </div>
-</section>
-
-<!-- =============== QA & Runs =============== -->
-<section id="qaTab" class="tabsec">
-  <div class="wrap grid">
-    <div class="card">
-      <h2>QA Mode</h2>
-      <div class="row">
-        <label><input type="checkbox" id="qaToggle" onchange="toggleQA()"> Enable QA Mode</label>
-        <span class="pill" id="qaRunId">RUN: —</span>
-        <button class="btn orange" onclick="qaFreeze()">🔒 Freeze parameters</button>
-        <button class="btn" onclick="qaUnfreeze()">🔓 QA unlock (logged)</button>
-      </div>
-      <div class="info small">QA Mode: freezes inputs; derives deterministic seed; stamps a Run ID into filenames, PDB REMARKs & audit bundle; logs every change; stores runs locally.</div>
-      <div id="qaLog" class="score" style="max-height:160px;margin-top:8px"></div>
+      <h2>Sequence → PDB (toy builder)</h2>
+      <textarea id="seqInput" placeholder="Protein sequence (one-letter)…"></textarea>
       <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="qaExportLog()">⬇ QA Log</button>
+        <label>Preset</label><select id="ssPreset"><option value="HELIX">Helix</option><option value="STRAND">Strand</option><option value="COIL">Coil</option></select>
+        <label>Chain</label><input type="text" id="seqChain" value="A" style="width:80px" />
+        <label>Start</label><input type="number" id="seqStart" value="1" />
+        <label>Atoms</label><select id="seqAtoms"><option value="CA">CA only</option><option value="BB">Backbone</option></select>
       </div>
+      <div class="panelbar">
+        <button class="btn green" onclick="seqPreview()">👁️ Preview</button>
+        <button class="btn" onclick="seqDownload()">⬇ Download PDB</button>
+      </div>
+      <div class="small muted">Use AlphaFold/ESMFold for realistic models; this is for quick prototypes only.</div>
     </div>
     <div class="card">
-      <h2>Stored Runs</h2>
-      <div class="row"><button class="btn" onclick="runsRefresh()">🔄 Refresh</button><button class="btn" onclick="runsExport()">⬇ Export All (JSON)</button><button class="btn red" onclick="runsClear()">🗑️ Clear All</button></div>
-      <table id="runsTable" style="margin-top:8px"><thead>
-        <tr><th>Run ID</th><th>Type</th><th>Date</th><th>Seed</th><th>Notes</th><th>Actions</th></tr>
-      </thead><tbody id="runsBody"></tbody></table>
+      <div id="seqViewer"></div>
     </div>
   </div>
 </section>
 
-<!-- =============== About & Safety =============== -->
+<!-- QA / Audit -->
+<section id="qaTab" class="tabsec">
+  <div class="wrap">
+    <div class="card">
+      <h2>QA / Audit Trail</h2>
+      <div class="small muted">Every completed run is stored locally (browser) with parameters, seed, scores, and file hashes for reproducibility. Export bundles include DISCLAIMER.txt.</div>
+      <table style="margin-top:8px">
+        <thead><tr><th>Time</th><th>Type</th><th>ID</th><th>Seed</th><th>Top Score</th><th>Actions</th></tr></thead>
+        <tbody id="qaTable"></tbody>
+      </table>
+      <div class="panelbar">
+        <button class="btn" onclick="qaExportAll()">📦 Export All (zip)</button>
+        <button class="btn red" onclick="qaClear()">🗑️ Clear All</button>
+      </div>
+      <div id="qaLog" class="score" style="margin-top:8px;max-height:280px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- About / Safety -->
 <section id="aboutTab" class="tabsec">
   <div class="wrap">
     <div class="card">
       <h2>About & Safety</h2>
-      <div class="info">All computations are client-side. Scoring (contacts, clashes, hydrophobics, Coulombic residue charge) & “pseudo-enthalpy” are educational and not calibrated ΔG. Export PDBs for refinement/validation in standard pipelines.</div>
-      <div class="warn">This app avoids interactive sequence-design of biological agents. Docking/folding tools provided here are for visualization, education, and hypothesis generation, not clinical decision-making.</div>
-      <div class="small muted">© You • v3.2 • No server</div>
+      <div class="info">
+        All computations are client-side. Scoring (contacts, clashes, hydrophobics, residue Coulomb) and “pseudo-enthalpy” are educational and not calibrated ΔG. Export PDBs for refinement/validation in standard tools (HADDOCK/ClusPro/Rosetta/MD).
+      </div>
+      <div class="warn">
+        The app avoids interactive sequence-design of biological agents. Docking/folding tools are for visualization, education, and hypothesis generation — not clinical or diagnostic use.
+      </div>
+      <div class="score">
+Professional & Legal Disclaimers (summary)
+
+• Provided for educational and research use only — no professional advice.  
+• Outputs are heuristic and require independent verification.  
+• Software is provided “AS IS” without warranties.  
+• You are solely responsible for any use of outputs.  
+• We disclaim any and all loss, damage, or liability in any way (including direct, indirect, incidental, consequential, special, exemplary damages) arising from or related to use, even if advised of the possibility of such damages.  
+• Do not use for clinical decision-making. Ensure compliance with all laws and regulations.
+      </div>
+      <div class="small muted">© You • No server • v3.4</div>
     </div>
   </div>
 </section>
 
-<footer class="wrap" style="padding:20px 16px;color:var(--muted);text-align:center">
-  In-Browser Docking • Ligand Docking • Screening • QA & Runs • TriPredict — All client-side
+<footer class="wrap" style="padding:18px 16px;color:var(--muted);text-align:center">
+  Use implies acceptance of the disclaimers. All computations client-side.
 </footer>
 
-<!-- libs -->
+<!-- Legal modal -->
+<div id="legalModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+  <div class="box">
+    <h2 id="legalTitle">Professional & Legal Disclaimers</h2>
+    <div class="info" style="margin:10px 0">
+      These tools are provided for educational and research use only. They are not medical, clinical, regulatory, or other professional advice.
+      Outputs are heuristic and uncalibrated; independent verification is required.
+    </div>
+    <div class="small" style="line-height:1.8">
+      <b>By using this software you agree that:</b>
+      <ul>
+        <li>You are solely responsible for how you use any outputs and must validate results independently.</li>
+        <li>The software is provided “AS IS”, without warranties of any kind, express or implied.</li>
+        <li><b>We disclaim any and all loss, damage, or liability in any way</b> (including direct, indirect,
+            incidental, consequential, special, exemplary damages), arising from or related to use, even if advised
+            of the possibility of such damages.</li>
+        <li>No use for clinical decision-making or deployment in production without proper validation, review,
+            and compliance with all applicable laws and regulations.</li>
+      </ul>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:10px">
+      <button class="btn red" onclick="declineLegal()">Decline</button>
+      <button class="btn green" onclick="ackLegal()">I understand & accept</button>
+    </div>
+  </div>
+</div>
+
+<!-- Libraries -->
 <script src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
 <script>
-/* =========================================================
-   Core State / Globals
-========================================================= */
-let viewer=null, ligViewer=null, screenViewer=null, seqViewer=null, triViewers=[null,null,null];
-let pdbAAll=[], pdbBAll=[], pdbAText="", pdbBText="", pdbAAtoms=[], pdbBAtoms=[];
+/* ========================= Globals ========================= */
+let viewer=null, ligViewer=null, seqViewer=null;
+let pdbAAtoms=[], pdbBAtoms=[], pdbAAllAtoms=[], pdbBAllAtoms=[];
 let currentA=null, currentB0=null, posesTop=[], currentPose=null;
-let workerPool=[], cancelled=false, inProgress=false, heavyUsed=false;
-let qaMode=false, qaFrozen=false, qaRunId=null;
-const APP_VER="3.2";
-const vdw = {H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
-const hydrophobic = new Set(['ALA','VAL','LEU','ILE','PRO','PHE','MET','TRP','TYR','CYS']);
-function status(msg){ document.getElementById('statusPill').textContent = msg; }
-function setProgress(frac){ const el=document.getElementById('prog'); el.value=Math.max(0,Math.min(1,frac||0)); }
-function logLine(s){ const box=document.getElementById('runLog'); const t=new Date().toISOString().replace('T',' ').replace('Z',''); box.textContent += `[${t}] ${s}\n`; box.scrollTop=box.scrollHeight; qaLog(`RUN: ${s}`); }
-function qaLog(s){ const box=document.getElementById('qaLog'); const t=new Date().toISOString().replace('T',' ').replace('Z',''); box.textContent += `[${t}] ${s}\n`; box.scrollTop=box.scrollHeight; }
-function centroid(pts){ let sx=0,sy=0,sz=0; for(const p of pts){ sx+=p.x; sy+=p.y; sz+=p.z; } const n=pts.length||1; return {x:sx/n,y:sy/n,z:sz/n}; }
-function translate(points, v){ return points.map(p=>({...p, x:p.x+v.x, y:p.y+v.y, z:p.z+v.z })); }
-function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
-async function sha256Hex(str){ const enc=new TextEncoder().encode(str); const buf=await crypto.subtle.digest('SHA-256', enc); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
-function hashToSeed(hex){ const n = parseInt(hex.slice(0,8), 16) >>> 0; return n % 2147483647; }
+let workerPool=[], cancelled=false, inProgress=false;
+let ligState={recAll:[], rec:[], ligAll:[], lig:[], poses:[], inProgress:false, pool:[], cancelled:false};
+let screenState={inProgress:false, cancelled:false, results:[], items:[]}; // items: {name, atoms[]}
 
-/* =========================================================
-   Tabs & Viewers
-========================================================= */
-window.addEventListener('DOMContentLoaded', ()=>{
-  setupTabs();
-  ensureMainViewer(); ensureLigViewer(); ensureScreenViewer();
-  logLine('App ready.');
-  runsRefresh();
-});
-window.addEventListener('resize', ()=>{
-  const active = document.querySelector('.tabsec.active')?.id;
-  if (active==='dockTab') { viewer?.resize(); viewer?.render(); }
-  if (active==='ligTab')  { ligViewer?.resize(); ligViewer?.render(); }
-  if (active==='screenTab')  { screenViewer?.resize(); screenViewer?.render(); }
-  if (active==='seqTab')  { seqViewer?.resize(); seqViewer?.render(); }
-  if (active==='triTab')  { triViewers.forEach(v=>{v?.resize(); v?.render();}); }
-});
+/* QA / Audit Store (localStorage: 'dockAuditRuns') */
+const QA_KEY='dockAuditRuns_v2';
+function qaLoad(){ try{ return JSON.parse(localStorage.getItem(QA_KEY)||'[]'); }catch{return []} }
+function qaSave(runs){ localStorage.setItem(QA_KEY, JSON.stringify(runs)); renderQATable(); }
+function qaLog(line){ const el=document.getElementById('qaLog'); if(!el) return; el.textContent += (line+'\n'); el.scrollTop=el.scrollHeight; }
+
+/* Legal modal / gating */
+const DISCLAIMER_TXT = [
+"Professional & Legal Disclaimers",
+"--------------------------------",
+"This software is provided for educational and research use only. It is not medical, clinical, regulatory, or other professional advice.",
+"Outputs are heuristic and uncalibrated. Independent verification is required.",
+'THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED.',
+"YOU ARE SOLELY RESPONSIBLE FOR ANY USE OF THE SOFTWARE AND OUTPUTS.",
+"WE DISCLAIM ANY AND ALL LOSS, DAMAGE, OR LIABILITY IN ANY WAY, INCLUDING DIRECT, INDIRECT, INCIDENTAL, CONSEQUENTIAL,",
+"SPECIAL, OR EXEMPLARY DAMAGES, ARISING FROM OR RELATED TO USE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.",
+"Do not use for clinical decision-making. Ensure compliance with all applicable laws and regulations."
+].join("\n");
+function setLegalLock(lock){ document.querySelectorAll('[data-requires-legal="1"]').forEach(btn=>btn.disabled=!!lock); }
+function openLegal(){ document.getElementById('legalModal').classList.add('open'); }
+function closeLegal(){ document.getElementById('legalModal').classList.remove('open'); }
+function ackLegal(){ localStorage.setItem('legal_ack_v1','yes'); setLegalLock(false); qaLog('User accepted legal disclaimers.'); closeLegal(); }
+function declineLegal(){ setLegalLock(true); closeLegal(); document.querySelector('.tabbtn[data-tab="aboutTab"]').click(); }
+
+/* ========================= Tabs & Viewers ========================= */
 function setupTabs(){
   document.querySelectorAll('.tabbtn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.tabsec').forEach(s=>s.classList.remove('active'));
-      const tab = document.getElementById(btn.dataset.tab); tab.classList.add('active');
-      if (tab.id==='dockTab') { ensureMainViewer(); viewer.resize(); viewer.render(); }
-      if (tab.id==='ligTab')  { ensureLigViewer(); ligViewer.resize(); ligViewer.render(); }
-      if (tab.id==='screenTab')  { ensureScreenViewer(); screenViewer.resize(); screenViewer.render(); }
-      if (tab.id==='seqTab')  { ensureSeqViewer(); seqViewer.resize(); seqViewer.render(); }
-      if (tab.id==='triTab')  { ensureTriViewers(); triViewers.forEach(v=>{v.resize(); v.render();}); }
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab==='dockTab'){ ensureMainViewer(); viewer.resize(); viewer.render(); }
+      if (btn.dataset.tab==='ligTab'){ ensureLigViewer(); ligViewer.resize(); ligViewer.render(); }
+      if (btn.dataset.tab==='seqTab'){ ensureSeqViewer(); seqViewer.resize(); seqViewer.render(); }
     });
   });
 }
-function ensureMainViewer(){ if (viewer) return; viewer=$3Dmol.createViewer(document.getElementById('viewer'),{backgroundColor:'#0a0f1a'}); }
-function ensureLigViewer(){ if (ligViewer) return; ligViewer=$3Dmol.createViewer(document.getElementById('ligViewer'),{backgroundColor:'#0a0f1a'}); }
-function ensureScreenViewer(){ if (screenViewer) return; screenViewer=$3Dmol.createViewer(document.getElementById('screenViewer'),{backgroundColor:'#0a0f1a'}); }
-function ensureSeqViewer(){ if (seqViewer) return; seqViewer=$3Dmol.createViewer(document.getElementById('seqViewer'),{backgroundColor:'#0a0f1a'}); }
-function ensureTriViewers(){ if (triViewers[0]) return;
-  triViewers[0]=$3Dmol.createViewer(document.getElementById('triView1'),{backgroundColor:'#0a0f1a'});
-  triViewers[1]=$3Dmol.createViewer(document.getElementById('triView2'),{backgroundColor:'#0a0f1a'});
-  triViewers[2]=$3Dmol.createViewer(document.getElementById('triView3'),{backgroundColor:'#0a0f1a'});
-}
+function ensureMainViewer(){ if(viewer) return; viewer=$3Dmol.createViewer(document.getElementById('viewer'),{backgroundColor:"#0a0f1a"}); setTimeout(()=>{viewer.resize();viewer.render();},0);}
+function ensureLigViewer(){ if(ligViewer) return; ligViewer=$3Dmol.createViewer(document.getElementById('ligViewer'),{backgroundColor:"#0a0f1a"}); setTimeout(()=>{ligViewer.resize();ligViewer.render();},0);}
+function ensureSeqViewer(){ if(seqViewer) return; seqViewer=$3Dmol.createViewer(document.getElementById('seqViewer'),{backgroundColor:"#0a0f1a"}); setTimeout(()=>{seqViewer.resize();seqViewer.render();},0);}
+window.addEventListener('resize',()=>{ viewer?.resize(); viewer?.render(); ligViewer?.resize(); ligViewer?.render(); seqViewer?.resize(); seqViewer?.render(); });
 
-/* =========================================================
-   PDB Parsing + Chains
-========================================================= */
+/* ========================= Utilities ========================= */
+function djb2(str){ let h=5381; for(let i=0;i<str.length;i++){ h=((h<<5)+h) ^ str.charCodeAt(i);} return (h>>>0).toString(16); }
+function centroid(points){ let sx=0,sy=0,sz=0,n=points.length; for(const p of points){sx+=p.x;sy+=p.y;sz+=p.z} return {x:sx/n,y:sy/n,z:sz/n}; }
+function translate(points,v){ return points.map(p=>({...p, x:p.x+v.x, y:p.y+v.y, z:p.z+v.z})); }
+function formatPDB(atoms, chainShift=0){
+  let lines=[], serial=1;
+  for(const a of atoms){
+    const name=(a.name||'CA').padStart(4,' ');
+    const resn=(a.resn||'RES').padStart(3,' ');
+    const chain=(a.chain||'A');
+    const chainOut=String.fromCharCode(chain.charCodeAt(0)+chainShift);
+    const resi=(a.resi||1).toString().padStart(4,' ');
+    const x=(a.x??0).toFixed(3).toString().padStart(8,' ');
+    const y=(a.y??0).toFixed(3).toString().padStart(8,' ');
+    const z=(a.z??0).toFixed(3).toString().padStart(8,' ');
+    const occ=" 1.00", b=" 0.00";
+    const elem=(a.elem||'C').toString().padStart(2,' ');
+    lines.push(`ATOM  ${String(serial).padStart(5,' ')} ${name} ${resn} ${chainOut}${resi}    ${x}${y}${z}${occ}${b}          ${elem}`);
+    serial++;
+  }
+  lines.push("TER","ENDMDL","END");
+  return lines.join("\n");
+}
 function parsePDB(text){
-  const out=[]; const lines=text.split(/\r?\n/);
+  const atoms=[]; const lines=(text||'').split(/\r?\n/);
   for(const ln of lines){
-    if (ln.startsWith('ATOM') || ln.startsWith('HETATM')){
+    if(ln.startsWith('ATOM')||ln.startsWith('HETATM')){
       const name=ln.substring(12,16).trim();
       const resn=ln.substring(17,20).trim();
       const chain=(ln.substring(21,22).trim()||'A');
@@ -500,1029 +475,755 @@ function parsePDB(text){
       const x=parseFloat(ln.substring(30,38));
       const y=parseFloat(ln.substring(38,46));
       const z=parseFloat(ln.substring(46,54));
-      const elem = ln.length>=78 ? (ln.substring(76,78).trim() || name[0]) : name[0];
-      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z))
-        out.push({name,resn,chain,resi,x,y,z,elem:elem.toUpperCase()});
+      const elem=ln.length>=78 ? (ln.substring(76,78).trim()||name[0]) : (name[0]||'C');
+      if (!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(z)) continue;
+      atoms.push({name,resn,chain,resi,x,y,z,elem});
     }
   }
+  return atoms;
+}
+async function fileToText(file){
+  const name=file.name.toLowerCase();
+  const buf=await file.arrayBuffer();
+  if(name.endsWith('.gz')){ const out=pako.inflate(new Uint8Array(buf)); return new TextDecoder().decode(out); }
+  return new TextDecoder().decode(buf);
+}
+function uniqueChains(atoms){ return Array.from(new Set(atoms.map(a=>a.chain))).sort(); }
+function buildChainChips(which, chains){
+  const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':'chainsRBox');
+  box.innerHTML='';
+  chains.forEach(c=>{
+    const id=`ch_${which}_${c}`;
+    const span=document.createElement('label'); span.className='chip';
+    span.innerHTML=`<input type="checkbox" id="${id}" checked /> <span>${c}</span>`;
+    box.appendChild(span);
+  });
+}
+function getSelectedChains(which){
+  const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':'chainsRBox');
+  const checks=box.querySelectorAll('input[type=checkbox]');
+  const out=[]; checks.forEach(ch=>{ if(ch.checked){ out.push(ch.id.split('_').pop()); }});
   return out;
 }
-function summarizeChains(atoms){
-  const m=new Map(); for(const a of atoms){ if(!m.has(a.chain)) m.set(a.chain,{count:0,ca:0}); const s=m.get(a.chain); s.count++; if(a.name==='CA') s.ca++; }
-  return Array.from(m.entries()).map(([id,info])=>({id,...info}));
+function filterChains(atoms, list){
+  if(!list || list.length===0) return atoms; // default = all
+  const keep=new Set(list);
+  return atoms.filter(a=>keep.has(a.chain));
 }
-function renderChainChips(which, atoms){
-  const box = document.getElementById(
-    which==='A'?'chainsABox': which==='B'?'chainsBBox': which==='REC'?'recChainsBox': 'scrRecChainsBox');
-  if (!box) return;
-  const chains = summarizeChains(atoms);
-  box.innerHTML = chains.map(c=>`
-    <label class="chainchip"><input type="checkbox" data-which="${which}" data-chain="${c.id}" checked />
-      <span>${c.id}</span><span class="small muted">${c.count} atoms${c.ca?`, ${c.ca} CA`:''}</span>
-    </label>`).join('');
-}
-function selectedChains(which){
-  const id = which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox';
-  const box = document.getElementById(id); if (!box) return new Set();
-  const cbs = [...box.querySelectorAll('input[type=checkbox]')];
-  if (!cbs.length) return new Set();
-  return new Set(cbs.filter(cb=>cb.checked).map(cb=>cb.dataset.chain));
-}
-function selectAllChains(which){ const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox'); if(!box) return; box.querySelectorAll('input').forEach(cb=>cb.checked=true); }
-function clearChains(which){ const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox'); if(!box) return; box.querySelectorAll('input').forEach(cb=>cb.checked=false); }
-
-/* =========================================================
-   Deterministic Seed
-========================================================= */
-async function deriveSeed(){
-  const p = {
-    samples:+document.getElementById('samples').value, maxTrans:+document.getElementById('maxTrans').value,
-    contactCut:+document.getElementById('contactCut').value, clashFactor:+document.getElementById('clashFactor').value,
-    wContact:+document.getElementById('wContact').value, wClash:+document.getElementById('wClash').value,
-    soft:+document.getElementById('soft').value, topN:+document.getElementById('topN').value,
-    atomMode:document.getElementById('atomMode').value, rescoreMode:document.getElementById('rescoreMode').value,
-    abMode:document.getElementById('abMode').checked
-  };
-  const concat = (pdbAText||'')+'\n---\n'+(pdbBText||'')+'\n---\n'+JSON.stringify(p);
-  const hex = await sha256Hex(concat);
-  const seed = hashToSeed(hex);
-  document.getElementById('seed').value = seed;
-  document.getElementById('seedMsg').textContent = `SHA-256=${hex.slice(0,16)}… → seed=${seed}`;
-  logLine(`Derived seed=${seed}`);
+const vdw = {H:1.2, C:1.7, N:1.55, O:1.52, S:1.8, P:1.8, F:1.47, CL:1.75, BR:1.85, I:1.98};
+function selectAtomSet(atoms, mode){
+  const bb=new Set(['N','CA','C','O']);
+  return atoms.filter(a=>{
+    if(mode==='CA') return a.name==='CA';
+    if(mode==='BB') return bb.has(a.name);
+    if(mode==='HEAVY') return a.elem!=='H';
+    return true;
+  });
 }
 
-/* =========================================================
-   Dock Worker (shared)
-========================================================= */
+/* ========================= Docking Workers & Math ========================= */
 function makeDockWorker(){
-  const src = `
+  const src=`
     const vdw={H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
     function rand(seed){ let s=seed>>>0; return ()=> (s=(1664525*s+1013904223)>>>0, (s/0xFFFFFFFF)); }
-    function randomQuat(r){ const u1=r(),u2=r(),u3=r(); const a=Math.sqrt(1-u1), b=Math.sqrt(u1), t1=2*Math.PI*u2, t2=2*Math.PI*u3;
-      return [a*Math.sin(t1), a*Math.cos(t1), b*Math.sin(t2), b*Math.cos(t2)];
-    }
-    function rot(pts,q){ const [x,y,z,w]=q; return pts.map(p=>{
-      const vx=p.x,vy=p.y,vz=p.z; const ix=w*vx+y*vz-z*vy, iy=w*vy+z*vx-x*vz, iz=w*vz+x*vy-y*vx, iw=-x*vx - y*vy - z*vz;
+    function randomQuat(rng){ const u1=rng(),u2=rng(),u3=rng(); const a=Math.sqrt(1-u1),b=Math.sqrt(u1),t1=2*Math.PI*u2,t2=2*Math.PI*u3; return [a*Math.sin(t1),a*Math.cos(t1),b*Math.sin(t2),b*Math.cos(t2)]; }
+    function rotate(pts,q){ const[x,y,z,w]=q; return pts.map(p=>{ const vx=p.x,vy=p.y,vz=p.z;
+      const ix=w*vx+y*vz-z*vy, iy=w*vy+z*vx-x*vz, iz=w*vz+x*vy-y*vx, iw=-x*vx-y*vy-z*vz;
       const ox=ix*w+iw*(-x)+iy*(-z)-iz*(-y), oy=iy*w+iw*(-y)+iz*(-x)-ix*(-z), oz=iz*w+iw*(-z)+ix*(-y)-iy*(-x);
-      return {x:ox,y:oy,z:oz,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name};
-    });}
-    function trans(pts,t){ return pts.map(p=>({x:p.x+t.x,y:p.y+t.y,z:p.z+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name})); }
-    function makeGrid(coords, cell){
-      const m=new Map(); function key(i,j,k){return i+"|"+j+"|"+k}
-      for(let i=0;i<coords.length;i++){
-        const x=coords[i].x,y=coords[i].y,z=coords[i].z; const ix=Math.floor(x/cell),iy=Math.floor(y/cell),iz=Math.floor(z/cell);
-        const k=key(ix,iy,iz); if(!m.has(k)) m.set(k,[]); m.get(k).push(i);
-      }
-      return {cell:cell, map:m};
-    }
-    function nbr(g,x,y,z){
-      const c=g.cell; const ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c);
-      const res=[]; for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++){
-        const k=(ix+dx)+"|"+(iy+dy)+"|"+(iz+dz); if(g.map.has(k)) res.push(...g.map.get(k));
-      } return res;
-    }
-    function score(A,B,cut,clashFactor,wC,wX,soft){
-      const g=makeGrid(A,cut); let contacts=0, clash=0;
+      return {x:ox,y:oy,z:oz,elem:p.elem}; }); }
+    function translate(pts,t){ return pts.map(p=>({x:p.x+t.x,y:p.y+t.y,z:p.z+t.z,elem:p.elem})); }
+    function makeGrid(coords,cell){ const map=new Map(), key=(ix,iy,iz)=>ix+"|"+iy+"|"+iz;
+      for(let i=0;i<coords.length;i++){ const x=coords[i].x,y=coords[i].y,z=coords[i].z; const ix=Math.floor(x/cell),iy=Math.floor(y/cell),iz=Math.floor(z/cell);
+        const k=key(ix,iy,iz); if(!map.has(k)) map.set(k,[]); map.get(k).push(i); }
+      return {cell,map}; }
+    function neighbors(grid,x,y,z){ const c=grid.cell; const ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c);
+      const res=[]; for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){ const k=(ix+dx)+"|"+(iy+dy)+"|"+(iz+dz); if(grid.map.has(k)) res.push(...grid.map.get(k)); } return res; }
+    function scorePose(A,B,contactCut,clashFactor,wContact,wClash,soft){
+      const grid=makeGrid(A,contactCut); let contacts=0,clashPenalty=0;
       for(let i=0;i<B.length;i++){
-        const x=B[i].x,y=B[i].y,z=B[i].z, eb=(B[i].elem||'C').toUpperCase();
-        const cand=nbr(g,x,y,z);
+        const x=B[i].x,y=B[i].y,z=B[i].z, eB=(B[i].elem||'C').toUpperCase();
+        const cand=neighbors(grid,x,y,z);
         for(const j of cand){
-          const ax=A[j].x,ay=A[j].y,az=A[j].z, ea=(A[j].elem||'C').toUpperCase();
-          const dx=x-ax, dy=y-ay, dz=z-az; const d2=dx*dx+dy*dy+dz*dz; if (d2===0){ clash+=wX; continue; }
-          const d=Math.sqrt(d2);
-          const rv=(vdw[ea]||1.7)+(vdw[eb]||1.7); const cCut=clashFactor*rv;
-          if (d<=cCut){ const over=(cCut-d+1e-6)/cCut; clash += wX*over*(1/(1+soft*over)); }
-          else if (d<=cut){ contacts += wC; }
+          const ax=A[j].x,ay=A[j].y,az=A[j].z, eA=(A[j].elem||'C').toUpperCase();
+          const dx=x-ax,dy=y-ay,dz=z-az; const d2=dx*dx+dy*dy+dz*dz; if(d2===0){ clashPenalty+=wClash; continue; }
+          const d=Math.sqrt(d2); const rv=(vdw[eA]||1.7)+(vdw[eB]||1.7); const clashCut=clashFactor*rv;
+          if(d<=clashCut){ const over=(clashCut-d+1e-6)/(clashCut); clashPenalty+= wClash*over*(1.0/(1.0+soft*over)); }
+          else if(d<=contactCut){ contacts += 1.0; }
         }
       }
-      return {score:contacts - clash, contacts, clash};
+      return {score:contacts - clashPenalty, contacts, clash:clashPenalty};
     }
     self.onmessage=(e)=>{
-      const {Apts, Bpts, params, start, end}=e.data;
-      const rng=rand(params.seed + start*1337);
-      let best=[]; const total=end-start;
+      const {Apts,Bpts,params,rangeStart,rangeEnd} = e.data;
+      const rng=rand(params.seed + rangeStart*1337);
+      const total=rangeEnd-rangeStart; const list=[];
       for(let k=0;k<total;k++){
         const q=randomQuat(rng);
         const t={x:(rng()*2-1)*params.maxTrans, y:(rng()*2-1)*params.maxTrans, z:(rng()*2-1)*params.maxTrans};
-        const Bt=trans(rot(Bpts,q),t);
-        const sc=score(Apts,Bt,params.contactCut,params.clashFactor,params.wContact,params.wClash,params.soft);
-        best.push({score:sc.score, contacts:sc.contacts, clash:sc.clash, q, t});
-        if ((k&1023)===0) self.postMessage({type:'progress',k});
+        const Bt=translate(rotate(Bpts,q),t);
+        const sc=scorePose(Apts,Bt,params.contactCut,params.clashFactor,params.wContact,params.wClash,params.soft);
+        list.push({score:sc.score,contacts:sc.contacts,clash:sc.clash,q,t});
+        if(k%1000===0) self.postMessage({type:'progress',k});
       }
-      best.sort((a,b)=>b.score-a.score);
-      self.postMessage({type:'done', list: best.slice(0,Math.min(200,total))});
-    }`;
+      list.sort((a,b)=>b.score-a.score);
+      self.postMessage({type:'done', list:list.slice(0, Math.min(200,total))});
+    }
+  `;
   const blob=new Blob([src],{type:'application/javascript'});
   return new Worker(URL.createObjectURL(blob));
 }
-function angleBetweenQuats(q1,q2){ const dot = q1[0]*q2[0]+q1[1]*q2[1]+q1[2]*q2[2]+q1[3]*q2[3]; return 2*Math.acos(Math.min(1,Math.abs(dot))) * 180/Math.PI; }
+function angleBetweenQuats(q1,q2){ const dot=q1[0]*q2[0]+q1[1]*q2[1]+q1[2]*q2[2]+q1[3]*q2[3]; return 2*Math.acos(Math.min(1,Math.abs(dot))) * 180/Math.PI; }
 function diverseTop(sorted, angDeg, transA, topN){
-  const out=[]; for(const p of sorted){ let dup=false; for(const q of out){
-    const ad=angleBetweenQuats(p.q,q.q); const td=Math.hypot(p.t.x-q.t.x,p.t.y-q.t.y,p.t.z-q.t.z);
-    if (ad<=angDeg && td<=transA){ dup=true; break; } } if(!dup) out.push(p); if (out.length>=topN) break;
-  } return out;
-}
-
-/* =========================================================
-   Helpers: selection, styles, formats
-========================================================= */
-function selectAtomSet(atoms, mode){ const bb=new Set(['N','CA','C','O']); return atoms.filter(a=>{
-  if (mode==='CA') return a.name==='CA';
-  if (mode==='BB') return bb.has(a.name);
-  if (mode==='HEAVY') return a.elem!=='H';
-  return true;
-});}
-function formatPDB(atoms, chainShift=0, runId=null){
-  let lines=[], serial=1; if (runId) lines.push(`REMARK RUN-ID ${runId}`);
-  for(const a of atoms){
-    const name=(a.name||'CA').padStart(4,' ');
-    const resn=(a.resn||'RES').padStart(3,' ');
-    const chain=(a.chain||'A'); const outChain=String.fromCharCode(chain.charCodeAt(0)+chainShift);
-    const resi=(a.resi||1).toString().padStart(4,' ');
-    const x=(a.x??0).toFixed(3).toString().padStart(8,' ');
-    const y=(a.y??0).toFixed(3).toString().padStart(8,' ');
-    const z=(a.z??0).toFixed(3).toString().padStart(8,' ');
-    const occ=' 1.00', b=' 0.00'; const elem=(a.elem||'C').toString().padStart(2,' ');
-    lines.push(`ATOM  ${String(serial).padStart(5,' ')} ${name} ${resn} ${outChain}${resi}    ${x}${y}${z}${occ}${b}          ${elem}`); serial++;
+  const out=[];
+  for(const p of sorted){
+    let dup=false;
+    for(const q of out){
+      const ad=angleBetweenQuats(p.q,q.q);
+      const td=Math.hypot(p.t.x-q.t.x,p.t.y-q.t.y,p.t.z-q.t.z);
+      if(ad<=angDeg && td<=transA){ dup=true; break; }
+    }
+    if(!dup) out.push(p);
+    if(out.length>=topN) break;
   }
-  lines.push('TER','ENDMDL','END'); return lines.join('\n');
+  return out;
 }
 function applyTransform(points,q,t){
-  const [x,y,z,w]=q;
+  const[x,y,z,w]=q;
   return points.map(p=>{
-    const vx=p.x,vy=p.y,vz=p.z; const ix=w*vx+y*vz-z*vy, iy=w*vy+z*vx-x*vz, iz=w*vz+x*vy-y*vx, iw=-x*vx - y*vy - z*vz;
+    const vx=p.x,vy=p.y,vz=p.z;
+    const ix=w*vx+y*vz-z*vy, iy=w*vy+z*vx-x*vz, iz=w*vz+x*vy-y*vx, iw=-x*vx-y*vy-z*vz;
     const ox=ix*w+iw*(-x)+iy*(-z)-iz*(-y), oy=iy*w+iw*(-y)+iz*(-x)-ix*(-z), oz=iz*w+iw*(-z)+ix*(-y)-iy*(-x);
     return {x:ox+t.x,y:oy+t.y,z:oz+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name};
   });
 }
 
-/* =========================================================
-   Interface metrics (includes CDR weighting)
-========================================================= */
+/* ========================= Interface metrics (viewer overlays) ========================= */
+const hydrophobicSet=new Set(['ALA','VAL','LEU','ILE','PRO','PHE','MET','TRP','TYR','CYS']);
+function computeInterfaceMetrics(A,B,contactCut){
+  let contacts=0,clash=0,hb=0,sb=0,hyd=0;
+  const contactsPairs=[], hbPairs=[], sbPairs=[];
+  for(const b of B){
+    for(const a of A){
+      const dx=b.x-a.x, dy=b.y-a.y, dz=b.z-a.z; const d2=dx*dx+dy*dy+dz*dz; const d=Math.sqrt(d2);
+      const rv=(vdw[(a.elem||'C').toUpperCase()]||1.7)+(vdw[(b.elem||'C').toUpperCase()]||1.7);
+      const clashCut=parseFloat(document.getElementById('clashFactor').value)*rv;
+      if(d<=clashCut){ const over=(clashCut-d+1e-6)/clashCut; clash += 6.0*over*(1/(1+0.5*over)); }
+      if(d<=contactCut){ contacts++; contactsPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
+      const aN=a.name?.trim().startsWith('N'), bO=b.name?.trim().startsWith('O');
+      const aO=a.name?.trim().startsWith('O'), bN=b.name?.trim().startsWith('N');
+      if((aN&&bO||aO&&bN) && d<=3.5){ hb++; hbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
+      const acid=(x)=> (x.resn==='ASP'&&x.name.startsWith('OD'))||(x.resn==='GLU'&&x.name.startsWith('OE'));
+      const base=(x)=> (x.resn==='LYS'&&x.name==='NZ')||(x.resn==='ARG'&&(x.name==='NH1'||x.name==='NH2'||x.name==='NE'))||(x.resn==='HIS'&&(x.name==='ND1'||x.name==='NE2'));
+      if((acid(a)&&base(b)||acid(b)&&base(a)) && d<=4.0){ sb++; sbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
+      if(hydrophobicSet.has(a.resn)&&hydrophobicSet.has(b.resn) && (a.elem==='C'||b.elem==='C') && d<=4.5) hyd++;
+    }
+  }
+  return {contacts,clash,hb,sb,hydrophobics:hyd,contactsPairs,hbPairs,sbPairs};
+}
 function residueCharges(atoms){
   const charges=new Map(); const qByResn={ASP:-1,GLU:-1,LYS:+1,ARG:+1,HIS:+0.1};
-  const pos=new Map();
-  for(const a of atoms){ const key=a.chain+':'+a.resi; if(!pos.has(key)) pos.set(key,[]); pos.get(key).push(a); }
-  for(const [key,arr] of pos.entries()){
-    const resn=arr[0].resn||'UNK'; const q=qByResn[resn]||0; if (q===0) continue;
+  const groups=new Map();
+  for(const a of atoms){ const key=a.chain+':'+a.resi; if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(a); }
+  for(const [key,arr] of groups.entries()){
+    const resn=arr[0].resn||'UNK'; const q=qByResn[resn]||0; if(q===0) continue;
     let ca=arr.find(x=>x.name==='CA'); let x,y,z;
-    if (ca){ x=ca.x;y=ca.y;z=ca.z; } else { let sx=0,sy=0,sz=0; for(const a of arr){sx+=a.x;sy+=a.y;sz+=a.z} x=sx/arr.length; y=sy/arr.length; z=sz/arr.length; }
-    charges.set(key,{x,y,z,q,resn,chain:arr[0].chain,resi:arr[0].resi});
+    if(ca){x=ca.x;y=ca.y;z=ca.z;}else{ let sx=0,sy=0,sz=0; for(const a of arr){sx+=a.x;sy+=a.y;sz+=a.z} x=sx/arr.length; y=sy/arr.length; z=sz/arr.length; }
+    charges.set(key,{x,y,z,q});
   }
   return Array.from(charges.values());
 }
 function coulombResidueEnergy(A,B,k=0.5,cut=12){
   const cA=residueCharges(A), cB=residueCharges(B); let e=0, cut2=cut*cut;
-  for(const a of cA) for(const b of cB){ const dx=a.x-b.x, dy=a.y-b.y, dz=a.z-b.z; const d2=dx*dx+dy*dy+dz*dz; if (d2>cut2) continue; const d=Math.sqrt(d2)+1e-3; e += k*(a.q*b.q)/d; }
+  for(const a of cA){ for(const b of cB){ const dx=a.x-b.x,dy=a.y-b.y,dz=a.z-b.z; const d2=dx*dx+dy*dy+dz*dz; if(d2>cut2) continue; const d=Math.sqrt(d2)+1e-3; e += k*(a.q*b.q)/d; } }
   return e;
 }
-function parseRangeList(txt){ // "26-32,52-56,95-102"
-  const out=[]; (txt||'').split(',').map(s=>s.trim()).forEach(p=>{
-    if(!p) return; const m=p.match(/^(\d+)\s*-\s*(\d+)$/); if (m){ const a=+m[1], b=+m[2]; out.push([Math.min(a,b), Math.max(a,b)]); }
-    else if (/^\d+$/.test(p)){ const n=+p; out.push([n,n]); }
-  }); return out;
+
+/* ========================= Antibody Docking Flow ========================= */
+function status(msg){ const p=document.getElementById('statusPill'); p.textContent=msg; }
+function setProgress(frac){ document.getElementById('prog').value=Math.max(0,Math.min(1,frac||0)); }
+function resetDocking(){
+  ['pdbAText','pdbBText'].forEach(id=>document.getElementById(id).value='');
+  ['pdbAFile','pdbBFile'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('chainsABox').innerHTML='';
+  document.getElementById('chainsBBox').innerHTML='';
+  document.getElementById('poseControls').innerHTML='';
+  document.getElementById('scoreBox').textContent='';
+  viewer?.clear(); viewer?.render();
+  pdbAAllAtoms=[]; pdbBAllAtoms=[]; pdbAAtoms=[]; pdbBAtoms=[]; posesTop=[]; currentPose=null; currentA=null; currentB0=null;
+  setProgress(0); status('idle'); document.getElementById('pairStatus').textContent='inputs: idle';
 }
-function inRanges(n, ranges){ for(const [a,b] of ranges){ if (n>=a && n<=b) return true; } return false; }
-
-function computeInterfaceMetrics(A,B,contactCut, cdrConfig=null){
-  let contacts=0, clash=0, hb=0, sb=0, hyd=0;
-  const contactsPairs=[], hbPairs=[];
-  const SBPairs=[]; // optional
-  const clashFactor=+document.getElementById('clashFactor').value||0.85;
-  const wC=+document.getElementById('wContact').value||1.0;
-  const wX=+document.getElementById('wClash').value||6.0;
-  const soft=+document.getElementById('soft').value||0.5;
-  const cdrW = cdrConfig?.weight || 1.0;
-
-  function isAInCDR(a){
-    if (!cdrConfig) return false;
-    if (a.chain===cdrConfig.H && inRanges(a.resi, cdrConfig.Hranges)) return true;
-    if (a.chain===cdrConfig.L && inRanges(a.resi, cdrConfig.Lranges)) return true;
-    return false;
-  }
-
-  for(const b of B){
-    for(const a of A){
-      const dx=b.x-a.x, dy=b.y-a.y, dz=b.z-a.z; const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
-      const rv=(vdw[(a.elem||'C').toUpperCase()]||1.7)+(vdw[(b.elem||'C').toUpperCase()]||1.7);
-      const cCut=clashFactor*rv;
-
-      if (d<=cCut){ const over=(cCut-d+1e-6)/cCut; clash += wX*over*(1/(1+soft*over)); }
-      if (d<=contactCut){
-        const weight = isAInCDR(a) ? (wC*cdrW) : wC;
-        contacts += weight;
-        contactsPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z, w:weight});
-      }
-      const aN=a.name?.trim().startsWith('N'), bO=b.name?.trim().startsWith('O');
-      const aO=a.name?.trim().startsWith('O'), bN=b.name?.trim().startsWith('N');
-      if ((aN && bO || aO && bN) && d<=3.5){ hb++; hbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
-      const acid=(x)=> (x.resn==='ASP'&&x.name.startsWith('OD'))||(x.resn==='GLU'&&x.name.startsWith('OE'));
-      const base=(x)=> (x.resn==='LYS'&&x.name==='NZ')||(x.resn==='ARG'&&(x.name==='NH1'||x.name==='NH2'||x.name==='NE'))||(x.resn==='HIS'&&(x.name==='ND1'||x.name==='NE2'));
-      if ( (acid(a)&&base(b) || acid(b)&&base(a)) && d<=4.0){ SBPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
-      if (hydrophobic.has(a.resn) && hydrophobic.has(b.resn) && (a.elem==='C'||b.elem==='C') && d<=4.5) hyd++;
-    }
-  }
-  return {contacts, clash, hb, sb:SBPairs.length, hyd, contactsPairs, hbPairs, sbPairs:SBPairs};
-}
-
-/* =========================================================
-   Protein–Protein Docking (reuses your previous logic)
-========================================================= */
 async function parseOne(which){
-  const txtEl = document.getElementById(which==='A'?'pdbAText':'pdbBText');
-  const fileEl= document.getElementById(which==='A'?'pdbAFile':'pdbBFile');
-  let text = (txtEl.value||'').trim();
-  if (!text && fileEl?.files?.[0]) text = await fileEl.files[0].text();
-  if (!text){ alert(`Provide PDB text or file for ${which}`); return; }
-  const atoms = parsePDB(text);
-  if (!atoms.length){ alert('No parsable ATOM/HETATM records.'); return; }
-  if (which==='A'){ pdbAAll=atoms; pdbAText=text; renderChainChips('A',atoms); document.getElementById('chainInfoA').className='success'; document.getElementById('chainInfoA').textContent=`Parsed ${atoms.length} atoms`; }
-  else { pdbBAll=atoms; pdbBText=text; renderChainChips('B',atoms); document.getElementById('chainInfoB').className='success'; document.getElementById('chainInfoB').textContent=`Parsed ${atoms.length} atoms`; }
+  const fileEl = document.getElementById(which==='A'?'pdbAFile':'pdbBFile');
+  const textEl = document.getElementById(which==='A'?'pdbAText':'pdbBText');
+  let text=textEl.value.trim();
+  if(!text && fileEl.files[0]) text = await fileToText(fileEl.files[0]);
+  if(!text){ alert(`Provide PDB for ${which==='A'?'Protein A':'Protein B'} (file or paste).`); return; }
+  const atoms=parsePDB(text);
+  if(atoms.length===0){ alert('No atoms parsed — check PDB content.'); return; }
+  if(which==='A'){ pdbAAllAtoms=atoms; buildChainChips('A', uniqueChains(atoms)); document.getElementById('chainInfoA').textContent=`Parsed ${atoms.length} atoms, chains: ${uniqueChains(atoms).join(', ')||'—'}`; }
+  else if(which==='B'){ pdbBAllAtoms=atoms; buildChainChips('B', uniqueChains(atoms)); document.getElementById('chainInfoB').textContent=`Parsed ${atoms.length} atoms, chains: ${uniqueChains(atoms).join(', ')||'—'}`; }
+  document.getElementById('pairStatus').textContent = `inputs: A ${pdbAAllAtoms.length||0} | B ${pdbBAllAtoms.length||0}`;
+  // quick preview
+  ensureMainViewer(); viewer.clear();
+  if(pdbAAllAtoms.length){ viewer.addModel(formatPDB(pdbAAllAtoms),"pdb"); viewer.setStyle({model:0},{cartoon:{colorscheme:"Chain"}}); }
+  if(pdbBAllAtoms.length){ viewer.addModel(formatPDB(pdbBAllAtoms,1),"pdb"); viewer.setStyle({model:1},{cartoon:{color:"#f97316"}}); }
+  viewer.zoomTo(); viewer.render();
 }
-function selectAllChains(which){}
-function clearChains(which){ const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox'); if(!box) return; box.querySelectorAll('input').forEach(cb=>cb.checked=false); }
-
-async function loadInputs(){
-  const fA=document.getElementById('pdbAFile').files[0];
-  const fB=document.getElementById('pdbBFile').files[0];
-  if (!pdbAText && fA) pdbAText = await fA.text();
-  if (!pdbBText && fB) pdbBText = await fB.text();
-  if (!pdbAText || !pdbBText) throw new Error('Provide PDB for both A and B.');
-
-  if (!pdbAAll.length) pdbAAll = parsePDB(pdbAText);
-  if (!pdbBAll.length) pdbBAll = parsePDB(pdbBText);
-  if (!pdbAAll.length || !pdbBAll.length) throw new Error('No atoms in input PDB(s).');
-
-  const keepA = selectedChains('A'); const keepB = selectedChains('B');
-  pdbAAtoms = keepA.size ? pdbAAll.filter(a=>keepA.has(a.chain)) : pdbAAll;
-  pdbBAtoms = keepB.size ? pdbBAll.filter(a=>keepB.has(a.chain)) : pdbBAll;
-
-  if (!pdbAAtoms.length){ pdbAAtoms = pdbAAll; renderChainChips('A',pdbAAll); document.getElementById('chainInfoA').className='error'; document.getElementById('chainInfoA').textContent='No atoms after chain filter — fell back to all.'; }
-  if (!pdbBAtoms.length){ pdbBAtoms = pdbBAll; renderChainChips('B',pdbBAll); document.getElementById('chainInfoB').className='error'; document.getElementById('chainInfoB').textContent='No atoms after chain filter — fell back to all.'; }
+function selectAllChains(which){
+  const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':'chainsRBox');
+  box.querySelectorAll('input[type=checkbox]').forEach(ch=>ch.checked=true);
 }
-
+async function loadInputsDock(){
+  // build atoms from selected chains + atom mode
+  const mode=document.getElementById('atomMode').value;
+  const selA=getSelectedChains('A'), selB=getSelectedChains('B');
+  const Aall = (selA.length? filterChains(pdbAAllAtoms, selA):pdbAAllAtoms);
+  const Ball = (selB.length? filterChains(pdbBAllAtoms, selB):pdbBAllAtoms);
+  if(!Aall.length || !Ball.length) throw new Error("No atoms after chain filtering; ensure you parsed and selected chains. (Tip: click ‘All’)");
+  pdbAAtoms=Aall; pdbBAtoms=Ball;
+  let Apts=selectAtomSet(Aall,mode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
+  let Bpts=selectAtomSet(Ball,mode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
+  if(!Apts.length||!Bpts.length) throw new Error("No atoms with current atom mode.");
+  const cA=centroid(Apts), cB=centroid(Bpts);
+  Apts=translate(Apts,{x:-cA.x,y:-cA.y,z:-cA.z});
+  Bpts=translate(Bpts,{x:-cB.x,y:-cB.y,z:-cB.z});
+  return {Apts,Bpts};
+}
 async function runDocking(){
-  if (inProgress) return;
-  if (qaMode && !qaRunId) await qaNewRunId('protein-protein');
-  cancelled=false; inProgress=true; heavyUsed=false; currentPose=null; posesTop=[];
-  document.getElementById('poseBody').innerHTML=''; document.getElementById('scoreBox').textContent='';
-  document.getElementById('dockBtn').disabled=true; document.getElementById('cancelBtn').disabled=false;
-  document.getElementById('dockBtn').textContent='Running…'; setProgress(0); status('loading'); logLine('Starting protein–protein docking.');
-
+  if(inProgress) return;
+  // gate legal
+  if(localStorage.getItem('legal_ack_v1')!=='yes'){ openLegal(); return; }
+  inProgress=true; cancelled=false; posesTop=[]; currentPose=null;
+  const btn=document.getElementById('dockBtn'), cancelBtn=document.getElementById('cancelBtn');
+  btn.disabled=true; cancelBtn.disabled=false; btn.textContent="Running…"; status('loading'); setProgress(0);
+  ensureMainViewer(); document.getElementById('poseControls').innerHTML=''; document.getElementById('scoreBox').textContent='';
   try{
-    await loadInputs();
-    const params = {
-      samples:+document.getElementById('samples').value, maxTrans:+document.getElementById('maxTrans').value,
-      contactCut:+document.getElementById('contactCut').value, clashFactor:+document.getElementById('clashFactor').value,
-      wContact:+document.getElementById('wContact').value, wClash:+document.getElementById('wClash').value,
-      soft:+document.getElementById('soft').value, topN: clamp(+document.getElementById('topN').value,1,200),
-      seed:(+document.getElementById('seed').value)||42, atomMode:document.getElementById('atomMode').value,
-      rescoreMode:document.getElementById('rescoreMode').value
+    const params={
+      samples: parseInt(document.getElementById('samples').value),
+      maxTrans: parseFloat(document.getElementById('maxTrans').value),
+      contactCut: parseFloat(document.getElementById('contactCut').value),
+      clashFactor: parseFloat(document.getElementById('clashFactor').value),
+      wContact: parseFloat(document.getElementById('wContact').value),
+      wClash: parseFloat(document.getElementById('wClash').value),
+      soft: parseFloat(document.getElementById('soft').value),
+      topN: Math.max(1, parseInt(document.getElementById('topN').value)),
+      seed: parseInt(document.getElementById('seed').value)||42,
+      atomMode: document.getElementById('atomMode').value,
+      rescoreMode: document.getElementById('rescoreMode').value
     };
-    if (document.getElementById('seedDet').checked) await deriveSeed();
+    const dupAng=parseFloat(document.getElementById('dupAngle').value)||10;
+    const dupTrans=parseFloat(document.getElementById('dupTrans').value)||2;
 
-    let Apts=selectAtomSet(pdbAAtoms, params.atomMode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
-    let Bpts=selectAtomSet(pdbBAtoms, params.atomMode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
-    if (!Apts.length || !Bpts.length) throw new Error('No atoms with current atom mode.');
-    const cA=centroid(Apts), cB=centroid(Bpts);
-    Apts=translate(Apts,{x:-cA.x,y:-cA.y,z:-cA.z}); Bpts=translate(Bpts,{x:-cB.x,y:-cB.y,z:-cB.z});
-
+    const {Apts,Bpts}=await loadInputsDock();
     status('sampling');
-    const dupAng=+document.getElementById('dupAngle').value||10;
-    const dupTrans=+document.getElementById('dupTrans').value||2;
 
     const cores=Math.max(1,(navigator.hardwareConcurrency||4)-1);
-    const poolSize=Math.min(8, cores);
+    const poolSize=Math.min(cores,8);
     const per=Math.floor(params.samples/poolSize), extra=params.samples%poolSize;
-
-    let done=0, lists=[]; workerPool=[];
+    workerPool=[];
+    let lists=[], done=0;
     for(let i=0;i<poolSize;i++){
-      const start=i*per + Math.min(i,extra), end=start+per+(i<extra?1:0);
+      const start=i*per+Math.min(i,extra);
+      const end=start+per+(i<extra?1:0);
       const w=makeDockWorker(); workerPool.push(w);
-      w.onmessage=(e)=>{
-        if (cancelled) return;
-        if (e.data.type==='progress'){ done+=1024; setProgress(Math.min(1, done/params.samples)); status(`scan ${Math.min(done,params.samples)}/${params.samples}`);}
-        if (e.data.type==='done'){
-          lists.push(e.data.list); w.terminate();
-          if (lists.length===poolSize){
-            let merged = lists.flat(); merged.sort((a,b)=>b.score-a.score);
-            const diverse = diverseTop(merged, dupAng, dupTrans, params.topN);
+      w.onmessage=e=>{
+        const msg=e.data;
+        if(msg.type==='progress'){ done += 1000; setProgress(Math.min(1, done/params.samples)); status(`scan ${Math.min(done,params.samples)}/${params.samples}`); }
+        if(msg.type==='done'){
+          lists.push(msg.list); w.terminate();
+          if(lists.length===poolSize){
+            let merged=lists.flat(); merged.sort((a,b)=>b.score-a.score);
+            const diverse=diverseTop(merged, dupAng, dupTrans, params.topN);
             resolveAfterSampling(diverse, params);
           }
         }
       };
       w.onerror=(err)=>{ console.error(err); w.terminate(); };
-      w.postMessage({Apts, Bpts, params, start, end});
+      w.postMessage({Apts,Bpts,params,rangeStart:start,rangeEnd:end});
     }
-  } catch(e){
-    alert(e.message||e); status('error'); inProgress=false; document.getElementById('dockBtn').disabled=false; document.getElementById('cancelBtn').disabled=true; document.getElementById('dockBtn').textContent='▶️ Run Docking';
+  }catch(e){
+    alert(e.message||e);
+    inProgress=false; const btn=document.getElementById('dockBtn'), cancelBtn=document.getElementById('cancelBtn');
+    btn.disabled=false; cancelBtn.disabled=true; btn.textContent="▶️ Run Docking"; status('error');
   }
 }
-function cancelDocking(){ cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch{}}); workerPool=[]; status('cancelled'); setProgress(0); inProgress=false; document.getElementById('dockBtn').disabled=false; document.getElementById('cancelBtn').disabled=true; document.getElementById('dockBtn').textContent='▶️ Run Docking'; logLine('Run cancelled.'); }
-
+function cancelDocking(){
+  cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch{} }); workerPool=[];
+  inProgress=false; setProgress(0); status('cancelled');
+  const btn=document.getElementById('dockBtn'), cancelBtn=document.getElementById('cancelBtn');
+  btn.disabled=false; cancelBtn.disabled=true; btn.textContent="▶️ Run Docking";
+}
 async function resolveAfterSampling(diverse, params){
-  status(params.rescoreMode==='NONE' ? 'ranking' : (params.rescoreMode==='HEAVY'?'rescore':'refine'));
-  const cA=centroid(pdbAAtoms), cB=centroid(pdbBAtoms);
-  const Aheavy = translate(selectAtomSet(pdbAAtoms,'HEAVY').map(a=>({...a})), {x:-cA.x,y:-cA.y,z:-cA.z});
-  const Bheavy0= translate(selectAtomSet(pdbBAtoms,'HEAVY').map(a=>({...a})), {x:-cB.x,y:-cB.y,z:-cB.z});
+  status(params.rescoreMode==="NONE" ? 'ranking' : (params.rescoreMode==="HEAVY"?'rescore':'refine'));
+  // prepare heavy sets for postprocessing & rendering (centered)
+  const cA=centroid(pdbAAllAtoms), cB=centroid(pdbBAllAtoms);
+  const Aheavy=translate(selectAtomSet(pdbAAllAtoms,'HEAVY').map(a=>({...a})), {x:-cA.x,y:-cA.y,z:-cA.z});
+  const Bheavy0=translate(selectAtomSet(pdbBAllAtoms,'HEAVY').map(a=>({...a})), {x:-cB.x,y:-cB.y,z:-cB.z});
 
-  // Antibody CDR config
-  let cdrConf=null;
-  if (document.getElementById('abMode').checked){
-    cdrConf = {
-      H: (document.getElementById('Hchain').value||'H').trim()[0]||'H',
-      L: (document.getElementById('Lchain').value||'L').trim()[0]||'L',
-      Hranges: [...parseRangeList(document.getElementById('H1').value), ...parseRangeList(document.getElementById('H2').value), ...parseRangeList(document.getElementById('H3').value)],
-      Lranges: [...parseRangeList(document.getElementById('L1').value), ...parseRangeList(document.getElementById('L2').value), ...parseRangeList(document.getElementById('L3').value)],
-      weight: +document.getElementById('cdrW').value||1.5
-    };
+  let top=diverse;
+  if(params.rescoreMode!=="NONE"){
+    top = await heavyRescore(Aheavy, Bheavy0, params, diverse, params.rescoreMode==="HEAVY_REFINE");
   }
-
-  let top = diverse;
-  if (params.rescoreMode!=='NONE'){
-    top = await heavyRescore(Aheavy, Bheavy0, params, diverse, cdrConf, params.rescoreMode==='HEAVY_REFINE');
-    heavyUsed=true;
-  } else heavyUsed=false;
-
-  posesTop = top; currentA=Aheavy; currentB0=Bheavy0;
-  buildPoseTable(top, cdrConf);
-  if (top.length>0) showPose(0, cdrConf);
-
-  document.getElementById('dockBtn').disabled=false; document.getElementById('cancelBtn').disabled=true; document.getElementById('dockBtn').textContent='▶️ Run Docking';
+  posesTop=top; currentA=Aheavy; currentB0=Bheavy0;
+  buildPoseButtons(top);
+  if(top.length>0) document.querySelector('#poseControls button.btn[data-rank="1"]')?.click();
+  const btn=document.getElementById('dockBtn'), cancelBtn=document.getElementById('cancelBtn');
+  btn.disabled=false; cancelBtn.disabled=true; btn.textContent="▶️ Run Docking";
   status('done'); setProgress(1); inProgress=false;
 
-  // Store run (QA)
-  if (qaMode) storeRun({
-    runId: qaRunId, type:'protein-protein', seed:+document.getElementById('seed').value,
-    params: params, ab:cdrConf?true:false, top: top.slice(0,3).map((p,i)=>({rank:i+1,score:p.score, q:p.q, t:p.t}))
-  });
-  runsRefresh();
+  // QA log run
+  const runId = 'ab-' + djb2(JSON.stringify({time:Date.now(), seed:params.seed}) + (posesTop[0]?.score||0));
+  const runs=qaLoad();
+  runs.unshift({id:runId, type:'antibody', time:new Date().toISOString(), seed:params.seed, params, bestScore:posesTop[0]?.score||null});
+  qaSave(runs);
+  qaLog(`Dock run stored: ${runId}  bestScore=${(posesTop[0]?.score||0).toFixed(2)}`);
 }
-
-function heavyRescore(Aheavy, Bheavy0, params, topCoarse, cdrConf, refine=false){
-  function baseScore(A,B){
-    const cut=params.contactCut, cf=params.clashFactor, wC=params.wContact, wX=params.wClash, soft=params.soft;
-    let contacts=0, clash=0, hb=0, sb=0, hyd=0;
+function heavyRescore(Aheavy,Bheavy0, params, topCoarse, refine=false){
+  function score(A,B){
+    let contacts=0, clashPenalty=0;
     for(let i=0;i<B.length;i++){
-      const x=B[i].x,y=B[i].y,z=B[i].z, eb=(B[i].elem||'C').toUpperCase();
+      const x=B[i].x,y=B[i].y,z=B[i].z, eB=(B[i].elem||'C').toUpperCase();
       for(let j=0;j<A.length;j++){
-        const ax=A[j].x,ay=A[j].y,az=A[j].z, ea=(A[j].elem||'C').toUpperCase();
-        const dx=x-ax, dy=y-ay, dz=z-az; const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
-        const rv=(vdw[ea]||1.7)+(vdw[eb]||1.7); const cCut=cf*rv;
-        if (d<=cCut){ const over=(cCut-d+1e-6)/cCut; clash += wX*over*(1/(1+soft*over)); }
-        else if (d<=cut){ // contact
-          let weight=wC;
-          if (cdrConf){ // CDR boost if A residue in CDR
-            const a=A[j];
-            if ((a.chain===cdrConf.H && inRanges(a.resi,cdrConf.Hranges)) || (a.chain===cdrConf.L && inRanges(a.resi,cdrConf.Lranges)))
-              weight*=cdrConf.weight;
-          }
-          contacts += weight;
-          if (hydrophobic.has(A[j].resn) && hydrophobic.has(B[i].resn) && (A[j].elem==='C'||B[i].elem==='C') && d<=4.5) hyd++;
-          const aN=A[j].name?.trim().startsWith('N'), bO=B[i].name?.trim().startsWith('O');
-          const aO=A[j].name?.trim().startsWith('O'), bN=B[i].name?.trim().startsWith('N');
-          if ((aN && bO || aO && bN) && d<=3.5) hb++;
-        }
+        const ax=A[j].x,ay=A[j].y,az=A[j].z, eA=(A[j].elem||'C').toUpperCase();
+        const dx=x-ax,dy=y-ay,dz=z-az; const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+        const rv=(vdw[eA]||1.7)+(vdw[eB]||1.7); const clashCut=params.clashFactor*rv;
+        if(d<=clashCut){ const over=(clashCut-d+1e-6)/clashCut; clashPenalty += params.wClash*over*(1.0/(1.0+params.soft*over)); }
+        else if(d<=params.contactCut){ contacts += 1.0; }
       }
     }
-    return {contacts, clash, hb, hyd, score:contacts-clash};
+    return {score:contacts - clashPenalty, contacts, clash:clashPenalty};
   }
-  function jiggle(p){ const j=0.5, r=()=> (Math.random()*2-1)*j;
-    const dq=[p.q[0]+r()*0.01,p.q[1]+r()*0.01,p.q[2]+r()*0.01,p.q[3]+r()*0.01]; const n=Math.hypot(...dq); for(let i=0;i<4;i++) dq[i]/=n;
-    const dt={x:p.t.x+r(),y:p.t.y+r(),z:p.t.z+r()}; return {q:dq,t:dt};
+  function jiggle(p){
+    const j=0.5, r=()=> (Math.random()*2-1)*j;
+    const dq=[p.q[0]+r()*0.01,p.q[1]+r()*0.01,p.q[2]+r()*0.01,p.q[3]+r()*0.01];
+    const n=Math.hypot(dq[0],dq[1],dq[2],dq[3]); for(let i=0;i<4;i++) dq[i]/=n;
+    const dt={x:p.t.x+r(),y:p.t.y+r(),z:p.t.z+r()};
+    return {q:dq,t:dt};
   }
   const rescored=[];
   for(const p of topCoarse){
     let best={...p};
-    let Bcur=applyTransform(Bheavy0,best.q,best.t);
-    let sc=baseScore(Aheavy,Bcur); best.score=sc.score; best.contacts=sc.contacts; best.clash=sc.clash; best.hb=sc.hb; best.hyd=sc.hyd;
-    if (refine){
-      for(let k=0;k<50;k++){
-        const jt=jiggle(best); const Btry=applyTransform(Bheavy0,jt.q,jt.t); const sc2=baseScore(Aheavy,Btry);
-        if (sc2.score>best.score){ best.q=jt.q; best.t=jt.t; best.score=sc2.score; best.contacts=sc2.contacts; best.clash=sc2.clash; best.hb=sc2.hb; best.hyd=sc2.hyd; }
+    let Bcur=applyTransform(Bheavy0, best.q, best.t);
+    let sc=score(Aheavy,Bcur);
+    best.score=sc.score; best.contacts=sc.contacts; best.clash=sc.clash;
+    if(refine){
+      for(let i=0;i<50;i++){
+        const jt=jiggle(best); const Btry=applyTransform(Bheavy0,jt.q,jt.t); const sc2=score(Aheavy,Btry);
+        if(sc2.score>best.score){ best.q=jt.q; best.t=jt.t; best.score=sc2.score; best.contacts=sc2.contacts; best.clash=sc2.clash; }
       }
     }
     rescored.push(best);
   }
   rescored.sort((a,b)=>b.score-a.score);
-  return rescored.slice(0, +document.getElementById('topN').value);
+  return rescored.slice(0, parseInt(document.getElementById('topN').value));
 }
-
-/* Pose table / viewer */
+function buildPoseButtons(top){
+  const pc=document.getElementById('poseControls'); pc.innerHTML='';
+  top.forEach((p,idx)=>{
+    const btn=document.createElement('button'); btn.className='btn'; btn.dataset.rank=(idx+1);
+    btn.textContent=`Pose ${idx+1} (S=${p.score.toFixed(1)}, C=${p.contacts|0}, X=${p.clash.toFixed(1)})`;
+    btn.onclick=()=> showPose(idx);
+    pc.appendChild(btn);
+    const db=document.createElement('button'); db.className='btn green'; db.textContent='⬇ PDB'; db.style.marginLeft='6px';
+    db.onclick=()=> downloadPose(idx); pc.appendChild(db);
+  });
+}
 let currentContacts=[], currentHB=[], currentSB=[];
-function buildPoseTable(top, cdrConf){
-  const tbody=document.getElementById('poseBody'); tbody.innerHTML='';
-  const kElec=0.5, eCut=12, cut=+document.getElementById('contactCut').value;
-
-  const rows = top.map((p,i)=>{
-    const Bout=applyTransform(currentB0, p.q, p.t);
-    const m=computeInterfaceMetrics(currentA, Bout, cut, cdrConf);
-    const elec=coulombResidueEnergy(currentA, Bout, kElec, eCut);
-    const bsa=m.contacts*10.0;
-    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)+(m.sb*1.0)-(elec);
-    return {rank:i+1, score:+p.score, contacts:m.contacts, clash:+m.clash, hb:m.hb, sb:m.sb, hyd:m.hyd, bsa:+bsa, elec:+elec, enth:+enth, q:p.q, t:p.t};
-  });
-  rows.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML = `
-      <td>${r.rank}</td><td>${r.score.toFixed(2)}</td><td>${r.contacts.toFixed(2)}</td><td>${r.clash.toFixed(2)}</td>
-      <td>${r.hb}</td><td>${r.sb}</td><td>${r.hyd}</td><td>${r.bsa.toFixed(0)}</td>
-      <td>${r.elec.toFixed(2)}</td><td>${r.enth.toFixed(2)}</td>
-      <td><button class="btn" onclick="downloadPose(${r.rank-1})">PDB</button></td>`;
-    tr.addEventListener('click', ()=> showPose(r.rank-1, cdrConf));
-    tbody.appendChild(tr);
-  });
-}
-function showPose(idx, cdrConf){
-  currentPose = posesTop[idx];
-  viewer.clear();
+function showPose(i){
+  currentPose=posesTop[i];
   const Bout=applyTransform(currentB0, currentPose.q, currentPose.t);
-  viewer.addModel(formatPDB(currentA,0,qaRunId),'pdb'); viewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
-  viewer.addModel(formatPDB(Bout,1,qaRunId),'pdb');   viewer.setStyle({model:1},{cartoon:{color:'#f97316'}});
+  viewer.clear();
+  viewer.addModel(formatPDB(currentA),"pdb"); viewer.setStyle({model:0},{cartoon:{colorscheme:"Chain"}});
+  viewer.addModel(formatPDB(Bout,1),"pdb"); viewer.setStyle({model:1},{cartoon:{color:"#f97316"}});
   viewer.zoomTo();
 
-  const cut=+document.getElementById('contactCut').value;
-  const metrics=computeInterfaceMetrics(currentA, Bout, cut, cdrConf);
+  const cut=parseFloat(document.getElementById('contactCut').value);
+  const metrics=computeInterfaceMetrics(currentA,Bout,cut);
   currentContacts=metrics.contactsPairs; currentHB=metrics.hbPairs; currentSB=metrics.sbPairs;
   refreshOverlays();
 
-  const Eelec=coulombResidueEnergy(currentA, Bout, 0.5, 12);
+  const Eelec=coulombResidueEnergy(currentA,Bout,0.5,12);
   const BSA=metrics.contacts*10.0;
-  const enthalpy=(metrics.contacts)-(metrics.clash)+(metrics.hb*0.5)+(metrics.sb*1.0)-(Eelec);
+  const pseudo=(metrics.contacts) - (metrics.clash) + (metrics.hb*0.5) + (metrics.sb*1.0) - (Eelec);
   document.getElementById('scoreBox').textContent =
-    `Pose ${idx+1} — Score=${currentPose.score.toFixed(2)}  Contacts=${metrics.contacts.toFixed(2)}  Clash=${metrics.clash.toFixed(2)}  `+
-    `HB=${metrics.hb}  SB=${metrics.sb}  Hyd=${metrics.hyd}  BSA≈${BSA.toFixed(0)} Å²  Elec≈${Eelec.toFixed(2)}  Pseudo-ΔH≈${enthalpy.toFixed(2)}`;
+    `Pose ${i+1} — Score=${currentPose.score.toFixed(2)}  Contacts=${metrics.contacts}  Clash=${metrics.clash.toFixed(2)}  `
+    +`HB=${metrics.hb}  SB=${metrics.sb}  Hydrophobics=${metrics.hydrophobics}  BSA≈${BSA.toFixed(0)} Å²  `
+    +`Electrostatics≈${Eelec.toFixed(2)}  Pseudo-enthalpy≈${pseudo.toFixed(2)}`;
   viewer.render();
 }
 function refreshOverlays(){
-  if (!currentPose) return;
+  if(!currentPose) return;
   viewer.removeAllShapes();
-  if (document.getElementById('toggleContacts').checked) drawPairs(viewer,currentContacts,'#60a5fa');
-  if (document.getElementById('toggleHB').checked)       drawPairs(viewer,currentHB,'#34d399');
-  if (document.getElementById('toggleSB').checked)       drawPairs(viewer,currentSB,'#f87171');
+  if(document.getElementById('toggleContacts').checked) drawPairs(currentContacts,"#60a5fa");
+  if(document.getElementById('toggleHB').checked)       drawPairs(currentHB,"#34d399");
+  if(document.getElementById('toggleSB').checked)       drawPairs(currentSB,"#f87171");
   viewer.render();
 }
-function drawPairs(v,pairs,color){ pairs.slice(0,400).forEach(pr=>{ v.addLine({start:{x:pr.x1,y:pr.y1,z:pr.z1}, end:{x:pr.x2,y:pr.y2,z:pr.z2}, dashed:true, dashLength:0.5, color, linewidth:2}); }); }
+function drawPairs(pairs,color){
+  pairs.slice(0,400).forEach(pr=>{
+    viewer.addLine({start:{x:pr.x1,y:pr.y1,z:pr.z1}, end:{x:pr.x2,y:pr.y2,z:pr.z2}, dashed:true, dashLength:0.5, color, linewidth:2});
+  });
+}
 
-/* Downloads */
+/* ========================= Downloads / QA Bundles ========================= */
 function downloadPose(idx){
   const p=posesTop[idx];
+  const Aout=currentA;
   const Bout=applyTransform(currentB0, p.q, p.t);
-  const pdbOut = formatPDB(currentA,0,qaRunId) + '\n' + formatPDB(Bout,1,qaRunId);
-  downloadBlob(pdbOut, stamped(`pose_${idx+1}.pdb`), 'text/plain');
+  const pdbOut = formatPDB(Aout) + "\n" + formatPDB(Bout,1);
+  downloadBlob(pdbOut, `pose_${idx+1}.pdb`);
 }
 function downloadAllPoses(){
-  if (!posesTop.length) return alert('No poses yet.');
-  const out=[];
-  if (qaRunId) out.push(`REMARK RUN-ID ${qaRunId}`);
-  posesTop.forEach((p,i)=>{ out.push(`MODEL     ${i+1}`); out.push(formatPDB(currentA,0,qaRunId)); out.push(formatPDB(applyTransform(currentB0,p.q,p.t),1,qaRunId)); out.push('ENDMDL');});
-  out.push('END'); downloadBlob(out.join('\n'), stamped('top_poses.pdb'), 'text/plain');
+  if(!posesTop.length){ alert("No poses yet."); return; }
+  let out=[];
+  posesTop.forEach((p,i)=>{
+    out.push(`MODEL     ${i+1}`);
+    out.push(formatPDB(currentA));
+    out.push(formatPDB(applyTransform(currentB0,p.q,p.t),1));
+    out.push("ENDMDL");
+  });
+  out.push("END");
+  downloadBlob(out.join("\n"), "top_poses.pdb");
 }
 function downloadCSV(){
-  if (!posesTop.length) return alert('No poses yet.');
-  const cut=+document.getElementById('contactCut').value;
-  const rows=['rank,score,contacts,clash,hb,sb,hydrophobic,BSA_proxy_A2,electrostatics,pseudo_enthalpy,qx,qy,qz,qw,tx,ty,tz,run_id'];
-  posesTop.forEach((p,i)=>{
-    const Bout=applyTransform(currentB0, p.q, p.t);
-    const m=computeInterfaceMetrics(currentA, Bout, cut);
-    const elec=coulombResidueEnergy(currentA, Bout, 0.5, 12);
-    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)+(m.sb*1.0)-(elec);
-    rows.push([i+1,p.score.toFixed(4),m.contacts.toFixed(2),m.clash.toFixed(4),m.hb,m.sb,m.hyd,(m.contacts*10).toFixed(0),elec.toFixed(4),enth.toFixed(4),p.q[0],p.q[1],p.q[2],p.q[3],p.t.x,p.t.y,p.t.z,(qaRunId||'')].join(','));
-  });
-  downloadBlob(rows.join('\n'), stamped('poses_summary.csv'), 'text/csv');
+  if(!posesTop.length){ alert("No poses yet."); return; }
+  const rows=["rank,score,contacts,clash,qx,qy,qz,qw,tx,ty,tz"];
+  posesTop.forEach((p,i)=>rows.push([i+1,p.score,p.contacts,p.clash,p.q[0],p.q[1],p.q[2],p.q[3],p.t.x,p.t.y,p.t.z].join(",")));
+  downloadBlob(rows.join("\n"), "poses_summary.csv");
 }
 function downloadJSON(){
-  if (!posesTop.length) return alert('No poses yet.');
-  const cut=+document.getElementById('contactCut').value;
+  if(!posesTop.length){ alert("No poses yet."); return; }
+  const kElec=0.5, elecCut=12, cut=parseFloat(document.getElementById('contactCut').value);
   const report=posesTop.map((p,i)=>{
-    const Bout=applyTransform(currentB0, p.q, p.t);
-    const m=computeInterfaceMetrics(currentA, Bout, cut);
-    return {rank:i+1, score:+p.score, contacts:m.contacts, clash:+m.clash, hb:m.hb, sb:m.sb, hydrophobic:m.hyd, BSA_proxy_A2:+(m.contacts*10), electrostatics:+coulombResidueEnergy(currentA,Bout,0.5,12), transform:{q:p.q, t:p.t}, run_id:(qaRunId||null)};
+    const Bout=applyTransform(currentB0,p.q,p.t);
+    const m=computeInterfaceMetrics(currentA,Bout,cut);
+    return {
+      rank:i+1, score:p.score, contacts:m.contacts, clash:m.clash, hb:m.hb, sb:m.sb, hydrophobic:m.hydrophobics,
+      BSA_proxy_A2:m.contacts*10.0, electrostatics:coulombResidueEnergy(currentA,Bout,kElec,elecCut),
+      transform:{q:p.q,t:p.t}
+    };
   });
-  downloadBlob(JSON.stringify(report,null,2), stamped('interface_report.json'), 'application/json');
+  downloadBlob(JSON.stringify(report,null,2), "interface_report.json");
 }
-function snapshotPNG(){ viewer.pngURI(uri=>{ const a=document.createElement('a'); a.href=uri; a.download=stamped('viewer.png'); a.click(); }); }
-
-/* Pose recipes & Audit */
-function exportPoseRecipes(){ if (!posesTop.length) return alert('No poses yet.'); const recipes = posesTop.map((p,i)=>({rank:i+1, q:p.q, t:p.t, run_id:qaRunId})); downloadBlob(JSON.stringify({recipes}, null, 2), stamped('pose_recipes.json'),'application/json'); }
-function importPoseRecipes(){
-  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
-  inp.onchange=async ()=>{ const f=inp.files[0]; if(!f) return; const text=await f.text(); try{
-    const obj=JSON.parse(text); if (!obj.recipes?.length) throw new Error('No recipes found.');
-    posesTop = obj.recipes.map(r=>({score:0,contacts:0,clash:0,q:r.q,t:r.t}));
-    if (!currentA||!currentB0){ alert('Load A/B first, then import.'); return; }
-    buildPoseTable(posesTop); showPose(0); logLine('Imported pose recipes.');
-  }catch(e){ alert('Invalid recipes JSON.'); }};
-  inp.click();
+function snapshotPNG(){
+  viewer.pngURI(function(uri){
+    const a=document.createElement('a'); a.href=uri; a.download="viewer.png"; a.click();
+  });
+}
+function downloadBlob(text,name){
+  const blob=new Blob([text],{type:"text/plain"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
 }
 async function exportAuditBundle(){
-  if (!currentA || !currentB0) return alert('Run a docking first.');
+  if(!posesTop.length){ alert("No results to export."); return; }
   const zip=new JSZip();
-  // Inputs
-  zip.file('inputs/proteinA.pdb', pdbAText||formatPDB(pdbAAll,0,qaRunId));
-  zip.file('inputs/proteinB.pdb', pdbBText||formatPDB(pdbBAll,0,qaRunId));
-  // Params
-  const params = {
-    samples:+document.getElementById('samples').value,maxTrans:+document.getElementById('maxTrans').value,contactCut:+document.getElementById('contactCut').value,
-    clashFactor:+document.getElementById('clashFactor').value,wContact:+document.getElementById('wContact').value,wClash:+document.getElementById('wClash').value,
-    soft:+document.getElementById('soft').value, topN:+document.getElementById('topN').value, atomMode:document.getElementById('atomMode').value,
-    rescoreMode:document.getElementById('rescoreMode').value, seed:+document.getElementById('seed').value, qaMode, qaFrozen, runId:qaRunId, appVersion:APP_VER
+  // params
+  const params={
+    samples: parseInt(document.getElementById('samples').value),
+    maxTrans: parseFloat(document.getElementById('maxTrans').value),
+    contactCut: parseFloat(document.getElementById('contactCut').value),
+    clashFactor: parseFloat(document.getElementById('clashFactor').value),
+    wContact: parseFloat(document.getElementById('wContact').value),
+    wClash: parseFloat(document.getElementById('wClash').value),
+    soft: parseFloat(document.getElementById('soft').value),
+    topN: parseInt(document.getElementById('topN').value),
+    seed: parseInt(document.getElementById('seed').value),
+    atomMode: document.getElementById('atomMode').value,
+    rescoreMode: document.getElementById('rescoreMode').value
   };
-  zip.file('params.json', JSON.stringify(params,null,2));
-  // Results
-  const cut=+document.getElementById('contactCut').value;
-  const result = posesTop.map((p,i)=>{
-    const Bout=applyTransform(currentB0,p.q,p.t); const m=computeInterfaceMetrics(currentA,Bout,cut);
-    return {rank:i+1, score:+p.score, contacts:m.contacts, clash:+m.clash, hb:m.hb, sb:m.sb, hyd:+m.hyd, BSA_proxy_A2:+(m.contacts*10), elec:+coulombResidueEnergy(currentA,Bout,0.5,12), transform:{q:p.q, t:p.t}};
+  zip.file('parameters.json', JSON.stringify(params,null,2));
+  // summaries
+  const rows=["rank,score,contacts,clash,qx,qy,qz,qw,tx,ty,tz"];
+  posesTop.forEach((p,i)=>rows.push([i+1,p.score,p.contacts,p.clash,p.q[0],p.q[1],p.q[2],p.q[3],p.t.x,p.t.y,p.t.z].join(",")));
+  zip.file('poses_summary.csv', rows.join("\n"));
+  // PDB models
+  let mm=[];
+  posesTop.forEach((p,i)=>{ mm.push(`MODEL     ${i+1}`); mm.push(formatPDB(currentA)); mm.push(formatPDB(applyTransform(currentB0,p.q,p.t),1)); mm.push('ENDMDL'); });
+  mm.push('END');
+  zip.file('top_poses.pdb', mm.join("\n"));
+  // DISCLAIMER
+  zip.file('DISCLAIMER.txt', DISCLAIMER_TXT);
+  // snapshot
+  await new Promise(res=>{
+    viewer.pngURI(async (uri)=>{
+      const b=await (await fetch(uri)).blob();
+      zip.file('viewer.png', b);
+      res();
+    });
   });
-  zip.file('results/interface_report.json', JSON.stringify(result,null,2));
-  // PDB bundle
-  let multi = []; if (qaRunId) multi.push(`REMARK RUN-ID ${qaRunId}`);
-  posesTop.forEach((p,i)=>{ multi.push(`MODEL     ${i+1}`); multi.push(formatPDB(currentA,0,qaRunId)); multi.push(formatPDB(applyTransform(currentB0,p.q,p.t),1,qaRunId)); multi.push('ENDMDL');});
-  multi.push('END'); zip.file('results/top_poses.pdb', multi.join('\n'));
-  // Log & system
-  const sys = {ua:navigator.userAgent, hw:navigator.hardwareConcurrency, lang:navigator.language, time:new Date().toISOString()};
-  zip.file('system.json', JSON.stringify(sys,null,2)); zip.file('run_log.txt', document.getElementById('runLog').textContent||''); zip.file('qa_log.txt', document.getElementById('qaLog').textContent||'');
   const blob=await zip.generateAsync({type:'blob'});
-  downloadBlob(blob, stamped('audit_bundle.zip'), 'application/zip', true);
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`dock_audit_${Date.now()}.zip`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
 }
 
-/* =========================================================
-   Examples
-========================================================= */
+/* ========================= Examples ========================= */
 function useExample(which){
-  const egA=`ATOM      1  N   GLY H   1      -2.000   0.000   0.000  1.00  0.00           N
-ATOM      2  CA  GLY H   1      -0.650   0.000   0.000  1.00  0.00           C
-ATOM      3  C   GLY H   1       0.000   1.300   0.500  1.00  0.00           C
-ATOM      4  O   GLY H   1       0.000   2.300  -0.200  1.00  0.00           O
+  // two tiny toy chains per partner
+  const A=`
+ATOM      1  N   GLY H   1      -6.000   0.000   0.000  1.00  0.00           N
+ATOM      2  CA  GLY H   1      -4.700   0.000   0.000  1.00  0.00           C
+ATOM      3  C   GLY H   1      -4.000   1.300   0.500  1.00  0.00           C
+ATOM      4  O   GLY H   1      -4.000   2.300  -0.200  1.00  0.00           O
+ATOM      5  N   ALA L   2      -3.000  -1.000  -0.300  1.00  0.00           N
+ATOM      6  CA  ALA L   2      -1.700  -1.000  -0.300  1.00  0.00           C
 END`;
-  const egB=`ATOM      1  N   GLY A   1       2.000   0.000   0.000  1.00  0.00           N
-ATOM      2  CA  GLY A   1       0.650   0.000   0.000  1.00  0.00           C
-ATOM      3  C   GLY A   1       0.000  -1.300  -0.500  1.00  0.00           C
-ATOM      4  O   GLY A   1       0.000  -2.300   0.200  1.00  0.00           O
+  const B=`
+ATOM      1  N   GLY A   1       6.000   0.000   0.000  1.00  0.00           N
+ATOM      2  CA  GLY A   1       4.700   0.000   0.000  1.00  0.00           C
+ATOM      3  C   GLY A   1       4.000  -1.300  -0.500  1.00  0.00           C
+ATOM      4  O   GLY A   1       4.000  -2.300   0.200  1.00  0.00           O
+ATOM      5  N   ALA X   2       3.000   1.000   0.300  1.00  0.00           N
+ATOM      6  CA  ALA X   2       1.700   1.000   0.300  1.00  0.00           C
 END`;
-  if (which==='A'){ document.getElementById('pdbAText').value=egA; pdbAText=egA; parseOne('A'); }
-  else { document.getElementById('pdbBText').value=egB; pdbBText=egB; parseOne('B'); }
+  if(which==='A'){ document.getElementById('pdbAText').value=A; parseOne('A'); }
+  else { document.getElementById('pdbBText').value=B; parseOne('B'); }
 }
 
-/* =========================================================
-   Ligand Docking (SDF/MOL/PDB)
-========================================================= */
-let recAll=[], recText="", recAtoms=[], ligMol=null, ligText="", ligPoses=[];
-function ligUseExampleReceptor(toScreen=false){
-  const eg=`ATOM      1  CA  GLY R   1       0.000   0.000   0.000  1.00  0.00           C
-ATOM      2  CA  GLY R   2       2.300   0.100   0.000  1.00  0.00           C
-ATOM      3  CA  GLY R   3       4.600   0.200   0.300  1.00  0.00           C
+/* ========================= Ligand Docking (toy) ========================= */
+function useExampleRec(forScreen=false){
+  const rec=`ATOM      1  CA  GLY R   1       0.000   0.000   0.000  1.00  0.00           C
+ATOM      2  CA  GLY R   2       3.000   0.000   0.000  1.00  0.00           C
+ATOM      3  CA  GLY R   3       0.000   3.000   0.000  1.00  0.00           C
+ATOM      4  CA  GLY R   4       0.000   0.000   3.000  1.00  0.00           C
 END`;
-  if (toScreen){ document.getElementById('scrRecText').value=eg; } else { document.getElementById('recText').value=eg; }
+  if(forScreen){ document.getElementById('scrRecText').value=rec; }
+  else { document.getElementById('recText').value=rec; parseLigandSystem(true); }
 }
-function ligUseExampleLigand(){
-  const sdf=`LigExample
-  ChatGPT
-
-  4 3  0  0  0  0            999 V2000
-   -1.2000   0.0000   0.0000 C   0  0
-    0.0000   0.0000   0.0000 O   0  0
-    1.2000   0.0000   0.0000 C   0  0
-    2.4000   0.0000   0.0000 N   0  0
-  1  2  1  0
-  2  3  1  0
-  3  4  1  0
-M  END
-$$$$`;
-  document.getElementById('ligText').value=sdf;
+function useExampleLig(){
+  const lig=`ATOM      1  C1  LIG L   1       0.000   0.000   0.000  1.00  0.00           C
+ATOM      2  C2  LIG L   1       1.50    0.000   0.000  1.00  0.00           C
+ATOM      3  O1  LIG L   1       0.75    1.20    0.000  1.00  0.00           O
+END`;
+  document.getElementById('ligText').value=lig;
+  parseLigandSystem(true);
 }
-async function parseReceptor(){
-  let text=(document.getElementById('recText').value||'').trim();
-  if (!text && document.getElementById('recFile').files[0]) text = await document.getElementById('recFile').files[0].text();
-  if (!text) return alert('Provide receptor PDB');
-  recText=text; recAll=parsePDB(text); if (!recAll.length) return alert('No atoms parsed.');
-  renderChainChips('REC', recAll);
-  document.getElementById('recInfo').className='success'; document.getElementById('recInfo').textContent=`Parsed ${recAll.length} atoms`;
-}
-function parseSDF(sdfText){ // returns first molecule atoms
-  const blocks = sdfText.split(/\$\$\$\$\s*/).filter(b=>b.trim());
-  if (!blocks.length) return null;
-  const b = blocks[0].split(/\r?\n/);
-  if (b.length<4) return null;
-  const countsLine = b[3];
-  let nat=0, nb=0;
-  const m = countsLine.match(/\s*(\d+)\s+(\d+)\s/);
-  if (m){ nat=+m[1]; nb=+m[2]; } else { nat=parseInt(countsLine.slice(0,3)); nb=parseInt(countsLine.slice(3,6)); }
-  const atoms=[];
-  for(let i=4;i<4+nat;i++){
-    const ln=b[i];
-    const x=parseFloat(ln.slice(0,10)), y=parseFloat(ln.slice(10,20)), z=parseFloat(ln.slice(20,30));
-    const elem=(ln.slice(31,34).trim()||'C').toUpperCase();
-    atoms.push({x,y,z,elem,resn:'LIG',chain:'L',resi:i-3,name:elem.trim()});
-  }
-  if (!atoms.length) return null;
-  return atoms;
-}
-function parseLigPDB(txt){
-  const a=parsePDB(txt); // coerce to LIG chain
-  return a.map(o=>({...o, resn:o.resn||'LIG', chain:'L'}));
-}
-async function parseLigand(){
-  let text=(document.getElementById('ligText').value||'').trim();
-  if (!text && document.getElementById('ligFile').files[0]) text = await document.getElementById('ligFile').files[0].text();
-  if (!text) return alert('Provide ligand text/file');
-  ligText=text;
-  // try SDF, else PDB
-  let atoms = parseSDF(text); if (!atoms){ atoms = parseLigPDB(text); }
-  if (!atoms?.length) return alert('Unable to parse ligand SDF/MOL/PDB');
-  ligMol=atoms;
-  document.getElementById('ligInfo').className='success'; document.getElementById('ligInfo').textContent=`Ligand atoms: ${atoms.length}`;
-  // preview
-  ensureLigViewer();
-  ligViewer.clear();
-  // receptor faint
-  if (recAtoms?.length){ ligViewer.addModel(formatPDB(recAtoms,0,qaRunId),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}}); }
-  ligViewer.addModel(formatPDB(ligMol,1,qaRunId),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.2}}); ligViewer.zoomTo(); ligViewer.render();
-}
-async function parseReceptorSel(){
-  if (!recAll.length) await parseReceptor();
-  const keep = selectedChains('REC'); recAtoms = keep.size ? recAll.filter(a=>keep.has(a.chain)) : recAll;
-  if (!recAtoms.length){ recAtoms = recAll; document.getElementById('recInfo').className='error'; document.getElementById('recInfo').textContent='No atoms after chain filter — fell back to all.'; }
+async function parseLigandSystem(skipAlert){
+  // receptor
+  let rtxt=document.getElementById('recText').value.trim();
+  if(!rtxt && document.getElementById('recFile').files[0]) rtxt=await fileToText(document.getElementById('recFile').files[0]);
+  // ligand
+  let ltxt=document.getElementById('ligText').value.trim();
+  if(!ltxt && document.getElementById('ligFile').files[0]) ltxt=await fileToText(document.getElementById('ligFile').files[0]);
+  if(!rtxt || !ltxt){ if(!skipAlert) alert('Provide receptor and ligand.'); return; }
+  ligState.recAll=parsePDB(rtxt); ligState.ligAll=parsePDB(ltxt);
+  if(!ligState.recAll.length || !ligState.ligAll.length){ alert('Could not parse receptor/ligand.'); return; }
+  buildChainChips('R', uniqueChains(ligState.recAll)); document.getElementById('chainInfoR').textContent=`Parsed receptor ${ligState.recAll.length} atoms`;
+  ensureLigViewer(); ligViewer.clear();
+  ligViewer.addModel(formatPDB(ligState.recAll),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:"Chain"}});
+  ligViewer.addModel(formatPDB(ligState.ligAll,1),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.2,color:'#f97316'}});
+  ligViewer.zoomTo(); ligViewer.render();
 }
 async function runLigDock(){
-  if (inProgress) return;
-  if (qaMode && !qaRunId) await qaNewRunId('ligand');
-  await parseReceptorSel(); if (!recAtoms?.length) return alert('Parse receptor first');
-  if (!ligMol?.length){ await parseLigand(); if (!ligMol?.length) return; }
+  if(ligState.inProgress) return;
+  if(localStorage.getItem('legal_ack_v1')!=='yes'){ openLegal(); return; }
+  // select chains (or all)
+  const selR=getSelectedChains('R');
+  const Rall = selR.length ? filterChains(ligState.recAll, selR) : ligState.recAll;
+  const Lall = ligState.ligAll;
+  if(!Rall.length || !Lall.length){ alert('Parse receptor and ligand first.'); return; }
+  // center
+  const Rc=centroid(Rall), Lc=centroid(Lall);
+  const R=translate(selectAtomSet(Rall,'HEAVY').map(a=>({...a})), {x:-Rc.x,y:-Rc.y,z:-Rc.z});
+  const L0=translate(selectAtomSet(Lall,'HEAVY').map(a=>({...a})), {x:-Lc.x,y:-Lc.y,z:-Lc.z});
 
-  const params = {
-    samples:+document.getElementById('ligSamples').value, maxTrans:+document.getElementById('ligMaxTrans').value,
-    contactCut:+document.getElementById('ligCut').value, clashFactor:+document.getElementById('ligClash').value,
-    wContact:1.0, wClash:6.0, soft:0.5, topN:+document.getElementById('ligTopN').value,
-    seed:(+document.getElementById('ligSeed').value)||99
+  ligState.rec=R; ligState.lig=L0; ligState.poses=[]; ligState.cancelled=false; ligState.inProgress=true;
+  const btn=document.getElementById('ligRunBtn'), cancel=document.getElementById('ligCancelBtn');
+  btn.disabled=true; cancel.disabled=false; document.getElementById('ligStatus').textContent='sampling'; document.getElementById('ligPoseControls').innerHTML=''; document.getElementById('ligScoreBox').textContent='';
+  const params={
+    samples: parseInt(document.getElementById('ligSamples').value),
+    maxTrans: 6.0,
+    contactCut: parseFloat(document.getElementById('ligContact').value),
+    clashFactor: parseFloat(document.getElementById('ligClashF').value),
+    wContact: 1.0, wClash: 6.0, soft: 0.5,
+    topN: 15, seed: parseInt(document.getElementById('ligSeed').value)||7
   };
-  if (document.getElementById('ligSeedDet').checked){
-    const hex=await sha256Hex((recText||'')+'\n---\n'+(ligText||'')+'\n---\n'+JSON.stringify(params));
-    params.seed = hashToSeed(hex);
-    document.getElementById('ligSeed').value=params.seed;
-  }
-
-  const Apts = selectAtomSet(recAtoms,'HEAVY').map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
-  const cA=centroid(Apts);
-  const Bpts = ligMol.map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
-  const cB=centroid(Bpts);
-  const Ac=translate(Apts,{x:-cA.x,y:-cA.y,z:-cA.z});
-  const Bc=translate(Bpts,{x:-cB.x,y:-cB.y,z:-cB.z});
-
-  // run workers
-  ligPoses=[]; inProgress=true; cancelled=false;
-  document.getElementById('ligRunBtn').disabled=true; document.getElementById('ligCancelBtn').disabled=false;
-  document.getElementById('ligStatus').textContent='sampling'; document.getElementById('ligProg').value=0;
-
+  // worker pool
   const cores=Math.max(1,(navigator.hardwareConcurrency||4)-1);
-  const poolSize=Math.min(8, cores);
+  const poolSize=Math.min(cores,6);
   const per=Math.floor(params.samples/poolSize), extra=params.samples%poolSize;
-
-  let done=0, lists=[]; workerPool=[];
+  ligState.pool=[];
+  let lists=[], done=0;
   for(let i=0;i<poolSize;i++){
-    const start=i*per + Math.min(i,extra), end=start+per+(i<extra?1:0);
-    const w=makeDockWorker(); workerPool.push(w);
+    const start=i*per+Math.min(i,extra);
+    const end=start+per+(i<extra?1:0);
+    const w=makeDockWorker(); ligState.pool.push(w);
     w.onmessage=(e)=>{
-      if (cancelled) return;
-      if (e.data.type==='progress'){ done+=1024; const f=Math.min(1, done/params.samples); document.getElementById('ligProg').value=f; document.getElementById('ligStatus').textContent=`scan ${Math.min(done,params.samples)}/${params.samples}`; }
-      if (e.data.type==='done'){
-        lists.push(e.data.list); w.terminate();
-        if (lists.length===poolSize){
-          let merged = lists.flat(); merged.sort((a,b)=>b.score-a.score);
-          const diverse = diverseTop(merged, +document.getElementById('ligDupA').value, +document.getElementById('ligDupT').value, params.topN);
-          resolveLigAfter(Ac, Bc, diverse, params);
+      const msg=e.data;
+      if(msg.type==='progress'){ done += 1000; document.getElementById('ligProg').value=Math.min(1, done/params.samples); document.getElementById('ligStatus').textContent=`scan ${Math.min(done,params.samples)}/${params.samples}`; }
+      if(msg.type==='done'){
+        lists.push(msg.list); w.terminate();
+        if(lists.length===poolSize){
+          let merged=lists.flat(); merged.sort((a,b)=>b.score-a.score);
+          ligState.poses = merged.slice(0, params.topN);
+          resolveLigAfter();
         }
       }
     };
-    w.postMessage({Apts:Ac, Bpts:Bc, params, start, end});
+    w.postMessage({Apts:R.map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem})), Bpts:L0.map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem})), params, rangeStart:start, rangeEnd:end});
   }
 }
-function cancelLig(){ cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch{}}); workerPool=[]; inProgress=false; document.getElementById('ligRunBtn').disabled=false; document.getElementById('ligCancelBtn').disabled=true; document.getElementById('ligStatus').textContent='cancelled'; }
-function resolveLigAfter(Ac, Bc, diverse, params){
-  ligPoses = diverse;
-  // render best
-  if (!recAtoms?.length || !ligMol?.length) return;
-  ligViewer.clear();
-  const best=ligPoses[0];
-  const Bout=applyTransform(ligMol.map(a=>({..a, x:a.x - centroid(ligMol).x, y:a.y - centroid(ligMol).y, z:a.z - centroid(ligMol).z})), best.q, best.t);
-  ligViewer.addModel(formatPDB(recAtoms,0,qaRunId),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
-  ligViewer.addModel(formatPDB(Bout,1,qaRunId),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.22}});
+function cancelLigDock(){
+  ligState.cancelled=true; ligState.pool.forEach(w=>{try{w.terminate();}catch{}});
+  ligState.pool=[]; ligState.inProgress=false; document.getElementById('ligProg').value=0; document.getElementById('ligStatus').textContent='cancelled';
+  const btn=document.getElementById('ligRunBtn'), cancel=document.getElementById('ligCancelBtn'); btn.disabled=false; cancel.disabled=true;
+}
+function resolveLigAfter(){
+  const btn=document.getElementById('ligRunBtn'), cancel=document.getElementById('ligCancelBtn'); btn.disabled=false; cancel.disabled=true;
+  document.getElementById('ligStatus').textContent='done'; document.getElementById('ligProg').value=1;
+  const pc=document.getElementById('ligPoseControls'); pc.innerHTML='';
+  ligState.poses.forEach((p,idx)=>{
+    const b=document.createElement('button'); b.className='btn'; b.textContent=`Pose ${idx+1} (S=${p.score.toFixed(1)})`; b.onclick=()=>showLigPose(idx); pc.appendChild(b);
+  });
+  if(ligState.poses.length) showLigPose(0);
+  // QA store
+  const runId='lg-'+djb2(JSON.stringify({time:Date.now(),seed:document.getElementById('ligSeed').value})+(ligState.poses[0]?.score||0));
+  const runs=qaLoad(); runs.unshift({id:runId,type:'ligand',time:new Date().toISOString(),seed:parseInt(document.getElementById('ligSeed').value),bestScore:ligState.poses[0]?.score||null}); qaSave(runs); qaLog(`Ligand run stored: ${runId}`);
+}
+function showLigPose(i){
+  const p=ligState.poses[i];
+  const Bout=applyTransform(ligState.lig, p.q, p.t);
+  ensureLigViewer(); ligViewer.clear();
+  ligViewer.addModel(formatPDB(ligState.rec),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:"Chain"}});
+  ligViewer.addModel(formatPDB(Bout,1),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.22,color:'#f97316'}});
   ligViewer.zoomTo(); ligViewer.render();
+  document.getElementById('ligScoreBox').textContent = `Pose ${i+1} — Score=${p.score.toFixed(2)} Contacts=${p.contacts|0} Clash=${p.clash.toFixed(2)}`;
+}
 
-  // table
-  const tbody=document.getElementById('ligPoseBody'); tbody.innerHTML='';
-  const kElec=0.5, eCut=12;
-  ligPoses.forEach((p,i)=>{
-    const Lout=applyTransform(Bc.map((b,idx)=>ligMol[idx]), p.q, p.t); // reuse ligand atom meta for metrics
-    const m=computeInterfaceMetrics(recAtoms, Lout, +document.getElementById('ligCut').value);
-    const elec=coulombResidueEnergy(recAtoms, Lout, kElec, eCut);
-    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)-(elec);
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td><td>${p.score.toFixed(2)}</td><td>${m.contacts.toFixed(2)}</td><td>${m.clash.toFixed(2)}</td><td>${m.hb}</td><td>${m.hyd}</td><td>${elec.toFixed(2)}</td><td>${enth.toFixed(2)}</td><td><button class="btn" onclick="ligDownloadPose(${i})">PDB</button></td>`;
-    tr.addEventListener('click', ()=>{
-      ligViewer.clear();
-      const Bout2=applyTransform(ligMol.map(a=>({..a, x:a.x - centroid(ligMol).x, y:a.y - centroid(ligMol).y, z:a.z - centroid(ligMol).z})), p.q, p.t);
-      ligViewer.addModel(formatPDB(recAtoms,0,qaRunId),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
-      ligViewer.addModel(formatPDB(Bout2,1,qaRunId),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.22}});
-      ligViewer.zoomTo(); ligViewer.render();
-    });
-    tbody.appendChild(tr);
-  });
-
-  document.getElementById('ligRunBtn').disabled=false; document.getElementById('ligCancelBtn').disabled=true; inProgress=false; document.getElementById('ligStatus').textContent='done'; document.getElementById('ligProg').value=1;
-
-  // store run
-  if (qaMode) storeRun({runId:qaRunId, type:'ligand', seed:+document.getElementById('ligSeed').value, params, top:ligPoses.slice(0,3)});
-}
-function ligDownloadPose(i){
-  const p=ligPoses[i];
-  const cB=centroid(ligMol); const centered=ligMol.map(a=>({...a,x:a.x-cB.x,y:a.y-cB.y,z:a.z-cB.z}));
-  const Lout=applyTransform(centered, p.q, p.t);
-  const pdb = formatPDB(recAtoms,0,qaRunId)+'\n'+formatPDB(Lout,1,qaRunId);
-  downloadBlob(pdb, stamped(`lig_pose_${i+1}.pdb`), 'text/plain');
-}
-function ligDownloadAll(){
-  const out=[]; if (qaRunId) out.push(`REMARK RUN-ID ${qaRunId}`);
-  const cB=centroid(ligMol); const centered=ligMol.map(a=>({...a,x:a.x-cB.x,y:a.y-cB.y,z:a.z-cB.z}));
-  ligPoses.forEach((p,i)=>{ out.push(`MODEL     ${i+1}`); out.push(formatPDB(recAtoms,0,qaRunId)); out.push(formatPDB(applyTransform(centered,p.q,p.t),1,qaRunId)); out.push('ENDMDL');});
-  out.push('END'); downloadBlob(out.join('\n'), stamped('lig_top_poses.pdb'), 'text/plain');
-}
-function ligDownloadCSV(){
-  const rows=['rank,score,contacts,clash,hb,hyd,elec,pseudo_enthalpy,run_id'];
-  const cB=centroid(ligMol); const centered=ligMol.map(a=>({...a,x:a.x-cB.x,y:a.y-cB.y,z:a.z-cB.z}));
-  ligPoses.forEach((p,i)=>{
-    const Lout=applyTransform(centered, p.q, p.t);
-    const m=computeInterfaceMetrics(recAtoms, Lout, +document.getElementById('ligCut').value);
-    const elec=coulombResidueEnergy(recAtoms, Lout, 0.5, 12);
-    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)-(elec);
-    rows.push([i+1,p.score.toFixed(2),m.contacts.toFixed(2),m.clash.toFixed(2),m.hb,m.hyd,elec.toFixed(2),enth.toFixed(2),(qaRunId||'')].join(','));
-  });
-  downloadBlob(rows.join('\n'), stamped('lig_summary.csv'),'text/csv');
-}
-function ligSnapshot(){ ligViewer.pngURI(uri=>{ const a=document.createElement('a'); a.href=uri; a.download=stamped('lig_viewer.png'); a.click(); }); }
-
-/* =========================================================
-   Screening
-========================================================= */
-let scrRecAll=[], scrRecText="", scrRecAtoms=[], scrLigSet=[], scrResults=[];
-async function scrParseReceptor(){
-  let text=(document.getElementById('scrRecText').value||'').trim();
-  if (!text && document.getElementById('scrRecFile').files[0]) text = await document.getElementById('scrRecFile').files[0].text();
-  if (!text) return alert('Provide receptor PDB');
-  scrRecText=text; scrRecAll=parsePDB(text); if (!scrRecAll.length) return alert('No atoms parsed.');
-  renderChainChips('SCRREC', scrRecAll);
-  document.getElementById('scrRecInfo').className='success'; document.getElementById('scrRecInfo').textContent=`Parsed ${scrRecAll.length} atoms`;
-}
-async function scrUseExampleLib(){
-  const eg=`Lib
-  ChatGPT
-
-  4 3  0  0  0  0            999 V2000
-   -1.2000   0.0000   0.0000 C   0  0
-    0.0000   0.0000   0.0000 O   0  0
-    1.2000   0.0000   0.0000 C   0  0
-    2.4000   0.0000   0.0000 N   0  0
-  1  2  1  0
-  2  3  1  0
-  3  4  1  0
-M  END
-$$$$
-Lib2
-  ChatGPT
-
-  5 4  0  0  0  0            999 V2000
-   -1.3000   0.2000   0.0000 C   0  0
-    0.0000   0.1000   0.0000 C   0  0
-    1.3000  -0.1000   0.0000 O   0  0
-    2.6000  -0.1000   0.0000 C   0  0
-    3.9000  -0.1000   0.0000 N   0  0
-  1  2  1  0
-  2  3  1  0
-  3  4  1  0
-  4  5  1  0
-M  END
-$$$$`;
-  const file = new File([eg], "library.sdf", {type:"chemical/x-mdl-sdfile"});
-  const dt = new DataTransfer(); dt.items.add(file);
-  document.getElementById('scrLigFile').files = dt.files;
-}
-async function loadLigSetFromFile(file){
-  if (file.name.toLowerCase().endsWith('.zip')){
-    const buf=await file.arrayBuffer(); const zip=await JSZip.loadAsync(buf); const ligs=[];
-    for(const k of Object.keys(zip.files)){
-      if (!k.toLowerCase().endsWith('.sdf')) continue;
-      const txt=await zip.files[k].async('string'); const blocks=txt.split(/\$\$\$\$\s*/).filter(b=>b.trim());
-      blocks.forEach((b,idx)=>{ const atoms=parseSDF(b+"\n$$$$"); if (atoms?.length) ligs.push({name:`${k}#${idx+1}`, atoms}); });
-    }
-    return ligs;
-  } else {
-    const txt=await file.text(); const blocks=txt.split(/\$\$\$\$\s*/).filter(b=>b.trim()); const ligs=[];
-    blocks.forEach((b,idx)=>{ const atoms=parseSDF(b+"\n$$$$"); if (atoms?.length) ligs.push({name:`mol${idx+1}`, atoms}); });
-    return ligs;
-  }
-}
+/* ========================= Screening (toy) ========================= */
 async function runScreen(){
-  if (inProgress) return;
-  if (qaMode && !qaRunId) await qaNewRunId('screening');
+  if(screenState.inProgress) return;
+  if(localStorage.getItem('legal_ack_v1')!=='yes'){ openLegal(); return; }
+  // receptor
+  let rtxt=document.getElementById('scrRecText').value.trim();
+  if(!rtxt && document.getElementById('scrRecFile').files[0]) rtxt=await fileToText(document.getElementById('scrRecFile').files[0]);
+  if(!rtxt){ alert('Provide receptor.'); return; }
+  const Rall=parsePDB(rtxt); if(!Rall.length){ alert('Receptor parse failed.'); return; }
+  const Rc=centroid(Rall); const R=translate(selectAtomSet(Rall,'HEAVY').map(a=>({...a})), {x:-Rc.x,y:-Rc.y,z:-Rc.z});
+  // ligands
+  let ligs=[];
+  const files=[...document.getElementById('scrLigFiles').files];
+  for(const f of files){ const t=await fileToText(f); ligs.push({name:f.name, text:t}); }
+  const pasted=document.getElementById('scrLigText').value.trim();
+  if(pasted){ const chunks=pasted.split(/\nEND\s*\n/); chunks.forEach((t,i)=>{ const txt=t.trim(); if(txt) ligs.push({name:`pasted_${i+1}.pdb`, text: txt+'\nEND'}); }); }
+  if(!ligs.length){ alert('Provide at least one ligand (files or pasted multi-PDB).'); return; }
 
-  await scrParseReceptor(); if (!scrRecAll?.length) return alert('Parse receptor first');
-  const keep=selectedChains('SCRREC'); scrRecAtoms = keep.size ? scrRecAll.filter(a=>keep.has(a.chain)) : scrRecAll;
-  if (!scrRecAtoms.length){ scrRecAtoms=scrRecAll; document.getElementById('scrRecInfo').className='error'; document.getElementById('scrRecInfo').textContent='No atoms after chain filter — fell back to all.'; }
+  screenState.inProgress=true; screenState.cancelled=false; screenState.results=[]; screenState.items=[];
+  document.getElementById('scrStatus').textContent='running'; document.getElementById('scrProg').value=0; document.getElementById('scrTable').innerHTML=''; document.getElementById('scrLog').textContent='';
+  const per=parseInt(document.getElementById('scrSamples').value), topK=parseInt(document.getElementById('scrTop').value);
+  const contactCut=parseFloat(document.getElementById('scrContact').value), clashF=parseFloat(document.getElementById('scrClashF').value), seed=parseInt(document.getElementById('scrSeed').value)||11;
 
-  const file=document.getElementById('scrLigFile').files[0]; if (!file) return alert('Upload SDF or ZIP of SDFs');
-  scrLigSet = await loadLigSetFromFile(file); if (!scrLigSet.length) return alert('No ligands parsed from file');
+  let processed=0;
+  for(let idx=0; idx<ligs.length; idx++){
+    const L=parsePDB(ligs[idx].text); if(!L.length){ qaLog(`Skip ${ligs[idx].name}: parse failed`); continue; }
+    const Lc=centroid(L); const L0=translate(selectAtomSet(L,'HEAVY').map(a=>({...a})), {x:-Lc.x,y:-Lc.y,z:-Lc.z});
 
-  const params = {
-    samples:+document.getElementById('scrSamples').value, maxTrans:+document.getElementById('scrMaxTrans').value,
-    contactCut:+document.getElementById('scrCut').value, clashFactor:+document.getElementById('scrClash').value,
-    wContact:1.0, wClash:6.0, soft:0.5, topN:+document.getElementById('scrTopN').value,
-    seed:(+document.getElementById('scrSeed').value)||777
-  };
-  if (document.getElementById('scrSeedDet').checked){
-    const hex=await sha256Hex((scrRecText||'')+'\n---\n'+file.name+'\n---\n'+JSON.stringify(params));
-    params.seed = hashToSeed(hex);
-    document.getElementById('scrSeed').value=params.seed;
-  }
-
-  // prep receptor
-  const Apts = selectAtomSet(scrRecAtoms,'HEAVY').map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
-  const cA=centroid(Apts); const Ac=translate(Apts,{x:-cA.x,y:-cA.y,z:-cA.z});
-
-  scrResults=[]; inProgress=true; cancelled=false;
-  document.getElementById('scrRunBtn').disabled=true; document.getElementById('scrCancelBtn').disabled=false;
-  document.getElementById('scrStatus').textContent=`screen 0/${scrLigSet.length}`; document.getElementById('scrProg').value=0;
-
-  const tbody=document.getElementById('scrBody'); tbody.innerHTML='';
-  for(let i=0;i<scrLigSet.length;i++){
-    if (cancelled) break;
-    const lig=scrLigSet[i]; const c=centroid(lig.atoms); const Bc=lig.atoms.map(a=>({x:a.x-c.x,y:a.y-c.y,z:a.z-c.z,elem:a.elem,resn:'LIG',chain:'L',resi:1,name:a.elem}));
-    // small run (single worker to keep simple)
-    const start=0, end=params.samples; const w=makeDockWorker();
-    const lists=[]; let done=0;
+    // one worker per ligand (simplified)
+    const w=makeDockWorker();
+    const params={samples:per,maxTrans:6,contactCut,clashFactor:clashF,wContact:1.0,wClash:6.0,soft:0.5,topN:topK,seed:seed+idx};
     await new Promise((resolve)=>{
+      let done=0;
       w.onmessage=(e)=>{
-        if (e.data.type==='progress'){ done+=1024; const g=(i+done/params.samples)/scrLigSet.length; document.getElementById('scrProg').value=Math.min(1,g); document.getElementById('scrStatus').textContent=`screen ${i+1}/${scrLigSet.length}`; }
-        if (e.data.type==='done'){ lists.push(e.data.list); w.terminate(); resolve(); }
+        const msg=e.data;
+        if(msg.type==='progress'){ done += 1000; const frac=(processed + Math.min(done,per)) / (ligs.length*per); document.getElementById('scrProg').value=Math.min(1,frac); }
+        if(msg.type==='done'){
+          let list=msg.list.slice(0,topK);
+          screenState.results.push({name:ligs[idx].name, best:list[0]||null});
+          const tr=document.createElement('tr');
+          const best=list[0]; tr.innerHTML=`<td>${idx+1}</td><td>${ligs[idx].name}</td><td>${best?best.score.toFixed(2):'-'}</td><td>${best?best.contacts|0:'-'}</td><td>${best?best.clash.toFixed(2):'-'}</td>`;
+          document.getElementById('scrTable').appendChild(tr);
+          qaLog(`Screen: ${ligs[idx].name}  best=${best?best.score.toFixed(2):'NA'}`);
+          w.terminate(); processed += per; resolve();
+        }
       };
-      w.postMessage({Apts:Ac, Bpts:Bc, params, start, end});
+      w.postMessage({Apts:R.map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem})), Bpts:L0.map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem})), params, rangeStart:0, rangeEnd:per});
     });
-    let merged=lists.flat(); merged.sort((a,b)=>b.score-a.score); const diverse=diverseTop(merged, 12, 1.5, params.topN);
-    const best=diverse[0];
-    // metrics
-    const Lout = applyTransform(Bc, best.q, best.t);
-    const m=computeInterfaceMetrics(scrRecAtoms, Lout, params.contactCut);
-    const elec=coulombResidueEnergy(scrRecAtoms, Lout, 0.5, 12);
-    scrResults.push({name:lig.name, best, contacts:m.contacts, clash:m.clash, hb:m.hb, hyd:m.hyd, elec});
-    // row
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td><td>${lig.name}</td><td>${best.score.toFixed(2)}</td><td>${m.contacts.toFixed(2)}</td><td>${m.clash.toFixed(2)}</td><td>${m.hb}</td><td>${m.hyd}</td><td>${elec.toFixed(2)}</td><td><button class="btn" onclick="scrShow('${lig.name.replace(/[^a-z0-9]/gi,'_')}',${i})">View</button></td>`;
-    tbody.appendChild(tr);
+    if(screenState.cancelled) break;
   }
-  // sort table by score
-  scrResults.sort((a,b)=>b.best.score-a.best.score);
-  document.getElementById('scrRunBtn').disabled=false; document.getElementById('scrCancelBtn').disabled=true; inProgress=false; document.getElementById('scrStatus').textContent='done'; document.getElementById('scrProg').value=1;
+  document.getElementById('scrStatus').textContent='done'; screenState.inProgress=false; document.getElementById('scrProg').value=1;
 
-  // store run
-  if (qaMode) storeRun({runId:qaRunId, type:'screening', seed:params.seed, ligCount:scrLigSet.length, top:scrResults.slice(0,10)});
+  // QA store
+  const runId='sc-'+djb2(JSON.stringify({time:Date.now(),seed})+(screenState.results[0]?.best?.score||0));
+  const runs=qaLoad(); runs.unshift({id:runId,type:'screen',time:new Date().toISOString(),seed,bestScore:screenState.results[0]?.best?.score||null, n:screenState.results.length}); qaSave(runs); qaLog(`Screen run stored: ${runId}   ligands=${screenState.results.length}`);
 }
-function cancelScreen(){ cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch{}}); workerPool=[]; inProgress=false; document.getElementById('scrRunBtn').disabled=false; document.getElementById('scrCancelBtn').disabled=true; document.getElementById('scrStatus').textContent='cancelled'; }
-function scrShow(safeName, idx){
-  const lig=scrLigSet[idx]; const res=scrResults.find(r=>r.name===lig.name); if (!res) return;
-  screenViewer.clear();
-  screenViewer.addModel(formatPDB(scrRecAtoms,0,qaRunId),'pdb'); screenViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
-  const c=centroid(lig.atoms); const Bc=lig.atoms.map(a=>({...a,x:a.x-c.x,y:a.y-c.y,z:a.z-c.z}));
-  screenViewer.addModel(formatPDB(applyTransform(Bc, res.best.q, res.best.t),1,qaRunId),'pdb'); screenViewer.setStyle({model:1},{stick:{radius:0.22}});
-  screenViewer.zoomTo(); screenViewer.render();
-}
-function scrDownloadReport(){
-  const rows=['rank,ligand,score,contacts,clash,hb,hyd,elec,run_id'];
-  scrResults.sort((a,b)=>b.best.score-a.best.score).forEach((r,i)=>rows.push([i+1,r.name,r.best.score.toFixed(2),r.contacts.toFixed(2),r.clash.toFixed(2),r.hb,r.hyd,r.elec.toFixed(2),(qaRunId||'')].join(',')));
-  downloadBlob(rows.join('\n'), stamped('screening_report.csv'),'text/csv');
+function cancelScreen(){
+  screenState.cancelled=true; document.getElementById('scrStatus').textContent='cancelled'; screenState.inProgress=false; document.getElementById('scrProg').value=0;
 }
 async function scrDownloadBundle(){
-  const zip=new JSZip(); zip.file('report.csv', (function(){
-    const rows=['rank,ligand,score,contacts,clash,hb,hyd,elec,run_id'];
-    scrResults.forEach((r,i)=>rows.push([i+1,r.name,r.best.score.toFixed(2),r.contacts.toFixed(2),r.clash.toFixed(2),r.hb,r.hyd,r.elec.toFixed(2),(qaRunId||'')].join(',')));
-    return rows.join('\n');
-  })());
-  zip.file('receptor.pdb', scrRecText || formatPDB(scrRecAll,0,qaRunId));
-  scrResults.forEach((r,i)=>{
-    const lig = scrLigSet.find(L=>L.name===r.name); const c=centroid(lig.atoms); const Bc=lig.atoms.map(a=>({...a,x:a.x-c.x,y:a.y-c.y,z:a.z-c.z}));
-    const pdb = formatPDB(scrRecAtoms,0,qaRunId)+'\n'+formatPDB(applyTransform(Bc, r.best.q, r.best.t),1,qaRunId);
-    zip.file(`poses/${String(i+1).padStart(3,'0')}_${r.name}.pdb`, pdb);
-  });
-  const blob=await zip.generateAsync({type:'blob'}); downloadBlob(blob, stamped('screening_bundle.zip'),'application/zip', true);
+  if(!screenState.results.length){ alert('No screening results.'); return; }
+  const zip=new JSZip();
+  const rows=["idx,ligand,best_score,contacts,clash"];
+  screenState.results.forEach((r,i)=>{ const b=r.best; rows.push([i+1,r.name, b?b.score:'' , b?b.contacts:'' , b?b.clash:'' ].join(',')); });
+  zip.file('report.csv', rows.join("\n"));
+  zip.file('DISCLAIMER.txt', DISCLAIMER_TXT);
+  const blob=await zip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`screen_results_${Date.now()}.zip`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0);
 }
 
-/* =========================================================
-   TriPredict + Seq→PDB (from earlier)
-========================================================= */
-function cleanSequence(raw){ return (raw||'').toUpperCase().replace(/[^A-Z]/g,'').replace(/[^ARNDCEQGHILKMFPSTWYV]/g,''); }
+/* ========================= Sequence → PDB (toy) ========================= */
 const aa3={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','E':'GLU','Q':'GLN','G':'GLY','H':'HIS','I':'ILE','L':'LEU','K':'LYS','M':'MET','F':'PHE','P':'PRO','S':'SER','T':'THR','W':'TRP','Y':'TYR','V':'VAL'};
-let triModels=[], triSelected=-1;
-function triGenerate(){
-  ensureTriViewers();
-  const seq=cleanSequence(document.getElementById('triSeq').value);
-  if (!seq){ alert('Enter a protein sequence.'); return; }
-  triModels=[makeSSMC(seq), makeDG(seq), makeHC(seq)];
-  triViewers.forEach((v,i)=>{ v.clear(); v.addModel(formatPDB(triModels[i],0,qaRunId),'pdb'); v.setStyle({cartoon:{color:'#60a5fa'}}); v.zoomTo(); v.render(); });
-  triSelected=-1; document.getElementById('triSelMsg').textContent='none selected';
-}
-function selectTri(i){ triSelected=i; document.getElementById('triSelMsg').textContent=`selected ${i+1}`; }
-function triDownloadAll(){ if (!triModels.length) return alert('Generate models first'); triModels.forEach((m,i)=>downloadBlob(formatPDB(m,0,qaRunId), stamped(`TriPredict_${i+1}.pdb`),'text/plain')); }
-function triSendToDock(which){
-  if (triSelected<0) return alert('Click a mini-viewer to select a model.'); const pdb=formatPDB(triModels[triSelected],0,qaRunId);
-  if (which==='A'){ pdbAText=pdb; document.getElementById('pdbAText').value=pdb; parseOne('A'); }
-  else { pdbBText=pdb; document.getElementById('pdbBText').value=pdb; parseOne('B'); }
-}
-function triDockAll(){
-  if (!pdbBAll.length && !pdbBText){ return alert('Load Protein B'); }
-  triSelected = triSelected<0 ? 0 : triSelected; triSendToDock('A'); alert('Selected TriPredict model sent to A. Tune params and run docking.');
-}
-function makeSSMC(seq){ const out=[]; let z=0, angle=0; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; const block=Math.floor(i/10)%2===0?'HELIX':'STRAND'; if (block==='HELIX'){ const r=2.3, rise=1.5; angle+=(2*Math.PI)/3.6; z+=rise; const x=r*Math.cos(angle), y=r*Math.sin(angle); pushBB(out,resn,'A',i+1,x,y,z); } else { const dir=(i%2===0?1:-1); const x=i*3.5*0.3, y=dir*1.2, zz=Math.sin(i*0.2)*0.6 + z*0.05; pushBB(out,resn,'A',i+1,x,y,zz); z+=1.2; } } return out; }
-function makeDG(seq){ const out=[]; let x=0,y=0,z=0; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; x+=(Math.random()*2-1)*2.5; y+=(Math.random()*2-1)*2.5; z+=3.3+(Math.random()-0.5); x*=0.98; y*=0.98; pushBB(out,resn,'A',i+1,x,y,z); } return out; }
-function makeHC(seq){ const out=[]; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; const isHyd=hydrophobic.has(resn); const r=isHyd?6:10; const ang=i*0.9; const x=Math.cos(ang)*r, y=Math.sin(ang)*r, z=i*0.8; const px=x+(isHyd?-0.5:+0.5), py=y+(isHyd?-0.5:+0.5), pz=z*0.7; pushBB(out,resn,'A',i+1,px,py,pz);} const c=centroid(out); return out.map(a=>({...a,x:a.x-c.x,y:a.y-c.y,z:a.z-c.z})); }
-function pushBB(out,resn,chain,resi, cx,cy,cz){ out.push({x:cx-1.33,y:cy,z:cz-0.1,name:' N  ',elem:'N',resn,chain,resi}); out.push({x:cx,y:cy,z:cz,name:' CA ',elem:'C',resn,chain,resi}); out.push({x:cx+1.52,y:cy,z:cz+0.1,name:' C  ',elem:'C',resn,chain,resi}); out.push({x:cx+2.30,y:cy+0.4,z:cz+0.1,name:' O  ',elem:'O',resn,chain,resi}); }
-
-/* Seq→PDB */
-function seqToPDB(opts){
-  const {rawSeq, chain, start, atomsMode, preset, radius, rise} = opts;
-  const seq = cleanSequence(rawSeq); if (!seq) throw new Error('Enter a valid sequence.');
-  let ca; if (preset==='HELIX') ca=helixCA(seq.length, radius, rise); else if (preset==='STRAND') ca=strandCA(seq.length); else ca=coilCA(seq.length);
-  const out=[]; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; const c=ca[i];
-    if (atomsMode==='BB'){ out.push({x:c.x-1.33,y:c.y,z:c.z-0.1,name:' N  ',elem:'N',resn,chain,resi:start+i}); out.push({x:c.x,y:c.y,z:c.z,name:' CA ',elem:'C',resn,chain,resi:start+i}); out.push({x:c.x+1.52,y:c.y,z:c.z+0.1,name:' C  ',elem:'C',resn,chain,resi:start+i}); out.push({x:c.x+2.30,y:c.y+0.4,z:c.z+0.1,name:' O  ',elem:'O',resn,chain,resi:start+i}); }
-    else { out.push({x:c.x,y:c.y,z:c.z,name:' CA ',elem:'C',resn,chain,resi:start+i}); }
+function cleanSeq(raw){ return (raw||"").toUpperCase().replace(/[^A-Z]/g,'').replace(/[^ARNDCEQGHILKMFPSTWYV]/g,''); }
+function helixCA(seq){ const ca=[]; const turn=100*Math.PI/180; for(let i=0;i<seq.length;i++){ const a=i*turn; ca.push({x:2.3*Math.cos(a),y:2.3*Math.sin(a),z:i*1.5}); } return ca; }
+function strandCA(seq){ const ca=[]; for(let i=0;i<seq.length;i++){ const dir=(i%2?1:-1); ca.push({x:i*3.5,y:dir*1.2,z:0}); } return ca; }
+function coilCA(seq){ const ca=[]; let x=0,y=0,z=0; for(let i=0;i<seq.length;i++){ x+=(Math.random()*2-1)*2.5; y+=(Math.random()*2-1)*2.5; z+=3.2; ca.push({x,y,z}); } return ca; }
+function buildBB(ca, chain, start, atomsMode, seq){
+  const out=[];
+  for(let i=0;i<ca.length;i++){
+    const resi=start+i, resn=aa3[seq[i]]||'UNK';
+    const c=ca[i], prev=ca[Math.max(0,i-1)], next=ca[Math.min(ca.length-1,i+1)];
+    const tx=next.x-prev.x, ty=next.y-prev.y, tz=next.z-prev.z; const tlen=Math.hypot(tx,ty,tz)||1; const ux=tx/tlen, uy=ty/tlen, uz=tz/tlen;
+    const nx=-uy, ny=ux, nz=0;
+    if(atomsMode==='BB') out.push({x:c.x-1.33*ux,y:c.y-1.33*uy,z:c.z-1.33*uz,name:" N  ",elem:"N",resn,chain,resi});
+    out.push({x:c.x,y:c.y,z:c.z,name:" CA ",elem:"C",resn,chain,resi});
+    if(atomsMode==='BB'){
+      out.push({x:c.x+1.52*ux,y:c.y+1.52*uy,z:c.z+1.52*uz,name:" C  ",elem:"C",resn,chain,resi});
+      out.push({x:c.x+2.30*ux+0.5*nx,y:c.y+2.30*uy+0.5*ny,z:c.z+2.30*uz+0.5*nz,name:" O  ",elem:"O",resn,chain,resi});
+    }
   }
-  return formatPDB(out,0,qaRunId);
+  return out;
 }
-function helixCA(n, radius, rise){ const out=[]; const dAng=100*Math.PI/180; for(let i=0;i<n;i++){ out.push({x:radius*Math.cos(dAng*i), y:radius*Math.sin(dAng*i), z:i*rise}); } return out; }
-function strandCA(n){ const out=[]; for(let i=0;i<n;i++){ const dir=(i%2?1:-1); out.push({x:i*3.5*0.3,y:dir*1.2,z:0}); } return out; }
-function coilCA(n){ const out=[]; let x=0,y=0,z=0; for(let i=0;i<n;i++){ x+=(Math.random()*2-1)*2.5; y+=(Math.random()*2-1)*2.5; z+=3.2; out.push({x,y,z}); } return out; }
-function seqPreview(){ ensureSeqViewer(); const opts={ rawSeq:document.getElementById('seqInput').value, chain:(document.getElementById('seqChain').value||'A')[0].toUpperCase(), start:+document.getElementById('seqStart').value||1, atomsMode:document.getElementById('seqAtoms').value, preset:document.getElementById('ssPreset').value, radius:+document.getElementById('seqRadius').value||2.3, rise:+document.getElementById('seqRise').value||1.5 }; try{ const pdb=seqToPDB(opts); seqViewer.clear(); seqViewer.addModel(pdb,'pdb'); seqViewer.setStyle({cartoon:{color:'#60a5fa'}}); seqViewer.zoomTo(); seqViewer.render(); }catch(e){ alert(e.message||e); } }
-function seqDownload(){ const opts={ rawSeq:document.getElementById('seqInput').value, chain:(document.getElementById('seqChain').value||'A')[0].toUpperCase(), start:+document.getElementById('seqStart').value||1, atomsMode:document.getElementById('seqAtoms').value, preset:document.getElementById('ssPreset').value, radius:+document.getElementById('seqRadius').value||2.3, rise:+document.getElementById('seqRise').value||1.5 }; try{ const pdb=seqToPDB(opts); downloadBlob(pdb, stamped('sequence_model.pdb'),'text/plain'); }catch(e){ alert(e.message||e); } }
+function seqToPDB(){
+  const raw=document.getElementById('seqInput').value; const seq=cleanSeq(raw);
+  if(!seq){ alert('Enter a sequence.'); return null; }
+  const mode=document.getElementById('ssPreset').value, chain=(document.getElementById('seqChain').value||'A').charAt(0).toUpperCase();
+  const start=parseInt(document.getElementById('seqStart').value)||1, atomsMode=document.getElementById('seqAtoms').value;
+  let ca = mode==='HELIX'? helixCA(seq) : mode==='STRAND'? strandCA(seq) : coilCA(seq);
+  const bb=buildBB(ca, chain, start, atomsMode, seq);
+  return formatPDB(bb);
+}
+function seqPreview(){
+  ensureSeqViewer(); const pdb=seqToPDB(); if(!pdb) return;
+  seqViewer.clear(); seqViewer.addModel(pdb,'pdb'); seqViewer.setStyle({cartoon:{color:'#60a5fa'}}); seqViewer.zoomTo(); seqViewer.render();
+}
+function seqDownload(){ const pdb=seqToPDB(); if(!pdb) return; downloadBlob(pdb, 'sequence_model.pdb'); }
 
-/* =========================================================
-   QA Mode & Runs (localStorage)
-========================================================= */
-function toggleQA(){ qaMode = document.getElementById('qaToggle').checked; qaLog(`QA mode ${qaMode?'ENABLED':'DISABLED'}`); if (qaMode && !qaRunId) qaNewRunId('init'); }
-async function qaNewRunId(kind){
-  const t = new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14);
-  const mat = (pdbAText||'')+(pdbBText||'')+(recText||'')+(scrRecText||'')+JSON.stringify(kind);
-  const h = await sha256Hex(mat).then(x=>x.slice(0,12));
-  qaRunId = `${t}-${h}`;
-  document.getElementById('qaRunId').textContent = `RUN: ${qaRunId}`;
-  qaLog(`New Run ID ${qaRunId} [${kind}]`);
+/* ========================= QA UI ========================= */
+function renderQATable(){
+  const runs=qaLoad(); const tbody=document.getElementById('qaTable'); if(!tbody) return;
+  tbody.innerHTML = runs.map(r=>`<tr><td>${r.time}</td><td>${r.type}</td><td>${r.id}</td><td>${r.seed??''}</td><td>${r.bestScore!=null? r.bestScore.toFixed?.(2)??r.bestScore : ''}</td>
+    <td><button class="btn small" onclick="qaExport('${r.id}')">Export</button> <button class="btn small red" onclick="qaDelete('${r.id}')">Delete</button></td></tr>`).join('');
 }
-function qaFreeze(){
-  if (!qaMode) return alert('Enable QA mode first');
-  qaFrozen=true; qaLog('Parameters frozen.');
-  // disable all inputs that affect computation
-  document.querySelectorAll('input,select,textarea').forEach(el=>{
-    if (['qaToggle'].includes(el.id)) return;
-    if (['pdbAText','pdbBText','recText','scrRecText','ligText','seqInput','triSeq'].includes(el.id)) return; // allow text areas for inputs
-    el.dataset.prevDisabled=el.disabled; el.disabled=true;
-  });
+async function qaExport(id){
+  const runs=qaLoad(); const r=runs.find(x=>x.id===id); if(!r){ alert('Run not found.'); return; }
+  const zip=new JSZip();
+  zip.file('run.json', JSON.stringify(r,null,2));
+  zip.file('DISCLAIMER.txt', DISCLAIMER_TXT);
+  const blob=await zip.generateAsync({type:'blob'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`run_${id}.zip`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0);
 }
-function qaUnfreeze(){
-  qaFrozen=false; qaLog('QA unlock (recorded).');
-  document.querySelectorAll('input,select,textarea').forEach(el=>{ if (el.dataset.prevDisabled!==undefined){ el.disabled=(el.dataset.prevDisabled==='true'); delete el.dataset.prevDisabled; } else el.disabled=false; });
+function qaDelete(id){ const runs=qaLoad().filter(x=>x.id!==id); qaSave(runs); }
+async function qaExportAll(){
+  const runs=qaLoad(); if(!runs.length){ alert('No runs stored.'); return; }
+  const zip=new JSZip(); zip.file('runs.json', JSON.stringify(runs,null,2)); zip.file('DISCLAIMER.txt', DISCLAIMER_TXT);
+  const blob=await zip.generateAsync({type:'blob'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`all_runs_${Date.now()}.zip`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0);
 }
-function stamped(name){ return qaRunId ? name.replace(/(\.[^.]*)?$/i, `_${qaRunId}$1`) : name; }
-function qaExportLog(){ const txt=document.getElementById('qaLog').textContent||''; downloadBlob(txt, stamped('qa_log.txt'),'text/plain'); }
+function qaClear(){ if(!confirm('Delete all stored runs?')) return; qaSave([]); qaLog('All QA runs cleared.'); }
 
-function storeRun(run){
-  const all = JSON.parse(localStorage.getItem('dock_runs')||'[]');
-  const rec = {runId:run.runId, ts:new Date().toISOString(), type:run.type, seed:run.seed, note:run.note||'', meta:{app:APP_VER}, top:run.top||[]};
-  all.unshift(rec); localStorage.setItem('dock_runs', JSON.stringify(all));
-  qaLog(`Stored run ${run.runId} (${run.type})`);
-}
-function runsRefresh(){
-  const all = JSON.parse(localStorage.getItem('dock_runs')||'[]');
-  const tbody=document.getElementById('runsBody'); tbody.innerHTML='';
-  all.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="small">${r.runId}</td><td>${r.type}</td><td class="small">${new Date(r.ts).toLocaleString()}</td><td>${r.seed??''}</td><td>${r.note??''}</td><td><button class="btn" onclick="runsDelete('${r.runId}')">Delete</button></td>`;
-    tbody.appendChild(tr);
-  });
-}
-function runsDelete(id){
-  let all = JSON.parse(localStorage.getItem('dock_runs')||'[]');
-  all = all.filter(r=>r.runId!==id); localStorage.setItem('dock_runs', JSON.stringify(all)); runsRefresh(); qaLog(`Deleted run ${id}`);
-}
-function runsExport(){
-  const all = localStorage.getItem('dock_runs')||'[]';
-  downloadBlob(all, 'stored_runs.json','application/json');
-}
-function runsClear(){ if (!confirm('Delete all stored runs?')) return; localStorage.removeItem('dock_runs'); runsRefresh(); qaLog('Cleared all stored runs.'); }
-
-/* =========================================================
-   Generic download helper
-========================================================= */
-function downloadBlob(data, name, mime='text/plain', isBlob=false){
-  const blob = isBlob? data : new Blob([data], {type:mime});
-  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0);
-}
+/* ========================= Init ========================= */
+window.addEventListener('DOMContentLoaded', ()=>{
+  setupTabs(); ensureMainViewer();
+  renderQATable();
+  if(localStorage.getItem('legal_ack_v1')!=='yes'){ setLegalLock(true); openLegal(); } else { setLegalLock(false); }
+});
 </script>
 </body>
 </html>
