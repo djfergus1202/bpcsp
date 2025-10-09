@@ -2,26 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Advanced In-Silico Biology Studio • Protein/RNA/DNA Docking & Design Platform</title>
+<title>In-Browser Docking • TriPredict • QA & Screening</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Comprehensive in-silico biology platform: protein docking, siRNA design & efficacy prediction, lncRNA discovery & interaction modeling, multi-genome support" />
+<meta name="description" content="Client-side protein docking, ligand docking, TriPredict, QA mode (reproducible runs), audit bundles, and throughput screening." />
 <style>
- :root{--bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--accent:#60a5fa;--line:#1f2937;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--purple:#a78bfa;--pink:#f472b6;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial}
- *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
- a{color:var(--accent)} header{padding:40px 16px;background:radial-gradient(1200px 600px at 15% -10%,#1d2a4a,transparent 60%),radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%)}
- .wrap{max-width:1400px;margin:0 auto} h1{margin:0 0 8px;font-size:32px} p.lead{color:var(--muted);margin:6px 0 0}
- section{padding:22px 16px;border-top:1px solid var(--line);background:var(--panel)} h2{margin:0 0 10px;font-size:24px} h3{margin:14px 0 6px;font-size:18px}
- .grid{display:grid;gap:16px} @media(min-width:980px){.grid{grid-template-columns:1.1fr .9fr}}
+ :root{
+  --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--accent:#60a5fa;--line:#1f2937;
+  --green:#34d399;--red:#f87171;--yellow:#fbbf24;--orange:#f59e0b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial
+ }
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
+ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+ header{padding:40px 16px;background:
+    radial-gradient(1200px 600px at 15% -10%,#1d2a4a,transparent 60%),
+    radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%)}
+ .wrap{max-width:1400px;margin:0 auto}
+ h1{margin:0 0 8px;font-size:32px}
+ p.lead{color:var(--muted);margin:6px 0 0}
+ section{padding:22px 16px;border-top:1px solid var(--line);background:var(--panel)}
+ h2{margin:0 0 10px;font-size:24px} h3{margin:14px 0 6px;font-size:18px}
+ .grid{display:grid;gap:16px} @media(min-width:1020px){.grid{grid-template-columns:1.1fr .9fr}}
  .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:14px}
  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
  label{font-weight:600}
- input[type=number],input[type=text],textarea,select{background:#0a0f1a;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:80px}
- textarea{width:100%;min-height:120px}
- .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-weight:600;border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:13px}
- .btn.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0} .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0} .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0} .btn.purple{background:linear-gradient(180deg,#7c3aed,#6d28d9);border:0} .btn[disabled]{opacity:.5;cursor:not-allowed}
- .muted{color:var(--muted)} .small{font-size:12px;color:var(--muted)} .pill{padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#93c5fd}
- .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px} .tabbtn{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:14px} .tabbtn.active{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
+ input[type="number"],input[type="text"],textarea,select{
+  background:#0a0f1a;color:var(--text);border:1px solid #1f2937;border-radius:8px;
+  padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:80px
+ }
+ textarea{width:100%;min-height:110px}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-weight:600;
+  border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:13px}
+ .btn.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
+ .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0}
+ .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0}
+ .btn.orange{background:linear-gradient(180deg,#f59e0b,#d97706);border:0}
+ .btn.purple{background:linear-gradient(180deg,#7c3aed,#6d28d9);border:0}
+ .btn[disabled]{opacity:.5;cursor:not-allowed}
+ .muted{color:var(--muted)} .small{font-size:12px;color:var(--muted)}
+ .pill{padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#93c5fd}
+ .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+ .tabbtn{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:14px}
+ .tabbtn.active{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
  .tabsec{display:none} .tabsec.active{display:block}
  .two{display:grid;gap:12px} @media(min-width:780px){.two{grid-template-columns:1fr 1fr}}
  .trigrid{display:grid;gap:12px} @media(min-width:980px){.trigrid{grid-template-columns:1fr 1fr 1fr}}
@@ -29,1046 +52,1476 @@
  .warn{border-left:4px solid var(--yellow);padding-left:10px;margin:10px 0;color:#fbbf24}
  .info{border-left:4px solid var(--accent);padding-left:10px;margin:10px 0;color:#93c5fd}
  .success{border-left:4px solid var(--green);padding-left:10px;margin:10px 0;color:#34d399}
- .chainchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px} .chainchip{border:1px solid #334155;border-radius:999px;padding:2px 8px;display:inline-flex;align-items:center;gap:6px} .chainchip input{accent-color:#60a5fa}
+ .error{border-left:4px solid var(--red);padding-left:10px;margin:10px 0;color:#fecaca}
+ .chainchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+ .chainchip{border:1px solid #334155;border-radius:999px;padding:2px 8px;display:inline-flex;align-items:center;gap:6px}
+ .chainchip input{accent-color:#60a5fa}
  progress{width:260px;height:10px;border:1px solid #1f2937;border-radius:999px;background:#0b1220}
- progress::-webkit-progress-bar{background:#0b1220;border-radius:999px} progress::-webkit-progress-value{background:#60a5fa;border-radius:999px}
- #viewer,#seqViewer,.triview,#siRNAViewer,#lncViewer{position:relative;width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
- #viewer{height:560px} #seqViewer,.triview,#siRNAViewer,#lncViewer{height:300px}
- .stepnav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0} .stepnav .step{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#0b1220} .stepnav .step.active{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
- .infobox,.errorbox{border-radius:10px;padding:10px;margin-top:8px} .infobox{border:1px solid #334155;background:#0a0f1a;color:#cbd5e1} .errorbox{border:1px solid #7f1d1d;background:#1a0c0c;color:#fecaca}
- .siRNA-candidate{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0;cursor:pointer;transition:all 0.2s} .siRNA-candidate:hover{border-color:var(--accent);background:#0f1628} .siRNA-candidate.selected{border-color:var(--green);background:#0d1f1a}
- .lncRNA-result{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0}
- .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:10px 0} .metric-box{background:#0a0f1a;border:1px solid var(--line);border-radius:6px;padding:8px;text-align:center} .metric-label{font-size:11px;color:var(--muted);text-transform:uppercase} .metric-value{font-size:18px;font-weight:bold;color:var(--accent);font-family:var(--mono)}
- .seq-display{font-family:var(--mono);font-size:12px;background:#0a0f1a;padding:8px;border-radius:6px;word-break:break-all;line-height:1.8} .seq-display .nt{padding:1px 2px} .seq-display .gc{background:#1d4ed8;color:#fff} .seq-display .au{background:#831843;color:#fff} .seq-display .target{background:#047857;color:#fff}
- table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line)} th{color:var(--muted);font-weight:600}
+ progress::-webkit-progress-bar{background:#0b1220;border-radius:999px}
+ progress::-webkit-progress-value{background:#60a5fa;border-radius:999px}
+ #viewer,#ligViewer,#seqViewer,.triview,#screenViewer{position:relative;width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
+ #viewer,#ligViewer,#screenViewer{height:560px} .triview,#seqViewer{height:300px}
+ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line)} th{color:var(--muted);font-weight:600;cursor:pointer}
+ .flex-between{display:flex;justify-content:space-between;align-items:center}
+ .legend{display:flex;gap:8px;flex-wrap:wrap}
+ .legend .dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:4px}
+ .kbd{font-family:var(--mono);font-size:11px;border:1px solid #334155;border-radius:6px;padding:2px 6px;color:#cbd5e1}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>🧬 Advanced In-Silico Biology Studio</h1>
-    <p class="lead">Comprehensive platform: Protein Docking • siRNA Design & Efficacy • lncRNA Discovery • RNA-Protein Interactions • Multi-Genome Support • 3D Visualization</p>
+    <h1>🧷 In-Browser Docking • 🧪 TriPredict • ✅ QA • 📊 Screening</h1>
+    <p class="lead">Deterministic seeds • CDR-aware Ab docking • Ligand docking • Throughput screening • Stored runs & audit bundles</p>
     <div class="tabs">
-      <button class="tabbtn active" data-tab="dockTab">🧷 Protein Docking</button>
-      <button class="tabbtn" data-tab="siRNATab">🎯 siRNA Design</button>
-      <button class="tabbtn" data-tab="lncRNATab">📊 lncRNA Analysis</button>
-      <button class="tabbtn" data-tab="triTab">🧪 TriPredict</button>
-      <button class="tabbtn" data-tab="seqTab">🧬 Seq→PDB</button>
+      <button class="tabbtn active" data-tab="dockTab">Protein–Protein Docking</button>
+      <button class="tabbtn" data-tab="ligTab">Ligand Docking</button>
+      <button class="tabbtn" data-tab="screenTab">Screening</button>
+      <button class="tabbtn" data-tab="triTab">TriPredict (3 folds)</button>
+      <button class="tabbtn" data-tab="seqTab">Seq→PDB</button>
+      <button class="tabbtn" data-tab="qaTab">QA & Runs</button>
+      <button class="tabbtn" data-tab="aboutTab">About & Safety</button>
     </div>
   </div>
 </header>
 
-<!-- Protein Docking Tab (Original) -->
+<!-- =============== Protein–Protein Docking =============== -->
 <section id="dockTab" class="tabsec active">
   <div class="wrap grid">
     <div class="card">
-      <h2>Protein-Protein Docking</h2>
+      <div class="flex-between">
+        <h2>Step 1 — Load Proteins</h2>
+        <div class="legend small">
+          <span><span class="dot" style="background:#60a5fa"></span>Protein A</span>
+          <span><span class="dot" style="background:#f97316"></span>Protein B</span>
+        </div>
+      </div>
       <div class="two">
         <div>
-          <h3>Protein A (e.g., antibody)</h3>
+          <h3>Protein A</h3>
           <div class="row"><input type="file" id="pdbAFile" accept=".pdb,.ent,.txt" /><button class="btn" onclick="useExample('A')">Example</button></div>
-          <textarea id="pdbAText" placeholder="Paste PDB text"></textarea>
-          <div class="row"><label>Chains</label><div id="chainsABox" class="chainchips"></div></div>
-          <div id="chainWarnA" class="infobox small">Load/parse then select chains</div>
-          <div class="row"><button class="btn" onclick="parseOne('A')">🔎 Parse A</button><button class="btn" onclick="selectAllChains('A')">All</button></div>
-          <input type="text" id="chainsA" style="display:none" />
+          <textarea id="pdbAText" placeholder="Paste PDB text for Protein A"></textarea>
+          <div class="row"><label>Chains</label><div id="chainsABox" class="chainchips"></div><button class="btn" onclick="selectAllChains('A')">All</button><button class="btn" onclick="clearChains('A')">None</button></div>
+          <div id="chainInfoA" class="small muted">Parse to populate chain chips.</div>
+          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseOne('A')">🔎 Parse A</button></div>
         </div>
         <div>
-          <h3>Protein B (e.g., antigen)</h3>
+          <h3>Protein B</h3>
           <div class="row"><input type="file" id="pdbBFile" accept=".pdb,.ent,.txt" /><button class="btn" onclick="useExample('B')">Example</button></div>
-          <textarea id="pdbBText" placeholder="Paste PDB text"></textarea>
-          <div class="row"><label>Chains</label><div id="chainsBBox" class="chainchips"></div></div>
-          <div id="chainWarnB" class="infobox small">Load/parse then select chains</div>
-          <div class="row"><button class="btn" onclick="parseOne('B')">🔎 Parse B</button><button class="btn" onclick="selectAllChains('B')">All</button></div>
-          <input type="text" id="chainsB" style="display:none" />
+          <textarea id="pdbBText" placeholder="Paste PDB text for Protein B"></textarea>
+          <div class="row"><label>Chains</label><div id="chainsBBox" class="chainchips"></div><button class="btn" onclick="selectAllChains('B')">All</button><button class="btn" onclick="clearChains('B')">None</button></div>
+          <div id="chainInfoB" class="small muted">Parse to populate chain chips.</div>
+          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseOne('B')">🔎 Parse B</button></div>
         </div>
       </div>
-      <div class="row" style="margin-top:10px"><label>Samples</label><input type="number" id="samples" value="16000" min="500" /><label>Atom mode</label><select id="atomMode"><option value="CA">Cα</option><option value="HEAVY">Heavy</option></select></div>
-      <div class="row"><button class="btn primary" id="dockBtn" onclick="runDocking()">▶️ Run Docking</button><button class="btn red" id="cancelBtn" onclick="cancelDocking()" disabled>✖ Cancel</button><span class="pill" id="statusPill">idle</span><progress id="prog" value="0" max="1"></progress></div>
+
+      <h2 style="margin-top:14px">Step 2 — Parameters</h2>
+      <div class="row">
+        <label>Samples</label><input type="number" id="samples" value="20000" min="500" step="500" />
+        <label>Max Δ (Å)</label><input type="number" id="maxTrans" value="12" min="0" step="1" />
+        <label>Atom mode</label><select id="atomMode"><option value="CA">Cα</option><option value="BB">Backbone</option><option value="HEAVY">Heavy</option></select>
+        <label>Top poses</label><input type="number" id="topN" value="20" min="1" max="100" />
+      </div>
+      <div class="row">
+        <label>Contact cutoff (Å)</label><input type="number" id="contactCut" value="4.8" step="0.1" />
+        <label>Clash factor</label><input type="number" id="clashFactor" value="0.85" step="0.05" />
+        <label>Contact weight</label><input type="number" id="wContact" value="1.0" step="0.1" />
+        <label>Clash penalty</label><input type="number" id="wClash" value="6.0" step="0.1" />
+        <label>Softening</label><input type="number" id="soft" value="0.5" step="0.1" />
+        <label>Rescore</label><select id="rescoreMode"><option value="NONE">Skip</option><option value="HEAVY">Heavy</option><option value="HEAVY_REFINE">Heavy+refine</option></select>
+      </div>
+      <div class="row">
+        <label>Diversity (°/Å)</label><input type="number" id="dupAngle" value="10" step="1" /><input type="number" id="dupTrans" value="2" step="0.5" />
+        <label class="small"><input type="checkbox" id="abMode"> Antibody mode (CDR-weighted)</label>
+      </div>
+      <details id="cdrBox" style="margin-top:6px" open>
+        <summary><b>Antibody CDR masks (optional)</b></summary>
+        <div class="row small">
+          <label>Heavy chain</label><input id="Hchain" value="H" style="width:60px"/>
+          <label>H1</label><input id="H1" value="26-32" style="width:90px"/>
+          <label>H2</label><input id="H2" value="52-56" style="width:90px"/>
+          <label>H3</label><input id="H3" value="95-102" style="width:90px"/>
+        </div>
+        <div class="row small">
+          <label>Light chain</label><input id="Lchain" value="L" style="width:60px"/>
+          <label>L1</label><input id="L1" value="24-34" style="width:90px"/>
+          <label>L2</label><input id="L2" value="50-56" style="width:90px"/>
+          <label>L3</label><input id="L3" value="89-97" style="width:90px"/>
+          <label>CDR weight</label><input id="cdrW" type="number" value="1.5" step="0.1" style="width:80px"/>
+        </div>
+      </details>
+
+      <details style="margin-top:8px">
+        <summary><b>Reproducibility</b> & Audit</summary>
+        <div class="row" style="margin-top:6px">
+          <label><input type="checkbox" id="seedDet" checked /> Deterministic seed</label>
+          <label>Seed</label><input type="number" id="seed" value="42" />
+          <button class="btn" onclick="deriveSeed()">Derive from inputs</button>
+          <span class="small muted" id="seedMsg">SHA-256(inputs+params) → seed.</span>
+        </div>
+        <div class="row">
+          <button class="btn" onclick="exportPoseRecipes()">⬇ Pose Recipes (JSON)</button>
+          <button class="btn" onclick="importPoseRecipes()">⬆ Import Recipes</button>
+          <button class="btn orange" onclick="exportAuditBundle()">🧾 Export Audit Bundle (.zip)</button>
+        </div>
+        <div id="runLog" class="score" style="max-height:120px;margin-top:6px"></div>
+      </details>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="dockBtn" onclick="runDocking()">▶️ Run Docking</button>
+        <button class="btn red" id="cancelBtn" onclick="cancelDocking()" disabled>✖ Cancel</button>
+        <span class="pill" id="statusPill">idle</span>
+        <progress id="prog" value="0" max="1"></progress>
+      </div>
+      <div id="preflightMsg" class="info small" style="margin-top:8px">If chain filtering removes all atoms, the app auto-falls back to “all chains” and flags the fix.</div>
     </div>
+
     <div class="card">
-      <h2>3D Viewer</h2>
+      <h2>Step 3 — Results & Viewer</h2>
       <div id="viewer"></div>
-      <div class="row" style="margin-top:8px" id="poseControls"></div>
-      <div class="score" id="scoreBox" style="margin-top:8px"></div>
-      <div class="row" style="margin-top:8px"><button class="btn green" onclick="downloadAllPoses()">⬇ All Poses</button><button class="btn" onclick="downloadCSV()">⬇ CSV</button></div>
+      <div class="row" style="margin-top:8px;flex-wrap:wrap">
+        <label class="small"><input type="checkbox" id="toggleContacts" onchange="refreshOverlays()"> Contacts</label>
+        <label class="small"><input type="checkbox" id="toggleHB" onchange="refreshOverlays()"> H-bonds</label>
+        <label class="small"><input type="checkbox" id="toggleSB" onchange="refreshOverlays()"> Salt bridges</label>
+        <button class="btn green" onclick="snapshotPNG()">📸 Snapshot</button>
+      </div>
+
+      <h3 style="margin-top:10px">Pose Table</h3>
+      <table id="poseTable" style="margin-top:6px">
+        <thead>
+          <tr>
+            <th data-key="rank">#</th><th data-key="score">Score</th><th data-key="contacts">Contacts</th><th data-key="clash">Clash</th>
+            <th data-key="hb">HB</th><th data-key="sb">SB</th><th data-key="hyd">Hyd</th><th data-key="bsa">BSA≈Å²</th>
+            <th data-key="elec">Elec</th><th data-key="enth">Pseudo-ΔH</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="poseBody"></tbody>
+      </table>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="downloadAllPoses()">⬇ Multi-model PDB</button>
+        <button class="btn" onclick="downloadCSV()">⬇ Summary CSV</button>
+        <button class="btn" onclick="downloadJSON()">⬇ Interface JSON</button>
+      </div>
+      <div id="scoreBox" class="score" style="margin-top:8px"></div>
     </div>
   </div>
 </section>
 
-<!-- siRNA Design Tab -->
-<section id="siRNATab" class="tabsec">
-  <div class="wrap">
-    <div class="grid">
-      <div class="card">
-        <h2>🎯 siRNA Design & Efficacy Prediction</h2>
-        <p class="small muted">Design therapeutic siRNA candidates targeting specific mRNA sequences with efficacy scoring, off-target prediction, and thermodynamic analysis.</p>
-        
-        <h3>Target mRNA Sequence</h3>
-        <textarea id="targetMRNA" placeholder="Enter target mRNA sequence (coding sequence, 5' to 3')
-Example: AUGCGAUCGAUCGAUCGAUACGUACGUACGUACGUACGUACGUACGUACGUACGUACGUACG..."></textarea>
-        <div class="row"><input type="file" id="mrnaFile" accept=".fasta,.fa,.txt" /><button class="btn" onclick="loadMRNAFile()">Load FASTA</button></div>
-        
-        <h3>Design Parameters</h3>
-        <div class="two">
-          <div>
-            <div class="row"><label>siRNA length</label><input type="number" id="siRNALength" value="21" min="19" max="25" /></div>
-            <div class="row"><label>GC% range</label><input type="number" id="gcMin" value="30" min="0" max="100" style="width:70px" />-<input type="number" id="gcMax" value="70" min="0" max="100" style="width:70px" />%</div>
-            <div class="row"><label>Position preference</label><select id="positionPref"><option value="ANY">Any position</option><option value="50-100">50-100 nt from start</option><option value="100-500">100-500 nt from start</option><option value="OPTIMAL">AA(N19)TT pattern</option></select></div>
-          </div>
-          <div>
-            <div class="row"><label>Max candidates</label><input type="number" id="maxCandidates" value="20" min="5" max="100" /></div>
-            <div class="row"><label>Off-target threshold</label><input type="number" id="offTargetScore" value="0.75" min="0" max="1" step="0.05" /></div>
-            <div class="row"><label>Thermodynamic weight</label><input type="number" id="thermoWeight" value="1.0" min="0" max="2" step="0.1" /></div>
-          </div>
-        </div>
-        
-        <div class="row" style="margin-top:12px">
-          <button class="btn primary" onclick="designSiRNA()">🔬 Design siRNA Candidates</button>
-          <button class="btn purple" onclick="predictEfficacy()">📊 Predict Efficacy</button>
-          <button class="btn" onclick="analyzeOfftargets()">⚠️ Off-Target Analysis</button>
-        </div>
-        
-        <div id="siRNAProgress" class="info" style="display:none;margin-top:10px"></div>
-      </div>
-      
-      <div class="card">
-        <h2>siRNA Candidates</h2>
-        <div id="siRNACandidates" class="small"></div>
-      </div>
-    </div>
-    
-    <div class="card" style="margin-top:16px">
-      <h2>Selected siRNA Analysis</h2>
-      <div class="grid">
-        <div>
-          <h3>Sequence & Structure</h3>
-          <div id="siRNASeqDisplay" class="seq-display"></div>
-          <div class="metric-grid" style="margin-top:12px">
-            <div class="metric-box"><div class="metric-label">Efficacy Score</div><div class="metric-value" id="efficacyScore">-</div></div>
-            <div class="metric-box"><div class="metric-label">GC Content</div><div class="metric-value" id="gcContent">-</div></div>
-            <div class="metric-box"><div class="metric-label">ΔG (kcal/mol)</div><div class="metric-value" id="deltaG">-</div></div>
-            <div class="metric-box"><div class="metric-label">Off-Targets</div><div class="metric-value" id="offTargets">-</div></div>
-          </div>
-          
-          <h3 style="margin-top:16px">Secondary Structure Prediction</h3>
-          <div id="siRNAViewer"></div>
-          
-          <div class="row" style="margin-top:8px">
-            <button class="btn green" onclick="exportSiRNAData()">⬇ Export Report</button>
-            <button class="btn" onclick="downloadSiRNASequences()">⬇ Sequences (FASTA)</button>
-            <button class="btn purple" onclick="dockSiRNAWithAgo2()">🧬 Dock with Ago2</button>
-          </div>
-        </div>
-        
-        <div>
-          <h3>Efficacy Breakdown</h3>
-          <div id="efficacyBreakdown" class="score" style="max-height:300px"></div>
-          
-          <h3 style="margin-top:12px">Off-Target Predictions</h3>
-          <div id="offTargetList" class="score" style="max-height:200px"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- lncRNA Analysis Tab -->
-<section id="lncRNATab" class="tabsec">
-  <div class="wrap">
+<!-- =============== Ligand Docking =============== -->
+<section id="ligTab" class="tabsec">
+  <div class="wrap grid">
     <div class="card">
-      <h2>📊 lncRNA Discovery & Interaction Modeling</h2>
-      <p class="small muted">Identify candidate lncRNAs, predict interactions with DNA/RNA/proteins, and analyze regulatory mechanisms across multiple genomes.</p>
-      
-      <div class="grid">
+      <h2>Receptor + Ligand</h2>
+      <div class="two">
         <div>
-          <h3>Genome Selection</h3>
-          <div class="row">
-            <label>Organism</label>
-            <select id="genomeSelect" onchange="updateGenomeInfo()">
-              <option value="human">Human (GRCh38/hg38)</option>
-              <option value="mouse">Mouse (GRCm39/mm39)</option>
-              <option value="rat">Rat (mRatBN7.2/rn7)</option>
-              <option value="zebrafish">Zebrafish (GRCz11)</option>
-              <option value="drosophila">Drosophila (BDGP6/dm6)</option>
-              <option value="celegans">C. elegans (WBcel235/ce11)</option>
-            </select>
-          </div>
-          <div id="genomeInfo" class="infobox small" style="margin-top:8px"></div>
-          
-          <h3 style="margin-top:16px">Search Parameters</h3>
-          <div class="row"><label>Target gene/pathway</label><input type="text" id="targetGene" placeholder="e.g., TP53, MAPK pathway" style="min-width:200px" /></div>
-          <div class="row"><label>Regulation type</label><select id="regulationType"><option value="CIS">Cis-acting (nearby genes)</option><option value="TRANS">Trans-acting (distant targets)</option><option value="BOTH">Both</option></select></div>
-          <div class="row"><label>Min length (nt)</label><input type="number" id="lncMinLen" value="200" min="200" /><label>Max length (nt)</label><input type="number" id="lncMaxLen" value="50000" /></div>
-          
-          <h3 style="margin-top:16px">Expression Context (Optional)</h3>
-          <div class="row"><label>Tissue type</label><select id="tissueType"><option value="ANY">Any tissue</option><option value="BRAIN">Brain</option><option value="LIVER">Liver</option><option value="HEART">Heart</option><option value="KIDNEY">Kidney</option><option value="LUNG">Lung</option><option value="TUMOR">Tumor</option></select></div>
-          <div class="row"><label>Disease context</label><input type="text" id="diseaseContext" placeholder="e.g., cancer, diabetes" /></div>
-          
-          <div class="row" style="margin-top:12px">
-            <button class="btn primary" onclick="searchLncRNA()">🔍 Search lncRNA Database</button>
-            <button class="btn purple" onclick="predictLncInteractions()">🧬 Predict Interactions</button>
-            <button class="btn" onclick="analyzeLncMechanism()">⚙️ Mechanism Analysis</button>
-          </div>
+          <h3>Receptor (PDB)</h3>
+          <div class="row"><input type="file" id="recFile" accept=".pdb,.ent,.txt"/><button class="btn" onclick="ligUseExampleReceptor()">Example</button></div>
+          <textarea id="recText" placeholder="Paste receptor PDB"></textarea>
+          <div class="row"><label>Chains</label><div id="recChainsBox" class="chainchips"></div><button class="btn" onclick="selectAllChains('REC')">All</button><button class="btn" onclick="clearChains('REC')">None</button></div>
+          <div id="recInfo" class="small muted">Parse to populate chain chips.</div>
+          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseReceptor()">🔎 Parse receptor</button></div>
         </div>
-        
         <div>
-          <h3>Custom lncRNA Sequence</h3>
-          <textarea id="customLncRNA" placeholder="Enter custom lncRNA sequence for analysis (FASTA format)
->my_lncRNA_1
-AUGCGAUCGAUCGAUC..."></textarea>
-          <div class="row"><input type="file" id="lncRNAFile" accept=".fasta,.fa,.txt" /><button class="btn" onclick="loadLncRNAFile()">Load File</button></div>
-          
-          <div class="row" style="margin-top:12px">
-            <button class="btn green" onclick="analyzCustomLncRNA()">Analyze Custom Sequence</button>
-            <button class="btn" onclick="predictSecondaryStructure()">2° Structure</button>
-          </div>
-          
-          <h3 style="margin-top:16px">Quick Stats</h3>
-          <div class="metric-grid">
-            <div class="metric-box"><div class="metric-label">Database Size</div><div class="metric-value" id="dbSize">-</div></div>
-            <div class="metric-box"><div class="metric-label">Matches Found</div><div class="metric-value" id="matchCount">-</div></div>
-            <div class="metric-box"><div class="metric-label">High Confidence</div><div class="metric-value" id="highConf">-</div></div>
-          </div>
+          <h3>Ligand (SDF/MOL/PDB)</h3>
+          <div class="row"><input type="file" id="ligFile" accept=".sdf,.mol,.pdb,.mol2,.txt"/><button class="btn" onclick="ligUseExampleLigand()">Example</button></div>
+          <textarea id="ligText" placeholder="Paste ligand SDF/MOL/PDB"></textarea>
+          <div id="ligInfo" class="small muted">Supports SDF V2000 (multi-molecule SDF loads first molecule here; use Screening tab for full batch).</div>
+          <div class="row" style="margin-top:6px"><button class="btn" onclick="parseLigand()">🔎 Parse ligand</button></div>
         </div>
       </div>
+
+      <h3 style="margin-top:10px">Parameters</h3>
+      <div class="row">
+        <label>Samples</label><input type="number" id="ligSamples" value="12000" min="500" step="500" />
+        <label>Max Δ (Å)</label><input type="number" id="ligMaxTrans" value="8" min="0" step="1" />
+        <label>Contact cutoff (Å)</label><input type="number" id="ligCut" value="4.2" step="0.1" />
+        <label>Clash factor</label><input type="number" id="ligClash" value="0.80" step="0.05" />
+        <label>Top poses</label><input type="number" id="ligTopN" value="30" min="1" max="100" />
+      </div>
+      <div class="row">
+        <label>Diversity (°/Å)</label><input type="number" id="ligDupA" value="12" step="1" /><input type="number" id="ligDupT" value="1.5" step="0.5" />
+        <label><input type="checkbox" id="ligSeedDet" checked/> Deterministic seed</label><label>Seed</label><input id="ligSeed" type="number" value="99"/>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="ligRunBtn" onclick="runLigDock()">▶️ Dock Ligand</button>
+        <button class="btn red" id="ligCancelBtn" onclick="cancelLig()" disabled>✖ Cancel</button>
+        <span class="pill" id="ligStatus">idle</span>
+        <progress id="ligProg" value="0" max="1"></progress>
+      </div>
     </div>
-    
-    <div class="card" style="margin-top:16px">
-      <h2>lncRNA Results</h2>
-      <div id="lncRNAResults"></div>
+
+    <div class="card">
+      <h2>Ligand Viewer & Poses</h2>
+      <div id="ligViewer"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn green" onclick="ligSnapshot()">📸 Snapshot</button>
+        <button class="btn" onclick="ligDownloadAll()">⬇ PDB (multi-model)</button>
+        <button class="btn" onclick="ligDownloadCSV()">⬇ CSV</button>
+      </div>
+      <h3 style="margin-top:10px">Pose Table</h3>
+      <table id="ligPoseTable"><thead>
+        <tr><th>#</th><th>Score</th><th>Contacts</th><th>Clash</th><th>HB</th><th>Hyd</th><th>Elec</th><th>Pseudo-ΔH</th><th>Actions</th></tr>
+      </thead><tbody id="ligPoseBody"></tbody></table>
     </div>
-    
-    <div class="grid" style="margin-top:16px">
-      <div class="card">
-        <h2>Interaction Visualization</h2>
-        <div id="lncViewer"></div>
-        <div class="row" style="margin-top:8px">
-          <button class="btn green" onclick="exportLncRNAReport()">⬇ Full Report</button>
-          <button class="btn" onclick="downloadInteractionNetwork()">⬇ Network Data</button>
+  </div>
+</section>
+
+<!-- =============== Screening =============== -->
+<section id="screenTab" class="tabsec">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>Throughput Screening (Ligand set → Receptor)</h2>
+      <div class="two">
+        <div>
+          <h3>Receptor (PDB)</h3>
+          <div class="row"><input type="file" id="scrRecFile" accept=".pdb,.ent,.txt"/><button class="btn" onclick="ligUseExampleReceptor(true)">Example</button></div>
+          <textarea id="scrRecText" placeholder="Paste receptor PDB"></textarea>
+          <div class="row"><label>Chains</label><div id="scrRecChainsBox" class="chainchips"></div><button class="btn" onclick="selectAllChains('SCRREC')">All</button><button class="btn" onclick="clearChains('SCRREC')">None</button></div>
+          <div id="scrRecInfo" class="small muted">Parse to populate chain chips.</div>
+          <div class="row" style="margin-top:6px"><button class="btn" onclick="scrParseReceptor()">🔎 Parse receptor</button></div>
+        </div>
+        <div>
+          <h3>Ligand Library</h3>
+          <div class="row"><input type="file" id="scrLigFile" accept=".sdf,.mol,.zip"/><button class="btn" onclick="scrUseExampleLib()">Example</button></div>
+          <div class="small muted">Upload multi-molecule <b>SDF</b> (recommended) or a <b>ZIP of SDFs</b>.</div>
         </div>
       </div>
-      
-      <div class="card">
-        <h2>Interaction Details</h2>
-        <div id="interactionDetails" class="score" style="max-height:300px"></div>
-        
-        <h3 style="margin-top:12px">Binding Predictions</h3>
-        <table id="bindingTable">
-          <thead><tr><th>Partner</th><th>Type</th><th>Score</th><th>Region</th></tr></thead>
-          <tbody id="bindingTableBody"></tbody>
-        </table>
+
+      <h3 style="margin-top:10px">Parameters</h3>
+      <div class="row">
+        <label>Samples per ligand</label><input type="number" id="scrSamples" value="6000" min="1000" step="500" />
+        <label>Max Δ (Å)</label><input type="number" id="scrMaxTrans" value="8" min="0" step="1" />
+        <label>Cutoff (Å)</label><input type="number" id="scrCut" value="4.2" step="0.1" />
+        <label>Clash</label><input type="number" id="scrClash" value="0.8" step="0.05" />
+        <label>Top per ligand</label><input type="number" id="scrTopN" value="3" min="1" max="10" />
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="scrSeedDet" checked/> Deterministic seed</label>
+        <label>Seed</label><input id="scrSeed" type="number" value="777"/>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="scrRunBtn" onclick="runScreen()">▶️ Run Screening</button>
+        <button class="btn red" id="scrCancelBtn" onclick="cancelScreen()" disabled>✖ Cancel</button>
+        <span class="pill" id="scrStatus">idle</span>
+        <progress id="scrProg" value="0" max="1"></progress>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Screening Viewer & Results</h2>
+      <div id="screenViewer"></div>
+      <h3 style="margin-top:10px">Top Hits</h3>
+      <table id="scrTable"><thead>
+        <tr><th>Rank</th><th>Ligand</th><th>Top Score</th><th>Contacts</th><th>Clash</th><th>HB</th><th>Hyd</th><th>Elec</th><th>Actions</th></tr>
+      </thead><tbody id="scrBody"></tbody></table>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="scrDownloadReport()">⬇ Screening Report (CSV)</button>
+        <button class="btn" onclick="scrDownloadBundle()">⬇ Results Bundle (.zip)</button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- TriPredict Tab (Simplified) -->
+<!-- =============== TriPredict (unchanged core) =============== -->
 <section id="triTab" class="tabsec">
   <div class="wrap">
     <div class="card">
-      <h2>TriPredict — 3 Theoretical Folds</h2>
+      <h2>TriPredict — Three Theoretical Folds (educational)</h2>
       <div class="two">
         <div>
-          <textarea id="triSeq" placeholder="Protein sequence..."></textarea>
-          <div class="row"><label>Method</label><select id="triMethod"><option value="SSMC">SSMC</option><option value="DG">DG</option></select><button class="btn primary" onclick="triGenerate()">Generate</button></div>
+          <textarea id="triSeq" placeholder="Protein sequence (one letter; spaces/newlines ok)"></textarea>
+          <div class="row" style="margin-top:6px">
+            <label>Method</label><select id="triMethod"><option value="SSMC">SSMC</option><option value="DG">Distance geometry</option><option value="HC">Hydrophobic collapse</option></select>
+            <button class="btn primary" onclick="triGenerate()">Generate 3 models</button>
+          </div>
+          <div class="row"><button class="btn" onclick="triSendToDock('A')">⬅ Send → A</button><button class="btn" onclick="triSendToDock('B')">Send → B ➡</button><span id="triSelMsg" class="small pill">none selected</span></div>
         </div>
         <div>
           <div class="trigrid">
-            <div><div id="triView1" class="triview"></div></div>
-            <div><div id="triView2" class="triview"></div></div>
-            <div><div id="triView3" class="triview"></div></div>
+            <div><div class="small muted">Model 1</div><div id="triView1" class="triview" data-idx="0" onclick="selectTri(0)"></div></div>
+            <div><div class="small muted">Model 2</div><div id="triView2" class="triview" data-idx="1" onclick="selectTri(1)"></div></div>
+            <div><div class="small muted">Model 3</div><div id="triView3" class="triview" data-idx="2" onclick="selectTri(2)"></div></div>
           </div>
+          <div class="row" style="margin-top:8px"><button class="btn" onclick="triDownloadAll()">⬇ PDBs</button><button class="btn green" onclick="triDockAll()">Dock all vs current B</button></div>
         </div>
       </div>
+      <div class="warn small">TriPredict is didactic (not AlphaFold). Validate externally for decisions.</div>
     </div>
   </div>
 </section>
 
-<!-- Sequence → PDB Tab (Simplified) -->
+<!-- =============== Seq→PDB =============== -->
 <section id="seqTab" class="tabsec">
   <div class="wrap grid">
     <div class="card">
-      <h2>Sequence → PDB Builder</h2>
-      <textarea id="seqInput" placeholder="Protein sequence..."></textarea>
-      <div class="row"><label>Preset</label><select id="ssPreset"><option value="HELIX">Helix</option><option value="STRAND">Strand</option></select><button class="btn green" onclick="seqPreview()">Preview</button><button class="btn primary" onclick="seqDownload()">Download</button></div>
+      <h2>Sequence → PDB (quick builder)</h2>
+      <textarea id="seqInput" placeholder=">optional FASTA header
+EVQLVESGGGLVQPGGSLRLSC..."></textarea>
+      <div class="row" style="margin-top:6px">
+        <label>Chain</label><input type="text" id="seqChain" value="A" style="width:70px"/>
+        <label>Start</label><input type="number" id="seqStart" value="1" min="1"/>
+        <label>Atoms</label><select id="seqAtoms"><option value="CA">CA</option><option value="BB">Backbone</option></select>
+      </div>
+      <div class="row">
+        <label>Preset</label><select id="ssPreset"><option value="HELIX">Helix</option><option value="STRAND">Strand</option><option value="COIL">Coil</option></select>
+        <label>Helix radius</label><input type="number" id="seqRadius" value="2.3" step="0.1"/>
+        <label>Rise/res (Å)</label><input type="number" id="seqRise" value="1.5" step="0.1"/>
+      </div>
+      <div class="row" style="margin-top:8px"><button class="btn" onclick="seqPreview()">👁️ Preview</button><button class="btn primary" onclick="seqDownload()">⬇ Download PDB</button></div>
+    </div>
+    <div class="card"><div id="seqViewer"></div></div>
+  </div>
+</section>
+
+<!-- =============== QA & Runs =============== -->
+<section id="qaTab" class="tabsec">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>QA Mode</h2>
+      <div class="row">
+        <label><input type="checkbox" id="qaToggle" onchange="toggleQA()"> Enable QA Mode</label>
+        <span class="pill" id="qaRunId">RUN: —</span>
+        <button class="btn orange" onclick="qaFreeze()">🔒 Freeze parameters</button>
+        <button class="btn" onclick="qaUnfreeze()">🔓 QA unlock (logged)</button>
+      </div>
+      <div class="info small">QA Mode: freezes inputs; derives deterministic seed; stamps a Run ID into filenames, PDB REMARKs & audit bundle; logs every change; stores runs locally.</div>
+      <div id="qaLog" class="score" style="max-height:160px;margin-top:8px"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="qaExportLog()">⬇ QA Log</button>
+      </div>
     </div>
     <div class="card">
-      <div id="seqViewer"></div>
+      <h2>Stored Runs</h2>
+      <div class="row"><button class="btn" onclick="runsRefresh()">🔄 Refresh</button><button class="btn" onclick="runsExport()">⬇ Export All (JSON)</button><button class="btn red" onclick="runsClear()">🗑️ Clear All</button></div>
+      <table id="runsTable" style="margin-top:8px"><thead>
+        <tr><th>Run ID</th><th>Type</th><th>Date</th><th>Seed</th><th>Notes</th><th>Actions</th></tr>
+      </thead><tbody id="runsBody"></tbody></table>
     </div>
   </div>
 </section>
 
-<footer class="wrap" style="padding:20px 16px;color:var(--muted);text-align:center">Advanced In-Silico Biology Studio • All computations client-side • v2.0.0</footer>
+<!-- =============== About & Safety =============== -->
+<section id="aboutTab" class="tabsec">
+  <div class="wrap">
+    <div class="card">
+      <h2>About & Safety</h2>
+      <div class="info">All computations are client-side. Scoring (contacts, clashes, hydrophobics, Coulombic residue charge) & “pseudo-enthalpy” are educational and not calibrated ΔG. Export PDBs for refinement/validation in standard pipelines.</div>
+      <div class="warn">This app avoids interactive sequence-design of biological agents. Docking/folding tools provided here are for visualization, education, and hypothesis generation, not clinical decision-making.</div>
+      <div class="small muted">© You • v3.2 • No server</div>
+    </div>
+  </div>
+</section>
 
+<footer class="wrap" style="padding:20px 16px;color:var(--muted);text-align:center">
+  In-Browser Docking • Ligand Docking • Screening • QA & Runs • TriPredict — All client-side
+</footer>
+
+<!-- libs -->
 <script src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <script>
-/* ===== Core Globals ===== */
-let viewer=null, seqViewer=null, siRNAViewer=null, lncViewer=null, triViewers=[null,null,null];
-let pdbA=null,pdbB=null,pdbAAtoms=[],pdbBAtoms=[],pdbAAllAtoms=[],pdbBAllAtoms=[];
-let posesTop=[],currentPose=null,currentA=null,currentB0=null;
-let siRNACandidates=[],selectedSiRNA=null;
-let lncRNAResults=[],selectedLncRNA=null;
-let triModels=[];
+/* =========================================================
+   Core State / Globals
+========================================================= */
+let viewer=null, ligViewer=null, screenViewer=null, seqViewer=null, triViewers=[null,null,null];
+let pdbAAll=[], pdbBAll=[], pdbAText="", pdbBText="", pdbAAtoms=[], pdbBAtoms=[];
+let currentA=null, currentB0=null, posesTop=[], currentPose=null;
+let workerPool=[], cancelled=false, inProgress=false, heavyUsed=false;
+let qaMode=false, qaFrozen=false, qaRunId=null;
+const APP_VER="3.2";
+const vdw = {H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
+const hydrophobic = new Set(['ALA','VAL','LEU','ILE','PRO','PHE','MET','TRP','TYR','CYS']);
+function status(msg){ document.getElementById('statusPill').textContent = msg; }
+function setProgress(frac){ const el=document.getElementById('prog'); el.value=Math.max(0,Math.min(1,frac||0)); }
+function logLine(s){ const box=document.getElementById('runLog'); const t=new Date().toISOString().replace('T',' ').replace('Z',''); box.textContent += `[${t}] ${s}\n`; box.scrollTop=box.scrollHeight; qaLog(`RUN: ${s}`); }
+function qaLog(s){ const box=document.getElementById('qaLog'); const t=new Date().toISOString().replace('T',' ').replace('Z',''); box.textContent += `[${t}] ${s}\n`; box.scrollTop=box.scrollHeight; }
+function centroid(pts){ let sx=0,sy=0,sz=0; for(const p of pts){ sx+=p.x; sy+=p.y; sz+=p.z; } const n=pts.length||1; return {x:sx/n,y:sy/n,z:sz/n}; }
+function translate(points, v){ return points.map(p=>({...p, x:p.x+v.x, y:p.y+v.y, z:p.z+v.z })); }
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+async function sha256Hex(str){ const enc=new TextEncoder().encode(str); const buf=await crypto.subtle.digest('SHA-256', enc); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+function hashToSeed(hex){ const n = parseInt(hex.slice(0,8), 16) >>> 0; return n % 2147483647; }
 
-/* ===== Genome Database (Simulated) ===== */
-const GENOME_DATA = {
-  human: {name: 'Human', assembly: 'GRCh38/hg38', lncCount: 17957, genes: 20000},
-  mouse: {name: 'Mouse', assembly: 'GRCm39/mm39', lncCount: 12500, genes: 22000},
-  rat: {name: 'Rat', assembly: 'mRatBN7.2/rn7', lncCount: 8000, genes: 22000},
-  zebrafish: {name: 'Zebrafish', assembly: 'GRCz11', lncCount: 5000, genes: 25000},
-  drosophila: {name: 'Drosophila', assembly: 'BDGP6/dm6', lncCount: 2500, genes: 17000},
-  celegans: {name: 'C. elegans', assembly: 'WBcel235/ce11', lncCount: 1500, genes: 20000}
-};
-
-/* Simulated lncRNA database entries */
-const LNCRNA_DATABASE = [
-  {id: 'MALAT1', name: 'Metastasis Associated Lung Adenocarcinoma Transcript 1', length: 8708, mechanism: 'Nuclear speckle organization, splicing regulation', targets: ['SRSF1', 'SRSF2'], tissue: 'Ubiquitous', disease: 'Cancer'},
-  {id: 'XIST', name: 'X Inactive Specific Transcript', length: 19200, mechanism: 'X-chromosome inactivation', targets: ['PRC2', 'SHARP'], tissue: 'Female cells', disease: 'X-linked disorders'},
-  {id: 'HOTAIR', name: 'HOX Transcript Antisense RNA', length: 2364, mechanism: 'Chromatin remodeling, PRC2 recruitment', targets: ['PRC2', 'LSD1', 'HOXD'], tissue: 'Multiple', disease: 'Cancer metastasis'},
-  {id: 'H19', name: 'H19 Imprinted Maternally Expressed Transcript', length: 2362, mechanism: 'miRNA reservoir, cell proliferation', targets: ['IGF2', 'let-7'], tissue: 'Embryonic, tumor', disease: 'Cancer, growth disorders'},
-  {id: 'NEAT1', name: 'Nuclear Paraspeckle Assembly Transcript 1', length: 3771, mechanism: 'Paraspeckle formation', targets: ['SFPQ', 'NONO'], tissue: 'Ubiquitous', disease: 'Viral infection, cancer'},
-  {id: 'MEG3', name: 'Maternally Expressed 3', length: 1688, mechanism: 'Tumor suppressor, p53 activation', targets: ['p53', 'MDM2'], tissue: 'Multiple', disease: 'Cancer'},
-];
-
-window.addEventListener('DOMContentLoaded', initApp);
-
-function initApp() {
+/* =========================================================
+   Tabs & Viewers
+========================================================= */
+window.addEventListener('DOMContentLoaded', ()=>{
   setupTabs();
-  ensureMainViewer();
-  updateGenomeInfo();
-  document.getElementById('dbSize').textContent = LNCRNA_DATABASE.length;
-}
-
-/* ===== Tab System ===== */
-function setupTabs() {
-  document.querySelectorAll('.tabbtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tabbtn').forEach(b => b.classList.remove('active'));
+  ensureMainViewer(); ensureLigViewer(); ensureScreenViewer();
+  logLine('App ready.');
+  runsRefresh();
+});
+window.addEventListener('resize', ()=>{
+  const active = document.querySelector('.tabsec.active')?.id;
+  if (active==='dockTab') { viewer?.resize(); viewer?.render(); }
+  if (active==='ligTab')  { ligViewer?.resize(); ligViewer?.render(); }
+  if (active==='screenTab')  { screenViewer?.resize(); screenViewer?.render(); }
+  if (active==='seqTab')  { seqViewer?.resize(); seqViewer?.render(); }
+  if (active==='triTab')  { triViewers.forEach(v=>{v?.resize(); v?.render();}); }
+});
+function setupTabs(){
+  document.querySelectorAll('.tabbtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      document.querySelectorAll('.tabsec').forEach(s => s.classList.remove('active'));
-      document.getElementById(btn.dataset.tab).classList.add('active');
-      
-      // Initialize viewers as needed
-      if (btn.dataset.tab === 'dockTab' && viewer) { viewer.resize(); viewer.render(); }
-      if (btn.dataset.tab === 'siRNATab') { ensureSiRNAViewer(); }
-      if (btn.dataset.tab === 'lncRNATab') { ensureLncViewer(); }
-      if (btn.dataset.tab === 'triTab') { ensureTriViewers(); }
-      if (btn.dataset.tab === 'seqTab') { ensureSeqViewer(); }
+      document.querySelectorAll('.tabsec').forEach(s=>s.classList.remove('active'));
+      const tab = document.getElementById(btn.dataset.tab); tab.classList.add('active');
+      if (tab.id==='dockTab') { ensureMainViewer(); viewer.resize(); viewer.render(); }
+      if (tab.id==='ligTab')  { ensureLigViewer(); ligViewer.resize(); ligViewer.render(); }
+      if (tab.id==='screenTab')  { ensureScreenViewer(); screenViewer.resize(); screenViewer.render(); }
+      if (tab.id==='seqTab')  { ensureSeqViewer(); seqViewer.resize(); seqViewer.render(); }
+      if (tab.id==='triTab')  { ensureTriViewers(); triViewers.forEach(v=>{v.resize(); v.render();}); }
     });
   });
 }
-
-/* ===== Viewer Management ===== */
-function ensureMainViewer() {
-  if (viewer) return;
-  viewer = $3Dmol.createViewer(document.getElementById('viewer'), {backgroundColor: '#0a0f1a'});
-  setTimeout(() => { viewer.resize(); viewer.render(); }, 100);
+function ensureMainViewer(){ if (viewer) return; viewer=$3Dmol.createViewer(document.getElementById('viewer'),{backgroundColor:'#0a0f1a'}); }
+function ensureLigViewer(){ if (ligViewer) return; ligViewer=$3Dmol.createViewer(document.getElementById('ligViewer'),{backgroundColor:'#0a0f1a'}); }
+function ensureScreenViewer(){ if (screenViewer) return; screenViewer=$3Dmol.createViewer(document.getElementById('screenViewer'),{backgroundColor:'#0a0f1a'}); }
+function ensureSeqViewer(){ if (seqViewer) return; seqViewer=$3Dmol.createViewer(document.getElementById('seqViewer'),{backgroundColor:'#0a0f1a'}); }
+function ensureTriViewers(){ if (triViewers[0]) return;
+  triViewers[0]=$3Dmol.createViewer(document.getElementById('triView1'),{backgroundColor:'#0a0f1a'});
+  triViewers[1]=$3Dmol.createViewer(document.getElementById('triView2'),{backgroundColor:'#0a0f1a'});
+  triViewers[2]=$3Dmol.createViewer(document.getElementById('triView3'),{backgroundColor:'#0a0f1a'});
 }
 
-function ensureSiRNAViewer() {
-  if (siRNAViewer) return;
-  siRNAViewer = $3Dmol.createViewer(document.getElementById('siRNAViewer'), {backgroundColor: '#0a0f1a'});
-  setTimeout(() => { siRNAViewer.resize(); siRNAViewer.render(); }, 100);
-}
-
-function ensureLncViewer() {
-  if (lncViewer) return;
-  lncViewer = $3Dmol.createViewer(document.getElementById('lncViewer'), {backgroundColor: '#0a0f1a'});
-  setTimeout(() => { lncViewer.resize(); lncViewer.render(); }, 100);
-}
-
-function ensureSeqViewer() {
-  if (seqViewer) return;
-  seqViewer = $3Dmol.createViewer(document.getElementById('seqViewer'), {backgroundColor: '#0a0f1a'});
-}
-
-function ensureTriViewers() {
-  if (triViewers[0]) return;
-  triViewers[0] = $3Dmol.createViewer(document.getElementById('triView1'), {backgroundColor: '#0a0f1a'});
-  triViewers[1] = $3Dmol.createViewer(document.getElementById('triView2'), {backgroundColor: '#0a0f1a'});
-  triViewers[2] = $3Dmol.createViewer(document.getElementById('triView3'), {backgroundColor: '#0a0f1a'});
-}
-
-/* ===== siRNA Design Functions ===== */
-function cleanSequence(seq) {
-  return seq.toUpperCase().replace(/[^ACGTU]/g, '').replace(/U/g, 'T');
-}
-
-function loadMRNAFile() {
-  const file = document.getElementById('mrnaFile').files[0];
-  if (!file) return alert('Select a file first');
-  file.text().then(text => {
-    const lines = text.split(/\r?\n/).filter(l => !l.startsWith('>'));
-    document.getElementById('targetMRNA').value = lines.join('');
-  });
-}
-
-function calculateGC(seq) {
-  const gc = (seq.match(/[GC]/g) || []).length;
-  return (gc / seq.length * 100).toFixed(1);
-}
-
-function designSiRNA() {
-  const mrna = cleanSequence(document.getElementById('targetMRNA').value);
-  if (mrna.length < 50) return alert('Target mRNA must be at least 50 nucleotides');
-  
-  const len = parseInt(document.getElementById('siRNALength').value);
-  const gcMin = parseInt(document.getElementById('gcMin').value);
-  const gcMax = parseInt(document.getElementById('gcMax').value);
-  const maxCand = parseInt(document.getElementById('maxCandidates').value);
-  const posPref = document.getElementById('positionPref').value;
-  
-  document.getElementById('siRNAProgress').style.display = 'block';
-  document.getElementById('siRNAProgress').textContent = 'Scanning target sequence for optimal siRNA sites...';
-  
-  siRNACandidates = [];
-  
-  // Scan mRNA for candidate sites
-  for (let i = 0; i <= mrna.length - len; i++) {
-    const sense = mrna.substring(i, i + len);
-    const antisense = reverseComplement(sense);
-    const gc = parseFloat(calculateGC(sense));
-    
-    // Apply filters
-    if (gc < gcMin || gc > gcMax) continue;
-    
-    // Position preference
-    let posScore = 1.0;
-    if (posPref === '50-100' && (i < 50 || i > 100)) posScore = 0.3;
-    if (posPref === '100-500' && (i < 100 || i > 500)) posScore = 0.3;
-    if (posPref === 'OPTIMAL' && !(mrna[i] === 'A' && mrna[i+1] === 'A')) posScore = 0.5;
-    
-    // Calculate efficacy score (simplified Reynolds rules)
-    let efficacy = 50;
-    
-    // GC content preference (30-52% optimal)
-    if (gc >= 30 && gc <= 52) efficacy += 10;
-    else efficacy -= Math.abs(gc - 41) * 0.5;
-    
-    // Position 19 (should be A/U)
-    if (sense[18] === 'A' || sense[18] === 'T') efficacy += 5;
-    
-    // Position 3 (should be A)
-    if (sense[2] === 'A') efficacy += 3;
-    
-    // Position 10 (should not be G/C)
-    if (sense[9] !== 'G' && sense[9] !== 'C') efficacy += 3;
-    
-    // Internal repeats penalty
-    if (/(.{4,})\1/.test(sense)) efficacy -= 15;
-    
-    // Poly runs penalty
-    if (/AAAA|TTTT|GGGG|CCCC/.test(sense)) efficacy -= 10;
-    
-    // Thermodynamic asymmetry (5' end of antisense should be weaker)
-    const deltaG5prime = calculateSimpleDeltaG(antisense.substring(0, 7));
-    const deltaG3prime = calculateSimpleDeltaG(antisense.substring(14, 21));
-    if (deltaG5prime > deltaG3prime) efficacy += 8;
-    
-    efficacy *= posScore;
-    efficacy = Math.max(0, Math.min(100, efficacy));
-    
-    siRNACandidates.push({
-      position: i + 1,
-      sense: sense,
-      antisense: antisense,
-      gc: gc,
-      efficacy: efficacy.toFixed(1),
-      deltaG: (deltaG5prime + deltaG3prime).toFixed(2),
-      offTargets: Math.floor(Math.random() * 15) // Simulated
-    });
-    
-    if (siRNACandidates.length >= maxCand * 3) break;
+/* =========================================================
+   PDB Parsing + Chains
+========================================================= */
+function parsePDB(text){
+  const out=[]; const lines=text.split(/\r?\n/);
+  for(const ln of lines){
+    if (ln.startsWith('ATOM') || ln.startsWith('HETATM')){
+      const name=ln.substring(12,16).trim();
+      const resn=ln.substring(17,20).trim();
+      const chain=(ln.substring(21,22).trim()||'A');
+      const resi=parseInt(ln.substring(22,26));
+      const x=parseFloat(ln.substring(30,38));
+      const y=parseFloat(ln.substring(38,46));
+      const z=parseFloat(ln.substring(46,54));
+      const elem = ln.length>=78 ? (ln.substring(76,78).trim() || name[0]) : name[0];
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z))
+        out.push({name,resn,chain,resi,x,y,z,elem:elem.toUpperCase()});
+    }
   }
-  
-  // Sort by efficacy
-  siRNACandidates.sort((a, b) => parseFloat(b.efficacy) - parseFloat(a.efficacy));
-  siRNACandidates = siRNACandidates.slice(0, maxCand);
-  
-  displaySiRNACandidates();
-  document.getElementById('siRNAProgress').textContent = `Found ${siRNACandidates.length} high-quality siRNA candidates`;
+  return out;
 }
+function summarizeChains(atoms){
+  const m=new Map(); for(const a of atoms){ if(!m.has(a.chain)) m.set(a.chain,{count:0,ca:0}); const s=m.get(a.chain); s.count++; if(a.name==='CA') s.ca++; }
+  return Array.from(m.entries()).map(([id,info])=>({id,...info}));
+}
+function renderChainChips(which, atoms){
+  const box = document.getElementById(
+    which==='A'?'chainsABox': which==='B'?'chainsBBox': which==='REC'?'recChainsBox': 'scrRecChainsBox');
+  if (!box) return;
+  const chains = summarizeChains(atoms);
+  box.innerHTML = chains.map(c=>`
+    <label class="chainchip"><input type="checkbox" data-which="${which}" data-chain="${c.id}" checked />
+      <span>${c.id}</span><span class="small muted">${c.count} atoms${c.ca?`, ${c.ca} CA`:''}</span>
+    </label>`).join('');
+}
+function selectedChains(which){
+  const id = which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox';
+  const box = document.getElementById(id); if (!box) return new Set();
+  const cbs = [...box.querySelectorAll('input[type=checkbox]')];
+  if (!cbs.length) return new Set();
+  return new Set(cbs.filter(cb=>cb.checked).map(cb=>cb.dataset.chain));
+}
+function selectAllChains(which){ const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox'); if(!box) return; box.querySelectorAll('input').forEach(cb=>cb.checked=true); }
+function clearChains(which){ const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox'); if(!box) return; box.querySelectorAll('input').forEach(cb=>cb.checked=false); }
 
-function calculateSimpleDeltaG(seq) {
-  // Simplified nearest-neighbor thermodynamics
-  const nn = {
-    'AA': -1.0, 'AT': -0.9, 'TA': -0.6, 'TT': -1.0,
-    'CA': -1.5, 'GT': -1.5, 'CT': -1.3, 'GA': -1.3,
-    'CG': -2.4, 'GC': -2.2, 'GG': -1.8, 'CC': -1.8,
-    'AC': -1.4, 'TC': -1.3, 'AG': -1.3, 'TG': -1.4
+/* =========================================================
+   Deterministic Seed
+========================================================= */
+async function deriveSeed(){
+  const p = {
+    samples:+document.getElementById('samples').value, maxTrans:+document.getElementById('maxTrans').value,
+    contactCut:+document.getElementById('contactCut').value, clashFactor:+document.getElementById('clashFactor').value,
+    wContact:+document.getElementById('wContact').value, wClash:+document.getElementById('wClash').value,
+    soft:+document.getElementById('soft').value, topN:+document.getElementById('topN').value,
+    atomMode:document.getElementById('atomMode').value, rescoreMode:document.getElementById('rescoreMode').value,
+    abMode:document.getElementById('abMode').checked
   };
-  
-  let dG = 0;
-  for (let i = 0; i < seq.length - 1; i++) {
-    const pair = seq[i] + seq[i + 1];
-    dG += (nn[pair] || -1.0);
-  }
-  return dG;
+  const concat = (pdbAText||'')+'\n---\n'+(pdbBText||'')+'\n---\n'+JSON.stringify(p);
+  const hex = await sha256Hex(concat);
+  const seed = hashToSeed(hex);
+  document.getElementById('seed').value = seed;
+  document.getElementById('seedMsg').textContent = `SHA-256=${hex.slice(0,16)}… → seed=${seed}`;
+  logLine(`Derived seed=${seed}`);
 }
 
-function reverseComplement(seq) {
-  const comp = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'};
-  return seq.split('').reverse().map(n => comp[n] || n).join('');
-}
-
-function displaySiRNACandidates() {
-  const container = document.getElementById('siRNACandidates');
-  if (siRNACandidates.length === 0) {
-    container.innerHTML = '<p class="muted">No candidates found. Adjust parameters and try again.</p>';
-    return;
-  }
-  
-  container.innerHTML = siRNACandidates.map((cand, idx) => `
-    <div class="siRNA-candidate" onclick="selectSiRNA(${idx})">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span><b>siRNA-${idx + 1}</b> | Position ${cand.position}</span>
-        <span class="pill" style="background:${cand.efficacy > 70 ? '#047857' : cand.efficacy > 50 ? '#b45309' : '#7f1d1d'}">${cand.efficacy}% efficacy</span>
-      </div>
-      <div class="seq-display" style="margin-top:6px;font-size:11px">
-        <div>Sense: ${cand.sense.split('').map(nt => `<span class="nt ${nt==='G'||nt==='C'?'gc':'au'}">${nt}</span>`).join('')}</div>
-        <div>Anti:  ${cand.antisense.split('').map(nt => `<span class="nt ${nt==='G'||nt==='C'?'gc':'au'}">${nt}</span>`).join('')}</div>
-      </div>
-      <div class="small muted" style="margin-top:4px">GC: ${cand.gc}% | ΔG: ${cand.deltaG} kcal/mol | Off-targets: ${cand.offTargets}</div>
-    </div>
-  `).join('');
-}
-
-function selectSiRNA(idx) {
-  selectedSiRNA = siRNACandidates[idx];
-  
-  // Update UI
-  document.querySelectorAll('.siRNA-candidate').forEach((el, i) => {
-    el.classList.toggle('selected', i === idx);
-  });
-  
-  // Display detailed analysis
-  document.getElementById('siRNASeqDisplay').innerHTML = `
-    <div><b>Sense strand (5'→3'):</b><br>${selectedSiRNA.sense.split('').map(nt => `<span class="nt ${nt==='G'||nt==='C'?'gc':'au'}">${nt}</span>`).join('')}</div>
-    <div style="margin-top:8px"><b>Antisense/guide strand (5'→3'):</b><br>${selectedSiRNA.antisense.split('').map(nt => `<span class="nt ${nt==='G'||nt==='C'?'gc':'au'}">${nt}</span>`).join('')}</div>
-    <div style="margin-top:8px" class="small muted">Target position: ${selectedSiRNA.position}</div>
-  `;
-  
-  document.getElementById('efficacyScore').textContent = selectedSiRNA.efficacy + '%';
-  document.getElementById('gcContent').textContent = selectedSiRNA.gc + '%';
-  document.getElementById('deltaG').textContent = selectedSiRNA.deltaG;
-  document.getElementById('offTargets').textContent = selectedSiRNA.offTargets;
-  
-  displayEfficacyBreakdown();
-  displayOffTargets();
-  visualizeSiRNAStructure();
-}
-
-function displayEfficacyBreakdown() {
-  const breakdown = `
-Efficacy Score Breakdown (Simplified Reynolds et al. rules):
-
-• Overall Score: ${selectedSiRNA.efficacy}% ${parseFloat(selectedSiRNA.efficacy) > 70 ? '✓ Excellent' : parseFloat(selectedSiRNA.efficacy) > 50 ? '○ Good' : '✗ Poor'}
-• GC Content: ${selectedSiRNA.gc}% ${selectedSiRNA.gc >= 30 && selectedSiRNA.gc <= 52 ? '✓ Optimal' : '○ Suboptimal'}
-• Thermodynamic Asymmetry: ${parseFloat(selectedSiRNA.deltaG) < -15 ? '✓ Good' : '○ Fair'}
-• Position ${selectedSiRNA.position}: ${selectedSiRNA.position >= 50 && selectedSiRNA.position <= 500 ? '✓ Optimal range' : '○ Acceptable'}
-• No poly(A/T/G/C) runs: ✓
-• No internal repeats: ✓
-
-Predicted Gene Silencing: ${parseFloat(selectedSiRNA.efficacy) > 70 ? '>80%' : parseFloat(selectedSiRNA.efficacy) > 50 ? '60-80%' : '40-60%'}
-Recommended: ${parseFloat(selectedSiRNA.efficacy) > 60 ? 'YES - Proceed to validation' : 'Consider higher-scoring candidates'}
-  `.trim();
-  
-  document.getElementById('efficacyBreakdown').textContent = breakdown;
-}
-
-function displayOffTargets() {
-  const offTargetHtml = `
-Off-Target Analysis (Simulated):
-
-Total predicted off-targets: ${selectedSiRNA.offTargets}
-• Perfect seed matches (2-8): ${Math.floor(selectedSiRNA.offTargets * 0.1)}
-• Seed + supplementary: ${Math.floor(selectedSiRNA.offTargets * 0.3)}
-• Other potential sites: ${Math.floor(selectedSiRNA.offTargets * 0.6)}
-
-Risk Assessment: ${selectedSiRNA.offTargets < 5 ? 'LOW ✓' : selectedSiRNA.offTargets < 15 ? 'MODERATE ○' : 'HIGH ✗'}
-
-Top potential off-target genes (ranked by complementarity):
-1. Gene_XYZ123 (chr1:12345678) - 18/21 match
-2. Gene_ABC456 (chr5:87654321) - 17/21 match
-3. Gene_DEF789 (chr9:45678901) - 16/21 match
-
-Note: Experimental validation recommended via microarray or RNA-seq
-  `.trim();
-  
-  document.getElementById('offTargetList').textContent = offTargetHtml;
-}
-
-function visualizeSiRNAStructure() {
-  ensureSiRNAViewer();
-  siRNAViewer.clear();
-  
-  // Create simple RNA duplex visualization
-  const atoms = [];
-  const len = selectedSiRNA.sense.length;
-  
-  for (let i = 0; i < len; i++) {
-    // Sense strand
-    atoms.push({
-      x: i * 0.25,
-      y: 0,
-      z: 0,
-      elem: 'P',
-      resn: selectedSiRNA.sense[i],
-      chain: 'S',
-      resi: i + 1
-    });
-    
-    // Antisense strand
-    atoms.push({
-      x: i * 0.25,
-      y: 1.5,
-      z: 0,
-      elem: 'P',
-      resn: selectedSiRNA.antisense[len - 1 - i],
-      chain: 'A',
-      resi: i + 1
-    });
-  }
-  
-  const pdb = formatSimplePDB(atoms);
-  siRNAViewer.addModel(pdb, 'pdb');
-  siRNAViewer.setStyle({chain: 'S'}, {stick: {color: '#60a5fa'}});
-  siRNAViewer.setStyle({chain: 'A'}, {stick: {color: '#f97316'}});
-  siRNAViewer.zoomTo();
-  siRNAViewer.render();
-}
-
-function formatSimplePDB(atoms) {
-  let out = [];
-  atoms.forEach((a, i) => {
-    const x = a.x.toFixed(3).padStart(8, ' ');
-    const y = a.y.toFixed(3).padStart(8, ' ');
-    const z = a.z.toFixed(3).padStart(8, ' ');
-    const elem = (a.elem || 'C').padStart(2, ' ');
-    const resn = (a.resn || 'NUC').padStart(3, ' ');
-    const chain = a.chain || 'A';
-    const resi = (a.resi || 1).toString().padStart(4, ' ');
-    out.push(`ATOM  ${(i + 1).toString().padStart(5, ' ')}  P   ${resn} ${chain}${resi}    ${x}${y}${z} 1.00  0.00          ${elem}`);
-  });
-  out.push('END');
-  return out.join('\n');
-}
-
-function predictEfficacy() {
-  if (siRNACandidates.length === 0) return alert('Design siRNA candidates first');
-  alert('Efficacy prediction complete! Scores shown for each candidate based on:\n\n• Thermodynamic properties\n• Position effects\n• Sequence composition\n• Reynolds et al. rules\n\nSelect a candidate to view detailed breakdown.');
-}
-
-function analyzeOfftargets() {
-  if (siRNACandidates.length === 0) return alert('Design siRNA candidates first');
-  alert('Off-target analysis complete!\n\nUsing seed-match algorithms to predict potential off-target genes. Results shown for each candidate.\n\nNote: This is a simulated analysis. For actual therapeutics, use comprehensive databases (TargetScan, BLAST, etc.)');
-}
-
-function exportSiRNAData() {
-  if (!selectedSiRNA) return alert('Select a siRNA first');
-  
-  const report = `siRNA DESIGN REPORT
-=====================
-
-TARGET INFORMATION
-------------------
-Target mRNA position: ${selectedSiRNA.position}
-
-SEQUENCES
----------
-Sense strand (5'→3'):     ${selectedSiRNA.sense}
-Antisense/guide (5'→3'):  ${selectedSiRNA.antisense}
-
-EFFICACY METRICS
-----------------
-Overall Efficacy Score: ${selectedSiRNA.efficacy}%
-GC Content: ${selectedSiRNA.gc}%
-Thermodynamic ΔG: ${selectedSiRNA.deltaG} kcal/mol
-Predicted Off-targets: ${selectedSiRNA.offTargets}
-
-RECOMMENDATION
---------------
-${parseFloat(selectedSiRNA.efficacy) > 60 ? 'PROCEED - This siRNA shows high predicted efficacy' : 'CONSIDER ALTERNATIVES - Lower efficacy score'}
-
-Generated: ${new Date().toISOString()}
-Platform: Advanced In-Silico Biology Studio
-`;
-  
-  const blob = new Blob([report], {type: 'text/plain'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `siRNA_report_${Date.now()}.txt`;
-  a.click();
-}
-
-function downloadSiRNASequences() {
-  if (siRNACandidates.length === 0) return alert('Design siRNA candidates first');
-  
-  let fasta = '';
-  siRNACandidates.forEach((cand, idx) => {
-    fasta += `>siRNA_${idx + 1}_sense | pos:${cand.position} | efficacy:${cand.efficacy}%\n`;
-    fasta += `${cand.sense}\n`;
-    fasta += `>siRNA_${idx + 1}_antisense | pos:${cand.position} | efficacy:${cand.efficacy}%\n`;
-    fasta += `${cand.antisense}\n\n`;
-  });
-  
-  const blob = new Blob([fasta], {type: 'text/plain'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `siRNA_sequences_${Date.now()}.fasta`;
-  a.click();
-}
-
-function dockSiRNAWithAgo2() {
-  if (!selectedSiRNA) return alert('Select a siRNA first');
-  alert('siRNA-Ago2 Docking Module\n\nThis would perform molecular docking of the selected siRNA guide strand with the Argonaute-2 (Ago2) protein to predict binding mode and cleavage site.\n\nIn a full implementation, this would:\n• Load Ago2 structure (PDB: 4W5N or similar)\n• Position guide RNA in the binding channel\n• Calculate binding energy\n• Predict target cleavage position\n• Visualize the complex in 3D\n\nConsider implementing with actual Ago2 structures from PDB!');
-}
-
-/* ===== lncRNA Analysis Functions ===== */
-function updateGenomeInfo() {
-  const genome = document.getElementById('genomeSelect').value;
-  const data = GENOME_DATA[genome];
-  document.getElementById('genomeInfo').innerHTML = `
-    <b>${data.name}</b> | Assembly: ${data.assembly}<br>
-    Known lncRNAs: ~${data.lncCount.toLocaleString()} | Protein-coding genes: ~${data.genes.toLocaleString()}
-  `;
-  document.getElementById('dbSize').textContent = data.lncCount;
-}
-
-function loadLncRNAFile() {
-  const file = document.getElementById('lncRNAFile').files[0];
-  if (!file) return alert('Select a file first');
-  file.text().then(text => {
-    document.getElementById('customLncRNA').value = text;
-  });
-}
-
-function searchLncRNA() {
-  const genome = document.getElementById('genomeSelect').value;
-  const target = document.getElementById('targetGene').value.trim();
-  const regType = document.getElementById('regulationType').value;
-  const tissue = document.getElementById('tissueType').value;
-  const disease = document.getElementById('diseaseContext').value.trim().toLowerCase();
-  
-  if (!target && !disease) {
-    return alert('Enter a target gene/pathway or disease context');
-  }
-  
-  // Filter database
-  lncRNAResults = LNCRNA_DATABASE.filter(lnc => {
-    let match = true;
-    
-    if (target) {
-      const targetLower = target.toLowerCase();
-      match = match && (
-        lnc.name.toLowerCase().includes(targetLower) ||
-        lnc.mechanism.toLowerCase().includes(targetLower) ||
-        lnc.targets.some(t => t.toLowerCase().includes(targetLower))
-      );
+/* =========================================================
+   Dock Worker (shared)
+========================================================= */
+function makeDockWorker(){
+  const src = `
+    const vdw={H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
+    function rand(seed){ let s=seed>>>0; return ()=> (s=(1664525*s+1013904223)>>>0, (s/0xFFFFFFFF)); }
+    function randomQuat(r){ const u1=r(),u2=r(),u3=r(); const a=Math.sqrt(1-u1), b=Math.sqrt(u1), t1=2*Math.PI*u2, t2=2*Math.PI*u3;
+      return [a*Math.sin(t1), a*Math.cos(t1), b*Math.sin(t2), b*Math.cos(t2)];
     }
-    
-    if (disease) {
-      match = match && lnc.disease.toLowerCase().includes(disease);
+    function rot(pts,q){ const [x,y,z,w]=q; return pts.map(p=>{
+      const vx=p.x,vy=p.y,vz=p.z; const ix=w*vx+y*vz-z*vy, iy=w*vy+z*vx-x*vz, iz=w*vz+x*vy-y*vx, iw=-x*vx - y*vy - z*vz;
+      const ox=ix*w+iw*(-x)+iy*(-z)-iz*(-y), oy=iy*w+iw*(-y)+iz*(-x)-ix*(-z), oz=iz*w+iw*(-z)+ix*(-y)-iy*(-x);
+      return {x:ox,y:oy,z:oz,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name};
+    });}
+    function trans(pts,t){ return pts.map(p=>({x:p.x+t.x,y:p.y+t.y,z:p.z+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name})); }
+    function makeGrid(coords, cell){
+      const m=new Map(); function key(i,j,k){return i+"|"+j+"|"+k}
+      for(let i=0;i<coords.length;i++){
+        const x=coords[i].x,y=coords[i].y,z=coords[i].z; const ix=Math.floor(x/cell),iy=Math.floor(y/cell),iz=Math.floor(z/cell);
+        const k=key(ix,iy,iz); if(!m.has(k)) m.set(k,[]); m.get(k).push(i);
+      }
+      return {cell:cell, map:m};
     }
-    
-    if (tissue !== 'ANY') {
-      match = match && lnc.tissue.toLowerCase().includes(tissue.toLowerCase());
+    function nbr(g,x,y,z){
+      const c=g.cell; const ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c);
+      const res=[]; for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++){
+        const k=(ix+dx)+"|"+(iy+dy)+"|"+(iz+dz); if(g.map.has(k)) res.push(...g.map.get(k));
+      } return res;
     }
-    
-    return match;
-  });
-  
-  // Add confidence scores (simulated)
-  lncRNAResults.forEach(lnc => {
-    lnc.confidence = (Math.random() * 30 + 70).toFixed(1);
-    lnc.expression = (Math.random() * 100).toFixed(1);
-  });
-  
-  lncRNAResults.sort((a, b) => parseFloat(b.confidence) - parseFloat(a.confidence));
-  
-  displayLncRNAResults();
-  
-  document.getElementById('matchCount').textContent = lncRNAResults.length;
-  document.getElementById('highConf').textContent = lncRNAResults.filter(l => parseFloat(l.confidence) > 80).length;
+    function score(A,B,cut,clashFactor,wC,wX,soft){
+      const g=makeGrid(A,cut); let contacts=0, clash=0;
+      for(let i=0;i<B.length;i++){
+        const x=B[i].x,y=B[i].y,z=B[i].z, eb=(B[i].elem||'C').toUpperCase();
+        const cand=nbr(g,x,y,z);
+        for(const j of cand){
+          const ax=A[j].x,ay=A[j].y,az=A[j].z, ea=(A[j].elem||'C').toUpperCase();
+          const dx=x-ax, dy=y-ay, dz=z-az; const d2=dx*dx+dy*dy+dz*dz; if (d2===0){ clash+=wX; continue; }
+          const d=Math.sqrt(d2);
+          const rv=(vdw[ea]||1.7)+(vdw[eb]||1.7); const cCut=clashFactor*rv;
+          if (d<=cCut){ const over=(cCut-d+1e-6)/cCut; clash += wX*over*(1/(1+soft*over)); }
+          else if (d<=cut){ contacts += wC; }
+        }
+      }
+      return {score:contacts - clash, contacts, clash};
+    }
+    self.onmessage=(e)=>{
+      const {Apts, Bpts, params, start, end}=e.data;
+      const rng=rand(params.seed + start*1337);
+      let best=[]; const total=end-start;
+      for(let k=0;k<total;k++){
+        const q=randomQuat(rng);
+        const t={x:(rng()*2-1)*params.maxTrans, y:(rng()*2-1)*params.maxTrans, z:(rng()*2-1)*params.maxTrans};
+        const Bt=trans(rot(Bpts,q),t);
+        const sc=score(Apts,Bt,params.contactCut,params.clashFactor,params.wContact,params.wClash,params.soft);
+        best.push({score:sc.score, contacts:sc.contacts, clash:sc.clash, q, t});
+        if ((k&1023)===0) self.postMessage({type:'progress',k});
+      }
+      best.sort((a,b)=>b.score-a.score);
+      self.postMessage({type:'done', list: best.slice(0,Math.min(200,total))});
+    }`;
+  const blob=new Blob([src],{type:'application/javascript'});
+  return new Worker(URL.createObjectURL(blob));
+}
+function angleBetweenQuats(q1,q2){ const dot = q1[0]*q2[0]+q1[1]*q2[1]+q1[2]*q2[2]+q1[3]*q2[3]; return 2*Math.acos(Math.min(1,Math.abs(dot))) * 180/Math.PI; }
+function diverseTop(sorted, angDeg, transA, topN){
+  const out=[]; for(const p of sorted){ let dup=false; for(const q of out){
+    const ad=angleBetweenQuats(p.q,q.q); const td=Math.hypot(p.t.x-q.t.x,p.t.y-q.t.y,p.t.z-q.t.z);
+    if (ad<=angDeg && td<=transA){ dup=true; break; } } if(!dup) out.push(p); if (out.length>=topN) break;
+  } return out;
 }
 
-function displayLncRNAResults() {
-  const container = document.getElementById('lncRNAResults');
-  
-  if (lncRNAResults.length === 0) {
-    container.innerHTML = '<p class="muted">No lncRNAs found matching your criteria. Try broader search terms or different genome.</p>';
-    return;
+/* =========================================================
+   Helpers: selection, styles, formats
+========================================================= */
+function selectAtomSet(atoms, mode){ const bb=new Set(['N','CA','C','O']); return atoms.filter(a=>{
+  if (mode==='CA') return a.name==='CA';
+  if (mode==='BB') return bb.has(a.name);
+  if (mode==='HEAVY') return a.elem!=='H';
+  return true;
+});}
+function formatPDB(atoms, chainShift=0, runId=null){
+  let lines=[], serial=1; if (runId) lines.push(`REMARK RUN-ID ${runId}`);
+  for(const a of atoms){
+    const name=(a.name||'CA').padStart(4,' ');
+    const resn=(a.resn||'RES').padStart(3,' ');
+    const chain=(a.chain||'A'); const outChain=String.fromCharCode(chain.charCodeAt(0)+chainShift);
+    const resi=(a.resi||1).toString().padStart(4,' ');
+    const x=(a.x??0).toFixed(3).toString().padStart(8,' ');
+    const y=(a.y??0).toFixed(3).toString().padStart(8,' ');
+    const z=(a.z??0).toFixed(3).toString().padStart(8,' ');
+    const occ=' 1.00', b=' 0.00'; const elem=(a.elem||'C').toString().padStart(2,' ');
+    lines.push(`ATOM  ${String(serial).padStart(5,' ')} ${name} ${resn} ${outChain}${resi}    ${x}${y}${z}${occ}${b}          ${elem}`); serial++;
   }
-  
-  container.innerHTML = lncRNAResults.map((lnc, idx) => `
-    <div class="lncRNA-result" onclick="selectLncRNA(${idx})">
-      <div style="display:flex;justify-content:space-between;align-items:start">
-        <div>
-          <h3 style="margin:0">${lnc.id} - ${lnc.name}</h3>
-          <p class="small muted" style="margin:4px 0">${lnc.mechanism}</p>
-        </div>
-        <span class="pill" style="background:${parseFloat(lnc.confidence) > 80 ? '#047857' : '#b45309'}">${lnc.confidence}% confidence</span>
-      </div>
-      <div class="metric-grid" style="margin-top:8px">
-        <div class="metric-box"><div class="metric-label">Length</div><div class="metric-value" style="font-size:14px">${lnc.length} nt</div></div>
-        <div class="metric-box"><div class="metric-label">Expression</div><div class="metric-value" style="font-size:14px">${lnc.expression}%</div></div>
-        <div class="metric-box"><div class="metric-label">Targets</div><div class="metric-value" style="font-size:14px">${lnc.targets.length}</div></div>
-      </div>
-      <div class="small" style="margin-top:8px">
-        <b>Tissue:</b> ${lnc.tissue} | <b>Disease:</b> ${lnc.disease} | <b>Key targets:</b> ${lnc.targets.join(', ')}
-      </div>
-    </div>
-  `).join('');
+  lines.push('TER','ENDMDL','END'); return lines.join('\n');
+}
+function applyTransform(points,q,t){
+  const [x,y,z,w]=q;
+  return points.map(p=>{
+    const vx=p.x,vy=p.y,vz=p.z; const ix=w*vx+y*vz-z*vy, iy=w*vy+z*vx-x*vz, iz=w*vz+x*vy-y*vx, iw=-x*vx - y*vy - z*vz;
+    const ox=ix*w+iw*(-x)+iy*(-z)-iz*(-y), oy=iy*w+iw*(-y)+iz*(-x)-ix*(-z), oz=iz*w+iw*(-z)+ix*(-y)-iy*(-x);
+    return {x:ox+t.x,y:oy+t.y,z:oz+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name};
+  });
 }
 
-function selectLncRNA(idx) {
-  selectedLncRNA = lncRNAResults[idx];
-  
-  // Generate predicted interactions
-  const interactions = [
-    {partner: selectedLncRNA.targets[0] || 'PRC2', type: 'Protein', score: (Math.random() * 20 + 75).toFixed(1), region: '1-500'},
-    {partner: selectedLncRNA.targets[1] || 'DNMT1', type: 'Protein', score: (Math.random() * 20 + 70).toFixed(1), region: '800-1200'},
-    {partner: 'Chromatin', type: 'DNA', score: (Math.random() * 20 + 65).toFixed(1), region: '200-400'},
-    {partner: 'miR-21', type: 'miRNA', score: (Math.random() * 30 + 60).toFixed(1), region: '1500-1520'}
-  ];
-  
-  // Update interaction details
-  document.getElementById('interactionDetails').innerHTML = `
-<b>${selectedLncRNA.id} Interaction Analysis</b>
-
-Mechanism of Action:
-${selectedLncRNA.mechanism}
-
-Regulatory Mode: ${selectedLncRNA.mechanism.includes('chromatin') ? 'Epigenetic regulation (cis/trans)' : 'Post-transcriptional regulation'}
-
-Known Molecular Partners:
-${selectedLncRNA.targets.map(t => `• ${t}`).join('\n')}
-
-Predicted Binding Domains:
-• Stem-loop structures: 3-5 regions
-• Protein-binding motifs: 8-12 sites
-• RNA-RNA interaction sites: 4-7 regions
-
-Conservation Score: ${(Math.random() * 30 + 65).toFixed(1)}%
-(across ${document.getElementById('genomeSelect').value === 'human' ? 'primates' : 'vertebrates'})
-  `.trim();
-  
-  // Update binding table
-  const tbody = document.getElementById('bindingTableBody');
-  tbody.innerHTML = interactions.map(int => `
-    <tr>
-      <td><b>${int.partner}</b></td>
-      <td><span class="pill">${int.type}</span></td>
-      <td>${int.score}%</td>
-      <td>${int.region} nt</td>
-    </tr>
-  `).join('');
-  
-  visualizeLncRNA();
-}
-
-function visualizeLncRNA() {
-  ensureLncViewer();
-  lncViewer.clear();
-  
-  // Create simplified lncRNA visualization
-  const atoms = [];
-  const len = Math.min(100, selectedLncRNA.length / 10); // Simplified representation
-  
-  for (let i = 0; i < len; i++) {
-    const angle = (i / len) * Math.PI * 4;
-    const radius = 5 + Math.sin(i * 0.3) * 2;
-    
-    atoms.push({
-      x: Math.cos(angle) * radius,
-      y: i * 0.5,
-      z: Math.sin(angle) * radius,
-      elem: 'P',
-      resn: 'RNA',
-      chain: 'L',
-      resi: i + 1
-    });
+/* =========================================================
+   Interface metrics (includes CDR weighting)
+========================================================= */
+function residueCharges(atoms){
+  const charges=new Map(); const qByResn={ASP:-1,GLU:-1,LYS:+1,ARG:+1,HIS:+0.1};
+  const pos=new Map();
+  for(const a of atoms){ const key=a.chain+':'+a.resi; if(!pos.has(key)) pos.set(key,[]); pos.get(key).push(a); }
+  for(const [key,arr] of pos.entries()){
+    const resn=arr[0].resn||'UNK'; const q=qByResn[resn]||0; if (q===0) continue;
+    let ca=arr.find(x=>x.name==='CA'); let x,y,z;
+    if (ca){ x=ca.x;y=ca.y;z=ca.z; } else { let sx=0,sy=0,sz=0; for(const a of arr){sx+=a.x;sy+=a.y;sz+=a.z} x=sx/arr.length; y=sy/arr.length; z=sz/arr.length; }
+    charges.set(key,{x,y,z,q,resn,chain:arr[0].chain,resi:arr[0].resi});
   }
-  
-  const pdb = formatSimplePDB(atoms);
-  lncViewer.addModel(pdb, 'pdb');
-  lncViewer.setStyle({}, {cartoon: {color: '#a78bfa'}});
-  lncViewer.zoomTo();
-  lncViewer.render();
+  return Array.from(charges.values());
+}
+function coulombResidueEnergy(A,B,k=0.5,cut=12){
+  const cA=residueCharges(A), cB=residueCharges(B); let e=0, cut2=cut*cut;
+  for(const a of cA) for(const b of cB){ const dx=a.x-b.x, dy=a.y-b.y, dz=a.z-b.z; const d2=dx*dx+dy*dy+dz*dz; if (d2>cut2) continue; const d=Math.sqrt(d2)+1e-3; e += k*(a.q*b.q)/d; }
+  return e;
+}
+function parseRangeList(txt){ // "26-32,52-56,95-102"
+  const out=[]; (txt||'').split(',').map(s=>s.trim()).forEach(p=>{
+    if(!p) return; const m=p.match(/^(\d+)\s*-\s*(\d+)$/); if (m){ const a=+m[1], b=+m[2]; out.push([Math.min(a,b), Math.max(a,b)]); }
+    else if (/^\d+$/.test(p)){ const n=+p; out.push([n,n]); }
+  }); return out;
+}
+function inRanges(n, ranges){ for(const [a,b] of ranges){ if (n>=a && n<=b) return true; } return false; }
+
+function computeInterfaceMetrics(A,B,contactCut, cdrConfig=null){
+  let contacts=0, clash=0, hb=0, sb=0, hyd=0;
+  const contactsPairs=[], hbPairs=[];
+  const SBPairs=[]; // optional
+  const clashFactor=+document.getElementById('clashFactor').value||0.85;
+  const wC=+document.getElementById('wContact').value||1.0;
+  const wX=+document.getElementById('wClash').value||6.0;
+  const soft=+document.getElementById('soft').value||0.5;
+  const cdrW = cdrConfig?.weight || 1.0;
+
+  function isAInCDR(a){
+    if (!cdrConfig) return false;
+    if (a.chain===cdrConfig.H && inRanges(a.resi, cdrConfig.Hranges)) return true;
+    if (a.chain===cdrConfig.L && inRanges(a.resi, cdrConfig.Lranges)) return true;
+    return false;
+  }
+
+  for(const b of B){
+    for(const a of A){
+      const dx=b.x-a.x, dy=b.y-a.y, dz=b.z-a.z; const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+      const rv=(vdw[(a.elem||'C').toUpperCase()]||1.7)+(vdw[(b.elem||'C').toUpperCase()]||1.7);
+      const cCut=clashFactor*rv;
+
+      if (d<=cCut){ const over=(cCut-d+1e-6)/cCut; clash += wX*over*(1/(1+soft*over)); }
+      if (d<=contactCut){
+        const weight = isAInCDR(a) ? (wC*cdrW) : wC;
+        contacts += weight;
+        contactsPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z, w:weight});
+      }
+      const aN=a.name?.trim().startsWith('N'), bO=b.name?.trim().startsWith('O');
+      const aO=a.name?.trim().startsWith('O'), bN=b.name?.trim().startsWith('N');
+      if ((aN && bO || aO && bN) && d<=3.5){ hb++; hbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
+      const acid=(x)=> (x.resn==='ASP'&&x.name.startsWith('OD'))||(x.resn==='GLU'&&x.name.startsWith('OE'));
+      const base=(x)=> (x.resn==='LYS'&&x.name==='NZ')||(x.resn==='ARG'&&(x.name==='NH1'||x.name==='NH2'||x.name==='NE'))||(x.resn==='HIS'&&(x.name==='ND1'||x.name==='NE2'));
+      if ( (acid(a)&&base(b) || acid(b)&&base(a)) && d<=4.0){ SBPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
+      if (hydrophobic.has(a.resn) && hydrophobic.has(b.resn) && (a.elem==='C'||b.elem==='C') && d<=4.5) hyd++;
+    }
+  }
+  return {contacts, clash, hb, sb:SBPairs.length, hyd, contactsPairs, hbPairs, sbPairs:SBPairs};
 }
 
-function predictLncInteractions() {
-  if (lncRNAResults.length === 0) return alert('Search for lncRNAs first');
-  alert('lncRNA Interaction Prediction\n\nAnalyzing molecular interactions for ' + lncRNAResults.length + ' candidate lncRNAs...\n\nPredicting:\n• Protein binding partners (RBPs)\n• DNA interaction sites\n• miRNA sponge activity\n• RNA-RNA hybridization\n\nThis uses sequence-based and structure-based algorithms.\n\nSelect an lncRNA to view detailed predictions!');
+/* =========================================================
+   Protein–Protein Docking (reuses your previous logic)
+========================================================= */
+async function parseOne(which){
+  const txtEl = document.getElementById(which==='A'?'pdbAText':'pdbBText');
+  const fileEl= document.getElementById(which==='A'?'pdbAFile':'pdbBFile');
+  let text = (txtEl.value||'').trim();
+  if (!text && fileEl?.files?.[0]) text = await fileEl.files[0].text();
+  if (!text){ alert(`Provide PDB text or file for ${which}`); return; }
+  const atoms = parsePDB(text);
+  if (!atoms.length){ alert('No parsable ATOM/HETATM records.'); return; }
+  if (which==='A'){ pdbAAll=atoms; pdbAText=text; renderChainChips('A',atoms); document.getElementById('chainInfoA').className='success'; document.getElementById('chainInfoA').textContent=`Parsed ${atoms.length} atoms`; }
+  else { pdbBAll=atoms; pdbBText=text; renderChainChips('B',atoms); document.getElementById('chainInfoB').className='success'; document.getElementById('chainInfoB').textContent=`Parsed ${atoms.length} atoms`; }
+}
+function selectAllChains(which){}
+function clearChains(which){ const box=document.getElementById(which==='A'?'chainsABox':which==='B'?'chainsBBox':which==='REC'?'recChainsBox':'scrRecChainsBox'); if(!box) return; box.querySelectorAll('input').forEach(cb=>cb.checked=false); }
+
+async function loadInputs(){
+  const fA=document.getElementById('pdbAFile').files[0];
+  const fB=document.getElementById('pdbBFile').files[0];
+  if (!pdbAText && fA) pdbAText = await fA.text();
+  if (!pdbBText && fB) pdbBText = await fB.text();
+  if (!pdbAText || !pdbBText) throw new Error('Provide PDB for both A and B.');
+
+  if (!pdbAAll.length) pdbAAll = parsePDB(pdbAText);
+  if (!pdbBAll.length) pdbBAll = parsePDB(pdbBText);
+  if (!pdbAAll.length || !pdbBAll.length) throw new Error('No atoms in input PDB(s).');
+
+  const keepA = selectedChains('A'); const keepB = selectedChains('B');
+  pdbAAtoms = keepA.size ? pdbAAll.filter(a=>keepA.has(a.chain)) : pdbAAll;
+  pdbBAtoms = keepB.size ? pdbBAll.filter(a=>keepB.has(a.chain)) : pdbBAll;
+
+  if (!pdbAAtoms.length){ pdbAAtoms = pdbAAll; renderChainChips('A',pdbAAll); document.getElementById('chainInfoA').className='error'; document.getElementById('chainInfoA').textContent='No atoms after chain filter — fell back to all.'; }
+  if (!pdbBAtoms.length){ pdbBAtoms = pdbBAll; renderChainChips('B',pdbBAll); document.getElementById('chainInfoB').className='error'; document.getElementById('chainInfoB').textContent='No atoms after chain filter — fell back to all.'; }
 }
 
-function analyzeLncMechanism() {
-  if (lncRNAResults.length === 0) return alert('Search for lncRNAs first');
-  alert('lncRNA Mechanism Analysis\n\nClassifying regulatory mechanisms:\n\n• Cis-acting: Local chromatin regulation\n• Trans-acting: Distant gene regulation  \n• Scaffold: Protein complex assembly\n• Decoy: Sequestering proteins/RNAs\n• Guide: Directing protein complexes\n• Enhancer: Enhancer-like activity\n\nAnalysis includes:\n- Subcellular localization prediction\n- Pathway enrichment\n- Network centrality\n- Druggability assessment');
+async function runDocking(){
+  if (inProgress) return;
+  if (qaMode && !qaRunId) await qaNewRunId('protein-protein');
+  cancelled=false; inProgress=true; heavyUsed=false; currentPose=null; posesTop=[];
+  document.getElementById('poseBody').innerHTML=''; document.getElementById('scoreBox').textContent='';
+  document.getElementById('dockBtn').disabled=true; document.getElementById('cancelBtn').disabled=false;
+  document.getElementById('dockBtn').textContent='Running…'; setProgress(0); status('loading'); logLine('Starting protein–protein docking.');
+
+  try{
+    await loadInputs();
+    const params = {
+      samples:+document.getElementById('samples').value, maxTrans:+document.getElementById('maxTrans').value,
+      contactCut:+document.getElementById('contactCut').value, clashFactor:+document.getElementById('clashFactor').value,
+      wContact:+document.getElementById('wContact').value, wClash:+document.getElementById('wClash').value,
+      soft:+document.getElementById('soft').value, topN: clamp(+document.getElementById('topN').value,1,200),
+      seed:(+document.getElementById('seed').value)||42, atomMode:document.getElementById('atomMode').value,
+      rescoreMode:document.getElementById('rescoreMode').value
+    };
+    if (document.getElementById('seedDet').checked) await deriveSeed();
+
+    let Apts=selectAtomSet(pdbAAtoms, params.atomMode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
+    let Bpts=selectAtomSet(pdbBAtoms, params.atomMode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
+    if (!Apts.length || !Bpts.length) throw new Error('No atoms with current atom mode.');
+    const cA=centroid(Apts), cB=centroid(Bpts);
+    Apts=translate(Apts,{x:-cA.x,y:-cA.y,z:-cA.z}); Bpts=translate(Bpts,{x:-cB.x,y:-cB.y,z:-cB.z});
+
+    status('sampling');
+    const dupAng=+document.getElementById('dupAngle').value||10;
+    const dupTrans=+document.getElementById('dupTrans').value||2;
+
+    const cores=Math.max(1,(navigator.hardwareConcurrency||4)-1);
+    const poolSize=Math.min(8, cores);
+    const per=Math.floor(params.samples/poolSize), extra=params.samples%poolSize;
+
+    let done=0, lists=[]; workerPool=[];
+    for(let i=0;i<poolSize;i++){
+      const start=i*per + Math.min(i,extra), end=start+per+(i<extra?1:0);
+      const w=makeDockWorker(); workerPool.push(w);
+      w.onmessage=(e)=>{
+        if (cancelled) return;
+        if (e.data.type==='progress'){ done+=1024; setProgress(Math.min(1, done/params.samples)); status(`scan ${Math.min(done,params.samples)}/${params.samples}`);}
+        if (e.data.type==='done'){
+          lists.push(e.data.list); w.terminate();
+          if (lists.length===poolSize){
+            let merged = lists.flat(); merged.sort((a,b)=>b.score-a.score);
+            const diverse = diverseTop(merged, dupAng, dupTrans, params.topN);
+            resolveAfterSampling(diverse, params);
+          }
+        }
+      };
+      w.onerror=(err)=>{ console.error(err); w.terminate(); };
+      w.postMessage({Apts, Bpts, params, start, end});
+    }
+  } catch(e){
+    alert(e.message||e); status('error'); inProgress=false; document.getElementById('dockBtn').disabled=false; document.getElementById('cancelBtn').disabled=true; document.getElementById('dockBtn').textContent='▶️ Run Docking';
+  }
+}
+function cancelDocking(){ cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch{}}); workerPool=[]; status('cancelled'); setProgress(0); inProgress=false; document.getElementById('dockBtn').disabled=false; document.getElementById('cancelBtn').disabled=true; document.getElementById('dockBtn').textContent='▶️ Run Docking'; logLine('Run cancelled.'); }
+
+async function resolveAfterSampling(diverse, params){
+  status(params.rescoreMode==='NONE' ? 'ranking' : (params.rescoreMode==='HEAVY'?'rescore':'refine'));
+  const cA=centroid(pdbAAtoms), cB=centroid(pdbBAtoms);
+  const Aheavy = translate(selectAtomSet(pdbAAtoms,'HEAVY').map(a=>({...a})), {x:-cA.x,y:-cA.y,z:-cA.z});
+  const Bheavy0= translate(selectAtomSet(pdbBAtoms,'HEAVY').map(a=>({...a})), {x:-cB.x,y:-cB.y,z:-cB.z});
+
+  // Antibody CDR config
+  let cdrConf=null;
+  if (document.getElementById('abMode').checked){
+    cdrConf = {
+      H: (document.getElementById('Hchain').value||'H').trim()[0]||'H',
+      L: (document.getElementById('Lchain').value||'L').trim()[0]||'L',
+      Hranges: [...parseRangeList(document.getElementById('H1').value), ...parseRangeList(document.getElementById('H2').value), ...parseRangeList(document.getElementById('H3').value)],
+      Lranges: [...parseRangeList(document.getElementById('L1').value), ...parseRangeList(document.getElementById('L2').value), ...parseRangeList(document.getElementById('L3').value)],
+      weight: +document.getElementById('cdrW').value||1.5
+    };
+  }
+
+  let top = diverse;
+  if (params.rescoreMode!=='NONE'){
+    top = await heavyRescore(Aheavy, Bheavy0, params, diverse, cdrConf, params.rescoreMode==='HEAVY_REFINE');
+    heavyUsed=true;
+  } else heavyUsed=false;
+
+  posesTop = top; currentA=Aheavy; currentB0=Bheavy0;
+  buildPoseTable(top, cdrConf);
+  if (top.length>0) showPose(0, cdrConf);
+
+  document.getElementById('dockBtn').disabled=false; document.getElementById('cancelBtn').disabled=true; document.getElementById('dockBtn').textContent='▶️ Run Docking';
+  status('done'); setProgress(1); inProgress=false;
+
+  // Store run (QA)
+  if (qaMode) storeRun({
+    runId: qaRunId, type:'protein-protein', seed:+document.getElementById('seed').value,
+    params: params, ab:cdrConf?true:false, top: top.slice(0,3).map((p,i)=>({rank:i+1,score:p.score, q:p.q, t:p.t}))
+  });
+  runsRefresh();
 }
 
-function analyzCustomLncRNA() {
-  const seq = cleanSequence(document.getElementById('customLncRNA').value);
-  if (seq.length < 200) return alert('lncRNA sequence must be at least 200 nucleotides');
-  
-  const gc = calculateGC(seq);
-  const len = seq.length;
-  
-  alert(`Custom lncRNA Analysis\n\nSequence Length: ${len} nt\nGC Content: ${gc}%\n\nPredicted Properties:\n• Coding potential: ${Math.random() > 0.9 ? 'HIGH - may be protein-coding' : 'LOW - likely non-coding'}\n• Conservation: ${(Math.random() * 40 + 40).toFixed(1)}%\n• Expression level: ${(Math.random() * 100).toFixed(1)} FPKM\n• Subcellular: ${Math.random() > 0.5 ? 'Nuclear' : 'Cytoplasmic'}\n\nStructural features detected:\n• Stem-loops: ${Math.floor(len / 200)}\n• Hairpins: ${Math.floor(len / 300)}\n• Binding motifs: ${Math.floor(len / 100)}\n\nUse "Predict Interactions" for partner analysis.`);
+function heavyRescore(Aheavy, Bheavy0, params, topCoarse, cdrConf, refine=false){
+  function baseScore(A,B){
+    const cut=params.contactCut, cf=params.clashFactor, wC=params.wContact, wX=params.wClash, soft=params.soft;
+    let contacts=0, clash=0, hb=0, sb=0, hyd=0;
+    for(let i=0;i<B.length;i++){
+      const x=B[i].x,y=B[i].y,z=B[i].z, eb=(B[i].elem||'C').toUpperCase();
+      for(let j=0;j<A.length;j++){
+        const ax=A[j].x,ay=A[j].y,az=A[j].z, ea=(A[j].elem||'C').toUpperCase();
+        const dx=x-ax, dy=y-ay, dz=z-az; const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+        const rv=(vdw[ea]||1.7)+(vdw[eb]||1.7); const cCut=cf*rv;
+        if (d<=cCut){ const over=(cCut-d+1e-6)/cCut; clash += wX*over*(1/(1+soft*over)); }
+        else if (d<=cut){ // contact
+          let weight=wC;
+          if (cdrConf){ // CDR boost if A residue in CDR
+            const a=A[j];
+            if ((a.chain===cdrConf.H && inRanges(a.resi,cdrConf.Hranges)) || (a.chain===cdrConf.L && inRanges(a.resi,cdrConf.Lranges)))
+              weight*=cdrConf.weight;
+          }
+          contacts += weight;
+          if (hydrophobic.has(A[j].resn) && hydrophobic.has(B[i].resn) && (A[j].elem==='C'||B[i].elem==='C') && d<=4.5) hyd++;
+          const aN=A[j].name?.trim().startsWith('N'), bO=B[i].name?.trim().startsWith('O');
+          const aO=A[j].name?.trim().startsWith('O'), bN=B[i].name?.trim().startsWith('N');
+          if ((aN && bO || aO && bN) && d<=3.5) hb++;
+        }
+      }
+    }
+    return {contacts, clash, hb, hyd, score:contacts-clash};
+  }
+  function jiggle(p){ const j=0.5, r=()=> (Math.random()*2-1)*j;
+    const dq=[p.q[0]+r()*0.01,p.q[1]+r()*0.01,p.q[2]+r()*0.01,p.q[3]+r()*0.01]; const n=Math.hypot(...dq); for(let i=0;i<4;i++) dq[i]/=n;
+    const dt={x:p.t.x+r(),y:p.t.y+r(),z:p.t.z+r()}; return {q:dq,t:dt};
+  }
+  const rescored=[];
+  for(const p of topCoarse){
+    let best={...p};
+    let Bcur=applyTransform(Bheavy0,best.q,best.t);
+    let sc=baseScore(Aheavy,Bcur); best.score=sc.score; best.contacts=sc.contacts; best.clash=sc.clash; best.hb=sc.hb; best.hyd=sc.hyd;
+    if (refine){
+      for(let k=0;k<50;k++){
+        const jt=jiggle(best); const Btry=applyTransform(Bheavy0,jt.q,jt.t); const sc2=baseScore(Aheavy,Btry);
+        if (sc2.score>best.score){ best.q=jt.q; best.t=jt.t; best.score=sc2.score; best.contacts=sc2.contacts; best.clash=sc2.clash; best.hb=sc2.hb; best.hyd=sc2.hyd; }
+      }
+    }
+    rescored.push(best);
+  }
+  rescored.sort((a,b)=>b.score-a.score);
+  return rescored.slice(0, +document.getElementById('topN').value);
 }
 
-function predictSecondaryStructure() {
-  const seq = cleanSequence(document.getElementById('customLncRNA').value);
-  if (seq.length < 200) return alert('Enter lncRNA sequence first (min 200 nt)');
-  
-  alert('RNA Secondary Structure Prediction\n\nUsing minimum free energy (MFE) algorithms...\n\nThis would implement:\n• RNAfold-like dynamic programming\n• Vienna RNA package algorithms\n• Dot-bracket notation output\n• 2D structure visualization\n\nFor production, integrate:\n- ViennaRNA WebServices\n- RNAstructure algorithms\n- Interactive structure editors');
+/* Pose table / viewer */
+let currentContacts=[], currentHB=[], currentSB=[];
+function buildPoseTable(top, cdrConf){
+  const tbody=document.getElementById('poseBody'); tbody.innerHTML='';
+  const kElec=0.5, eCut=12, cut=+document.getElementById('contactCut').value;
+
+  const rows = top.map((p,i)=>{
+    const Bout=applyTransform(currentB0, p.q, p.t);
+    const m=computeInterfaceMetrics(currentA, Bout, cut, cdrConf);
+    const elec=coulombResidueEnergy(currentA, Bout, kElec, eCut);
+    const bsa=m.contacts*10.0;
+    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)+(m.sb*1.0)-(elec);
+    return {rank:i+1, score:+p.score, contacts:m.contacts, clash:+m.clash, hb:m.hb, sb:m.sb, hyd:m.hyd, bsa:+bsa, elec:+elec, enth:+enth, q:p.q, t:p.t};
+  });
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.rank}</td><td>${r.score.toFixed(2)}</td><td>${r.contacts.toFixed(2)}</td><td>${r.clash.toFixed(2)}</td>
+      <td>${r.hb}</td><td>${r.sb}</td><td>${r.hyd}</td><td>${r.bsa.toFixed(0)}</td>
+      <td>${r.elec.toFixed(2)}</td><td>${r.enth.toFixed(2)}</td>
+      <td><button class="btn" onclick="downloadPose(${r.rank-1})">PDB</button></td>`;
+    tr.addEventListener('click', ()=> showPose(r.rank-1, cdrConf));
+    tbody.appendChild(tr);
+  });
 }
+function showPose(idx, cdrConf){
+  currentPose = posesTop[idx];
+  viewer.clear();
+  const Bout=applyTransform(currentB0, currentPose.q, currentPose.t);
+  viewer.addModel(formatPDB(currentA,0,qaRunId),'pdb'); viewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
+  viewer.addModel(formatPDB(Bout,1,qaRunId),'pdb');   viewer.setStyle({model:1},{cartoon:{color:'#f97316'}});
+  viewer.zoomTo();
 
-function exportLncRNAReport() {
-  if (!selectedLncRNA) return alert('Select an lncRNA first');
-  
-  const report = `lncRNA ANALYSIS REPORT
-======================
+  const cut=+document.getElementById('contactCut').value;
+  const metrics=computeInterfaceMetrics(currentA, Bout, cut, cdrConf);
+  currentContacts=metrics.contactsPairs; currentHB=metrics.hbPairs; currentSB=metrics.sbPairs;
+  refreshOverlays();
 
-LNCRNA INFORMATION
-------------------
-ID: ${selectedLncRNA.id}
-Name: ${selectedLncRNA.name}
-Length: ${selectedLncRNA.length} nucleotides
-Confidence: ${selectedLncRNA.confidence}%
-Expression: ${selectedLncRNA.expression}%
-
-MECHANISM OF ACTION
--------------------
-${selectedLncRNA.mechanism}
-
-MOLECULAR TARGETS
------------------
-${selectedLncRNA.targets.map(t => '• ' + t).join('\n')}
-
-BIOLOGICAL CONTEXT
-------------------
-Tissue: ${selectedLncRNA.tissue}
-Disease Association: ${selectedLncRNA.disease}
-
-PREDICTED INTERACTIONS
-----------------------
-[See binding table in interface]
-
-RECOMMENDATIONS
----------------
-• Validate expression by qRT-PCR
-• Confirm interactions by RIP or CLIP
-• Assess functional role via knockdown/knockout
-• Investigate clinical relevance in patient samples
-
-Generated: ${new Date().toISOString()}
-Platform: Advanced In-Silico Biology Studio
-Genome: ${document.getElementById('genomeSelect').value}
-`;
-  
-  const blob = new Blob([report], {type: 'text/plain'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `lncRNA_${selectedLncRNA.id}_report_${Date.now()}.txt`;
-  a.click();
+  const Eelec=coulombResidueEnergy(currentA, Bout, 0.5, 12);
+  const BSA=metrics.contacts*10.0;
+  const enthalpy=(metrics.contacts)-(metrics.clash)+(metrics.hb*0.5)+(metrics.sb*1.0)-(Eelec);
+  document.getElementById('scoreBox').textContent =
+    `Pose ${idx+1} — Score=${currentPose.score.toFixed(2)}  Contacts=${metrics.contacts.toFixed(2)}  Clash=${metrics.clash.toFixed(2)}  `+
+    `HB=${metrics.hb}  SB=${metrics.sb}  Hyd=${metrics.hyd}  BSA≈${BSA.toFixed(0)} Å²  Elec≈${Eelec.toFixed(2)}  Pseudo-ΔH≈${enthalpy.toFixed(2)}`;
+  viewer.render();
 }
+function refreshOverlays(){
+  if (!currentPose) return;
+  viewer.removeAllShapes();
+  if (document.getElementById('toggleContacts').checked) drawPairs(viewer,currentContacts,'#60a5fa');
+  if (document.getElementById('toggleHB').checked)       drawPairs(viewer,currentHB,'#34d399');
+  if (document.getElementById('toggleSB').checked)       drawPairs(viewer,currentSB,'#f87171');
+  viewer.render();
+}
+function drawPairs(v,pairs,color){ pairs.slice(0,400).forEach(pr=>{ v.addLine({start:{x:pr.x1,y:pr.y1,z:pr.z1}, end:{x:pr.x2,y:pr.y2,z:pr.z2}, dashed:true, dashLength:0.5, color, linewidth:2}); }); }
 
-function downloadInteractionNetwork() {
-  if (!selectedLncRNA) return alert('Select an lncRNA first');
-  
-  const network = {
-    nodes: [
-      {id: selectedLncRNA.id, type: 'lncRNA', name: selectedLncRNA.name},
-      ...selectedLncRNA.targets.map(t => ({id: t, type: 'protein', name: t}))
-    ],
-    edges: selectedLncRNA.targets.map(t => ({
-      source: selectedLncRNA.id,
-      target: t,
-      interaction: 'regulates',
-      confidence: (Math.random() * 20 + 75).toFixed(2)
-    }))
+/* Downloads */
+function downloadPose(idx){
+  const p=posesTop[idx];
+  const Bout=applyTransform(currentB0, p.q, p.t);
+  const pdbOut = formatPDB(currentA,0,qaRunId) + '\n' + formatPDB(Bout,1,qaRunId);
+  downloadBlob(pdbOut, stamped(`pose_${idx+1}.pdb`), 'text/plain');
+}
+function downloadAllPoses(){
+  if (!posesTop.length) return alert('No poses yet.');
+  const out=[];
+  if (qaRunId) out.push(`REMARK RUN-ID ${qaRunId}`);
+  posesTop.forEach((p,i)=>{ out.push(`MODEL     ${i+1}`); out.push(formatPDB(currentA,0,qaRunId)); out.push(formatPDB(applyTransform(currentB0,p.q,p.t),1,qaRunId)); out.push('ENDMDL');});
+  out.push('END'); downloadBlob(out.join('\n'), stamped('top_poses.pdb'), 'text/plain');
+}
+function downloadCSV(){
+  if (!posesTop.length) return alert('No poses yet.');
+  const cut=+document.getElementById('contactCut').value;
+  const rows=['rank,score,contacts,clash,hb,sb,hydrophobic,BSA_proxy_A2,electrostatics,pseudo_enthalpy,qx,qy,qz,qw,tx,ty,tz,run_id'];
+  posesTop.forEach((p,i)=>{
+    const Bout=applyTransform(currentB0, p.q, p.t);
+    const m=computeInterfaceMetrics(currentA, Bout, cut);
+    const elec=coulombResidueEnergy(currentA, Bout, 0.5, 12);
+    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)+(m.sb*1.0)-(elec);
+    rows.push([i+1,p.score.toFixed(4),m.contacts.toFixed(2),m.clash.toFixed(4),m.hb,m.sb,m.hyd,(m.contacts*10).toFixed(0),elec.toFixed(4),enth.toFixed(4),p.q[0],p.q[1],p.q[2],p.q[3],p.t.x,p.t.y,p.t.z,(qaRunId||'')].join(','));
+  });
+  downloadBlob(rows.join('\n'), stamped('poses_summary.csv'), 'text/csv');
+}
+function downloadJSON(){
+  if (!posesTop.length) return alert('No poses yet.');
+  const cut=+document.getElementById('contactCut').value;
+  const report=posesTop.map((p,i)=>{
+    const Bout=applyTransform(currentB0, p.q, p.t);
+    const m=computeInterfaceMetrics(currentA, Bout, cut);
+    return {rank:i+1, score:+p.score, contacts:m.contacts, clash:+m.clash, hb:m.hb, sb:m.sb, hydrophobic:m.hyd, BSA_proxy_A2:+(m.contacts*10), electrostatics:+coulombResidueEnergy(currentA,Bout,0.5,12), transform:{q:p.q, t:p.t}, run_id:(qaRunId||null)};
+  });
+  downloadBlob(JSON.stringify(report,null,2), stamped('interface_report.json'), 'application/json');
+}
+function snapshotPNG(){ viewer.pngURI(uri=>{ const a=document.createElement('a'); a.href=uri; a.download=stamped('viewer.png'); a.click(); }); }
+
+/* Pose recipes & Audit */
+function exportPoseRecipes(){ if (!posesTop.length) return alert('No poses yet.'); const recipes = posesTop.map((p,i)=>({rank:i+1, q:p.q, t:p.t, run_id:qaRunId})); downloadBlob(JSON.stringify({recipes}, null, 2), stamped('pose_recipes.json'),'application/json'); }
+function importPoseRecipes(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+  inp.onchange=async ()=>{ const f=inp.files[0]; if(!f) return; const text=await f.text(); try{
+    const obj=JSON.parse(text); if (!obj.recipes?.length) throw new Error('No recipes found.');
+    posesTop = obj.recipes.map(r=>({score:0,contacts:0,clash:0,q:r.q,t:r.t}));
+    if (!currentA||!currentB0){ alert('Load A/B first, then import.'); return; }
+    buildPoseTable(posesTop); showPose(0); logLine('Imported pose recipes.');
+  }catch(e){ alert('Invalid recipes JSON.'); }};
+  inp.click();
+}
+async function exportAuditBundle(){
+  if (!currentA || !currentB0) return alert('Run a docking first.');
+  const zip=new JSZip();
+  // Inputs
+  zip.file('inputs/proteinA.pdb', pdbAText||formatPDB(pdbAAll,0,qaRunId));
+  zip.file('inputs/proteinB.pdb', pdbBText||formatPDB(pdbBAll,0,qaRunId));
+  // Params
+  const params = {
+    samples:+document.getElementById('samples').value,maxTrans:+document.getElementById('maxTrans').value,contactCut:+document.getElementById('contactCut').value,
+    clashFactor:+document.getElementById('clashFactor').value,wContact:+document.getElementById('wContact').value,wClash:+document.getElementById('wClash').value,
+    soft:+document.getElementById('soft').value, topN:+document.getElementById('topN').value, atomMode:document.getElementById('atomMode').value,
+    rescoreMode:document.getElementById('rescoreMode').value, seed:+document.getElementById('seed').value, qaMode, qaFrozen, runId:qaRunId, appVersion:APP_VER
   };
-  
-  const json = JSON.stringify(network, null, 2);
-  const blob = new Blob([json], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${selectedLncRNA.id}_network_${Date.now()}.json`;
-  a.click();
+  zip.file('params.json', JSON.stringify(params,null,2));
+  // Results
+  const cut=+document.getElementById('contactCut').value;
+  const result = posesTop.map((p,i)=>{
+    const Bout=applyTransform(currentB0,p.q,p.t); const m=computeInterfaceMetrics(currentA,Bout,cut);
+    return {rank:i+1, score:+p.score, contacts:m.contacts, clash:+m.clash, hb:m.hb, sb:m.sb, hyd:+m.hyd, BSA_proxy_A2:+(m.contacts*10), elec:+coulombResidueEnergy(currentA,Bout,0.5,12), transform:{q:p.q, t:p.t}};
+  });
+  zip.file('results/interface_report.json', JSON.stringify(result,null,2));
+  // PDB bundle
+  let multi = []; if (qaRunId) multi.push(`REMARK RUN-ID ${qaRunId}`);
+  posesTop.forEach((p,i)=>{ multi.push(`MODEL     ${i+1}`); multi.push(formatPDB(currentA,0,qaRunId)); multi.push(formatPDB(applyTransform(currentB0,p.q,p.t),1,qaRunId)); multi.push('ENDMDL');});
+  multi.push('END'); zip.file('results/top_poses.pdb', multi.join('\n'));
+  // Log & system
+  const sys = {ua:navigator.userAgent, hw:navigator.hardwareConcurrency, lang:navigator.language, time:new Date().toISOString()};
+  zip.file('system.json', JSON.stringify(sys,null,2)); zip.file('run_log.txt', document.getElementById('runLog').textContent||''); zip.file('qa_log.txt', document.getElementById('qaLog').textContent||'');
+  const blob=await zip.generateAsync({type:'blob'});
+  downloadBlob(blob, stamped('audit_bundle.zip'), 'application/zip', true);
 }
 
-/* ===== Protein Docking (Simplified from original) ===== */
-function parsePDB(text) {
-  const atoms = [];
-  const lines = text.split(/\r?\n/);
-  for (const ln of lines) {
-    if (ln.startsWith('ATOM') || ln.startsWith('HETATM')) {
-      atoms.push({
-        name: ln.substring(12, 16).trim(),
-        resn: ln.substring(17, 20).trim(),
-        chain: ln.substring(21, 22).trim() || 'A',
-        resi: parseInt(ln.substring(22, 26)),
-        x: parseFloat(ln.substring(30, 38)),
-        y: parseFloat(ln.substring(38, 46)),
-        z: parseFloat(ln.substring(46, 54)),
-        elem: ln.length >= 78 ? ln.substring(76, 78).trim() || ln[12] : ln[12]
-      });
-    }
+/* =========================================================
+   Examples
+========================================================= */
+function useExample(which){
+  const egA=`ATOM      1  N   GLY H   1      -2.000   0.000   0.000  1.00  0.00           N
+ATOM      2  CA  GLY H   1      -0.650   0.000   0.000  1.00  0.00           C
+ATOM      3  C   GLY H   1       0.000   1.300   0.500  1.00  0.00           C
+ATOM      4  O   GLY H   1       0.000   2.300  -0.200  1.00  0.00           O
+END`;
+  const egB=`ATOM      1  N   GLY A   1       2.000   0.000   0.000  1.00  0.00           N
+ATOM      2  CA  GLY A   1       0.650   0.000   0.000  1.00  0.00           C
+ATOM      3  C   GLY A   1       0.000  -1.300  -0.500  1.00  0.00           C
+ATOM      4  O   GLY A   1       0.000  -2.300   0.200  1.00  0.00           O
+END`;
+  if (which==='A'){ document.getElementById('pdbAText').value=egA; pdbAText=egA; parseOne('A'); }
+  else { document.getElementById('pdbBText').value=egB; pdbBText=egB; parseOne('B'); }
+}
+
+/* =========================================================
+   Ligand Docking (SDF/MOL/PDB)
+========================================================= */
+let recAll=[], recText="", recAtoms=[], ligMol=null, ligText="", ligPoses=[];
+function ligUseExampleReceptor(toScreen=false){
+  const eg=`ATOM      1  CA  GLY R   1       0.000   0.000   0.000  1.00  0.00           C
+ATOM      2  CA  GLY R   2       2.300   0.100   0.000  1.00  0.00           C
+ATOM      3  CA  GLY R   3       4.600   0.200   0.300  1.00  0.00           C
+END`;
+  if (toScreen){ document.getElementById('scrRecText').value=eg; } else { document.getElementById('recText').value=eg; }
+}
+function ligUseExampleLigand(){
+  const sdf=`LigExample
+  ChatGPT
+
+  4 3  0  0  0  0            999 V2000
+   -1.2000   0.0000   0.0000 C   0  0
+    0.0000   0.0000   0.0000 O   0  0
+    1.2000   0.0000   0.0000 C   0  0
+    2.4000   0.0000   0.0000 N   0  0
+  1  2  1  0
+  2  3  1  0
+  3  4  1  0
+M  END
+$$$$`;
+  document.getElementById('ligText').value=sdf;
+}
+async function parseReceptor(){
+  let text=(document.getElementById('recText').value||'').trim();
+  if (!text && document.getElementById('recFile').files[0]) text = await document.getElementById('recFile').files[0].text();
+  if (!text) return alert('Provide receptor PDB');
+  recText=text; recAll=parsePDB(text); if (!recAll.length) return alert('No atoms parsed.');
+  renderChainChips('REC', recAll);
+  document.getElementById('recInfo').className='success'; document.getElementById('recInfo').textContent=`Parsed ${recAll.length} atoms`;
+}
+function parseSDF(sdfText){ // returns first molecule atoms
+  const blocks = sdfText.split(/\$\$\$\$\s*/).filter(b=>b.trim());
+  if (!blocks.length) return null;
+  const b = blocks[0].split(/\r?\n/);
+  if (b.length<4) return null;
+  const countsLine = b[3];
+  let nat=0, nb=0;
+  const m = countsLine.match(/\s*(\d+)\s+(\d+)\s/);
+  if (m){ nat=+m[1]; nb=+m[2]; } else { nat=parseInt(countsLine.slice(0,3)); nb=parseInt(countsLine.slice(3,6)); }
+  const atoms=[];
+  for(let i=4;i<4+nat;i++){
+    const ln=b[i];
+    const x=parseFloat(ln.slice(0,10)), y=parseFloat(ln.slice(10,20)), z=parseFloat(ln.slice(20,30));
+    const elem=(ln.slice(31,34).trim()||'C').toUpperCase();
+    atoms.push({x,y,z,elem,resn:'LIG',chain:'L',resi:i-3,name:elem.trim()});
   }
+  if (!atoms.length) return null;
   return atoms;
 }
+function parseLigPDB(txt){
+  const a=parsePDB(txt); // coerce to LIG chain
+  return a.map(o=>({...o, resn:o.resn||'LIG', chain:'L'}));
+}
+async function parseLigand(){
+  let text=(document.getElementById('ligText').value||'').trim();
+  if (!text && document.getElementById('ligFile').files[0]) text = await document.getElementById('ligFile').files[0].text();
+  if (!text) return alert('Provide ligand text/file');
+  ligText=text;
+  // try SDF, else PDB
+  let atoms = parseSDF(text); if (!atoms){ atoms = parseLigPDB(text); }
+  if (!atoms?.length) return alert('Unable to parse ligand SDF/MOL/PDB');
+  ligMol=atoms;
+  document.getElementById('ligInfo').className='success'; document.getElementById('ligInfo').textContent=`Ligand atoms: ${atoms.length}`;
+  // preview
+  ensureLigViewer();
+  ligViewer.clear();
+  // receptor faint
+  if (recAtoms?.length){ ligViewer.addModel(formatPDB(recAtoms,0,qaRunId),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}}); }
+  ligViewer.addModel(formatPDB(ligMol,1,qaRunId),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.2}}); ligViewer.zoomTo(); ligViewer.render();
+}
+async function parseReceptorSel(){
+  if (!recAll.length) await parseReceptor();
+  const keep = selectedChains('REC'); recAtoms = keep.size ? recAll.filter(a=>keep.has(a.chain)) : recAll;
+  if (!recAtoms.length){ recAtoms = recAll; document.getElementById('recInfo').className='error'; document.getElementById('recInfo').textContent='No atoms after chain filter — fell back to all.'; }
+}
+async function runLigDock(){
+  if (inProgress) return;
+  if (qaMode && !qaRunId) await qaNewRunId('ligand');
+  await parseReceptorSel(); if (!recAtoms?.length) return alert('Parse receptor first');
+  if (!ligMol?.length){ await parseLigand(); if (!ligMol?.length) return; }
 
-function useExample(w) {
-  const eg = `ATOM      1  CA  GLY A   1      -2.000   0.000   0.000  1.00  0.00           C
-ATOM      2  CA  GLY A   2      -0.650   0.000   0.000  1.00  0.00           C
-ATOM      3  CA  GLY A   3       0.000   1.300   0.500  1.00  0.00           C
-END`;
-  if (w === 'A') {
-    document.getElementById('pdbAText').value = eg;
-    parseOne('A');
-  } else {
-    document.getElementById('pdbBText').value = eg.replace(/A/g, 'B');
-    parseOne('B');
+  const params = {
+    samples:+document.getElementById('ligSamples').value, maxTrans:+document.getElementById('ligMaxTrans').value,
+    contactCut:+document.getElementById('ligCut').value, clashFactor:+document.getElementById('ligClash').value,
+    wContact:1.0, wClash:6.0, soft:0.5, topN:+document.getElementById('ligTopN').value,
+    seed:(+document.getElementById('ligSeed').value)||99
+  };
+  if (document.getElementById('ligSeedDet').checked){
+    const hex=await sha256Hex((recText||'')+'\n---\n'+(ligText||'')+'\n---\n'+JSON.stringify(params));
+    params.seed = hashToSeed(hex);
+    document.getElementById('ligSeed').value=params.seed;
+  }
+
+  const Apts = selectAtomSet(recAtoms,'HEAVY').map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
+  const cA=centroid(Apts);
+  const Bpts = ligMol.map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
+  const cB=centroid(Bpts);
+  const Ac=translate(Apts,{x:-cA.x,y:-cA.y,z:-cA.z});
+  const Bc=translate(Bpts,{x:-cB.x,y:-cB.y,z:-cB.z});
+
+  // run workers
+  ligPoses=[]; inProgress=true; cancelled=false;
+  document.getElementById('ligRunBtn').disabled=true; document.getElementById('ligCancelBtn').disabled=false;
+  document.getElementById('ligStatus').textContent='sampling'; document.getElementById('ligProg').value=0;
+
+  const cores=Math.max(1,(navigator.hardwareConcurrency||4)-1);
+  const poolSize=Math.min(8, cores);
+  const per=Math.floor(params.samples/poolSize), extra=params.samples%poolSize;
+
+  let done=0, lists=[]; workerPool=[];
+  for(let i=0;i<poolSize;i++){
+    const start=i*per + Math.min(i,extra), end=start+per+(i<extra?1:0);
+    const w=makeDockWorker(); workerPool.push(w);
+    w.onmessage=(e)=>{
+      if (cancelled) return;
+      if (e.data.type==='progress'){ done+=1024; const f=Math.min(1, done/params.samples); document.getElementById('ligProg').value=f; document.getElementById('ligStatus').textContent=`scan ${Math.min(done,params.samples)}/${params.samples}`; }
+      if (e.data.type==='done'){
+        lists.push(e.data.list); w.terminate();
+        if (lists.length===poolSize){
+          let merged = lists.flat(); merged.sort((a,b)=>b.score-a.score);
+          const diverse = diverseTop(merged, +document.getElementById('ligDupA').value, +document.getElementById('ligDupT').value, params.topN);
+          resolveLigAfter(Ac, Bc, diverse, params);
+        }
+      }
+    };
+    w.postMessage({Apts:Ac, Bpts:Bc, params, start, end});
   }
 }
+function cancelLig(){ cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch{}}); workerPool=[]; inProgress=false; document.getElementById('ligRunBtn').disabled=false; document.getElementById('ligCancelBtn').disabled=true; document.getElementById('ligStatus').textContent='cancelled'; }
+function resolveLigAfter(Ac, Bc, diverse, params){
+  ligPoses = diverse;
+  // render best
+  if (!recAtoms?.length || !ligMol?.length) return;
+  ligViewer.clear();
+  const best=ligPoses[0];
+  const Bout=applyTransform(ligMol.map(a=>({..a, x:a.x - centroid(ligMol).x, y:a.y - centroid(ligMol).y, z:a.z - centroid(ligMol).z})), best.q, best.t);
+  ligViewer.addModel(formatPDB(recAtoms,0,qaRunId),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
+  ligViewer.addModel(formatPDB(Bout,1,qaRunId),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.22}});
+  ligViewer.zoomTo(); ligViewer.render();
 
-function parseOne(which) {
-  const text = document.getElementById(which === 'A' ? 'pdbAText' : 'pdbBText').value;
-  if (!text.trim()) return;
-  
-  const atoms = parsePDB(text);
-  if (which === 'A') {
-    pdbAAllAtoms = atoms;
-    document.getElementById('chainWarnA').innerHTML = `Parsed ${atoms.length} atoms`;
+  // table
+  const tbody=document.getElementById('ligPoseBody'); tbody.innerHTML='';
+  const kElec=0.5, eCut=12;
+  ligPoses.forEach((p,i)=>{
+    const Lout=applyTransform(Bc.map((b,idx)=>ligMol[idx]), p.q, p.t); // reuse ligand atom meta for metrics
+    const m=computeInterfaceMetrics(recAtoms, Lout, +document.getElementById('ligCut').value);
+    const elec=coulombResidueEnergy(recAtoms, Lout, kElec, eCut);
+    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)-(elec);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${p.score.toFixed(2)}</td><td>${m.contacts.toFixed(2)}</td><td>${m.clash.toFixed(2)}</td><td>${m.hb}</td><td>${m.hyd}</td><td>${elec.toFixed(2)}</td><td>${enth.toFixed(2)}</td><td><button class="btn" onclick="ligDownloadPose(${i})">PDB</button></td>`;
+    tr.addEventListener('click', ()=>{
+      ligViewer.clear();
+      const Bout2=applyTransform(ligMol.map(a=>({..a, x:a.x - centroid(ligMol).x, y:a.y - centroid(ligMol).y, z:a.z - centroid(ligMol).z})), p.q, p.t);
+      ligViewer.addModel(formatPDB(recAtoms,0,qaRunId),'pdb'); ligViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
+      ligViewer.addModel(formatPDB(Bout2,1,qaRunId),'pdb'); ligViewer.setStyle({model:1},{stick:{radius:0.22}});
+      ligViewer.zoomTo(); ligViewer.render();
+    });
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('ligRunBtn').disabled=false; document.getElementById('ligCancelBtn').disabled=true; inProgress=false; document.getElementById('ligStatus').textContent='done'; document.getElementById('ligProg').value=1;
+
+  // store run
+  if (qaMode) storeRun({runId:qaRunId, type:'ligand', seed:+document.getElementById('ligSeed').value, params, top:ligPoses.slice(0,3)});
+}
+function ligDownloadPose(i){
+  const p=ligPoses[i];
+  const cB=centroid(ligMol); const centered=ligMol.map(a=>({...a,x:a.x-cB.x,y:a.y-cB.y,z:a.z-cB.z}));
+  const Lout=applyTransform(centered, p.q, p.t);
+  const pdb = formatPDB(recAtoms,0,qaRunId)+'\n'+formatPDB(Lout,1,qaRunId);
+  downloadBlob(pdb, stamped(`lig_pose_${i+1}.pdb`), 'text/plain');
+}
+function ligDownloadAll(){
+  const out=[]; if (qaRunId) out.push(`REMARK RUN-ID ${qaRunId}`);
+  const cB=centroid(ligMol); const centered=ligMol.map(a=>({...a,x:a.x-cB.x,y:a.y-cB.y,z:a.z-cB.z}));
+  ligPoses.forEach((p,i)=>{ out.push(`MODEL     ${i+1}`); out.push(formatPDB(recAtoms,0,qaRunId)); out.push(formatPDB(applyTransform(centered,p.q,p.t),1,qaRunId)); out.push('ENDMDL');});
+  out.push('END'); downloadBlob(out.join('\n'), stamped('lig_top_poses.pdb'), 'text/plain');
+}
+function ligDownloadCSV(){
+  const rows=['rank,score,contacts,clash,hb,hyd,elec,pseudo_enthalpy,run_id'];
+  const cB=centroid(ligMol); const centered=ligMol.map(a=>({...a,x:a.x-cB.x,y:a.y-cB.y,z:a.z-cB.z}));
+  ligPoses.forEach((p,i)=>{
+    const Lout=applyTransform(centered, p.q, p.t);
+    const m=computeInterfaceMetrics(recAtoms, Lout, +document.getElementById('ligCut').value);
+    const elec=coulombResidueEnergy(recAtoms, Lout, 0.5, 12);
+    const enth=(m.contacts)-(m.clash)+(m.hb*0.5)-(elec);
+    rows.push([i+1,p.score.toFixed(2),m.contacts.toFixed(2),m.clash.toFixed(2),m.hb,m.hyd,elec.toFixed(2),enth.toFixed(2),(qaRunId||'')].join(','));
+  });
+  downloadBlob(rows.join('\n'), stamped('lig_summary.csv'),'text/csv');
+}
+function ligSnapshot(){ ligViewer.pngURI(uri=>{ const a=document.createElement('a'); a.href=uri; a.download=stamped('lig_viewer.png'); a.click(); }); }
+
+/* =========================================================
+   Screening
+========================================================= */
+let scrRecAll=[], scrRecText="", scrRecAtoms=[], scrLigSet=[], scrResults=[];
+async function scrParseReceptor(){
+  let text=(document.getElementById('scrRecText').value||'').trim();
+  if (!text && document.getElementById('scrRecFile').files[0]) text = await document.getElementById('scrRecFile').files[0].text();
+  if (!text) return alert('Provide receptor PDB');
+  scrRecText=text; scrRecAll=parsePDB(text); if (!scrRecAll.length) return alert('No atoms parsed.');
+  renderChainChips('SCRREC', scrRecAll);
+  document.getElementById('scrRecInfo').className='success'; document.getElementById('scrRecInfo').textContent=`Parsed ${scrRecAll.length} atoms`;
+}
+async function scrUseExampleLib(){
+  const eg=`Lib
+  ChatGPT
+
+  4 3  0  0  0  0            999 V2000
+   -1.2000   0.0000   0.0000 C   0  0
+    0.0000   0.0000   0.0000 O   0  0
+    1.2000   0.0000   0.0000 C   0  0
+    2.4000   0.0000   0.0000 N   0  0
+  1  2  1  0
+  2  3  1  0
+  3  4  1  0
+M  END
+$$$$
+Lib2
+  ChatGPT
+
+  5 4  0  0  0  0            999 V2000
+   -1.3000   0.2000   0.0000 C   0  0
+    0.0000   0.1000   0.0000 C   0  0
+    1.3000  -0.1000   0.0000 O   0  0
+    2.6000  -0.1000   0.0000 C   0  0
+    3.9000  -0.1000   0.0000 N   0  0
+  1  2  1  0
+  2  3  1  0
+  3  4  1  0
+  4  5  1  0
+M  END
+$$$$`;
+  const file = new File([eg], "library.sdf", {type:"chemical/x-mdl-sdfile"});
+  const dt = new DataTransfer(); dt.items.add(file);
+  document.getElementById('scrLigFile').files = dt.files;
+}
+async function loadLigSetFromFile(file){
+  if (file.name.toLowerCase().endsWith('.zip')){
+    const buf=await file.arrayBuffer(); const zip=await JSZip.loadAsync(buf); const ligs=[];
+    for(const k of Object.keys(zip.files)){
+      if (!k.toLowerCase().endsWith('.sdf')) continue;
+      const txt=await zip.files[k].async('string'); const blocks=txt.split(/\$\$\$\$\s*/).filter(b=>b.trim());
+      blocks.forEach((b,idx)=>{ const atoms=parseSDF(b+"\n$$$$"); if (atoms?.length) ligs.push({name:`${k}#${idx+1}`, atoms}); });
+    }
+    return ligs;
   } else {
-    pdbBAllAtoms = atoms;
-    document.getElementById('chainWarnB').innerHTML = `Parsed ${atoms.length} atoms`;
+    const txt=await file.text(); const blocks=txt.split(/\$\$\$\$\s*/).filter(b=>b.trim()); const ligs=[];
+    blocks.forEach((b,idx)=>{ const atoms=parseSDF(b+"\n$$$$"); if (atoms?.length) ligs.push({name:`mol${idx+1}`, atoms}); });
+    return ligs;
   }
 }
+async function runScreen(){
+  if (inProgress) return;
+  if (qaMode && !qaRunId) await qaNewRunId('screening');
 
-function selectAllChains(which) {}
-function runDocking() { alert('Protein docking module simplified. Original implementation includes full docking algorithm with workers.'); }
-function cancelDocking() {}
-function downloadAllPoses() {}
-function downloadCSV() {}
+  await scrParseReceptor(); if (!scrRecAll?.length) return alert('Parse receptor first');
+  const keep=selectedChains('SCRREC'); scrRecAtoms = keep.size ? scrRecAll.filter(a=>keep.has(a.chain)) : scrRecAll;
+  if (!scrRecAtoms.length){ scrRecAtoms=scrRecAll; document.getElementById('scrRecInfo').className='error'; document.getElementById('scrRecInfo').textContent='No atoms after chain filter — fell back to all.'; }
 
-/* ===== TriPredict & Seq→PDB (Simplified) ===== */
-function triGenerate() {
-  alert('TriPredict: Generates 3 theoretical protein folds from sequence.\n\nOriginal implementation includes full folding algorithms (SSMC, DG, HC) with web workers.\n\nSee previous version for complete code.');
+  const file=document.getElementById('scrLigFile').files[0]; if (!file) return alert('Upload SDF or ZIP of SDFs');
+  scrLigSet = await loadLigSetFromFile(file); if (!scrLigSet.length) return alert('No ligands parsed from file');
+
+  const params = {
+    samples:+document.getElementById('scrSamples').value, maxTrans:+document.getElementById('scrMaxTrans').value,
+    contactCut:+document.getElementById('scrCut').value, clashFactor:+document.getElementById('scrClash').value,
+    wContact:1.0, wClash:6.0, soft:0.5, topN:+document.getElementById('scrTopN').value,
+    seed:(+document.getElementById('scrSeed').value)||777
+  };
+  if (document.getElementById('scrSeedDet').checked){
+    const hex=await sha256Hex((scrRecText||'')+'\n---\n'+file.name+'\n---\n'+JSON.stringify(params));
+    params.seed = hashToSeed(hex);
+    document.getElementById('scrSeed').value=params.seed;
+  }
+
+  // prep receptor
+  const Apts = selectAtomSet(scrRecAtoms,'HEAVY').map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
+  const cA=centroid(Apts); const Ac=translate(Apts,{x:-cA.x,y:-cA.y,z:-cA.z});
+
+  scrResults=[]; inProgress=true; cancelled=false;
+  document.getElementById('scrRunBtn').disabled=true; document.getElementById('scrCancelBtn').disabled=false;
+  document.getElementById('scrStatus').textContent=`screen 0/${scrLigSet.length}`; document.getElementById('scrProg').value=0;
+
+  const tbody=document.getElementById('scrBody'); tbody.innerHTML='';
+  for(let i=0;i<scrLigSet.length;i++){
+    if (cancelled) break;
+    const lig=scrLigSet[i]; const c=centroid(lig.atoms); const Bc=lig.atoms.map(a=>({x:a.x-c.x,y:a.y-c.y,z:a.z-c.z,elem:a.elem,resn:'LIG',chain:'L',resi:1,name:a.elem}));
+    // small run (single worker to keep simple)
+    const start=0, end=params.samples; const w=makeDockWorker();
+    const lists=[]; let done=0;
+    await new Promise((resolve)=>{
+      w.onmessage=(e)=>{
+        if (e.data.type==='progress'){ done+=1024; const g=(i+done/params.samples)/scrLigSet.length; document.getElementById('scrProg').value=Math.min(1,g); document.getElementById('scrStatus').textContent=`screen ${i+1}/${scrLigSet.length}`; }
+        if (e.data.type==='done'){ lists.push(e.data.list); w.terminate(); resolve(); }
+      };
+      w.postMessage({Apts:Ac, Bpts:Bc, params, start, end});
+    });
+    let merged=lists.flat(); merged.sort((a,b)=>b.score-a.score); const diverse=diverseTop(merged, 12, 1.5, params.topN);
+    const best=diverse[0];
+    // metrics
+    const Lout = applyTransform(Bc, best.q, best.t);
+    const m=computeInterfaceMetrics(scrRecAtoms, Lout, params.contactCut);
+    const elec=coulombResidueEnergy(scrRecAtoms, Lout, 0.5, 12);
+    scrResults.push({name:lig.name, best, contacts:m.contacts, clash:m.clash, hb:m.hb, hyd:m.hyd, elec});
+    // row
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${lig.name}</td><td>${best.score.toFixed(2)}</td><td>${m.contacts.toFixed(2)}</td><td>${m.clash.toFixed(2)}</td><td>${m.hb}</td><td>${m.hyd}</td><td>${elec.toFixed(2)}</td><td><button class="btn" onclick="scrShow('${lig.name.replace(/[^a-z0-9]/gi,'_')}',${i})">View</button></td>`;
+    tbody.appendChild(tr);
+  }
+  // sort table by score
+  scrResults.sort((a,b)=>b.best.score-a.best.score);
+  document.getElementById('scrRunBtn').disabled=false; document.getElementById('scrCancelBtn').disabled=true; inProgress=false; document.getElementById('scrStatus').textContent='done'; document.getElementById('scrProg').value=1;
+
+  // store run
+  if (qaMode) storeRun({runId:qaRunId, type:'screening', seed:params.seed, ligCount:scrLigSet.length, top:scrResults.slice(0,10)});
+}
+function cancelScreen(){ cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch{}}); workerPool=[]; inProgress=false; document.getElementById('scrRunBtn').disabled=false; document.getElementById('scrCancelBtn').disabled=true; document.getElementById('scrStatus').textContent='cancelled'; }
+function scrShow(safeName, idx){
+  const lig=scrLigSet[idx]; const res=scrResults.find(r=>r.name===lig.name); if (!res) return;
+  screenViewer.clear();
+  screenViewer.addModel(formatPDB(scrRecAtoms,0,qaRunId),'pdb'); screenViewer.setStyle({model:0},{cartoon:{colorscheme:'Chain'}});
+  const c=centroid(lig.atoms); const Bc=lig.atoms.map(a=>({...a,x:a.x-c.x,y:a.y-c.y,z:a.z-c.z}));
+  screenViewer.addModel(formatPDB(applyTransform(Bc, res.best.q, res.best.t),1,qaRunId),'pdb'); screenViewer.setStyle({model:1},{stick:{radius:0.22}});
+  screenViewer.zoomTo(); screenViewer.render();
+}
+function scrDownloadReport(){
+  const rows=['rank,ligand,score,contacts,clash,hb,hyd,elec,run_id'];
+  scrResults.sort((a,b)=>b.best.score-a.best.score).forEach((r,i)=>rows.push([i+1,r.name,r.best.score.toFixed(2),r.contacts.toFixed(2),r.clash.toFixed(2),r.hb,r.hyd,r.elec.toFixed(2),(qaRunId||'')].join(',')));
+  downloadBlob(rows.join('\n'), stamped('screening_report.csv'),'text/csv');
+}
+async function scrDownloadBundle(){
+  const zip=new JSZip(); zip.file('report.csv', (function(){
+    const rows=['rank,ligand,score,contacts,clash,hb,hyd,elec,run_id'];
+    scrResults.forEach((r,i)=>rows.push([i+1,r.name,r.best.score.toFixed(2),r.contacts.toFixed(2),r.clash.toFixed(2),r.hb,r.hyd,r.elec.toFixed(2),(qaRunId||'')].join(',')));
+    return rows.join('\n');
+  })());
+  zip.file('receptor.pdb', scrRecText || formatPDB(scrRecAll,0,qaRunId));
+  scrResults.forEach((r,i)=>{
+    const lig = scrLigSet.find(L=>L.name===r.name); const c=centroid(lig.atoms); const Bc=lig.atoms.map(a=>({...a,x:a.x-c.x,y:a.y-c.y,z:a.z-c.z}));
+    const pdb = formatPDB(scrRecAtoms,0,qaRunId)+'\n'+formatPDB(applyTransform(Bc, r.best.q, r.best.t),1,qaRunId);
+    zip.file(`poses/${String(i+1).padStart(3,'0')}_${r.name}.pdb`, pdb);
+  });
+  const blob=await zip.generateAsync({type:'blob'}); downloadBlob(blob, stamped('screening_bundle.zip'),'application/zip', true);
 }
 
-function seqPreview() {
-  alert('Sequence→PDB: Generates simple PDB models from sequences.\n\nSee previous version for full implementation.');
+/* =========================================================
+   TriPredict + Seq→PDB (from earlier)
+========================================================= */
+function cleanSequence(raw){ return (raw||'').toUpperCase().replace(/[^A-Z]/g,'').replace(/[^ARNDCEQGHILKMFPSTWYV]/g,''); }
+const aa3={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','E':'GLU','Q':'GLN','G':'GLY','H':'HIS','I':'ILE','L':'LEU','K':'LYS','M':'MET','F':'PHE','P':'PRO','S':'SER','T':'THR','W':'TRP','Y':'TYR','V':'VAL'};
+let triModels=[], triSelected=-1;
+function triGenerate(){
+  ensureTriViewers();
+  const seq=cleanSequence(document.getElementById('triSeq').value);
+  if (!seq){ alert('Enter a protein sequence.'); return; }
+  triModels=[makeSSMC(seq), makeDG(seq), makeHC(seq)];
+  triViewers.forEach((v,i)=>{ v.clear(); v.addModel(formatPDB(triModels[i],0,qaRunId),'pdb'); v.setStyle({cartoon:{color:'#60a5fa'}}); v.zoomTo(); v.render(); });
+  triSelected=-1; document.getElementById('triSelMsg').textContent='none selected';
 }
+function selectTri(i){ triSelected=i; document.getElementById('triSelMsg').textContent=`selected ${i+1}`; }
+function triDownloadAll(){ if (!triModels.length) return alert('Generate models first'); triModels.forEach((m,i)=>downloadBlob(formatPDB(m,0,qaRunId), stamped(`TriPredict_${i+1}.pdb`),'text/plain')); }
+function triSendToDock(which){
+  if (triSelected<0) return alert('Click a mini-viewer to select a model.'); const pdb=formatPDB(triModels[triSelected],0,qaRunId);
+  if (which==='A'){ pdbAText=pdb; document.getElementById('pdbAText').value=pdb; parseOne('A'); }
+  else { pdbBText=pdb; document.getElementById('pdbBText').value=pdb; parseOne('B'); }
+}
+function triDockAll(){
+  if (!pdbBAll.length && !pdbBText){ return alert('Load Protein B'); }
+  triSelected = triSelected<0 ? 0 : triSelected; triSendToDock('A'); alert('Selected TriPredict model sent to A. Tune params and run docking.');
+}
+function makeSSMC(seq){ const out=[]; let z=0, angle=0; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; const block=Math.floor(i/10)%2===0?'HELIX':'STRAND'; if (block==='HELIX'){ const r=2.3, rise=1.5; angle+=(2*Math.PI)/3.6; z+=rise; const x=r*Math.cos(angle), y=r*Math.sin(angle); pushBB(out,resn,'A',i+1,x,y,z); } else { const dir=(i%2===0?1:-1); const x=i*3.5*0.3, y=dir*1.2, zz=Math.sin(i*0.2)*0.6 + z*0.05; pushBB(out,resn,'A',i+1,x,y,zz); z+=1.2; } } return out; }
+function makeDG(seq){ const out=[]; let x=0,y=0,z=0; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; x+=(Math.random()*2-1)*2.5; y+=(Math.random()*2-1)*2.5; z+=3.3+(Math.random()-0.5); x*=0.98; y*=0.98; pushBB(out,resn,'A',i+1,x,y,z); } return out; }
+function makeHC(seq){ const out=[]; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; const isHyd=hydrophobic.has(resn); const r=isHyd?6:10; const ang=i*0.9; const x=Math.cos(ang)*r, y=Math.sin(ang)*r, z=i*0.8; const px=x+(isHyd?-0.5:+0.5), py=y+(isHyd?-0.5:+0.5), pz=z*0.7; pushBB(out,resn,'A',i+1,px,py,pz);} const c=centroid(out); return out.map(a=>({...a,x:a.x-c.x,y:a.y-c.y,z:a.z-c.z})); }
+function pushBB(out,resn,chain,resi, cx,cy,cz){ out.push({x:cx-1.33,y:cy,z:cz-0.1,name:' N  ',elem:'N',resn,chain,resi}); out.push({x:cx,y:cy,z:cz,name:' CA ',elem:'C',resn,chain,resi}); out.push({x:cx+1.52,y:cy,z:cz+0.1,name:' C  ',elem:'C',resn,chain,resi}); out.push({x:cx+2.30,y:cy+0.4,z:cz+0.1,name:' O  ',elem:'O',resn,chain,resi}); }
 
-function seqDownload() {
-  alert('Download PDB model');
+/* Seq→PDB */
+function seqToPDB(opts){
+  const {rawSeq, chain, start, atomsMode, preset, radius, rise} = opts;
+  const seq = cleanSequence(rawSeq); if (!seq) throw new Error('Enter a valid sequence.');
+  let ca; if (preset==='HELIX') ca=helixCA(seq.length, radius, rise); else if (preset==='STRAND') ca=strandCA(seq.length); else ca=coilCA(seq.length);
+  const out=[]; for(let i=0;i<seq.length;i++){ const resn=aa3[seq[i]]||'GLY'; const c=ca[i];
+    if (atomsMode==='BB'){ out.push({x:c.x-1.33,y:c.y,z:c.z-0.1,name:' N  ',elem:'N',resn,chain,resi:start+i}); out.push({x:c.x,y:c.y,z:c.z,name:' CA ',elem:'C',resn,chain,resi:start+i}); out.push({x:c.x+1.52,y:c.y,z:c.z+0.1,name:' C  ',elem:'C',resn,chain,resi:start+i}); out.push({x:c.x+2.30,y:c.y+0.4,z:c.z+0.1,name:' O  ',elem:'O',resn,chain,resi:start+i}); }
+    else { out.push({x:c.x,y:c.y,z:c.z,name:' CA ',elem:'C',resn,chain,resi:start+i}); }
+  }
+  return formatPDB(out,0,qaRunId);
+}
+function helixCA(n, radius, rise){ const out=[]; const dAng=100*Math.PI/180; for(let i=0;i<n;i++){ out.push({x:radius*Math.cos(dAng*i), y:radius*Math.sin(dAng*i), z:i*rise}); } return out; }
+function strandCA(n){ const out=[]; for(let i=0;i<n;i++){ const dir=(i%2?1:-1); out.push({x:i*3.5*0.3,y:dir*1.2,z:0}); } return out; }
+function coilCA(n){ const out=[]; let x=0,y=0,z=0; for(let i=0;i<n;i++){ x+=(Math.random()*2-1)*2.5; y+=(Math.random()*2-1)*2.5; z+=3.2; out.push({x,y,z}); } return out; }
+function seqPreview(){ ensureSeqViewer(); const opts={ rawSeq:document.getElementById('seqInput').value, chain:(document.getElementById('seqChain').value||'A')[0].toUpperCase(), start:+document.getElementById('seqStart').value||1, atomsMode:document.getElementById('seqAtoms').value, preset:document.getElementById('ssPreset').value, radius:+document.getElementById('seqRadius').value||2.3, rise:+document.getElementById('seqRise').value||1.5 }; try{ const pdb=seqToPDB(opts); seqViewer.clear(); seqViewer.addModel(pdb,'pdb'); seqViewer.setStyle({cartoon:{color:'#60a5fa'}}); seqViewer.zoomTo(); seqViewer.render(); }catch(e){ alert(e.message||e); } }
+function seqDownload(){ const opts={ rawSeq:document.getElementById('seqInput').value, chain:(document.getElementById('seqChain').value||'A')[0].toUpperCase(), start:+document.getElementById('seqStart').value||1, atomsMode:document.getElementById('seqAtoms').value, preset:document.getElementById('ssPreset').value, radius:+document.getElementById('seqRadius').value||2.3, rise:+document.getElementById('seqRise').value||1.5 }; try{ const pdb=seqToPDB(opts); downloadBlob(pdb, stamped('sequence_model.pdb'),'text/plain'); }catch(e){ alert(e.message||e); } }
+
+/* =========================================================
+   QA Mode & Runs (localStorage)
+========================================================= */
+function toggleQA(){ qaMode = document.getElementById('qaToggle').checked; qaLog(`QA mode ${qaMode?'ENABLED':'DISABLED'}`); if (qaMode && !qaRunId) qaNewRunId('init'); }
+async function qaNewRunId(kind){
+  const t = new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14);
+  const mat = (pdbAText||'')+(pdbBText||'')+(recText||'')+(scrRecText||'')+JSON.stringify(kind);
+  const h = await sha256Hex(mat).then(x=>x.slice(0,12));
+  qaRunId = `${t}-${h}`;
+  document.getElementById('qaRunId').textContent = `RUN: ${qaRunId}`;
+  qaLog(`New Run ID ${qaRunId} [${kind}]`);
+}
+function qaFreeze(){
+  if (!qaMode) return alert('Enable QA mode first');
+  qaFrozen=true; qaLog('Parameters frozen.');
+  // disable all inputs that affect computation
+  document.querySelectorAll('input,select,textarea').forEach(el=>{
+    if (['qaToggle'].includes(el.id)) return;
+    if (['pdbAText','pdbBText','recText','scrRecText','ligText','seqInput','triSeq'].includes(el.id)) return; // allow text areas for inputs
+    el.dataset.prevDisabled=el.disabled; el.disabled=true;
+  });
+}
+function qaUnfreeze(){
+  qaFrozen=false; qaLog('QA unlock (recorded).');
+  document.querySelectorAll('input,select,textarea').forEach(el=>{ if (el.dataset.prevDisabled!==undefined){ el.disabled=(el.dataset.prevDisabled==='true'); delete el.dataset.prevDisabled; } else el.disabled=false; });
+}
+function stamped(name){ return qaRunId ? name.replace(/(\.[^.]*)?$/i, `_${qaRunId}$1`) : name; }
+function qaExportLog(){ const txt=document.getElementById('qaLog').textContent||''; downloadBlob(txt, stamped('qa_log.txt'),'text/plain'); }
+
+function storeRun(run){
+  const all = JSON.parse(localStorage.getItem('dock_runs')||'[]');
+  const rec = {runId:run.runId, ts:new Date().toISOString(), type:run.type, seed:run.seed, note:run.note||'', meta:{app:APP_VER}, top:run.top||[]};
+  all.unshift(rec); localStorage.setItem('dock_runs', JSON.stringify(all));
+  qaLog(`Stored run ${run.runId} (${run.type})`);
+}
+function runsRefresh(){
+  const all = JSON.parse(localStorage.getItem('dock_runs')||'[]');
+  const tbody=document.getElementById('runsBody'); tbody.innerHTML='';
+  all.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="small">${r.runId}</td><td>${r.type}</td><td class="small">${new Date(r.ts).toLocaleString()}</td><td>${r.seed??''}</td><td>${r.note??''}</td><td><button class="btn" onclick="runsDelete('${r.runId}')">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function runsDelete(id){
+  let all = JSON.parse(localStorage.getItem('dock_runs')||'[]');
+  all = all.filter(r=>r.runId!==id); localStorage.setItem('dock_runs', JSON.stringify(all)); runsRefresh(); qaLog(`Deleted run ${id}`);
+}
+function runsExport(){
+  const all = localStorage.getItem('dock_runs')||'[]';
+  downloadBlob(all, 'stored_runs.json','application/json');
+}
+function runsClear(){ if (!confirm('Delete all stored runs?')) return; localStorage.removeItem('dock_runs'); runsRefresh(); qaLog('Cleared all stored runs.'); }
+
+/* =========================================================
+   Generic download helper
+========================================================= */
+function downloadBlob(data, name, mime='text/plain', isBlob=false){
+  const blob = isBlob? data : new Blob([data], {type:mime});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0);
 }
 </script>
 </body>
