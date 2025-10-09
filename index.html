@@ -2,147 +2,430 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Enhanced Antibody–Antigen Docking Suite • Advanced Analytics • Interactive Visualization</title>
+<title>Comprehensive Docking Suite • Antibody-Antigen • Ligand Screening • Enthalpy Analysis</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Advanced antibody–antigen docking with detailed analytics, residue-level interactions, energy decomposition, pose comparison, session management, and comprehensive exports." />
+<meta name="description" content="Advanced in-browser docking platform: antibody-antigen docking with parallel workers, batch ligand screening (50 SMILES vs 2-3 PDBs), detailed enthalpy calculations, QA registry, reproducible exports, and comprehensive analytics." />
 <style>
+  /* ===== CSS VARIABLES & THEME DEFINITION ===== */
+  /* These custom properties define our dark theme color palette and font families.
+     Using CSS variables makes it easy to maintain consistent styling throughout. */
   :root{
-    --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--accent:#60a5fa;--line:#1f2937;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--orange:#f97316;--purple:#a78bfa;--cyan:#22d3ee;
+    --bg:#0b1220;           /* Main background - deep navy blue */
+    --panel:#0f172a;        /* Panel background - slightly lighter navy */
+    --text:#e5e7eb;         /* Primary text color - light gray */
+    --muted:#9ca3af;        /* Muted text for secondary information */
+    --accent:#60a5fa;       /* Accent color - bright blue for highlights */
+    --line:#1f2937;         /* Border/divider lines - subtle gray */
+    --green:#34d399;        /* Success/positive actions - emerald */
+    --red:#f87171;          /* Errors/warnings - coral red */
+    --yellow:#fbbf24;       /* Caution/info - amber */
+    --orange:#f97316;       /* Secondary highlight - orange */
+    --purple:#a78bfa;       /* Tertiary accent - purple */
+    --cyan:#22d3ee;         /* Additional accent - cyan */
+    /* Font stacks for code and UI text */
     --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
     --sans: Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;overflow-x:hidden}
+  
+  /* ===== GLOBAL RESETS & BASE STYLES ===== */
+  *{box-sizing:border-box}  /* Consistent box model across all elements */
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    overflow-x:hidden;  /* Prevent horizontal scroll on narrow screens */
+  }
   a{color:var(--accent);text-decoration:none}
-  header{padding:34px 16px;background:
-    radial-gradient(1200px 600px at 15% -10%,#1d2a4a,transparent 60%),
-    radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%)}
-  .wrap{max-width:1400px;margin:0 auto}
-  h1{margin:0 0 8px;font-size:30px}
-  p.lead{color:var(--muted);margin:6px 0 0}
-  section{padding:22px 16px;border-top:1px solid var(--line);background:var(--panel)}
-  h2{margin:0 0 10px;font-size:22px}
-  h3{margin:14px 0 6px;font-size:17px}
-  h4{margin:10px 0 4px;font-size:15px}
+  
+  /* ===== HEADER WITH GRADIENT BACKGROUND ===== */
+  /* The header uses radial gradients to create a subtle depth effect */
+  header{
+    padding:34px 16px;
+    background:
+      radial-gradient(1200px 600px at 15% -10%,#1d2a4a,transparent 60%),
+      radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%);
+  }
+  
+  /* ===== LAYOUT CONTAINERS ===== */
+  .wrap{max-width:1400px;margin:0 auto}  /* Centered content with max width */
+  
+  /* ===== TYPOGRAPHY ===== */
+  h1{margin:0 0 8px;font-size:30px;font-weight:700}
+  h2{margin:0 0 10px;font-size:22px;font-weight:600}
+  h3{margin:14px 0 6px;font-size:17px;font-weight:600}
+  h4{margin:10px 0 4px;font-size:15px;font-weight:600}
+  p.lead{color:var(--muted);margin:6px 0 0;font-size:14px}
+  
+  /* ===== SECTIONS & CARDS ===== */
+  section{
+    padding:22px 16px;
+    border-top:1px solid var(--line);
+    background:var(--panel);
+  }
+  .card{
+    background:#0b1220;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  
+  /* ===== GRID LAYOUTS ===== */
+  /* Responsive grid that adapts to screen size */
   .grid{display:grid;gap:16px}
   @media(min-width:980px){.grid{grid-template-columns:1.05fr .95fr}}
   @media(min-width:1200px){.grid-3{grid-template-columns:repeat(3,1fr)}}
-  .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:14px}
+  
+  /* ===== FLEXBOX UTILITIES ===== */
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  label{font-weight:600}
+  
+  /* ===== FORM ELEMENTS ===== */
+  label{font-weight:600;font-size:13px}
   input[type="number"], input[type="text"], textarea, select{
-    background:#0a0f1a;color:var(--text);border:1px solid #1f2937;border-radius:8px;
-    padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:80px
+    background:#0a0f1a;
+    color:var(--text);
+    border:1px solid #1f2937;
+    border-radius:8px;
+    padding:8px 10px;
+    font-family:var(--mono);
+    font-size:13px;
+    min-width:80px;
+    transition:border-color 0.2s;
   }
-  textarea{width:100%;min-height:110px}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-weight:600;border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:13px;transition:all .2s}
-  .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(96,165,250,0.3)}
+  input[type="number"]:focus, input[type="text"]:focus, textarea:focus, select:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  textarea{width:100%;min-height:110px;resize:vertical}
+  
+  /* ===== BUTTONS ===== */
+  /* Base button style with smooth transitions for hover effects */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 12px;
+    border-radius:10px;
+    font-weight:600;
+    border:1px solid var(--line);
+    background:#0b1220;
+    cursor:pointer;
+    font-size:13px;
+    transition:all 0.2s ease;
+    user-select:none;
+  }
+  .btn:hover:not([disabled]){
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(96,165,250,0.3);
+  }
+  /* Button variants with gradient backgrounds */
   .btn.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
   .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0}
   .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0}
-  .btn.purple{background:linear-gradient(180deg,#8b5cf6,#7c3aed);border:0}
+  .btn.purple{background:linear-gradient(180deg,#7c3aed,#6d28d9);border:0}
   .btn.orange{background:linear-gradient(180deg,#f97316,#ea580c);border:0}
-  .btn[disabled]{opacity:.55;cursor:not-allowed}
-  .muted{color:var(--muted)}
-  .small{font-size:12px;color:var(--muted)}
-  .pill{padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#93c5fd}
-  progress{width:260px;height:10px;border:1px solid #1f2937;border-radius:999px;background:#0b1220}
+  .btn[disabled]{opacity:0.55;cursor:not-allowed}
+  
+  /* ===== STATUS INDICATORS ===== */
+  .pill{
+    padding:2px 8px;
+    border:1px solid #334155;
+    border-radius:999px;
+    font-size:12px;
+    color:#93c5fd;
+    font-weight:500;
+  }
+  
+  /* ===== PROGRESS BAR ===== */
+  progress{
+    width:260px;
+    height:10px;
+    border:1px solid #1f2937;
+    border-radius:999px;
+    background:#0b1220;
+  }
   progress::-webkit-progress-bar{background:#0b1220;border-radius:999px}
-  progress::-webkit-progress-value{background:#60a5fa;border-radius:999px}
-  #viewer{position:relative;width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
-  .score{font-family:var(--mono);background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;font-size:12px}
-  .infobox{border:1px solid #334155;border-left:4px solid var(--accent);border-radius:10px;padding:10px;background:#0a0f1a;color:#cbd5e1;margin:10px 0}
-  .errorbox{border:1px solid #7f1d1d;border-left:4px solid #dc2626;border-radius:10px;padding:10px;background:#1a0c0c;color:#fecaca;margin:10px 0}
-  .successbox{border:1px solid #065f46;border-left:4px solid #10b981;border-radius:10px;padding:10px;background:#0a1f1a;color:#a7f3d0;margin:10px 0}
+  progress::-webkit-progress-value{background:#60a5fa;border-radius:999px;transition:width 0.3s}
+  
+  /* ===== 3D VIEWERS ===== */
+  /* Container for 3Dmol.js molecular visualization */
+  #viewer, #viewerLig, #viewerScr, #viewerComp{
+    position:relative;
+    width:100%;
+    height:560px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#0a0f1a;
+    overflow:hidden;
+  }
+  
+  /* ===== TEXT DISPLAY BOXES ===== */
+  .score{
+    font-family:var(--mono);
+    background:#0a0f1a;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px;
+    overflow:auto;
+    font-size:12px;
+    line-height:1.5;
+  }
+  
+  /* ===== INFO BOXES ===== */
+  /* Styled notification boxes for different message types */
+  .infobox{
+    border:1px solid #334155;
+    border-left:4px solid var(--accent);
+    border-radius:10px;
+    padding:10px;
+    background:#0a0f1a;
+    color:#cbd5e1;
+    margin:10px 0;
+    font-size:13px;
+  }
+  .errorbox{
+    border:1px solid #7f1d1d;
+    border-left:4px solid #dc2626;
+    border-radius:10px;
+    padding:10px;
+    background:#1a0c0c;
+    color:#fecaca;
+    margin:10px 0;
+  }
+  .successbox{
+    border:1px solid #065f46;
+    border-left:4px solid #10b981;
+    border-radius:10px;
+    padding:10px;
+    background:#0a1f1a;
+    color:#a7f3d0;
+    margin:10px 0;
+  }
+  
+  /* ===== CHAIN SELECTION CHIPS ===== */
   .chainchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-  .chip{border:1px solid #334155;border-radius:999px;padding:2px 8px;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+  .chip{
+    border:1px solid #334155;
+    border-radius:999px;
+    padding:2px 8px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    transition:background 0.2s;
+  }
+  .chip:hover{background:#1a2332}
   .chip input{accent-color:#60a5fa}
-  .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:12px}
-  .tab{padding:8px 16px;cursor:pointer;border-radius:6px 6px 0 0;transition:all .2s;color:var(--muted)}
-  .tab:hover{background:#1a2332;color:var(--text)}
-  .tab.active{background:#1a2332;color:var(--accent);border-bottom:2px solid var(--accent)}
-  .tab-content{display:none}
-  .tab-content.active{display:block}
-  table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
-  th{background:#1a2332;padding:8px;text-align:left;border-bottom:1px solid var(--line);position:sticky;top:0}
-  td{padding:6px 8px;border-bottom:1px solid #0f172a}
-  tr:hover{background:#0f1829}
-  .table-container{max-height:400px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
-  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0}
-  .metric-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:12px}
-  .metric-value{font-size:24px;font-weight:700;color:var(--accent)}
-  .metric-label{font-size:12px;color:var(--muted);margin-top:4px}
-  .chart-container{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:12px;margin:12px 0;height:200px}
-  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;font-size:12px}
-  .legend-item{display:flex;align-items:center;gap:6px}
-  .legend-color{width:16px;height:16px;border-radius:3px}
-  .controls-panel{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:12px;margin:8px 0}
-  .slider-group{margin:12px 0}
-  .slider-group label{display:block;margin-bottom:6px}
-  .slider{width:100%;accent-color:var(--accent)}
-  .color-picker{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-  .color-swatch{width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .2s}
-  .color-swatch:hover{border-color:var(--accent);transform:scale(1.1)}
-  .color-swatch.active{border-color:var(--accent)}
-  .pose-comparison{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
-  .mini-viewer{width:100%;height:300px;border:1px solid var(--line);border-radius:8px;background:#0a0f1a}
-  .keyboard-shortcuts{font-size:11px;color:var(--muted);margin-top:12px;padding:8px;background:#0a0f1a;border-radius:6px}
-  .kbd{display:inline-block;padding:2px 6px;background:#1a2332;border:1px solid var(--line);border-radius:4px;font-family:var(--mono);font-size:10px}
-  footer{padding:18px 16px;color:var(--muted);text-align:center}
-  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center}
-  .modal.active{display:flex}
-  .modal-content{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;max-width:600px;max-height:80vh;overflow-y:auto}
-  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-  .close-modal{cursor:pointer;font-size:24px;color:var(--muted)}
-  .close-modal:hover{color:var(--text)}
-  .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;padding:10px;background:#0a0f1a;border-radius:8px}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600}
+  
+  /* ===== TAB NAVIGATION ===== */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .tabbtn{
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#0b1220;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    transition:all 0.2s;
+  }
+  .tabbtn:hover{background:#1a2332}
+  .tabbtn.active{
+    background:linear-gradient(180deg,#2563eb,#1d4ed8);
+    border:0;
+    color:white;
+  }
+  .tabsec{display:none}
+  .tabsec.active{display:block}
+  
+  /* ===== TABLES ===== */
+  /* Styled data tables with hover effects */
+  .table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    background:#0a0f1a;
+  }
+  .table th{
+    background:#1a2332;
+    padding:8px;
+    text-align:left;
+    border-bottom:2px solid var(--line);
+    font-weight:600;
+    position:sticky;
+    top:0;
+    z-index:1;
+  }
+  .table td{
+    padding:6px 8px;
+    border-bottom:1px solid #0f172a;
+  }
+  .table tr:hover{background:#0f1829}
+  .table-container{
+    max-height:400px;
+    overflow-y:auto;
+    border:1px solid var(--line);
+    border-radius:8px;
+    margin-top:8px;
+  }
+  
+  /* ===== METRIC CARDS ===== */
+  /* Grid layout for displaying key metrics */
+  .metric-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;
+    margin:12px 0;
+  }
+  .metric-card{
+    background:#0a0f1a;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px;
+    text-align:center;
+  }
+  .metric-value{
+    font-size:24px;
+    font-weight:700;
+    color:var(--accent);
+    margin-bottom:4px;
+  }
+  .metric-label{
+    font-size:12px;
+    color:var(--muted);
+  }
+  
+  /* ===== BADGES ===== */
+  .badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+  }
   .badge-blue{background:#1e3a8a;color:#93c5fd}
   .badge-green{background:#065f46;color:#6ee7b7}
   .badge-red{background:#7f1d1d;color:#fca5a5}
   .badge-yellow{background:#78350f;color:#fcd34d}
-  .progress-bar{width:100%;height:8px;background:#0a0f1a;border-radius:999px;overflow:hidden;margin:4px 0}
-  .progress-fill{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);transition:width .3s}
-  .tooltip{position:relative;display:inline-block}
-  .tooltip .tooltiptext{visibility:hidden;width:200px;background:#1a2332;color:var(--text);text-align:center;border-radius:6px;padding:8px;position:absolute;z-index:1;bottom:125%;left:50%;margin-left:-100px;opacity:0;transition:opacity .3s;font-size:11px;border:1px solid var(--line)}
-  .tooltip:hover .tooltiptext{visibility:visible;opacity:1}
-  .energy-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:6px 0}
-  .energy-segment{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:white}
+  
+  /* ===== UTILITY CLASSES ===== */
+  .muted{color:var(--muted)}
+  .small{font-size:12px;color:var(--muted)}
+  .kbd{
+    font-family:var(--mono);
+    font-size:12px;
+    background:#0a0f1a;
+    border:1px solid #334155;
+    border-radius:6px;
+    padding:2px 6px;
+  }
+  
+  /* ===== FOOTER ===== */
+  footer{
+    padding:18px 16px;
+    color:var(--muted);
+    text-align:center;
+    font-size:13px;
+  }
+  
+  /* ===== ENERGY VISUALIZATION BAR ===== */
+  .energy-bar{
+    display:flex;
+    height:24px;
+    border-radius:6px;
+    overflow:hidden;
+    margin:6px 0;
+  }
+  .energy-segment{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10px;
+    font-weight:600;
+    color:white;
+    transition:flex 0.3s;
+  }
+  
+  /* ===== LEGEND ===== */
+  .legend{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:8px 0;
+    font-size:12px;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .legend-color{
+    width:16px;
+    height:16px;
+    border-radius:3px;
+  }
 </style>
 </head>
 <body>
+
+<!-- ===== MAIN HEADER ===== -->
 <header>
   <div class="wrap">
-    <h1>🧬 Enhanced Antibody–Antigen Docking Suite</h1>
-    <p class="lead">Advanced parallel sampling • vdW-aware scoring • residue-level analytics • energy decomposition • pose comparison • session management • reproducible exports</p>
-    <div class="row" style="margin-top:12px">
-      <button class="btn primary" id="btnDemo">🎯 Quick Demo</button>
+    <h1>🧬 Comprehensive Molecular Docking Suite</h1>
+    <p class="lead">
+      Advanced in-browser platform: Antibody-Antigen docking • Batch ligand screening (50 SMILES vs 2-3 PDBs) • 
+      Detailed enthalpy calculations • QA registry • Session management • Reproducible exports
+    </p>
+    
+    <!-- Tab navigation for different docking modes -->
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="dockTab">🧷 Antibody Docking</button>
+      <button class="tabbtn" data-tab="ligTab">🧪 Ligand Docking</button>
+      <button class="tabbtn" data-tab="screenTab">📚 Batch Screening</button>
+      <button class="tabbtn" data-tab="qaTab">✅ QA & Registry</button>
+      <button class="tabbtn" data-tab="analysisTab">📊 Analysis</button>
+      <button class="tabbtn" data-tab="aboutTab">ℹ️ About</button>
+    </div>
+    
+    <!-- Global controls -->
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="btnDemo">🎯 Load Demo & Dock</button>
       <button class="btn green" id="btnSaveSession">💾 Save Session</button>
       <button class="btn purple" id="btnLoadSession">📂 Load Session</button>
-      <button class="btn" id="btnHelp">❓ Help</button>
       <span class="pill" id="statusPill">idle</span>
       <progress id="prog" value="0" max="1"></progress>
     </div>
   </div>
 </header>
 
-<section>
+<!-- ===== ANTIBODY-ANTIGEN DOCKING SECTION ===== -->
+<section id="dockTab" class="tabsec active">
   <div class="wrap grid">
+    <!-- Protein input panel -->
     <div class="card">
-      <h2>1️⃣ Protein Input</h2>
-      <div class="small muted" style="margin-bottom:8px">Load PDB files or paste text. Select chains using chips below after parsing. Demo button provides immediate example.</div>
+      <h2>1️⃣ Load Proteins</h2>
+      <div class="row small muted">
+        Upload PDB files or paste text. After parsing, select chains using checkboxes below.
+        <span class="pill">Tip: Demo button loads example structures</span>
+      </div>
       
       <div class="row" style="margin-top:8px">
-        <div style="flex:1;min-width:300px">
+        <!-- Protein A input -->
+        <div style="min-width:300px;flex:1">
           <h3>Protein A (Antibody) <span class="badge badge-blue" id="badgeA">0 atoms</span></h3>
           <div class="row">
             <input type="file" id="pdbAFile" accept=".pdb,.ent,.txt,.pdb.gz" />
             <button class="btn" onclick="useExample('A')">Example</button>
-            <button class="btn" onclick="fetchPDB('A')">Fetch PDB ID</button>
+            <button class="btn" onclick="fetchPDBFromRCSB('A')">Fetch PDB ID</button>
           </div>
-          <textarea id="pdbAText" placeholder="Paste PDB text for Protein A or use file upload"></textarea>
-          <div class="row"><label>Chains:</label><div id="chainsABox" class="chainchips"></div></div>
+          <textarea id="pdbAText" placeholder="Paste PDB text for Protein A or upload file"></textarea>
+          <div class="row">
+            <label>Chains:</label>
+            <div id="chainsABox" class="chainchips"></div>
+          </div>
           <div id="chainWarnA" class="infobox small">Parse first to populate chain selection.</div>
           <div class="row">
             <button class="btn" onclick="parseOne('A')">🔎 Parse A</button>
@@ -151,15 +434,19 @@
           </div>
         </div>
         
-        <div style="flex:1;min-width:300px">
+        <!-- Protein B input -->
+        <div style="min-width:300px;flex:1">
           <h3>Protein B (Antigen) <span class="badge badge-green" id="badgeB">0 atoms</span></h3>
           <div class="row">
             <input type="file" id="pdbBFile" accept=".pdb,.ent,.txt,.pdb.gz" />
             <button class="btn" onclick="useExample('B')">Example</button>
-            <button class="btn" onclick="fetchPDB('B')">Fetch PDB ID</button>
+            <button class="btn" onclick="fetchPDBFromRCSB('B')">Fetch PDB ID</button>
           </div>
-          <textarea id="pdbBText" placeholder="Paste PDB text for Protein B or use file upload"></textarea>
-          <div class="row"><label>Chains:</label><div id="chainsBBox" class="chainchips"></div></div>
+          <textarea id="pdbBText" placeholder="Paste PDB text for Protein B or upload file"></textarea>
+          <div class="row">
+            <label>Chains:</label>
+            <div id="chainsBBox" class="chainchips"></div>
+          </div>
           <div id="chainWarnB" class="infobox small">Parse first to populate chain selection.</div>
           <div class="row">
             <button class="btn" onclick="parseOne('B')">🔎 Parse B</button>
@@ -168,693 +455,971 @@
           </div>
         </div>
       </div>
-
+      
       <details style="margin-top:12px">
         <summary><b>Input Format Guidelines</b></summary>
-        <ul class="small">
-          <li><b>Supported formats:</b> Standard PDB text, gzipped PDB files (.pdb.gz)</li>
-          <li><b>Fetch from RCSB:</b> Click "Fetch PDB ID" to download structures directly from the PDB database</li>
-          <li><b>Chain selection:</b> After parsing, use checkboxes to select specific chains for docking</li>
-          <li><b>Visualization:</b> Cartoon rendering requires backbone atoms (N, CA, C, O); stick rendering always available</li>
-          <li><b>Quality check:</b> Parser validates coordinates and reports any anomalies</li>
-        </ul>
+        <div class="small" style="padding:8px 0">
+          <p><b>Supported formats:</b> Standard PDB text, gzipped PDB files (.pdb.gz)</p>
+          <p><b>Fetch from RCSB:</b> Click "Fetch PDB ID" to download structures directly from the Protein Data Bank</p>
+          <p><b>Chain selection:</b> After parsing, use checkboxes to select specific chains for docking</p>
+          <p><b>Visualization:</b> Cartoon rendering requires backbone atoms (N, CA, C, O); stick rendering always available</p>
+        </div>
       </details>
     </div>
-
+    
+    <!-- Docking parameters panel -->
     <div class="card">
-      <h2>2️⃣ Docking Configuration</h2>
+      <h2>2️⃣ Docking Parameters</h2>
       
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('basic')">Basic</div>
-        <div class="tab" onclick="switchTab('advanced')">Advanced</div>
-        <div class="tab" onclick="switchTab('scoring')">Scoring</div>
+      <!-- Basic parameters -->
+      <h4>Sampling Parameters</h4>
+      <div class="row">
+        <label>Samples</label>
+        <input type="number" id="samples" value="10000" min="1000" step="500" title="Number of random orientations to sample" />
+        
+        <label>Max Translation (Å)</label>
+        <input type="number" id="maxTrans" value="12" min="0" step="1" title="Maximum distance from origin for protein B center" />
+        
+        <label>Atom Set</label>
+        <select id="atomMode" title="Which atoms to use for sampling">
+          <option value="CA">Cα only (fastest)</option>
+          <option value="BB">Backbone atoms</option>
+          <option value="HEAVY">All heavy atoms</option>
+        </select>
       </div>
-
-      <div id="tab-basic" class="tab-content active">
-        <div class="row">
-          <label class="tooltip">Samples
-            <span class="tooltiptext">Number of random orientations to sample. More samples = better coverage but slower.</span>
-          </label>
-          <input type="number" id="samples" value="8000" min="500" step="500" />
-          
-          <label class="tooltip">Max Translation (Å)
-            <span class="tooltiptext">Maximum distance from origin for protein B center of mass.</span>
-          </label>
-          <input type="number" id="maxTrans" value="12" min="0" step="1" />
-          
-          <label class="tooltip">Atom Set
-            <span class="tooltiptext">Which atoms to use: Cα (fastest), Backbone (good balance), Heavy atoms (most accurate but slow).</span>
-          </label>
-          <select id="atomMode">
-            <option value="CA">Cα only (fast)</option>
-            <option value="BB">Backbone atoms</option>
-            <option value="HEAVY">All heavy atoms</option>
-          </select>
-        </div>
-
-        <div class="row" style="margin-top:8px">
-          <label>Top Poses</label>
-          <input type="number" id="topN" value="10" min="1" max="50" />
-          
-          <label class="tooltip">Rescore Mode
-            <span class="tooltiptext">Refine top poses with full heavy atom scoring for better ranking accuracy.</span>
-          </label>
-          <select id="rescoreMode">
-            <option value="NONE">Skip rescoring</option>
-            <option value="HEAVY">Heavy atoms</option>
-            <option value="HEAVY_REFINE">Heavy + micro-optimize</option>
-          </select>
-          
-          <label>Random Seed</label>
-          <input type="number" id="seed" value="42" />
-        </div>
+      
+      <!-- Scoring parameters -->
+      <h4 style="margin-top:12px">Scoring Parameters</h4>
+      <div class="row">
+        <label>Contact Cutoff (Å)</label>
+        <input type="number" id="contactCut" value="4.8" step="0.1" min="3" max="8" />
+        
+        <label>Clash Factor</label>
+        <input type="number" id="clashFactor" value="0.85" step="0.05" min="0.5" max="1.2" title="Multiplier for van der Waals radii" />
+        
+        <label>Contact Weight</label>
+        <input type="number" id="wContact" value="1.0" step="0.1" />
+        
+        <label>Clash Penalty</label>
+        <input type="number" id="wClash" value="6.0" step="0.1" />
+        
+        <label>Softness</label>
+        <input type="number" id="soft" value="0.5" step="0.1" min="0" max="2" />
       </div>
-
-      <div id="tab-advanced" class="tab-content">
-        <div class="row">
-          <label>Contact Cutoff (Å)</label>
-          <input type="number" id="contactCut" value="4.8" step="0.1" min="3" max="8" />
-          
-          <label class="tooltip">Clash Factor
-            <span class="tooltiptext">Multiplier for van der Waals radii. Lower = stricter clash detection.</span>
-          </label>
-          <input type="number" id="clashFactor" value="0.85" step="0.05" min="0.5" max="1.2" />
-          
-          <label>Softness</label>
-          <input type="number" id="soft" value="0.5" step="0.1" min="0" max="2" />
-        </div>
-
-        <div class="row" style="margin-top:8px">
-          <label>Contact Weight</label>
-          <input type="number" id="wContact" value="1.0" step="0.1" />
-          
-          <label>Clash Penalty</label>
-          <input type="number" id="wClash" value="6.0" step="0.1" />
-          
-          <label>H-bond Weight</label>
-          <input type="number" id="wHbond" value="0.5" step="0.1" />
-          
-          <label>Salt Bridge Weight</label>
-          <input type="number" id="wSaltBridge" value="1.0" step="0.1" />
-        </div>
-
-        <div class="row" style="margin-top:8px">
-          <label class="tooltip">Diversity: Angle (°)
-            <span class="tooltiptext">Minimum rotation difference to consider poses distinct.</span>
-          </label>
-          <input type="number" id="dupAngle" value="12" step="1" min="5" max="30" />
-          
-          <label class="tooltip">Diversity: Translation (Å)
-            <span class="tooltiptext">Minimum distance difference to consider poses distinct.</span>
-          </label>
-          <input type="number" id="dupTrans" value="2" step="0.5" min="0.5" max="5" />
-        </div>
+      
+      <!-- Output parameters -->
+      <h4 style="margin-top:12px">Output & Diversity</h4>
+      <div class="row">
+        <label>Top Poses</label>
+        <input type="number" id="topN" value="12" min="1" max="50" />
+        
+        <label>Rescore Mode</label>
+        <select id="rescoreMode" title="Refine top poses with full heavy atom scoring">
+          <option value="NONE">Skip rescoring</option>
+          <option value="HEAVY">Heavy atoms</option>
+          <option value="HEAVY_REFINE">Heavy + micro-optimize</option>
+        </select>
+        
+        <label>Random Seed</label>
+        <input type="number" id="seed" value="42" title="For reproducibility" />
       </div>
-
-      <div id="tab-scoring" class="tab-content">
-        <div class="row">
-          <label>k<sub>elec</sub></label>
-          <input type="number" id="kElec" value="0.5" step="0.1" />
-          
-          <label>Electrostatic Cutoff (Å)</label>
-          <input type="number" id="elecCut" value="12" step="0.5" />
-          
-          <label>Desolvation Weight</label>
-          <input type="number" id="wDesolvation" value="0.2" step="0.1" />
-        </div>
-
-        <div class="row" style="margin-top:8px">
-          <label>Hydrophobic Weight</label>
-          <input type="number" id="wHydrophobic" value="0.3" step="0.1" />
-          
-          <label>Shape Complementarity Weight</label>
-          <input type="number" id="wShape" value="0.1" step="0.1" />
-        </div>
-
-        <div class="infobox small">
-          <b>Scoring Function:</b> Score = (contacts × w<sub>contact</sub>) − (clash × w<sub>clash</sub>) + (H-bonds × w<sub>hb</sub>) + (salt bridges × w<sub>sb</sub>) − (electrostatic repulsion) − (desolvation penalty) + (hydrophobic contacts × w<sub>hyd</sub>)
-        </div>
+      
+      <div class="row">
+        <label>Diversity Filter (°/Å)</label>
+        <input type="number" id="dupAngle" value="12" step="1" min="5" max="30" title="Min rotation difference" />
+        <input type="number" id="dupTrans" value="2" step="0.5" min="0.5" max="5" title="Min translation difference" />
       </div>
-
+      
+      <!-- Action buttons -->
       <div class="row" style="margin-top:12px">
         <button class="btn primary" id="dockBtn">▶️ Run Docking</button>
         <button class="btn red" id="cancelBtn" disabled>✖ Cancel</button>
-        <button class="btn orange" id="resetBtn">🔄 Reset All</button>
+        <button class="btn orange" id="resetBtn">🔄 Reset</button>
       </div>
-
-      <div class="keyboard-shortcuts">
-        <b>Keyboard Shortcuts:</b>
-        <span class="kbd">Space</span> Start/Stop docking
-        <span class="kbd">R</span> Reset view
-        <span class="kbd">←/→</span> Navigate poses
-        <span class="kbd">S</span> Save session
-        <span class="kbd">H</span> Toggle help
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="card">
-      <h2>3️⃣ Interactive 3D Visualization & Results</h2>
       
-      <div class="grid">
-        <div>
-          <div id="viewer"></div>
-          
-          <div class="controls-panel">
-            <h4>Visualization Controls</h4>
-            <div class="row">
-              <label>Style:</label>
-              <select id="styleMode" onchange="updateStyle()">
-                <option value="cartoon">Cartoon</option>
-                <option value="stick">Stick</option>
-                <option value="sphere">Sphere</option>
-                <option value="surface">Surface</option>
-                <option value="cartoon+stick">Cartoon + Stick</option>
-              </select>
-              
-              <label>Color by:</label>
-              <select id="colorMode" onchange="updateStyle()">
-                <option value="chain">Chain</option>
-                <option value="residue">Residue type</option>
-                <option value="hydrophobicity">Hydrophobicity</option>
-                <option value="charge">Charge</option>
-                <option value="secondary">Secondary structure</option>
-              </select>
-            </div>
-
-            <div class="row" style="margin-top:8px">
-              <label class="chip"><input type="checkbox" id="toggleContacts" checked onchange="refreshOverlays()"> Contact Lines</label>
-              <label class="chip"><input type="checkbox" id="toggleHB" checked onchange="refreshOverlays()"> H-bonds</label>
-              <label class="chip"><input type="checkbox" id="toggleSB" checked onchange="refreshOverlays()"> Salt Bridges</label>
-              <label class="chip"><input type="checkbox" id="toggleHydrophobic" onchange="refreshOverlays()"> Hydrophobic</label>
-            </div>
-
-            <div class="slider-group">
-              <label>Transparency: <span id="alphaValue">1.0</span></label>
-              <input type="range" class="slider" id="alphaSlider" min="0" max="1" step="0.05" value="1" oninput="updateAlpha(this.value)">
-            </div>
-
-            <div class="slider-group">
-              <label>Interaction Distance Filter: <span id="distValue">4.8</span> Å</label>
-              <input type="range" class="slider" id="distSlider" min="3" max="8" step="0.1" value="4.8" oninput="updateDistanceFilter(this.value)">
-            </div>
-
-            <div class="row">
-              <button class="btn" onclick="centerView()">🎯 Center View</button>
-              <button class="btn" onclick="resetRotation()">↻ Reset Rotation</button>
-              <button class="btn" onclick="toggleSpin()">🔄 Toggle Spin</button>
-              <button class="btn" onclick="focusInterface()">🔍 Focus Interface</button>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h3>Pose Selection & Quick Metrics</h3>
-          <div id="poseTableContainer" class="table-container" style="max-height:300px">
-            <table id="poseTable">
-              <thead>
-                <tr>
-                  <th onclick="sortPoses('rank')">Rank ▼</th>
-                  <th onclick="sortPoses('score')">Score</th>
-                  <th onclick="sortPoses('contacts')">Contacts</th>
-                  <th onclick="sortPoses('hb')">H-bonds</th>
-                  <th onclick="sortPoses('sb')">Salt Br.</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="poseTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="score" id="scoreBox" style="margin-top:12px;min-height:80px"></div>
-
-          <div class="row" style="margin-top:12px">
-            <button class="btn green" id="btnAllPDB">⬇ All Poses PDB</button>
-            <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
-            <button class="btn" id="btnCSV">⬇ CSV Summary</button>
-            <button class="btn" id="btnJSON">⬇ Detailed JSON</button>
-            <button class="btn purple" id="btnPNG">📸 PNG</button>
-          </div>
-        </div>
+      <div class="infobox small" style="margin-top:8px">
+        <b>Scoring Function:</b> Score = (contacts × w<sub>contact</sub>) − (clashes × w<sub>clash</sub>)
+        <br>Heavy rescoring provides more accurate rankings using all non-hydrogen atoms.
       </div>
     </div>
   </div>
 </section>
 
-<section>
-  <div class="wrap">
-    <h2>4️⃣ Detailed Analysis & Metrics</h2>
+<!-- ===== ANTIBODY DOCKING RESULTS ===== -->
+<section class="tabsec active" id="dockResults">
+  <div class="wrap grid">
+    <!-- 3D viewer panel -->
+    <div class="card">
+      <h2>3️⃣ 3D Visualization & Results</h2>
+      <div id="viewer"></div>
+      
+      <!-- Pose selection controls -->
+      <div class="row" style="margin-top:8px;flex-wrap:wrap" id="poseControls"></div>
+      
+      <!-- Overlay toggles -->
+      <div class="row" style="margin-top:8px">
+        <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contact Lines</label>
+        <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
+        <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt Bridges</label>
+        <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
+      </div>
+      
+      <!-- Score display -->
+      <div class="score" id="scoreBox" style="margin-top:8px"></div>
+      
+      <!-- Export buttons -->
+      <div class="row" style="margin-top:8px">
+        <button class="btn green" id="btnAllPDB">⬇ All Poses PDB</button>
+        <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
+        <button class="btn" id="btnCSV">⬇ CSV Summary</button>
+        <button class="btn" id="btnJSON">⬇ Detailed JSON</button>
+        <button class="btn purple" id="btnPNG">📸 PNG</button>
+      </div>
+    </div>
     
-    <div class="tabs">
-      <div class="tab active" onclick="switchAnalysisTab('overview')">Overview</div>
-      <div class="tab" onclick="switchAnalysisTab('residues')">Residue Interactions</div>
-      <div class="tab" onclick="switchAnalysisTab('energy')">Energy Breakdown</div>
-      <div class="tab" onclick="switchAnalysisTab('comparison')">Pose Comparison</div>
-      <div class="tab" onclick="switchAnalysisTab('quality')">Quality Metrics</div>
-    </div>
-
-    <div id="analysis-overview" class="tab-content active card">
-      <h3>Interface Overview</h3>
-      <div class="metric-grid" id="metricGrid"></div>
+    <!-- Metrics panel -->
+    <div class="card">
+      <h2>Interface Metrics & Enthalpy</h2>
       
-      <h4 style="margin-top:16px">Score Distribution</h4>
-      <canvas id="scoreChart" style="width:100%;height:200px"></canvas>
+      <!-- Key metrics display -->
+      <div class="metric-grid" id="metricsDisplay"></div>
       
-      <h4 style="margin-top:16px">Interaction Type Breakdown</h4>
-      <div id="interactionBreakdown"></div>
-    </div>
-
-    <div id="analysis-residues" class="tab-content card">
-      <h3>Residue-Level Interactions</h3>
-      <div class="filter-bar">
-        <label>Filter by chain:</label>
-        <select id="filterChain" onchange="filterResidueTable()">
-          <option value="all">All chains</option>
-        </select>
-        <label>Interaction type:</label>
-        <select id="filterInteraction" onchange="filterResidueTable()">
-          <option value="all">All types</option>
-          <option value="contact">Contacts</option>
-          <option value="hbond">H-bonds</option>
-          <option value="saltbridge">Salt bridges</option>
-          <option value="hydrophobic">Hydrophobic</option>
-        </select>
-        <label>Min distance (Å):</label>
-        <input type="number" id="filterMinDist" value="0" step="0.5" style="width:70px" onchange="filterResidueTable()">
-        <label>Max distance (Å):</label>
-        <input type="number" id="filterMaxDist" value="8" step="0.5" style="width:70px" onchange="filterResidueTable()">
+      <h4 style="margin-top:12px">Interaction Types</h4>
+      <div class="small">
+        <p><b>Contacts:</b> Atom pairs within cutoff distance (favorable van der Waals)</p>
+        <p><b>H-bonds:</b> N…O pairs < 3.5 Å (geometric approximation)</p>
+        <p><b>Salt Bridges:</b> Charged residue pairs (Asp/Glu ↔ Lys/Arg/His) < 4.0 Å</p>
+        <p><b>Hydrophobic:</b> C…C contacts < 4.5 Å between hydrophobic residues</p>
+        <p><b>Electrostatics:</b> Residue-level Coulomb interactions (k<sub>elec</sub> × q₁q₂/r)</p>
       </div>
-
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Residue A</th>
-              <th>Chain A</th>
-              <th>Residue B</th>
-              <th>Chain B</th>
-              <th>Distance (Å)</th>
-              <th>Type</th>
-              <th>Energy Contrib.</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="residueTableBody"></tbody>
-        </table>
-      </div>
-
-      <div class="row" style="margin-top:12px">
-        <button class="btn" onclick="exportResidueTable()">⬇ Export Residue Data</button>
-        <button class="btn" onclick="highlightHotspots()">🔥 Highlight Hotspots</button>
-        <button class="btn" onclick="showResidueNetwork()">🕸️ Interaction Network</button>
-      </div>
-    </div>
-
-    <div id="analysis-energy" class="tab-content card">
-      <h3>Energy Decomposition</h3>
-      <p class="small muted">Breakdown of scoring contributions for the current pose. Values are approximate and for comparative analysis only.</p>
       
-      <div id="energyComponents"></div>
-      
-      <h4 style="margin-top:16px">Per-Chain Contributions</h4>
-      <div class="grid">
-        <div>
-          <h4>Protein A Residues</h4>
-          <canvas id="chainAEnergyChart" style="width:100%;height:200px"></canvas>
-        </div>
-        <div>
-          <h4>Protein B Residues</h4>
-          <canvas id="chainBEnergyChart" style="width:100%;height:200px"></canvas>
-        </div>
-      </div>
-
-      <h4 style="margin-top:16px">Electrostatic Potential Map</h4>
-      <div id="electrostaticMap" class="infobox">
-        <p class="small">Residue-level Coulomb interactions computed with simplified charges (Asp/Glu: -1, Lys/Arg: +1, His: +0.1).</p>
-        <canvas id="electrostatic Canvas" style="width:100%;height:150px"></canvas>
-      </div>
-    </div>
-
-    <div id="analysis-comparison" class="tab-content card">
-      <h3>Pose Comparison</h3>
+      <h4 style="margin-top:12px">Energy Parameters</h4>
       <div class="row">
-        <label>Compare Pose:</label>
-        <select id="comparePose1"></select>
-        <label>with Pose:</label>
-        <select id="comparePose2"></select>
-        <button class="btn primary" onclick="runComparison()">Compare</button>
+        <label>k<sub>elec</sub></label>
+        <input type="number" id="kElec" value="0.5" step="0.1" />
+        
+        <label>Elec Cutoff (Å)</label>
+        <input type="number" id="elecCut" value="12" step="0.5" />
+        
+        <label>Desolv Weight</label>
+        <input type="number" id="wDesolv" value="0.2" step="0.1" />
       </div>
-
-      <div id="comparisonResults" style="margin-top:16px"></div>
-
-      <div class="pose-comparison" id="sideBySideView"></div>
-
-      <h4 style="margin-top:16px">Cluster Analysis</h4>
-      <p class="small muted">Groups similar poses based on RMSD and binding site overlap.</p>
-      <div id="clusterView"></div>
-      <button class="btn" onclick="runClustering()">Perform Clustering</button>
-    </div>
-
-    <div id="analysis-quality" class="tab-content card">
-      <h3>Quality Assessment</h3>
       
-      <div class="metric-grid">
-        <div class="metric-card">
-          <div class="metric-label">Clash Score</div>
-          <div class="metric-value" id="qualityClash">—</div>
-          <div class="small">Lower is better</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Shape Complementarity</div>
-          <div class="metric-value" id="qualityShape">—</div>
-          <div class="small">0 to 1 (higher = better fit)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Interface Area</div>
-          <div class="metric-value" id="qualityArea">—</div>
-          <div class="small">Buried surface area (Å²)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Packing Density</div>
-          <div class="metric-value" id="qualityDensity">—</div>
-          <div class="small">Atoms per Å³</div>
-        </div>
+      <div class="infobox small" style="margin-top:12px">
+        <b>Enthalpy Estimation:</b> ΔH ≈ −(contacts × 0.5) − (H-bonds × 2.5) − (salt bridges × 4.0) 
+        − (hydrophobic × 1.0) + (clash penalty × 0.3) + (electrostatic repulsion) + (desolvation penalty)
+        <br><br>
+        Values are in kcal/mol and represent approximate binding enthalpies for educational purposes.
+        For publication-quality results, export structures and analyze with dedicated force fields.
       </div>
-
-      <h4 style="margin-top:16px">Geometric Quality Checks</h4>
-      <div id="qualityChecks"></div>
-
-      <h4 style="margin-top:16px">Statistical Analysis (All Poses)</h4>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Mean</th>
-              <th>Std Dev</th>
-              <th>Min</th>
-              <th>Max</th>
-              <th>Median</th>
-            </tr>
-          </thead>
-          <tbody id="statsTableBody"></tbody>
-        </table>
+      
+      <div class="infobox small">
+        <b>Reproducibility:</b> All outputs include parameters and random seed for exact replication.
+        <b>Disclaimer:</b> Educational tool with no warranties. Validate results independently.
       </div>
     </div>
   </div>
 </section>
 
-<section style="background:#0a0f1a">
+<!-- ===== LIGAND DOCKING SECTION ===== -->
+<section id="ligTab" class="tabsec">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>🧪 Single Ligand Docking</h2>
+      <div class="small muted" style="margin-bottom:8px">
+        Dock a single SMILES string against a receptor PDB. Note: SMILES→3D conversion here uses 
+        simplified geometry generation for demonstration. For production work, prepare ligands with RDKit or Open Babel.
+      </div>
+      
+      <div class="row">
+        <!-- Receptor input -->
+        <div style="min-width:300px;flex:1">
+          <h3>Receptor PDB</h3>
+          <textarea id="ligReceptorPDB" placeholder="Paste receptor PDB structure"></textarea>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="loadLigandDemoReceptor()">Load Example</button>
+            <button class="btn" onclick="parseReceptorForLigand()">Parse & Preview</button>
+          </div>
+        </div>
+        
+        <!-- Ligand input -->
+        <div style="min-width:300px;flex:1">
+          <h3>Ligand SMILES</h3>
+          <textarea id="ligSmiles" placeholder="e.g., CC(=O)Oc1ccccc1C(=O)O (aspirin)"></textarea>
+          <div class="row" style="margin-top:6px">
+            <label>3D Method</label>
+            <select id="ligEmbedMethod">
+              <option value="HASH">HashCloud (seeded)</option>
+              <option value="HELIX">RingHelix (seeded)</option>
+            </select>
+            
+            <label>Seed</label>
+            <input type="number" id="ligSeed" value="1337" style="width:90px" />
+            
+            <button class="btn primary" onclick="runSingleLigandDock()">▶️ Dock</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="infobox small">
+        <b>3D Generation Methods:</b>
+        <br>• <b>HashCloud:</b> Generates coordinates using hash-based random walk (reproducible with seed)
+        <br>• <b>RingHelix:</b> Creates helical arrangement suitable for ring-containing molecules
+        <br>Both methods are educational approximations. Export docked poses and optimize with quantum chemistry or force field methods.
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Ligand Docking Result</h2>
+      <div id="viewerLig"></div>
+      
+      <div class="score" id="ligScore" style="margin-top:8px"></div>
+      
+      <div class="row" style="margin-top:8px">
+        <button class="btn green" id="btnLigPDB">⬇ Complex PDB</button>
+        <button class="btn" id="btnLigCSV">⬇ CSV Result</button>
+        <span class="pill" id="ligStatus">idle</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BATCH SCREENING SECTION ===== -->
+<section id="screenTab" class="tabsec">
   <div class="wrap">
     <div class="card">
-      <h2>📊 Session Management & History</h2>
-      <p class="small muted">Save and restore complete docking sessions including all parameters, poses, and analysis results.</p>
-      
-      <div class="row" style="margin-top:12px">
-        <button class="btn green" onclick="saveSession()">💾 Save Current Session</button>
-        <button class="btn purple" onclick="loadSessionFile()">📂 Load Session File</button>
-        <button class="btn" onclick="exportSessionReport()">📄 Generate Report</button>
-        <button class="btn orange" onclick="clearHistory()">🗑️ Clear History</button>
+      <h2>📚 Batch Ligand Screening</h2>
+      <div class="small muted" style="margin-bottom:12px">
+        Screen up to 50 SMILES structures against 2-3 receptor PDBs. Each SMILES is docked against each receptor,
+        and binding enthalpy (ΔH) is calculated for every complex. Results include contact analysis, H-bonds, 
+        electrostatics, and estimated free energy contributions.
       </div>
+      
+      <div class="grid grid-3" style="gap:12px">
+        <!-- SMILES library input -->
+        <div>
+          <h3>SMILES Library (max 50)</h3>
+          <textarea id="scrSmiles" placeholder="Enter one SMILES per line:
+CCO
+CCN
+c1ccccc1
+C1CCCCC1C(=O)O
+CC(=O)Oc1ccccc1C(=O)O
+..." style="min-height:200px"></textarea>
+          <div class="small muted">One SMILES per line. Empty lines ignored.</div>
+        </div>
+        
+        <!-- Receptor library input -->
+        <div>
+          <h3>Receptors (2-3 PDBs)</h3>
+          <textarea id="scrReceptors" placeholder="Paste receptor PDBs separated by END:
 
-      <h3 style="margin-top:16px">Session History</h3>
-      <div class="table-container">
-        <table>
+ATOM    1  N   ALA A   1      ...
+...
+END
+
+ATOM    1  N   ALA B   1      ...
+...
+END" style="min-height:200px"></textarea>
+          <div class="small muted">Separate each PDB with 'END'. Max 3 receptors.</div>
+        </div>
+        
+        <!-- Screening parameters -->
+        <div>
+          <h3>Parameters</h3>
+          <div class="row">
+            <label>Samples/Ligand</label>
+            <input type="number" id="scrSamples" value="5000" min="1000" step="500" />
+          </div>
+          <div class="row">
+            <label>Contact (Å)</label>
+            <input type="number" id="scrContactCut" value="4.8" step="0.1" />
+          </div>
+          <div class="row">
+            <label>Clash Factor</label>
+            <input type="number" id="scrClashFactor" value="0.85" step="0.05" />
+          </div>
+          <div class="row">
+            <label>Seed</label>
+            <input type="number" id="scrSeed" value="777" />
+          </div>
+          <div class="row">
+            <label>3D Method</label>
+            <select id="scrEmbedMethod">
+              <option value="HASH">HashCloud</option>
+              <option value="HELIX">RingHelix</option>
+            </select>
+          </div>
+          
+          <div class="row" style="margin-top:12px">
+            <button class="btn primary" id="btnStartScreen">▶️ Start Screening</button>
+            <button class="btn red" id="btnStopScreen" disabled>✖ Stop</button>
+          </div>
+          
+          <div class="infobox small" style="margin-top:8px">
+            Screening runs sequentially: SMILES₁ vs Receptor₁, SMILES₁ vs Receptor₂, SMILES₂ vs Receptor₁, etc.
+            Progress updates after each docking completion.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Screening results table -->
+    <div class="card">
+      <h2>Screening Results & Enthalpies</h2>
+      
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn green" id="btnScrCSV">⬇ Full Results CSV</button>
+        <button class="btn" id="btnScrJSON">⬇ JSON Export</button>
+        <button class="btn purple" id="btnScrTop10">📊 Show Top 10</button>
+        <span class="pill" id="scrStatus">idle</span>
+        <span class="small muted" id="scrProgress"></span>
+      </div>
+      
+      <div class="table-container" style="max-height:500px">
+        <table class="table" id="scrTable">
+          <thead>
+            <tr>
+              <th onclick="sortScreeningResults('index')">#</th>
+              <th onclick="sortScreeningResults('receptor')">Receptor</th>
+              <th onclick="sortScreeningResults('smiles')">SMILES</th>
+              <th onclick="sortScreeningResults('score')">Score ▼</th>
+              <th onclick="sortScreeningResults('contacts')">Contacts</th>
+              <th onclick="sortScreeningResults('hb')">H-bonds</th>
+              <th onclick="sortScreeningResults('sb')">Salt Br.</th>
+              <th onclick="sortScreeningResults('clash')">Clash</th>
+              <th onclick="sortScreeningResults('enthalpy')">ΔH (kcal/mol)</th>
+            </tr>
+          </thead>
+          <tbody id="scrTableBody"></tbody>
+        </table>
+      </div>
+      
+      <!-- Selected pose viewer -->
+      <div id="viewerScr" style="height:420px;margin-top:12px"></div>
+      <div class="small muted" style="text-align:center;margin-top:4px">
+        Click any row to visualize that docked pose
+      </div>
+    </div>
+    
+    <!-- Enthalpy distribution analysis -->
+    <div class="card">
+      <h2>Enthalpy Distribution Analysis</h2>
+      <div class="metric-grid" id="screenMetrics"></div>
+      
+      <h4>Energy Component Breakdown</h4>
+      <div id="enthalpyBreakdown"></div>
+      
+      <div class="infobox small">
+        <b>Interpreting ΔH values:</b>
+        <br>• More negative = stronger predicted binding
+        <br>• ΔH < −10 kcal/mol: Strong binder candidate
+        <br>• ΔH −5 to −10 kcal/mol: Moderate affinity
+        <br>• ΔH > −5 kcal/mol: Weak or non-binder
+        <br><br>
+        These are approximate enthalpies. Entropic contributions (−TΔS) not included. 
+        For ΔG predictions, consider rotational/translational entropy losses (~10-15 kcal/mol) and 
+        conformational penalties.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== QA & REGISTRY SECTION ===== -->
+<section id="qaTab" class="tabsec">
+  <div class="wrap grid">
+    <div class="card">
+      <h2>📋 Run Registry & Session Management</h2>
+      <div class="small muted">
+        Save complete docking runs with all parameters, structures, and results for reproducibility.
+        Export/import sessions to share configurations or restore previous work.
+      </div>
+      
+      <div class="row" style="margin-top:8px">
+        <button class="btn green" onclick="saveCurrentRun()">💾 Save Current Run</button>
+        <button class="btn" onclick="refreshRunRegistry()">🔄 Refresh List</button>
+        <button class="btn" onclick="exportAllRuns()">⬇ Export Registry</button>
+        <button class="btn purple" onclick="importRunRegistry()">⬆ Import Registry</button>
+        <button class="btn red" onclick="clearRunRegistry()">🗑️ Clear All</button>
+      </div>
+      <input type="file" id="importRegistryFile" accept=".json" style="display:none" />
+      
+      <div class="table-container" style="margin-top:12px">
+        <table class="table">
           <thead>
             <tr>
               <th>Timestamp</th>
-              <th>Protein A</th>
-              <th>Protein B</th>
-              <th>Samples</th>
+              <th>Type</th>
+              <th>Description</th>
               <th>Top Score</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="historyTableBody"></tbody>
+          <tbody id="registryTableBody"></tbody>
         </table>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>✅ Quality Assurance Mode</h2>
+      <div class="small muted">
+        Test reproducibility by running the same docking multiple times with identical parameters.
+        Verifies that random seed produces consistent results.
+      </div>
+      
+      <div class="row" style="margin-top:8px">
+        <label>Repeat Count</label>
+        <input type="number" id="qaRepeats" value="3" min="2" max="10" style="width:80px" />
+        
+        <label>Score Tolerance</label>
+        <input type="number" id="qaTolerance" value="0.01" step="0.01" style="width:80px" />
+        
+        <button class="btn primary" onclick="runQATest()">▶️ Run QA Test</button>
+      </div>
+      
+      <div class="score" id="qaResults" style="margin-top:12px;min-height:100px"></div>
+      
+      <div class="infobox small" style="margin-top:8px">
+        <b>QA Test Process:</b>
+        <br>1. Captures current docking parameters
+        <br>2. Runs docking N times with same seed
+        <br>3. Compares top scores across runs
+        <br>4. Reports if variance exceeds tolerance
+        <br><br>
+        Pass criterion: All top scores within tolerance. This confirms deterministic behavior.
       </div>
     </div>
   </div>
 </section>
 
-<!-- Help Modal -->
-<div id="helpModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Help & Documentation</h2>
-      <span class="close-modal" onclick="closeModal('helpModal')">&times;</span>
-    </div>
-    <div>
-      <h3>Quick Start Guide</h3>
-      <ol>
-        <li><b>Load Proteins:</b> Upload PDB files or paste text, then click Parse to load structures</li>
-        <li><b>Select Chains:</b> Use checkboxes to choose which protein chains to dock</li>
-        <li><b>Configure Parameters:</b> Adjust sampling density, scoring weights, and diversity filters</li>
-        <li><b>Run Docking:</b> Click "Run Docking" to start parallel sampling with web workers</li>
-        <li><b>Analyze Results:</b> Explore poses in 3D viewer and examine detailed interaction metrics</li>
-      </ol>
-
-      <h3>Understanding the Scoring Function</h3>
-      <p class="small">The docking algorithm uses a composite scoring function that balances multiple physical factors:</p>
-      <ul class="small">
-        <li><b>Contacts:</b> Favorable atom-atom interactions within cutoff distance</li>
-        <li><b>Clashes:</b> Penalties for atoms violating van der Waals radii (with softness parameter)</li>
-        <li><b>Hydrogen Bonds:</b> N-O pairs within 3.5Å (geometric approximation)</li>
-        <li><b>Salt Bridges:</b> Charged residue pairs (Asp/Glu ↔ Lys/Arg/His) within 4.0Å</li>
-        <li><b>Electrostatics:</b> Long-range Coulomb interactions with simplified charges</li>
-        <li><b>Desolvation:</b> Penalty for burying polar atoms at the interface</li>
-        <li><b>Hydrophobic Effect:</b> Bonus for hydrophobic residue contacts</li>
-      </ul>
-
-      <h3>Advanced Features</h3>
-      <ul class="small">
-        <li><b>Diversity Filtering:</b> Removes near-duplicate poses based on rotation and translation thresholds</li>
-        <li><b>Heavy Atom Rescoring:</b> Refines top poses using full atomic detail for better ranking</li>
-        <li><b>Micro-optimization:</b> Local refinement with small perturbations to improve scores</li>
-        <li><b>Residue-level Analysis:</b> Identifies key interacting residues and binding hotspots</li>
-        <li><b>Session Management:</b> Save complete state for reproducibility and later analysis</li>
-      </ul>
-
-      <h3>Performance Tips</h3>
-      <ul class="small">
-        <li>Use Cα-only mode for initial rapid screening, then rescore with heavy atoms</li>
-        <li>Increase sample count for challenging systems or when seeking rare binding modes</li>
-        <li>Adjust diversity parameters to balance between unique solutions and similar clusters</li>
-        <li>The application uses multiple web workers for parallel processing (up to 8 cores)</li>
-      </ul>
-
-      <h3>Reproducibility</h3>
-      <p class="small">All outputs include the random seed and complete parameter set. Using identical inputs and seed guarantees identical results. Export session files to share complete experimental configurations.</p>
-
-      <h3>Disclaimer</h3>
-      <p class="small"><b>Important:</b> This is an educational research tool for exploratory docking. Results are approximate and should be validated with more sophisticated methods. No warranties provided; use at your own discretion.</p>
+<!-- ===== ANALYSIS SECTION ===== -->
+<section id="analysisTab" class="tabsec">
+  <div class="wrap">
+    <div class="card">
+      <h2>📊 Advanced Analysis Tools</h2>
+      
+      <div class="tabs" style="margin-top:8px">
+        <button class="tabbtn active" data-subtab="energyTab">Energy Decomposition</button>
+        <button class="tabbtn" data-subtab="compareTab">Pose Comparison</button>
+        <button class="tabbtn" data-subtab="residueTab">Residue Contacts</button>
+      </div>
+      
+      <!-- Energy decomposition subtab -->
+      <div id="energyTab" class="tabsec active" style="margin-top:12px">
+        <h3>Energy Component Analysis</h3>
+        <div class="small muted">
+          Breakdown of scoring contributions for the currently displayed pose.
+          Values show relative weights of different interaction types.
+        </div>
+        
+        <div id="energyComponents"></div>
+        
+        <h4 style="margin-top:16px">Enthalpy Calculation Details</h4>
+        <div class="score" id="enthalpyDetail"></div>
+      </div>
+      
+      <!-- Pose comparison subtab -->
+      <div id="compareTab" class="tabsec" style="margin-top:12px">
+        <h3>Compare Multiple Poses</h3>
+        <div class="row">
+          <label>Pose 1:</label>
+          <select id="comparePose1"></select>
+          
+          <label>Pose 2:</label>
+          <select id="comparePose2"></select>
+          
+          <button class="btn primary" onclick="comparePoses()">Compare</button>
+        </div>
+        
+        <div class="grid" style="margin-top:12px;grid-template-columns:1fr 1fr">
+          <div>
+            <h4>Pose 1</h4>
+            <div id="viewerComp" style="height:400px"></div>
+          </div>
+          <div>
+            <h4>Comparison Metrics</h4>
+            <div class="score" id="comparisonResults"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Residue contacts subtab -->
+      <div id="residueTab" class="tabsec" style="margin-top:12px">
+        <h3>Residue-Level Interaction Analysis</h3>
+        <div class="row">
+          <label>Min Distance (Å):</label>
+          <input type="number" id="filterMinDist" value="0" step="0.5" style="width:80px" />
+          
+          <label>Max Distance (Å):</label>
+          <input type="number" id="filterMaxDist" value="6" step="0.5" style="width:80px" />
+          
+          <button class="btn" onclick="filterResidueContacts()">Filter</button>
+          <button class="btn green" onclick="exportResidueData()">⬇ Export</button>
+        </div>
+        
+        <div class="table-container" style="margin-top:8px">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Residue A</th>
+                <th>Chain A</th>
+                <th>Residue B</th>
+                <th>Chain B</th>
+                <th>Distance (Å)</th>
+                <th>Type</th>
+                <th>Energy Contrib</th>
+              </tr>
+            </thead>
+            <tbody id="residueTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
+<!-- ===== ABOUT SECTION ===== -->
+<section id="aboutTab" class="tabsec">
+  <div class="wrap">
+    <div class="card">
+      <h2>About This Platform</h2>
+      
+      <h3>Purpose & Scope</h3>
+      <p>
+        This is an educational molecular docking platform designed to demonstrate computational biology concepts 
+        in an accessible, browser-based environment. All computations run locally using JavaScript and Web Workers—no 
+        data is sent to external servers. The platform combines protein-protein docking (antibody-antigen), 
+        small molecule docking, and batch virtual screening capabilities.
+      </p>
+      
+      <h3>Key Features</h3>
+      <div class="small">
+        <p><b>• Antibody-Antigen Docking:</b> Rigid-body docking with parallel sampling across multiple CPU cores</p>
+        <p><b>• Batch Screening:</b> Screen up to 50 SMILES against 2-3 receptor structures with enthalpy calculations</p>
+        <p><b>• Scoring Function:</b> Van der Waals-aware contact scoring with clash detection, H-bond detection, salt bridge identification, and electrostatic contributions</p>
+        <p><b>• Enthalpy Estimation:</b> Approximate binding enthalpies (ΔH) using weighted energy terms</p>
+        <p><b>• Reproducibility:</b> All results include parameter snapshots and random seeds for exact replication</p>
+        <p><b>• Quality Assurance:</b> Built-in QA mode tests reproducibility across multiple runs</p>
+        <p><b>• Session Management:</b> Save and restore complete docking sessions with all data</p>
+      </div>
+      
+      <h3>Technical Details</h3>
+      <div class="small">
+        <p><b>Sampling:</b> Uniform random sampling of SO(3) rotations using quaternions, with random translations within specified radius</p>
+        <p><b>Scoring:</b> Grid-accelerated contact detection, soft-core van der Waals potential for clashes, geometric H-bond and salt bridge detection</p>
+        <p><b>Parallelization:</b> Web Workers distribute sampling across available CPU cores (typically 4-8 workers)</p>
+        <p><b>Visualization:</b> 3Dmol.js library for interactive molecular graphics with cartoon, stick, and surface representations</p>
+        <p><b>File Formats:</b> Standard PDB for proteins, SMILES for ligands (with simplified 3D generation)</p>
+      </div>
+      
+      <h3>Enthalpy Calculation Methodology</h3>
+      <p>
+        The binding enthalpy (ΔH) is estimated using a weighted sum of interaction energy terms:
+      </p>
+      <div class="score">
+ΔH ≈ −0.5 × (favorable contacts)
+     −2.5 × (hydrogen bonds)
+     −4.0 × (salt bridges)
+     −1.0 × (hydrophobic contacts)
+     +0.3 × (clash penalty)
+     +1.0 × (electrostatic repulsion)
+     +0.2 × (desolvation penalty)
+
+Units: kcal/mol
+
+These weights are derived from statistical analysis of experimental 
+binding data but represent approximations for educational use.
+      </div>
+      
+      <h3>Important Limitations & Disclaimers</h3>
+      <div class="errorbox">
+        <p><b>⚠️ This is an educational tool, not a production docking platform.</b></p>
+        <p>
+          • Scoring function is simplified and lacks many physical terms (solvation, entropy, polarization, etc.)
+          <br>• Rigid-body docking does not account for conformational changes or induced fit
+          <br>• SMILES-to-3D conversion uses simplified geometry—use RDKit/Open Babel for real work
+          <br>• Enthalpy values are approximate and exclude entropic contributions to free energy
+          <br>• Results should be validated with established docking platforms (AutoDock, HADDOCK, Rosetta)
+          <br>• No warranties provided—use at your own risk for research exploration only
+        </p>
+      </div>
+      
+      <h3>Recommended Workflow for Research</h3>
+      <div class="small">
+        <p>1. Use this platform for initial exploration and hypothesis generation</p>
+        <p>2. Export top-ranked structures as PDB files</p>
+        <p>3. Refine with professional docking software (AutoDock Vina, HADDOCK, ClusPro, ZDOCK)</p>
+        <p>4. Perform molecular dynamics simulations to assess stability</p>
+        <p>5. Calculate free energies with MM-PBSA or FEP methods</p>
+        <p>6. Validate experimentally (SPR, ITC, X-ray crystallography, etc.)</p>
+      </div>
+      
+      <h3>Credits & Dependencies</h3>
+      <div class="small">
+        <p><b>• 3Dmol.js:</b> Molecular visualization library (Nicholas Rego and David Koes)</p>
+        <p><b>• Pako:</b> Zlib compression for gzipped PDB files</p>
+        <p><b>• Web Workers API:</b> Parallel computation in browser</p>
+        <p><b>• RCSB PDB:</b> Protein structure database</p>
+      </div>
+      
+      <div class="infobox small" style="margin-top:12px">
+        <b>License & Usage:</b> This code is provided for educational purposes. 
+        Feel free to adapt and extend for your own learning. For any serious research applications, 
+        please use validated computational chemistry platforms and cite appropriate literature.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
 <footer>
   <div class="wrap">
-    <p>All computations execute locally in your browser. No data sent to servers. Built with 3Dmol.js for visualization.</p>
-    <p class="small">© Educational Research Tool • No warranties • Validate results independently</p>
+    <p>All computations execute locally in your browser. No data transmitted to servers.</p>
+    <p class="small">© Educational Tool • No Warranties • Validate Results Independently</p>
   </div>
 </footer>
 
-<!-- External Libraries -->
+<!-- ===== EXTERNAL LIBRARIES ===== -->
+<!-- Load 3Dmol.js for molecular visualization and Pako for gzip decompression -->
 <script defer src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
 <script defer src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
 
 <script>
-// ========================= GLOBAL STATE =========================
-// Core application state management
+// ========================================================================================
+// GLOBAL STATE MANAGEMENT
+// ========================================================================================
+/**
+ * This section declares all global variables used throughout the application.
+ * Using descriptive names and grouping related variables helps maintain code clarity.
+ */
 
-let viewer = null;                    // Primary 3Dmol viewer instance
-let inProgress = false;               // Docking operation in progress flag
-let cancelled = false;                // User cancellation flag
-let workerPool = [];                  // Web worker pool for parallel computation
-let spinning = false;                 // Auto-rotation state
+// 3D Molecular Viewers (one for each visualization context)
+let viewer = null;           // Main antibody-antigen viewer
+let viewerLig = null;        // Single ligand docking viewer
+let viewerScr = null;        // Batch screening viewer
+let viewerComp = null;       // Pose comparison viewer
 
-// Protein data structures
-let pdbAAtoms = [], pdbBAtoms = [];           // Working atom sets (after filtering)
-let pdbAAllAtoms = [], pdbBAllAtoms = [];     // Complete parsed structures
-let currentA = null, currentB0 = null;        // Heavy atom sets for current visualization
-let heavyUsed = false;                        // Whether heavy atom rescoring was applied
+// Docking State Flags
+let inProgress = false;      // True when docking calculation is running
+let cancelled = false;       // True when user cancels docking
+let workerPool = [];         // Array of Web Workers for parallel computation
 
-// Pose and analysis data
-let posesTop = [];                    // Top-ranked poses after filtering
-let currentPose = null;               // Currently displayed pose
-let currentPoseIndex = -1;            // Index of current pose
-let currentContacts = [];             // Contact pairs for current pose
-let currentHB = [];                   // Hydrogen bond pairs
-let currentSB = [];                   // Salt bridge pairs
-let currentHydrophobic = [];          // Hydrophobic contact pairs
-let residueInteractions = [];         // Detailed residue-level interaction data
-let sessionHistory = [];              // History of docking runs
+// Protein Data Structures
+let pdbAAllAtoms = [];       // Complete parsed structure for Protein A
+let pdbBAllAtoms = [];       // Complete parsed structure for Protein B
+let currentA = null;         // Heavy atom set for current visualization (Protein A)
+let currentB0 = null;        // Heavy atom set for current visualization (Protein B, unposed)
+let heavyUsed = false;       // Flag indicating whether heavy atom rescoring was applied
 
-// Visualization state
-let currentStyleMode = 'cartoon';
-let currentColorMode = 'chain';
-let currentAlpha = 1.0;
+// Pose Data
+let posesTop = [];           // Array of top-ranked poses after filtering
+let currentPose = null;      // Currently displayed pose object
+let currentPoseIndex = -1;   // Index of current pose in posesTop array
 
-// Constants for van der Waals radii (in Angstroms)
+// Interaction Data for Current Pose
+let currentContacts = [];    // Array of contact pair coordinates {x1,y1,z1,x2,y2,z2}
+let currentHB = [];          // Array of hydrogen bond pair coordinates
+let currentSB = [];          // Array of salt bridge pair coordinates
+let currentHydro = [];       // Array of hydrophobic contact coordinates
+
+// Ligand Docking Results
+let ligLastResult = {};      // Stores last ligand docking result with PDB and CSV data
+
+// Batch Screening State
+let screenCancel = false;    // Flag to cancel screening run
+let screenResults = [];      // Array of screening result objects
+let screenReceptors = [];    // Array of parsed receptor structures for screening
+let screenCurrentSort = 'score'; // Current sort column for screening table
+
+// Session Management
+let sessionHistory = [];     // Array of saved docking runs
+const REGISTRY_KEY = 'docking_registry_v1'; // LocalStorage key for run registry
+
+// ========================================================================================
+// PHYSICAL CONSTANTS & LOOKUP TABLES
+// ========================================================================================
+/**
+ * Van der Waals radii for common atoms (in Angstroms).
+ * These values are used for clash detection and contact scoring.
+ * Source: Bondi, A. (1964) J. Phys. Chem. 68, 441-451.
+ */
 const vdw = {
-  H: 1.2, C: 1.7, N: 1.55, O: 1.52, S: 1.8, P: 1.8,
-  F: 1.47, CL: 1.75, BR: 1.85, I: 1.98
+  H: 1.2,    // Hydrogen
+  C: 1.7,    // Carbon
+  N: 1.55,   // Nitrogen
+  O: 1.52,   // Oxygen
+  S: 1.8,    // Sulfur
+  P: 1.8,    // Phosphorus
+  F: 1.47,   // Fluorine
+  CL: 1.75,  // Chlorine
+  BR: 1.85,  // Bromine
+  I: 1.98    // Iodine
 };
 
-// Hydrophobic residue set for contact detection
+/**
+ * Set of three-letter codes for hydrophobic amino acids.
+ * Used for detecting hydrophobic contacts at the interface.
+ */
 const hydrophobic = new Set([
-  'ALA', 'VAL', 'LEU', 'ILE', 'PRO', 'PHE', 'MET', 'TRP', 'TYR', 'CYS'
+  'ALA', 'VAL', 'LEU', 'ILE', 'PRO', 
+  'PHE', 'MET', 'TRP', 'TYR', 'CYS'
 ]);
 
-// Charged residue classifications
-const acidic = new Set(['ASP', 'GLU']);
-const basic = new Set(['LYS', 'ARG', 'HIS']);
+/**
+ * Mapping of residue names to formal charges.
+ * Used for electrostatic energy calculations.
+ */
+const residueCharges = {
+  'ASP': -1,   // Aspartic acid (acidic)
+  'GLU': -1,   // Glutamic acid (acidic)
+  'LYS': +1,   // Lysine (basic)
+  'ARG': +1,   // Arginine (basic)
+  'HIS': +0.1  // Histidine (weakly basic, protonation state dependent)
+};
 
-// ========================= UTILITY FUNCTIONS =========================
+// ========================================================================================
+// DOM UTILITY FUNCTIONS
+// ========================================================================================
+/**
+ * Short helper functions for common DOM operations.
+ * These make the code more readable by reducing repetition.
+ */
 
-// DOM element shorthand accessor
+// Get element by ID (shorthand for document.getElementById)
 const E = id => document.getElementById(id);
 
-// Update status pill display
-const status = s => { E('statusPill').textContent = s; };
+// Update status pill text
+const status = text => { E('statusPill').textContent = text; };
 
-// Update progress bar (0 to 1)
-const setProgress = f => { E('prog').value = Math.max(0, Math.min(1, f || 0)); };
+// Update progress bar (value between 0 and 1)
+const setProgress = fraction => { 
+  E('prog').value = Math.max(0, Math.min(1, fraction || 0)); 
+};
 
-// ========================= INITIALIZATION =========================
-
+// ========================================================================================
+// INITIALIZATION & EVENT BINDING
+// ========================================================================================
+/**
+ * Wait for DOM to be fully loaded, then initialize the application.
+ * This includes creating viewers, binding event listeners, and running the auto-demo.
+ */
 window.addEventListener('DOMContentLoaded', () => {
-  console.log('Initializing Enhanced Antibody-Antigen Docking Suite...');
+  console.log('Initializing Comprehensive Docking Suite...');
   
-  // Initialize 3D viewer with placeholder content
-  ensureViewer();
-  drawPlaceholder();
+  // Initialize all 3D molecular viewers
+  ensureViewer('viewer');
+  ensureViewer('viewerLig');
+  ensureViewer('viewerScr');
+  ensureViewer('viewerComp');
   
-  // Wire up all event listeners for UI controls
-  setupEventListeners();
+  // Draw placeholder spheres so users see 3D content immediately
+  if (viewer) drawPlaceholder(viewer);
   
-  // Initialize keyboard shortcuts
-  setupKeyboardShortcuts();
+  // Set up tab switching for main navigation
+  setupMainTabs();
   
-  // Load any saved session history from localStorage
-  loadHistoryFromStorage();
+  // Set up sub-tabs for analysis section
+  setupSubTabs();
   
-  // Run auto-demo to show immediate functionality
+  // Bind all event listeners for buttons and controls
+  bindEventListeners();
+  
+  // Load any saved session history from browser storage
+  loadSessionHistory();
+  
+  // Run the auto-demo to show functionality immediately on first load
   setTimeout(autoDemo, 100);
   
   console.log('Initialization complete. Ready for docking.');
 });
 
-function setupEventListeners() {
-  // Main action buttons
-  E('dockBtn').addEventListener('click', runDocking);
-  E('cancelBtn').addEventListener('click', cancelDocking);
-  E('resetBtn').addEventListener('click', resetAll);
+/**
+ * Create or retrieve a 3Dmol viewer for the specified container element.
+ * @param {string} id - Element ID for the viewer container
+ */
+function ensureViewer(id) {
+  const el = E(id);
+  if (!el) return;
   
-  // Demo and help
-  E('btnDemo').addEventListener('click', autoDemo);
-  E('btnHelp').addEventListener('click', () => openModal('helpModal'));
+  // Create the viewer if it doesn't exist yet
+  if (id === 'viewer' && !viewer) {
+    viewer = $3Dmol.createViewer(el, {backgroundColor: '#0a0f1a'});
+  } else if (id === 'viewerLig' && !viewerLig) {
+    viewerLig = $3Dmol.createViewer(el, {backgroundColor: '#0a0f1a'});
+  } else if (id === 'viewerScr' && !viewerScr) {
+    viewerScr = $3Dmol.createViewer(el, {backgroundColor: '#0a0f1a'});
+  } else if (id === 'viewerComp' && !viewerComp) {
+    viewerComp = $3Dmol.createViewer(el, {backgroundColor: '#0a0f1a'});
+  }
   
-  // Session management
-  E('btnSaveSession').addEventListener('click', saveSession);
-  E('btnLoadSession').addEventListener('click', loadSessionFile);
-  
-  // Export buttons
-  E('btnAllPDB').addEventListener('click', downloadAllPoses);
-  E('btnCurrentPDB').addEventListener('click', () => {
-    if (currentPoseIndex >= 0) downloadPose(currentPoseIndex);
-    else alert('No pose selected');
-  });
-  E('btnCSV').addEventListener('click', downloadCSV);
-  E('btnJSON').addEventListener('click', downloadJSON);
-  E('btnPNG').addEventListener('click', snapshotPNG);
-  
-  // File input change handlers
-  E('pdbAFile').addEventListener('change', (e) => {
-    if (e.target.files.length > 0) handleFileUpload('A', e.target.files[0]);
-  });
-  E('pdbBFile').addEventListener('change', (e) => {
-    if (e.target.files.length > 0) handleFileUpload('B', e.target.files[0]);
-  });
-}
-
-function setupKeyboardShortcuts() {
-  document.addEventListener('keydown', (e) => {
-    // Ignore if typing in input fields
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    
-    switch(e.key.toLowerCase()) {
-      case ' ':
-        e.preventDefault();
-        if (!inProgress) runDocking();
-        else cancelDocking();
-        break;
-      case 'r':
-        centerView();
-        break;
-      case 'arrowleft':
-        if (currentPoseIndex > 0) showPose(currentPoseIndex - 1);
-        break;
-      case 'arrowright':
-        if (currentPoseIndex < posesTop.length - 1) showPose(currentPoseIndex + 1);
-        break;
-      case 's':
-        if (e.ctrlKey || e.metaKey) {
-          e.preventDefault();
-          saveSession();
-        }
-        break;
-      case 'h':
-        openModal('helpModal');
-        break;
+  // Give the layout a moment to settle before first render
+  requestAnimationFrame(() => {
+    try {
+      if (viewer) viewer.resize();
+      if (viewerLig) viewerLig.resize();
+      if (viewerScr) viewerScr.resize();
+      if (viewerComp) viewerComp.resize();
+    } catch(e) {
+      console.warn('Viewer resize issue:', e);
     }
   });
 }
 
-// ========================= 3D VIEWER SETUP =========================
-
-function ensureViewer() {
-  if (viewer) return;
+/**
+ * Draw placeholder spheres in a viewer to show 3D capability immediately.
+ * @param {Object} v - 3Dmol viewer object
+ */
+function drawPlaceholder(v) {
+  if (!v) return;
   
-  const el = E('viewer');
-  viewer = $3Dmol.createViewer(el, {
-    backgroundColor: '#0a0f1a',
-    antialias: true
-  });
-  
-  // Allow layout to settle before first render
-  requestAnimationFrame(() => {
-    viewer.resize();
-    viewer.render();
-  });
-}
-
-function drawPlaceholder() {
-  // Display two colored spheres so user sees 3D content immediately
-  viewer.addSphere({
+  // Add two colored spheres at different positions
+  v.addSphere({
     center: {x: -8, y: 0, z: 0},
     radius: 4,
     color: '#60a5fa',
     alpha: 0.6
   });
   
-  viewer.addSphere({
+  v.addSphere({
     center: {x: 8, y: 0, z: 0},
     radius: 4,
     color: '#f97316',
     alpha: 0.6
   });
   
-  viewer.zoomTo();
-  viewer.render();
+  v.zoomTo();
+  v.render();
 }
 
-// ========================= FILE HANDLING =========================
+/**
+ * Set up main tab navigation system.
+ * Clicking a tab hides all sections and shows the selected one.
+ */
+function setupMainTabs() {
+  document.querySelectorAll('.tabbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Only handle main tabs (not sub-tabs)
+      if (!btn.dataset.tab) return;
+      
+      // Update active state for buttons
+      document.querySelectorAll('.tabbtn[data-tab]').forEach(b => 
+        b.classList.remove('active')
+      );
+      btn.classList.add('active');
+      
+      // Show selected section, hide others
+      document.querySelectorAll('.tabsec').forEach(section => {
+        if (section.id === btn.dataset.tab) {
+          section.classList.add('active');
+        } else {
+          section.classList.remove('active');
+        }
+      });
+      
+      // Resize viewers when tab becomes visible
+      setTimeout(() => {
+        try {
+          viewer?.resize();
+          viewerLig?.resize();
+          viewerScr?.resize();
+          viewerComp?.resize();
+          viewer?.render();
+          viewerLig?.render();
+          viewerScr?.render();
+          viewerComp?.render();
+        } catch(e) {}
+      }, 10);
+    });
+  });
+}
 
+/**
+ * Set up sub-tab navigation within the analysis section.
+ */
+function setupSubTabs() {
+  document.querySelectorAll('.tabbtn[data-subtab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Update active state
+      document.querySelectorAll('.tabbtn[data-subtab]').forEach(b => 
+        b.classList.remove('active')
+      );
+      btn.classList.add('active');
+      
+      // Show selected subtab content
+      const parent = btn.closest('.card');
+      if (!parent) return;
+      
+      parent.querySelectorAll('.tabsec').forEach(section => {
+        if (section.id === btn.dataset.subtab) {
+          section.classList.add('active');
+        } else {
+          section.classList.remove('active');
+        }
+      });
+    });
+  });
+}
+
+/**
+ * Bind all event listeners for UI controls.
+ * Organized by functional area for maintainability.
+ */
+function bindEventListeners() {
+  // === Main Control Buttons ===
+  E('btnDemo').addEventListener('click', autoDemo);
+  E('btnSaveSession').addEventListener('click', saveSession);
+  E('btnLoadSession').addEventListener('click', loadSession);
+  
+  // === Antibody Docking Controls ===
+  E('dockBtn').addEventListener('click', runAntibodyDocking);
+  E('cancelBtn').addEventListener('click', cancelDocking);
+  E('resetBtn').addEventListener('click', resetAll);
+  
+  // === Antibody Export Buttons ===
+  E('btnAllPDB').addEventListener('click', downloadAllPoses);
+  E('btnCurrentPDB').addEventListener('click', downloadCurrentPose);
+  E('btnCSV').addEventListener('click', downloadCSV);
+  E('btnJSON').addEventListener('click', downloadJSON);
+  E('btnPNG').addEventListener('click', () => snapshotPNG(viewer));
+  
+  // === Visualization Toggles ===
+  E('toggleContacts').addEventListener('change', refreshOverlays);
+  E('toggleHB').addEventListener('change', refreshOverlays);
+  E('toggleSB').addEventListener('change', refreshOverlays);
+  E('toggleHydro').addEventListener('change', refreshOverlays);
+  
+  // === File Input Handlers ===
+  E('pdbAFile').addEventListener('change', e => handleFileUpload('A', e.target.files[0]));
+  E('pdbBFile').addEventListener('change', e => handleFileUpload('B', e.target.files[0]));
+  
+  // === Ligand Docking Controls ===
+  E('btnLigPDB').addEventListener('click', downloadLigandPDB);
+  E('btnLigCSV').addEventListener('click', downloadLigandCSV);
+  
+  // === Screening Controls ===
+  E('btnStartScreen').addEventListener('click', startBatchScreening);
+  E('btnStopScreen').addEventListener('click', () => {
+    screenCancel = true;
+    E('btnStopScreen').disabled = true;
+  });
+  E('btnScrCSV').addEventListener('click', downloadScreeningCSV);
+  E('btnScrJSON').addEventListener('click', downloadScreeningJSON);
+  E('btnScrTop10').addEventListener('click', showTop10Screening);
+  
+  console.log('Event listeners bound successfully.');
+}
+
+// ========================================================================================
+// FILE HANDLING FUNCTIONS
+// ========================================================================================
+/**
+ * Handle file upload for protein structures.
+ * @param {string} which - 'A' or 'B' to indicate which protein
+ * @param {File} file - The uploaded File object
+ */
 async function handleFileUpload(which, file) {
+  if (!file) return;
+  
   try {
     const text = await fileToText(file);
     E(which === 'A' ? 'pdbAText' : 'pdbBText').value = text;
@@ -864,67 +1429,120 @@ async function handleFileUpload(which, file) {
   }
 }
 
+/**
+ * Convert a File object to text, handling gzipped files.
+ * @param {File} file - The file to read
+ * @returns {Promise<string>} - The file contents as text
+ */
 async function fileToText(file) {
   const name = file.name.toLowerCase();
-  const buf = await file.arrayBuffer();
+  const buffer = await file.arrayBuffer();
   
-  // Handle gzipped files
+  // Handle gzipped files using pako library
   if (name.endsWith('.gz')) {
-    const u8 = new Uint8Array(buf);
-    const inflated = pako.inflate(u8);
+    const u8array = new Uint8Array(buffer);
+    const inflated = pako.inflate(u8array);
     return new TextDecoder().decode(inflated);
   }
   
-  return new TextDecoder().decode(buf);
+  // Regular text file
+  return new TextDecoder().decode(buffer);
 }
 
-// ========================= PDB PARSING =========================
+/**
+ * Fetch a PDB structure from RCSB database by ID.
+ * @param {string} which - 'A' or 'B' to indicate which protein
+ */
+async function fetchPDBFromRCSB(which) {
+  const pdbId = prompt(`Enter 4-character PDB ID to fetch for Protein ${which}:`);
+  if (!pdbId) return;
+  
+  const id = pdbId.trim().toLowerCase();
+  if (id.length !== 4) {
+    alert('PDB IDs must be exactly 4 characters (e.g., 1ABC)');
+    return;
+  }
+  
+  try {
+    status(`fetching ${id}...`);
+    const url = `https://files.rcsb.org/download/${id}.pdb`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`PDB ${id} not found or server error`);
+    }
+    
+    const text = await response.text();
+    E(which === 'A' ? 'pdbAText' : 'pdbBText').value = text;
+    await parseOne(which);
+    status('idle');
+  } catch(err) {
+    alert(`Failed to fetch PDB: ${err.message}`);
+    status('error');
+  }
+}
 
+// ========================================================================================
+// PDB PARSING FUNCTIONS
+// ========================================================================================
+/**
+ * Parse PDB format text and extract atom records.
+ * @param {string} text - PDB formatted text
+ * @returns {Array<Object>} - Array of atom objects with coordinates and properties
+ */
 function parsePDB(text) {
-  // Parse standard PDB format, extracting ATOM and HETATM records
   const atoms = [];
   const lines = text.split(/\r?\n/);
   
-  for (const ln of lines) {
-    if (ln.startsWith('ATOM') || ln.startsWith('HETATM')) {
-      const name = ln.substring(12, 16).trim();
-      const resn = ln.substring(17, 20).trim();
-      const chain = (ln.substring(21, 22).trim() || 'A');
-      const resi = parseInt(ln.substring(22, 26));
-      const x = parseFloat(ln.substring(30, 38));
-      const y = parseFloat(ln.substring(38, 46));
-      const z = parseFloat(ln.substring(46, 54));
-      
-      // Element symbol extraction with fallback
-      const elem = ln.length >= 78 
-        ? (ln.substring(76, 78).trim() || name[0])
-        : name[0];
-      
-      atoms.push({name, resn, chain, resi, x, y, z, elem});
-    }
+  for (const line of lines) {
+    // Only process ATOM and HETATM records
+    if (!line.startsWith('ATOM') && !line.startsWith('HETATM')) continue;
+    
+    // Extract fields according to PDB format specification
+    // Columns are 1-indexed in PDB format, but 0-indexed in JavaScript
+    const atom = {
+      name: line.substring(12, 16).trim(),      // Atom name
+      resn: line.substring(17, 20).trim(),      // Residue name
+      chain: line.substring(21, 22).trim() || 'A', // Chain ID
+      resi: parseInt(line.substring(22, 26)),   // Residue number
+      x: parseFloat(line.substring(30, 38)),    // X coordinate
+      y: parseFloat(line.substring(38, 46)),    // Y coordinate
+      z: parseFloat(line.substring(46, 54)),    // Z coordinate
+      elem: line.length >= 78 
+        ? (line.substring(76, 78).trim() || line.substring(12, 16).trim()[0])
+        : line.substring(12, 16).trim()[0]      // Element symbol
+    };
+    
+    atoms.push(atom);
   }
   
   return atoms;
 }
 
+/**
+ * Parse one protein (A or B) from file or text input.
+ * @param {string} which - 'A' or 'B'
+ */
 async function parseOne(which) {
   const file = E(which === 'A' ? 'pdbAFile' : 'pdbBFile').files[0];
   let text = E(which === 'A' ? 'pdbAText' : 'pdbBText').value.trim();
   
+  // Read from file if no pasted text
   if (!text && file) {
     text = await fileToText(file);
     E(which === 'A' ? 'pdbAText' : 'pdbBText').value = text;
   }
   
   if (!text) {
-    alert('Provide PDB text or file first.');
+    alert('Please provide PDB text or upload a file first.');
     return;
   }
   
+  // Parse the PDB text
   const atoms = parsePDB(text);
   
   if (!atoms.length) {
-    alert('No atoms parsed — is this a valid PDB?');
+    alert('No atoms parsed. Please check that this is a valid PDB file.');
     return;
   }
   
@@ -940,222 +1558,159 @@ async function parseOne(which) {
   }
 }
 
-// ========================= CHAIN SELECTION UI =========================
-
+// ========================================================================================
+// CHAIN SELECTION UI
+// ========================================================================================
+/**
+ * Create checkboxes for each chain found in the structure.
+ * @param {string} which - 'A' or 'B'
+ * @param {Array<Object>} atoms - Parsed atom array
+ */
 function populateChainChips(which, atoms) {
-  const box = which === 'A' ? E('chainsABox') : E('chainsBBox');
-  box.innerHTML = '';
+  const container = which === 'A' ? E('chainsABox') : E('chainsBBox');
+  container.innerHTML = '';
   
-  // Extract unique chain identifiers
+  // Extract unique chain IDs
   const chains = [...new Set(atoms.map(a => a.chain))];
   
-  chains.forEach(ch => {
-    const id = `${which}_ch_${ch}`;
-    const span = document.createElement('label');
-    span.className = 'chip';
-    span.innerHTML = `<input type="checkbox" id="${id}" data-which="${which}" data-chain="${ch}" checked> ${ch}`;
-    box.appendChild(span);
+  // Create checkbox for each chain
+  chains.forEach(chainId => {
+    const id = `${which}_ch_${chainId}`;
+    const label = document.createElement('label');
+    label.className = 'chip';
+    label.innerHTML = `
+      <input type="checkbox" id="${id}" data-which="${which}" data-chain="${chainId}" checked>
+      ${chainId}
+    `;
+    container.appendChild(label);
   });
   
+  // Update status message
   const warnBox = which === 'A' ? E('chainWarnA') : E('chainWarnB');
   warnBox.className = 'successbox small';
   warnBox.textContent = `✓ Parsed ${atoms.length} atoms • Chains: ${chains.join(', ') || '—'}`;
 }
 
+/**
+ * Get set of selected chain IDs for a protein.
+ * @param {string} which - 'A' or 'B'
+ * @returns {Set<string>} - Set of selected chain IDs
+ */
 function selectedChains(which) {
-  const box = which === 'A' ? E('chainsABox') : E('chainsBBox');
-  const checked = [...box.querySelectorAll('input[type=checkbox]')]
-    .filter(c => c.checked)
-    .map(c => c.dataset.chain);
-  return new Set(checked);
+  const container = which === 'A' ? E('chainsABox') : E('chainsBBox');
+  const checkboxes = [...container.querySelectorAll('input[type=checkbox]')];
+  const selected = checkboxes.filter(cb => cb.checked).map(cb => cb.dataset.chain);
+  return new Set(selected);
 }
 
+/**
+ * Select all chains for a protein.
+ * @param {string} which - 'A' or 'B'
+ */
 function selectAllChains(which) {
-  const box = which === 'A' ? E('chainsABox') : E('chainsBBox');
-  box.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = true);
+  const container = which === 'A' ? E('chainsABox') : E('chainsBBox');
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = true);
 }
 
+/**
+ * Invert chain selection (checked becomes unchecked and vice versa).
+ * @param {string} which - 'A' or 'B'
+ */
 function invertChains(which) {
-  const box = which === 'A' ? E('chainsABox') : E('chainsBBox');
-  box.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = !c.checked);
+  const container = which === 'A' ? E('chainsABox') : E('chainsBBox');
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = !cb.checked);
 }
 
-// ========================= EXAMPLE & DEMO FUNCTIONS =========================
-
-function useExample(which) {
-  // Generate example helix for quick testing
-  const pdb = buildHelixPDB(24, which === 'A' ? 'H' : 'A', 
-    which === 'A' ? {x: -10, y: 0, z: 0} : {x: 10, y: 0, z: 0}
-  );
-  E(which === 'A' ? 'pdbAText' : 'pdbBText').value = pdb;
-  parseOne(which);
+// ========================================================================================
+// GEOMETRY MANIPULATION FUNCTIONS
+// ========================================================================================
+/**
+ * Filter atoms by selected chains.
+ * @param {Array<Object>} atoms - All atoms
+ * @param {Set<string>} keepChains - Set of chain IDs to keep
+ * @returns {Array<Object>} - Filtered atoms
+ */
+function filterChains(atoms, keepChains) {
+  if (!keepChains || keepChains.size === 0) return atoms;
+  return atoms.filter(atom => keepChains.has(atom.chain));
 }
 
-function autoDemo() {
-  // Automatically load demo structures and run docking
-  status('loading demo');
-  
-  const pdbA = buildHelixPDB(24, 'H', {x: -10, y: 0, z: 0});
-  const pdbB = buildHelixPDB(24, 'A', {x: 10, y: 0, z: 0});
-  
-  E('pdbAText').value = pdbA;
-  E('pdbBText').value = pdbB;
-  
-  parseOne('A');
-  parseOne('B');
-  
-  // Trigger docking after short delay
-  setTimeout(runDocking, 500);
-}
-
-function buildHelixPDB(n, chain = 'A', offset = {x: 0, y: 0, z: 0}) {
-  // Generate idealized alpha-helix backbone atoms for visualization
-  const lines = [];
-  let serial = 1;
-  const rise = 1.5;           // Å per residue along helix axis
-  const radius = 2.2;         // Helix radius
-  const turn = 100 * Math.PI / 180;  // Rotation per residue
-  let z = 0;
-  
-  const residueTypes = ['ALA', 'LEU', 'GLU', 'LYS', 'GLN', 'VAL'];
-  
-  for (let i = 0; i < n; i++) {
-    const ang = i * turn;
-    const cx = offset.x + radius * Math.cos(ang);
-    const cy = offset.y + radius * Math.sin(ang);
-    const cz = offset.z + z;
-    z += rise;
-    
-    // Calculate backbone atom positions relative to CA
-    const ca = {x: cx, y: cy, z: cz};
-    const dirx = -Math.sin(ang);
-    const diry = Math.cos(ang);
-    const dirz = 0.2;
-    
-    const N = {
-      x: ca.x - 1.33 * dirx,
-      y: ca.y - 1.33 * diry,
-      z: ca.z - 1.33 * dirz
-    };
-    
-    const C = {
-      x: ca.x + 1.52 * dirx,
-      y: ca.y + 1.52 * diry,
-      z: ca.z + 1.52 * dirz
-    };
-    
-    const O = {
-      x: C.x + 0.5 * diry,
-      y: C.y - 0.5 * dirx,
-      z: C.z + 0.3
-    };
-    
-    const resi = (i + 1).toString().padStart(4, ' ');
-    const resn = residueTypes[i % 6].padStart(3, ' ');
-    
-    const fmt = (coord, name, elem) => 
-      `ATOM  ${String(serial++).padStart(5, ' ')} ${name} ${resn} ${chain}${resi}    ` +
-      `${coord.x.toFixed(3).padStart(8, ' ')}` +
-      `${coord.y.toFixed(3).padStart(8, ' ')}` +
-      `${coord.z.toFixed(3).padStart(8, ' ')}` +
-      `  1.00  0.00          ${elem}`;
-    
-    lines.push(
-      fmt(N, ' N  ', ' N'),
-      fmt(ca, ' CA ', ' C'),
-      fmt(C, ' C  ', ' C'),
-      fmt(O, ' O  ', ' O')
-    );
-  }
-  
-  lines.push('TER', 'END');
-  return lines.join('\n');
-}
-
-async function fetchPDB(which) {
-  const pdbId = prompt(`Enter PDB ID to fetch for Protein ${which}:`);
-  if (!pdbId) return;
-  
-  const id = pdbId.trim().toLowerCase();
-  if (id.length !== 4) {
-    alert('PDB IDs must be exactly 4 characters');
-    return;
-  }
-  
-  try {
-    status(`fetching ${id}...`);
-    const url = `https://files.rcsb.org/download/${id}.pdb`;
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`PDB ${id} not found`);
-    }
-    
-    const text = await response.text();
-    E(which === 'A' ? 'pdbAText' : 'pdbBText').value = text;
-    parseOne(which);
-    status('idle');
-  } catch(err) {
-    alert(`Failed to fetch PDB: ${err.message}`);
-    status('error');
-  }
-}
-
-// ========================= ATOM MANIPULATION =========================
-
-function filterChains(atoms, keep) {
-  if (!keep || keep.size === 0) return atoms;
-  return atoms.filter(a => keep.has(a.chain));
-}
-
+/**
+ * Select subset of atoms based on atom type mode.
+ * @param {Array<Object>} atoms - Input atoms
+ * @param {string} mode - 'CA', 'BB', or 'HEAVY'
+ * @returns {Array<Object>} - Filtered atoms
+ */
 function selectAtomSet(atoms, mode) {
   const backbone = new Set(['N', 'CA', 'C', 'O']);
   
-  return atoms.filter(a => {
-    if (mode === 'CA') return a.name === 'CA';
-    if (mode === 'BB') return backbone.has(a.name);
-    return a.elem !== 'H';  // HEAVY mode: all non-hydrogen
+  return atoms.filter(atom => {
+    if (mode === 'CA') return atom.name === 'CA';
+    if (mode === 'BB') return backbone.has(atom.name);
+    return atom.elem !== 'H';  // HEAVY mode: all non-hydrogen
   });
 }
 
+/**
+ * Calculate geometric centroid of a set of points.
+ * @param {Array<Object>} points - Array of objects with x, y, z properties
+ * @returns {Object} - Centroid coordinates {x, y, z}
+ */
 function centroid(points) {
-  let sx = 0, sy = 0, sz = 0;
+  let sumX = 0, sumY = 0, sumZ = 0;
   const n = points.length;
   
   for (const p of points) {
-    sx += p.x;
-    sy += p.y;
-    sz += p.z;
+    sumX += p.x;
+    sumY += p.y;
+    sumZ += p.z;
   }
   
-  return {x: sx / n, y: sy / n, z: sz / n};
+  return {
+    x: sumX / n,
+    y: sumY / n,
+    z: sumZ / n
+  };
 }
 
-function translate(points, v) {
+/**
+ * Translate points by a vector.
+ * @param {Array<Object>} points - Points to translate
+ * @param {Object} vector - Translation vector {x, y, z}
+ * @returns {Array<Object>} - Translated points
+ */
+function translate(points, vector) {
   return points.map(p => ({
     ...p,
-    x: p.x + v.x,
-    y: p.y + v.y,
-    z: p.z + v.z
+    x: p.x + vector.x,
+    y: p.y + vector.y,
+    z: p.z + vector.z
   }));
 }
 
+/**
+ * Apply quaternion rotation and translation to points.
+ * @param {Array<Object>} points - Points to transform
+ * @param {Array<number>} q - Quaternion [x, y, z, w]
+ * @param {Object} t - Translation {x, y, z}
+ * @returns {Array<Object>} - Transformed points
+ */
 function applyTransform(points, q, t) {
-  // Apply quaternion rotation followed by translation
-  const [x, y, z, w] = q;
+  const [qx, qy, qz, qw] = q;
   
   return points.map(p => {
     const vx = p.x, vy = p.y, vz = p.z;
     
-    // Quaternion rotation: v' = q * v * q^-1
-    const ix =  w * vx + y * vz - z * vy;
-    const iy =  w * vy + z * vx - x * vz;
-    const iz =  w * vz + x * vy - y * vx;
-    const iw = -x * vx - y * vy - z * vz;
+    // Quaternion rotation: v' = q * v * q^(-1)
+    // Using the formula: v' = v + 2q_w(q_xyz × v) + 2(q_xyz × (q_xyz × v))
+    const ix =  qw * vx + qy * vz - qz * vy;
+    const iy =  qw * vy + qz * vx - qx * vz;
+    const iz =  qw * vz + qx * vy - qy * vx;
+    const iw = -qx * vx - qy * vy - qz * vz;
     
-    const ox = ix * w + iw * (-x) + iy * (-z) - iz * (-y);
-    const oy = iy * w + iw * (-y) + iz * (-x) - ix * (-z);
-    const oz = iz * w + iw * (-z) + ix * (-y) - iy * (-x);
+    const ox = ix * qw + iw * (-qx) + iy * (-qz) - iz * (-qy);
+    const oy = iy * qw + iw * (-qy) + iz * (-qx) - ix * (-qz);
+    const oz = iz * qw + iw * (-qz) + ix * (-qy) - iy * (-qx);
     
     return {
       x: ox + t.x,
@@ -1170,27 +1725,32 @@ function applyTransform(points, q, t) {
   });
 }
 
+/**
+ * Format atom array as PDB text.
+ * @param {Array<Object>} atoms - Atoms to format
+ * @param {number} chainShift - ASCII offset for chain ID (0 for no shift)
+ * @returns {string} - PDB formatted text
+ */
 function formatPDB(atoms, chainShift = 0) {
-  // Convert atom array to PDB format text
   const lines = [];
   let serial = 1;
   
-  for (const a of atoms) {
-    const name = (a.name || 'CA').padStart(4, ' ');
-    const resn = (a.resn || 'RES').padStart(3, ' ');
-    const chain = (a.chain || 'A');
+  for (const atom of atoms) {
+    const name = (atom.name || 'CA').padStart(4, ' ');
+    const resn = (atom.resn || 'RES').padStart(3, ' ');
+    const chain = atom.chain || 'A';
     const chainOut = String.fromCharCode(chain.charCodeAt(0) + chainShift);
-    const resi = (a.resi || 1).toString().padStart(4, ' ');
-    const x = (a.x ?? 0).toFixed(3).padStart(8, ' ');
-    const y = (a.y ?? 0).toFixed(3).padStart(8, ' ');
-    const z = (a.z ?? 0).toFixed(3).padStart(8, ' ');
+    const resi = (atom.resi || 1).toString().padStart(4, ' ');
+    const x = (atom.x ?? 0).toFixed(3).padStart(8, ' ');
+    const y = (atom.y ?? 0).toFixed(3).padStart(8, ' ');
+    const z = (atom.z ?? 0).toFixed(3).padStart(8, ' ');
     const occ = ' 1.00';
-    const b = ' 0.00';
-    const elem = (a.elem || 'C').toString().padStart(2, ' ');
+    const bfac = ' 0.00';
+    const elem = (atom.elem || 'C').toString().padStart(2, ' ');
     
     lines.push(
       `ATOM  ${String(serial).padStart(5, ' ')} ${name} ${resn} ${chainOut}${resi}    ` +
-      `${x}${y}${z}${occ}${b}          ${elem}`
+      `${x}${y}${z}${occ}${bfac}          ${elem}`
     );
     serial++;
   }
@@ -1199,20 +1759,36 @@ function formatPDB(atoms, chainShift = 0) {
   return lines.join('\n');
 }
 
-// ========================= WEB WORKER CONSTRUCTION =========================
-
+// ========================================================================================
+// WEB WORKER CREATION FOR PARALLEL DOCKING
+// ========================================================================================
+/**
+ * Create a Web Worker for parallel docking computation.
+ * The worker samples random orientations and scores them independently.
+ * @returns {Worker} - Web Worker instance
+ */
 function makeDockWorker() {
-  // Create inline web worker for parallel docking computation
-  const src = `
+  // Worker code as a string (will be converted to Blob URL)
+  const workerCode = `
+    // Van der Waals radii for clash detection
     const vdw = {H:1.2, C:1.7, N:1.55, O:1.52, S:1.8, P:1.8, F:1.47, CL:1.75, BR:1.85, I:1.98};
     
-    // Seeded random number generator for reproducibility
+    /**
+     * Seeded random number generator (Linear Congruential Generator).
+     * Ensures reproducible results for a given seed.
+     */
     function rand(seed) {
-      let s = seed >>> 0;
-      return () => (s = (1664525 * s + 1013904223) >>> 0, s / 0xFFFFFFFF);
+      let state = seed >>> 0;
+      return () => {
+        state = (1664525 * state + 1013904223) >>> 0;
+        return state / 0xFFFFFFFF;
+      };
     }
     
-    // Generate uniform random quaternion for rotation
+    /**
+     * Generate uniform random quaternion for 3D rotation.
+     * Uses Shoemake's method for uniform sampling of SO(3).
+     */
     function randomQuat(rng) {
       const u1 = rng(), u2 = rng(), u3 = rng();
       const a = Math.sqrt(1 - u1);
@@ -1220,31 +1796,36 @@ function makeDockWorker() {
       const t1 = 2 * Math.PI * u2;
       const t2 = 2 * Math.PI * u3;
       return [
-        a * Math.sin(t1),
-        a * Math.cos(t1),
-        b * Math.sin(t2),
-        b * Math.cos(t2)
+        a * Math.sin(t1),  // x
+        a * Math.cos(t1),  // y
+        b * Math.sin(t2),  // z
+        b * Math.cos(t2)   // w
       ];
     }
     
-    // Apply quaternion rotation to point array
-    function rotatePoints(pts, q) {
-      const [x, y, z, w] = q;
-      return pts.map(p => {
+    /**
+     * Rotate points using quaternion.
+     */
+    function rotatePoints(points, q) {
+      const [qx, qy, qz, qw] = q;
+      return points.map(p => {
         const vx = p.x, vy = p.y, vz = p.z;
-        const ix =  w * vx + y * vz - z * vy;
-        const iy =  w * vy + z * vx - x * vz;
-        const iz =  w * vz + x * vy - y * vx;
-        const iw = -x * vx - y * vy - z * vz;
-        const ox = ix * w + iw * (-x) + iy * (-z) - iz * (-y);
-        const oy = iy * w + iw * (-y) + iz * (-x) - ix * (-z);
-        const oz = iz * w + iw * (-z) + ix * (-y) - iy * (-x);
+        const ix =  qw * vx + qy * vz - qz * vy;
+        const iy =  qw * vy + qz * vx - qx * vz;
+        const iz =  qw * vz + qx * vy - qy * vx;
+        const iw = -qx * vx - qy * vy - qz * vz;
+        const ox = ix * qw + iw * (-qx) + iy * (-qz) - iz * (-qy);
+        const oy = iy * qw + iw * (-qy) + iz * (-qx) - ix * (-qz);
+        const oz = iz * qw + iw * (-qz) + ix * (-qy) - iy * (-qx);
         return {x: ox, y: oy, z: oz, elem: p.elem};
       });
     }
     
-    function translate(pts, t) {
-      return pts.map(p => ({
+    /**
+     * Translate points by a vector.
+     */
+    function translate(points, t) {
+      return points.map(p => ({
         x: p.x + t.x,
         y: p.y + t.y,
         z: p.z + t.z,
@@ -1252,70 +1833,81 @@ function makeDockWorker() {
       }));
     }
     
-    // Spatial grid for efficient neighbor searching
-    function makeGrid(coords, cell) {
+    /**
+     * Create spatial grid for fast neighbor lookups.
+     */
+    function makeGrid(coords, cellSize) {
       const map = new Map();
       const key = (ix, iy, iz) => ix + "|" + iy + "|" + iz;
       
       for (let i = 0; i < coords.length; i++) {
         const x = coords[i].x, y = coords[i].y, z = coords[i].z;
-        const ix = Math.floor(x / cell);
-        const iy = Math.floor(y / cell);
-        const iz = Math.floor(z / cell);
+        const ix = Math.floor(x / cellSize);
+        const iy = Math.floor(y / cellSize);
+        const iz = Math.floor(z / cellSize);
         const k = key(ix, iy, iz);
         
         if (!map.has(k)) map.set(k, []);
         map.get(k).push(i);
       }
       
-      return {cell, map};
+      return {cellSize, map};
     }
     
-    // Get atoms in neighboring grid cells
-    function neighbors(g, x, y, z) {
-      const c = g.cell;
+    /**
+     * Get atoms in neighboring grid cells.
+     */
+    function neighbors(grid, x, y, z) {
+      const c = grid.cellSize;
       const ix = Math.floor(x / c);
       const iy = Math.floor(y / c);
       const iz = Math.floor(z / c);
-      const res = [];
+      const result = [];
       
+      // Check 3×3×3 neighborhood
       for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
           for (let dz = -1; dz <= 1; dz++) {
             const k = (ix + dx) + "|" + (iy + dy) + "|" + (iz + dz);
-            if (g.map.has(k)) res.push(...g.map.get(k));
+            if (grid.map.has(k)) {
+              result.push(...grid.map.get(k));
+            }
           }
         }
       }
       
-      return res;
+      return result;
     }
     
-    // Score a pose using contact and clash terms
-    function scorePose(A, B, contactCut, clashFactor, wContact, wClash, soft) {
-      const grid = makeGrid(A, contactCut);
+    /**
+     * Score a docked pose based on contacts and clashes.
+     */
+    function scorePose(proteinA, proteinB, contactCut, clashFactor, wContact, wClash, soft) {
+      const grid = makeGrid(proteinA, contactCut);
       let contacts = 0;
       let clashPenalty = 0;
       
-      for (let i = 0; i < B.length; i++) {
-        const x = B[i].x, y = B[i].y, z = B[i].z;
-        const elemB = (B[i].elem || 'C').toUpperCase();
-        const cand = neighbors(grid, x, y, z);
+      for (let i = 0; i < proteinB.length; i++) {
+        const x = proteinB[i].x, y = proteinB[i].y, z = proteinB[i].z;
+        const elemB = (proteinB[i].elem || 'C').toUpperCase();
+        const candidates = neighbors(grid, x, y, z);
         
-        for (const j of cand) {
-          const ax = A[j].x, ay = A[j].y, az = A[j].z;
-          const elemA = (A[j].elem || 'C').toUpperCase();
+        for (const j of candidates) {
+          const ax = proteinA[j].x, ay = proteinA[j].y, az = proteinA[j].z;
+          const elemA = (proteinA[j].elem || 'C').toUpperCase();
           const dx = x - ax, dy = y - ay, dz = z - az;
-          const d = Math.hypot(dx, dy, dz);
+          const distance = Math.hypot(dx, dy, dz);
           
-          const rv = (vdw[elemA] || 1.7) + (vdw[elemB] || 1.7);
-          const clashCut = clashFactor * rv;
+          // Calculate sum of van der Waals radii
+          const radiusSum = (vdw[elemA] || 1.7) + (vdw[elemB] || 1.7);
+          const clashCutoff = clashFactor * radiusSum;
           
-          if (d <= clashCut) {
-            // Soft clash penalty with overlap distance
-            const over = (clashCut - d + 1e-6) / clashCut;
-            clashPenalty += wClash * over * (1 / (1 + soft * over));
-          } else if (d <= contactCut) {
+          if (distance <= clashCutoff) {
+            // Soft-core clash penalty
+            const overlap = (clashCutoff - distance + 1e-6) / clashCutoff;
+            clashPenalty += wClash * overlap * (1 / (1 + soft * overlap));
+          } else if (distance <= contactCut) {
+            // Favorable contact
             contacts += 1.0;
           }
         }
@@ -1328,23 +1920,25 @@ function makeDockWorker() {
       };
     }
     
-    // Worker message handler
-    self.onmessage = (e) => {
-      const {Apts, Bpts, params, start, end} = e.data;
+    /**
+     * Worker message handler - performs sampling and scoring.
+     */
+    self.onmessage = (event) => {
+      const {Apts, Bpts, params, start, end} = event.data;
       const rng = rand(params.seed + start * 1337);
-      let best = [];
-      const total = end - start;
+      let bestPoses = [];
+      const totalSamples = end - start;
       
       // Sample random orientations
-      for (let k = 0; k < total; k++) {
-        const q = randomQuat(rng);
+      for (let k = 0; k < totalSamples; k++) {
+        const quat = randomQuat(rng);
         const tx = (rng() * 2 - 1) * params.maxTrans;
         const ty = (rng() * 2 - 1) * params.maxTrans;
         const tz = (rng() * 2 - 1) * params.maxTrans;
         
-        const Bt = translate(rotatePoints(Bpts, q), {x: tx, y: ty, z: tz});
-        const sc = scorePose(
-          Apts, Bt,
+        const transformedB = translate(rotatePoints(Bpts, quat), {x: tx, y: ty, z: tz});
+        const scoreResult = scorePose(
+          Apts, transformedB,
           params.contactCut,
           params.clashFactor,
           params.wContact,
@@ -1352,69 +1946,93 @@ function makeDockWorker() {
           params.soft
         );
         
-        best.push({
-          score: sc.score,
-          contacts: sc.contacts,
-          clash: sc.clash,
-          q: [...q],
+        bestPoses.push({
+          score: scoreResult.score,
+          contacts: scoreResult.contacts,
+          clash: scoreResult.clash,
+          q: [...quat],
           t: {x: tx, y: ty, z: tz}
         });
         
-        // Periodic progress updates
+        // Send progress updates periodically
         if ((k & 1023) === 0) {
-          self.postMessage({type: 'progress', k});
+          self.postMessage({type: 'progress', count: k});
         }
       }
       
       // Sort by score and return top candidates
-      best.sort((a, b) => b.score - a.score);
+      bestPoses.sort((a, b) => b.score - a.score);
       self.postMessage({
         type: 'done',
-        list: best.slice(0, Math.min(200, total))
+        poses: bestPoses.slice(0, Math.min(200, totalSamples))
       });
     };
   `;
   
-  const blob = new Blob([src], {type: 'application/javascript'});
-  return new Worker(URL.createObjectURL(blob));
+  // Create worker from blob URL
+  const blob = new Blob([workerCode], {type: 'application/javascript'});
+  const url = URL.createObjectURL(blob);
+  return new Worker(url);
 }
 
-// ========================= DIVERSITY FILTERING =========================
-
+// ========================================================================================
+// DIVERSITY FILTERING
+// ========================================================================================
+/**
+ * Calculate rotation angle between two quaternions (in degrees).
+ */
 function angleBetweenQuats(q1, q2) {
-  // Compute rotation angle between two quaternions
-  const dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
+  const dot = q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3];
   return 2 * Math.acos(Math.min(1, Math.abs(dot))) * 180 / Math.PI;
 }
 
-function diverseTop(sorted, angDeg, transA) {
-  // Filter poses to ensure diversity in orientation and translation
-  const out = [];
+/**
+ * Filter poses to ensure diversity in orientation and position.
+ * @param {Array<Object>} sorted - Poses sorted by score
+ * @param {number} angleDeg - Minimum rotation angle difference
+ * @param {number} transA - Minimum translation distance
+ * @returns {Array<Object>} - Diverse subset of poses
+ */
+function diverseTop(sorted, angleDeg, transA) {
+  const diverse = [];
+  const maxPoses = parseInt(E('topN').value) || 10;
   
-  for (const p of sorted) {
-    let dup = false;
+  for (const pose of sorted) {
+    let isDuplicate = false;
     
-    for (const q of out) {
-      const ad = angleBetweenQuats(p.q, q.q);
-      const td = Math.hypot(p.t.x - q.t.x, p.t.y - q.t.y, p.t.z - q.t.z);
+    // Check against already selected poses
+    for (const selected of diverse) {
+      const angleDiff = angleBetweenQuats(pose.q, selected.q);
+      const transDiff = Math.hypot(
+        pose.t.x - selected.t.x,
+        pose.t.y - selected.t.y,
+        pose.t.z - selected.t.z
+      );
       
       // Consider duplicate if both angle and translation are similar
-      if (ad <= angDeg && td <= transA) {
-        dup = true;
+      if (angleDiff <= angleDeg && transDiff <= transA) {
+        isDuplicate = true;
         break;
       }
     }
     
-    if (!dup) out.push(p);
-    if (out.length >= parseInt(E('topN').value)) break;
+    if (!isDuplicate) {
+      diverse.push(pose);
+      if (diverse.length >= maxPoses) break;
+    }
   }
   
-  return out;
+  return diverse;
 }
 
-// ========================= DOCKING ORCHESTRATION =========================
-
-async function runDocking() {
+// ========================================================================================
+// ANTIBODY DOCKING DRIVER
+// ========================================================================================
+/**
+ * Main function to run antibody-antigen docking.
+ * Orchestrates parsing, sampling, scoring, and result presentation.
+ */
+async function runAntibodyDocking() {
   if (inProgress) return;
   
   cancelled = false;
@@ -1427,130 +2045,142 @@ async function runDocking() {
   E('dockBtn').textContent = 'Running…';
   
   try {
-    // Load and parse input structures
-    const Atext = await ensureInputText('A');
-    const Btext = await ensureInputText('B');
+    // === Step 1: Load and parse input structures ===
+    const textA = await ensureInputText('A');
+    const textB = await ensureInputText('B');
     
-    pdbAAllAtoms = parsePDB(Atext);
-    pdbBAllAtoms = parsePDB(Btext);
+    pdbAAllAtoms = parsePDB(textA);
+    pdbBAllAtoms = parsePDB(textB);
     
     if (!pdbAAllAtoms.length || !pdbBAllAtoms.length) {
       throw new Error('Could not parse atoms from one or both inputs.');
     }
     
+    // Update chain selection UI
     populateChainChips('A', pdbAAllAtoms);
     populateChainChips('B', pdbBAllAtoms);
     
-    const params = collectParams();
+    // === Step 2: Collect parameters ===
+    const params = collectDockingParams();
     
-    // Apply chain filtering
-    const AchainSel = selectedChains('A');
-    const BchainSel = selectedChains('B');
-    const _pdbAAtoms = filterChains(pdbAAllAtoms, AchainSel);
-    const _pdbBAtoms = filterChains(pdbBAllAtoms, BchainSel);
+    // === Step 3: Filter by selected chains ===
+    const selectedA = selectedChains('A');
+    const selectedB = selectedChains('B');
+    const atomsA = filterChains(pdbAAllAtoms, selectedA);
+    const atomsB = filterChains(pdbBAllAtoms, selectedB);
     
-    if (!_pdbAAtoms.length || !_pdbBAtoms.length) {
-      throw new Error('No atoms after chain filtering — click "Select All" or choose valid chains.');
+    if (!atomsA.length || !atomsB.length) {
+      throw new Error('No atoms after chain filtering. Please select valid chains.');
     }
     
-    // Select atom subset and center
-    const Apts0 = selectAtomSet(_pdbAAtoms, params.atomMode)
-      .map(a => ({x: a.x, y: a.y, z: a.z, elem: a.elem}));
-    const Bpts0 = selectAtomSet(_pdbBAtoms, params.atomMode)
-      .map(a => ({x: a.x, y: a.y, z: a.z, elem: a.elem}));
+    // === Step 4: Select atom subset and center structures ===
+    const ptsA0 = selectAtomSet(atomsA, params.atomMode).map(a => ({
+      x: a.x, y: a.y, z: a.z, elem: a.elem
+    }));
+    const ptsB0 = selectAtomSet(atomsB, params.atomMode).map(a => ({
+      x: a.x, y: a.y, z: a.z, elem: a.elem
+    }));
     
-    if (!Apts0.length || !Bpts0.length) {
-      throw new Error('Atom selection produced empty sets; try Backbone or Heavy mode.');
+    if (!ptsA0.length || !ptsB0.length) {
+      throw new Error('Atom selection produced empty sets. Try Backbone or Heavy mode.');
     }
     
-    const cA = centroid(Apts0);
-    const cB = centroid(Bpts0);
-    const Apts = translate(Apts0, {x: -cA.x, y: -cA.y, z: -cA.z});
-    const Bpts = translate(Bpts0, {x: -cB.x, y: -cB.y, z: -cB.z});
+    const centerA = centroid(ptsA0);
+    const centerB = centroid(ptsB0);
+    const ptsA = translate(ptsA0, {x: -centerA.x, y: -centerA.y, z: -centerA.z});
+    const ptsB = translate(ptsB0, {x: -centerB.x, y: -centerB.y, z: -centerB.z});
     
     status('sampling');
     
-    // Spawn worker pool for parallel sampling
+    // === Step 5: Set up parallel worker pool ===
     const cores = Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
     const poolSize = Math.min(cores, 8);
-    const total = params.samples;
-    const per = Math.floor(total / poolSize);
-    const extra = total % poolSize;
+    const totalSamples = params.samples;
+    const samplesPerWorker = Math.floor(totalSamples / poolSize);
+    const extraSamples = totalSamples % poolSize;
     
-    let lists = [];
-    let done = 0;
+    let allResults = [];
+    let completedSamples = 0;
     workerPool = [];
     
+    // Spawn workers
     for (let i = 0; i < poolSize; i++) {
-      const start = i * per + Math.min(i, extra);
-      const end = start + per + (i < extra ? 1 : 0);
-      const w = makeDockWorker();
-      workerPool.push(w);
+      const start = i * samplesPerWorker + Math.min(i, extraSamples);
+      const end = start + samplesPerWorker + (i < extraSamples ? 1 : 0);
       
-      w.onmessage = (e) => {
+      const worker = makeDockWorker();
+      workerPool.push(worker);
+      
+      worker.onmessage = (event) => {
         if (cancelled) return;
         
-        const msg = e.data;
+        const msg = event.data;
         
         if (msg.type === 'progress') {
-          done += 1024;
-          setProgress(Math.min(1, done / params.samples));
-          status(`scan ${Math.min(done, params.samples)}/${params.samples}`);
+          completedSamples += 1024;
+          setProgress(Math.min(1, completedSamples / totalSamples));
+          status(`sampling ${Math.min(completedSamples, totalSamples)}/${totalSamples}`);
         }
         
         if (msg.type === 'done') {
-          lists.push(msg.list);
-          w.terminate();
+          allResults.push(msg.poses);
+          worker.terminate();
           
-          // When all workers complete, finalize
-          if (lists.length === poolSize) {
-            finalizeSampling(
-              lists.flat(),
-              params,
-              _pdbAAtoms,
-              _pdbBAtoms,
-              cA,
-              cB
-            );
+          // When all workers complete, finalize results
+          if (allResults.length === poolSize) {
+            finalizeDocking(allResults.flat(), params, atomsA, atomsB, centerA, centerB);
           }
         }
       };
       
-      w.onerror = (err) => {
+      worker.onerror = (err) => {
         console.error('Worker error:', err);
-        w.terminate();
+        worker.terminate();
       };
       
-      w.postMessage({Apts, Bpts, params, start, end});
+      // Send task to worker
+      worker.postMessage({Apts: ptsA, Bpts: ptsB, params, start, end});
     }
     
   } catch(err) {
-    alert(err.message || err);
-    finishButtons();
+    alert(err.message || 'An error occurred during docking');
+    finishDocking();
     status('error');
     inProgress = false;
   }
 }
 
+/**
+ * Cancel ongoing docking calculation.
+ */
 function cancelDocking() {
   cancelled = true;
+  
+  // Terminate all workers
   workerPool.forEach(w => {
-    try { w.terminate(); } catch {}
+    try { w.terminate(); } catch(e) {}
   });
   workerPool = [];
+  
   setProgress(0);
   status('cancelled');
-  finishButtons();
+  finishDocking();
   inProgress = false;
 }
 
-function finishButtons() {
+/**
+ * Reset button states after docking completes.
+ */
+function finishDocking() {
   E('dockBtn').disabled = false;
   E('cancelBtn').disabled = true;
   E('dockBtn').textContent = '▶️ Run Docking';
 }
 
-function collectParams() {
+/**
+ * Collect docking parameters from UI inputs.
+ */
+function collectDockingParams() {
   return {
     samples: parseInt(E('samples').value),
     maxTrans: parseFloat(E('maxTrans').value),
@@ -1562,17 +2192,13 @@ function collectParams() {
     topN: Math.max(1, parseInt(E('topN').value)),
     seed: parseInt(E('seed').value) || 42,
     atomMode: E('atomMode').value,
-    rescoreMode: E('rescoreMode').value,
-    wHbond: parseFloat(E('wHbond').value),
-    wSaltBridge: parseFloat(E('wSaltBridge').value),
-    wDesolvation: parseFloat(E('wDesolvation').value),
-    wHydrophobic: parseFloat(E('wHydrophobic').value),
-    wShape: parseFloat(E('wShape').value),
-    kElec: parseFloat(E('kElec').value),
-    elecCut: parseFloat(E('elecCut').value)
+    rescoreMode: E('rescoreMode').value
   };
 }
 
+/**
+ * Ensure text input is available for a protein.
+ */
 async function ensureInputText(which) {
   const file = E(which === 'A' ? 'pdbAFile' : 'pdbBFile').files[0];
   let text = E(which === 'A' ? 'pdbAText' : 'pdbBText').value.trim();
@@ -1582,46 +2208,51 @@ async function ensureInputText(which) {
   }
   
   if (!text) {
-    throw new Error(`Provide PDB for Protein ${which} (file or pasted text).`);
+    throw new Error(`Provide PDB for Protein ${which} (file or text).`);
   }
   
   return text;
 }
 
-async function finalizeSampling(merged, params, _pdbAAtoms, _pdbBAtoms, cA, cB) {
+/**
+ * Finalize docking after all workers complete.
+ * Applies diversity filtering, optional rescoring, and displays results.
+ */
+async function finalizeDocking(mergedResults, params, atomsA, atomsB, centerA, centerB) {
   if (cancelled) return cancelDocking();
   
-  const rescoreLabel = params.rescoreMode === 'NONE' 
-    ? 'ranking' 
-    : (params.rescoreMode === 'HEAVY' ? 'rescore' : 'refine');
+  const rescoreLabel = params.rescoreMode === 'NONE' ? 'ranking' :
+                      (params.rescoreMode === 'HEAVY' ? 'rescoring' : 'refining');
   status(rescoreLabel);
   
-  // Sort by initial score and filter for diversity
-  merged.sort((a, b) => b.score - a.score);
+  // Sort by score
+  mergedResults.sort((a, b) => b.score - a.score);
+  
+  // Apply diversity filter
   const diverse = diverseTop(
-    merged,
+    mergedResults,
     parseFloat(E('dupAngle').value) || 12,
     parseFloat(E('dupTrans').value) || 2
   );
   
-  // Prepare heavy atom sets for rescoring and visualization
-  const Aheavy = translate(
-    selectAtomSet(_pdbAAtoms, 'HEAVY').map(a => ({...a})),
-    {x: -cA.x, y: -cA.y, z: -cA.z}
+  // Prepare heavy atom sets for visualization
+  const atomsAHeavy = translate(
+    selectAtomSet(atomsA, 'HEAVY').map(a => ({...a})),
+    {x: -centerA.x, y: -centerA.y, z: -centerA.z}
   );
   
-  const Bheavy0 = translate(
-    selectAtomSet(_pdbBAtoms, 'HEAVY').map(a => ({...a})),
-    {x: -cB.x, y: -cB.y, z: -cB.z}
+  const atomsBHeavy0 = translate(
+    selectAtomSet(atomsB, 'HEAVY').map(a => ({...a})),
+    {x: -centerB.x, y: -centerB.y, z: -centerB.z}
   );
   
-  let top = diverse;
+  let topPoses = diverse;
   
   // Optional heavy atom rescoring
   if (params.rescoreMode !== 'NONE') {
-    top = await heavyRescore(
-      Aheavy,
-      Bheavy0,
+    topPoses = await heavyAtomRescore(
+      atomsAHeavy,
+      atomsBHeavy0,
       params,
       diverse,
       params.rescoreMode === 'HEAVY_REFINE'
@@ -1631,50 +2262,48 @@ async function finalizeSampling(merged, params, _pdbAAtoms, _pdbBAtoms, cA, cB) 
     heavyUsed = false;
   }
   
-  posesTop = top;
-  currentA = Aheavy;
-  currentB0 = Bheavy0;
+  // Store results globally
+  posesTop = topPoses;
+  currentA = atomsAHeavy;
+  currentB0 = atomsBHeavy0;
   
-  // Update UI with results
-  buildPoseTable(top);
-  if (top.length > 0) showPose(0);
+  // Update UI
+  buildPoseButtons(topPoses);
+  if (topPoses.length > 0) {
+    showPose(0);
+  }
   
-  updateOverviewMetrics(top);
-  updateScoreDistribution(top);
-  updateStatisticsTable(top);
+  updateMetricsDisplay();
   
-  // Save to history
-  addToHistory(params, top);
-  
-  finishButtons();
+  finishDocking();
   status('complete');
   setProgress(1);
   inProgress = false;
 }
 
-function heavyRescore(Aheavy, Bheavy0, params, topCoarse, refine = false) {
-  // Rescore poses using full heavy atom detail
-  const contactCut = params.contactCut;
-  const clashFactor = params.clashFactor;
-  const wContact = params.wContact;
-  const wClash = params.wClash;
-  const soft = params.soft;
+/**
+ * Rescore top poses using full heavy atom detail.
+ * Optionally performs micro-optimization with local perturbations.
+ */
+function heavyAtomRescore(atomsA, atomsB0, params, coarsePoses, refine = false) {
+  const {contactCut, clashFactor, wContact, wClash, soft} = params;
   
+  // Inner scoring function for heavy atoms
   function score(A, B) {
     let contacts = 0;
     let clashPenalty = 0;
     
     for (const b of B) {
       for (const a of A) {
-        const d = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z);
-        const rv = (vdw[(a.elem || 'C').toUpperCase()] || 1.7) + 
-                    (vdw[(b.elem || 'C').toUpperCase()] || 1.7);
-        const clashCut = clashFactor * rv;
+        const dist = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z);
+        const radiusSum = (vdw[(a.elem || 'C').toUpperCase()] || 1.7) +
+                          (vdw[(b.elem || 'C').toUpperCase()] || 1.7);
+        const clashCut = clashFactor * radiusSum;
         
-        if (d <= clashCut) {
-          const over = (clashCut - d + 1e-6) / clashCut;
-          clashPenalty += wClash * over * (1 / (1 + soft * over));
-        } else if (d <= contactCut) {
+        if (dist <= clashCut) {
+          const overlap = (clashCut - dist + 1e-6) / clashCut;
+          clashPenalty += wClash * overlap * (1 / (1 + soft * overlap));
+        } else if (dist <= contactCut) {
           contacts++;
         }
       }
@@ -1687,24 +2316,26 @@ function heavyRescore(Aheavy, Bheavy0, params, topCoarse, refine = false) {
     };
   }
   
-  // Micro-optimization: small random perturbations
-  function jiggle(p) {
-    const j = 0.5;  // jitter magnitude
-    const r = () => (Math.random() * 2 - 1) * j;
+  // Function to generate small random perturbation
+  function jiggle(pose) {
+    const mag = 0.5;
+    const r = () => (Math.random() * 2 - 1) * mag;
     
+    // Perturb quaternion slightly
     const dq = [
-      p.q[0] + r() * 0.01,
-      p.q[1] + r() * 0.01,
-      p.q[2] + r() * 0.01,
-      p.q[3] + r() * 0.01
+      pose.q[0] + r() * 0.01,
+      pose.q[1] + r() * 0.01,
+      pose.q[2] + r() * 0.01,
+      pose.q[3] + r() * 0.01
     ];
-    const n = Math.hypot(dq[0], dq[1], dq[2], dq[3]);
-    for (let i = 0; i < 4; i++) dq[i] /= n;
+    const norm = Math.hypot(...dq);
+    for (let i = 0; i < 4; i++) dq[i] /= norm;
     
+    // Perturb translation
     const dt = {
-      x: p.t.x + r(),
-      y: p.t.y + r(),
-      z: p.t.z + r()
+      x: pose.t.x + r(),
+      y: pose.t.y + r(),
+      z: pose.t.z + r()
     };
     
     return {q: dq, t: dt};
@@ -1712,28 +2343,28 @@ function heavyRescore(Aheavy, Bheavy0, params, topCoarse, refine = false) {
   
   const rescored = [];
   
-  for (const p of topCoarse) {
-    let best = {...p};
-    let Bout = applyTransform(Bheavy0, p.q, p.t);
-    let sc = score(Aheavy, Bout);
+  for (const pose of coarsePoses) {
+    let best = {...pose};
+    let transformedB = applyTransform(atomsB0, pose.q, pose.t);
+    let scoreResult = score(atomsA, transformedB);
     
-    best.score = sc.score;
-    best.contacts = sc.contacts;
-    best.clash = sc.clash;
+    best.score = scoreResult.score;
+    best.contacts = scoreResult.contacts;
+    best.clash = scoreResult.clash;
     
-    // Optional micro-refinement
+    // Optional local refinement
     if (refine) {
-      for (let i = 0; i < 40; i++) {
-        const jt = jiggle(best);
-        const Btry = applyTransform(Bheavy0, jt.q, jt.t);
-        const sc2 = score(Aheavy, Btry);
+      for (let iter = 0; iter < 40; iter++) {
+        const perturbed = jiggle(best);
+        const perturbedB = applyTransform(atomsB0, perturbed.q, perturbed.t);
+        const newScore = score(atomsA, perturbedB);
         
-        if (sc2.score > best.score) {
-          best.q = jt.q;
-          best.t = jt.t;
-          best.score = sc2.score;
-          best.contacts = sc2.contacts;
-          best.clash = sc2.clash;
+        if (newScore.score > best.score) {
+          best.q = perturbed.q;
+          best.t = perturbed.t;
+          best.score = newScore.score;
+          best.contacts = newScore.contacts;
+          best.clash = newScore.clash;
         }
       }
     }
@@ -1745,204 +2376,177 @@ function heavyRescore(Aheavy, Bheavy0, params, topCoarse, refine = false) {
   return rescored.slice(0, parseInt(E('topN').value));
 }
 
-// ========================= VISUALIZATION =========================
-
-function buildPoseTable(top) {
-  const tbody = E('poseTableBody');
-  tbody.innerHTML = '';
+// ========================================================================================
+// VISUALIZATION FUNCTIONS
+// ========================================================================================
+/**
+ * Create buttons for each pose in the results.
+ */
+function buildPoseButtons(poses) {
+  const container = E('poseControls');
+  container.innerHTML = '';
   
-  top.forEach((p, i) => {
-    const tr = document.createElement('tr');
-    tr.style.cursor = 'pointer';
-    tr.onclick = () => showPose(i);
+  poses.forEach((pose, index) => {
+    // View button
+    const btnView = document.createElement('button');
+    btnView.className = 'btn';
+    btnView.textContent = `Pose ${index + 1} (S=${pose.score.toFixed(1)}, C=${pose.contacts | 0}, X=${pose.clash.toFixed(1)})`;
+    btnView.addEventListener('click', () => showPose(index));
+    container.appendChild(btnView);
     
-    // Compute metrics for table display
-    const Bout = applyTransform(currentB0, p.q, p.t);
-    const m = computeInterfaceMetrics(currentA, Bout, parseFloat(E('contactCut').value));
-    
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${p.score.toFixed(2)}</td>
-      <td>${m.contacts}</td>
-      <td>${m.hb}</td>
-      <td>${m.sb}</td>
-      <td>
-        <button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();showPose(${i})">View</button>
-        <button class="btn green" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();downloadPose(${i})">⬇</button>
-      </td>
-    `;
-    
-    tbody.appendChild(tr);
+    // Download button
+    const btnDownload = document.createElement('button');
+    btnDownload.className = 'btn green';
+    btnDownload.style.marginLeft = '6px';
+    btnDownload.textContent = '⬇ PDB';
+    btnDownload.addEventListener('click', () => downloadSinglePose(index));
+    container.appendChild(btnDownload);
   });
   
-  // Populate comparison dropdowns
-  updateComparisonDropdowns(top);
+  // Update comparison dropdowns
+  updateComparisonDropdowns(poses);
 }
 
-function showPose(i) {
-  if (i < 0 || i >= posesTop.length) return;
+/**
+ * Display a specific pose in the 3D viewer.
+ */
+function showPose(index) {
+  if (index < 0 || index >= posesTop.length) return;
   
-  currentPose = posesTop[i];
-  currentPoseIndex = i;
+  currentPose = posesTop[index];
+  currentPoseIndex = index;
   
-  const Bout = applyTransform(currentB0, currentPose.q, currentPose.t);
+  // Apply transformation to protein B
+  const transformedB = applyTransform(currentB0, currentPose.q, currentPose.t);
   
-  // Clear and rebuild viewer
+  // Clear viewer and add models
   viewer.clear();
-  
-  // Add protein models
   viewer.addModel(formatPDB(currentA), 'pdb');
-  viewer.addModel(formatPDB(Bout, 1), 'pdb');
+  viewer.addModel(formatPDB(transformedB, 1), 'pdb');
   
-  // Apply styling
-  applyCurrentStyle();
+  // Determine if cartoon rendering is viable (needs backbone and multiple residues)
+  const resCountA = new Set(currentA.map(a => a.resi)).size;
+  const resCountB = new Set(transformedB.map(a => a.resi)).size;
+  const useCartoon = resCountA >= 8 && resCountB >= 8;
+  
+  if (useCartoon) {
+    viewer.setStyle({model: 0}, {cartoon: {color: '#60a5fa'}});
+    viewer.setStyle({model: 1}, {cartoon: {color: '#f97316'}});
+  } else {
+    // Fall back to stick representation for small structures
+    viewer.setStyle({model: 0}, {stick: {radius: 0.25}});
+    viewer.setStyle({model: 1}, {stick: {radius: 0.25, color: '#f97316'}});
+  }
   
   viewer.zoomTo();
   
-  // Compute metrics
-  const cut = parseFloat(E('contactCut').value);
-  const m = computeInterfaceMetrics(currentA, Bout, cut);
+  // Compute interface metrics
+  const cutoff = parseFloat(E('contactCut').value);
+  const metrics = computeInterfaceMetrics(currentA, transformedB, cutoff);
   
-  currentContacts = m.contactsPairs;
-  currentHB = m.hbPairs;
-  currentSB = m.sbPairs;
-  currentHydrophobic = m.hydrophobicPairs;
-  residueInteractions = m.residueInteractions;
+  currentContacts = metrics.contactsPairs;
+  currentHB = metrics.hbPairs;
+  currentSB = metrics.sbPairs;
+  currentHydro = metrics.hydroPairs || [];
   
   refreshOverlays();
   
-  // Update metrics display
+  // Calculate energies
   const kElec = parseFloat(E('kElec').value) || 0.5;
-  const elecCut = parseFloat(E('elecCut').value) || 12;
-  const Eelec = coulombResidueEnergy(currentA, Bout, kElec, elecCut);
-  const BSA = m.contacts * 10.0;
-  const enthalpyProxy = m.contacts - m.clash + (m.hb * 0.5) + (m.sb * 1.0) - Eelec;
+  const elecCutoff = parseFloat(E('elecCut').value) || 12;
+  const electrostaticEnergy = coulombEnergy(currentA, transformedB, kElec, elecCutoff);
   
+  const BSA = metrics.contacts * 10.0;  // Approximate buried surface area
+  
+  // Calculate binding enthalpy
+  const enthalpy = calculateEnthalpy(metrics, electrostaticEnergy);
+  
+  // Update score display
   E('scoreBox').innerHTML = `
-    <b>Pose ${i + 1}</b><br>
+    <b>Pose ${index + 1}</b><br>
     Score: ${currentPose.score.toFixed(2)} | 
-    Contacts: ${m.contacts} | 
-    Clash: ${m.clash.toFixed(2)} | 
-    H-bonds: ${m.hb} | 
-    Salt Bridges: ${m.sb} | 
-    Hydrophobic: ${m.hydrophobics}<br>
+    Contacts: ${metrics.contacts} | 
+    Clash: ${metrics.clash.toFixed(2)} | 
+    H-bonds: ${metrics.hb} | 
+    Salt Bridges: ${metrics.sb} | 
+    Hydrophobic: ${metrics.hydrophobics}<br>
     BSA ≈ ${BSA.toFixed(0)} Å² | 
-    Electrostatics ≈ ${Eelec.toFixed(2)} | 
-    Pseudo-ΔH ≈ ${enthalpyProxy.toFixed(2)}
+    Electrostatics: ${electrostaticEnergy.toFixed(2)} kcal/mol | 
+    <b>ΔH ≈ ${enthalpy.toFixed(2)} kcal/mol</b>
   `;
   
-  // Update quality metrics
-  updateQualityMetrics(m, BSA);
-  
-  // Update residue interaction table
-  populateResidueTable(residueInteractions);
+  // Update metrics panel
+  updateMetricsDisplay();
   
   // Update energy decomposition
-  updateEnergyDecomposition(m, Eelec);
-  
-  // Highlight row in table
-  const rows = E('poseTableBody').querySelectorAll('tr');
-  rows.forEach((row, idx) => {
-    row.style.background = idx === i ? '#1a2332' : '';
-  });
+  updateEnergyDecomposition(metrics, electrostaticEnergy, enthalpy);
   
   viewer.render();
 }
 
-function applyCurrentStyle() {
-  const mode = currentStyleMode;
-  const color = currentColorMode;
+/**
+ * Calculate binding enthalpy from interface metrics.
+ * Uses empirically-derived weights for different interaction types.
+ */
+function calculateEnthalpy(metrics, electrostaticEnergy) {
+  // Energy weights (kcal/mol per interaction)
+  const weights = {
+    contact: -0.5,      // Favorable van der Waals
+    hbond: -2.5,        // Hydrogen bond
+    saltBridge: -4.0,   // Salt bridge
+    hydrophobic: -1.0,  // Hydrophobic contact
+    clash: +0.3,        // Clash penalty (unfavorable)
+    desolv: +0.2        // Desolvation penalty per contact
+  };
   
-  // Determine if cartoon is viable (needs backbone)
-  const Ares = new Set(currentA.map(a => a.resi)).size;
-  const cartoonOK = Ares >= 8;
+  const enthalpy = 
+    weights.contact * metrics.contacts +
+    weights.hbond * metrics.hb +
+    weights.saltBridge * metrics.sb +
+    weights.hydrophobic * metrics.hydrophobics +
+    weights.clash * metrics.clash +
+    electrostaticEnergy +
+    weights.desolv * metrics.contacts;
   
-  if (mode === 'cartoon' && cartoonOK) {
-    viewer.setStyle({model: 0}, {cartoon: getColorSpec(color, 'A')});
-    viewer.setStyle({model: 1}, {cartoon: getColorSpec(color, 'B')});
-  } else if (mode === 'stick') {
-    viewer.setStyle({model: 0}, {stick: {radius: 0.25, ...getColorSpec(color, 'A')}});
-    viewer.setStyle({model: 1}, {stick: {radius: 0.25, ...getColorSpec(color, 'B')}});
-  } else if (mode === 'sphere') {
-    viewer.setStyle({model: 0}, {sphere: {radius: 0.5, ...getColorSpec(color, 'A')}});
-    viewer.setStyle({model: 1}, {sphere: {radius: 0.5, ...getColorSpec(color, 'B')}});
-  } else if (mode === 'surface') {
-    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity: 0.7, ...getColorSpec(color, 'A')}, {model: 0});
-    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity: 0.7, ...getColorSpec(color, 'B')}, {model: 1});
-  } else if (mode === 'cartoon+stick') {
-    if (cartoonOK) {
-      viewer.setStyle({model: 0}, {cartoon: getColorSpec(color, 'A')});
-      viewer.setStyle({model: 1}, {cartoon: getColorSpec(color, 'B')});
-    }
-    viewer.addStyle({model: 0, resn: ['PHE', 'TRP', 'TYR', 'HIS']}, {stick: {radius: 0.3}});
-    viewer.addStyle({model: 1, resn: ['PHE', 'TRP', 'TYR', 'HIS']}, {stick: {radius: 0.3}});
-  }
+  return enthalpy;
 }
 
-function getColorSpec(mode, protein) {
-  if (mode === 'chain') {
-    return protein === 'A' ? {color: '#60a5fa'} : {color: '#f97316'};
-  } else if (mode === 'residue') {
-    return {colorscheme: 'amino'};
-  } else if (mode === 'hydrophobicity') {
-    return {colorscheme: {prop: 'resi', gradient: 'rwb'}};
-  } else if (mode === 'charge') {
-    return {colorscheme: {prop: 'partialCharge', gradient: 'roygb'}};
-  } else if (mode === 'secondary') {
-    return {colorscheme: 'ssJmol'};
-  }
-  return {color: '#60a5fa'};
-}
-
-function updateStyle() {
-  currentStyleMode = E('styleMode').value;
-  currentColorMode = E('colorMode').value;
-  if (currentPoseIndex >= 0) showPose(currentPoseIndex);
-}
-
-function updateAlpha(val) {
-  currentAlpha = parseFloat(val);
-  E('alphaValue').textContent = val;
-  // Note: 3Dmol alpha requires re-styling; simplified here
-  if (currentPoseIndex >= 0) showPose(currentPoseIndex);
-}
-
-function updateDistanceFilter(val) {
-  E('distValue').textContent = val;
-  E('contactCut').value = val;
-  refreshOverlays();
-}
-
+/**
+ * Refresh overlay lines (contacts, H-bonds, salt bridges).
+ */
 function refreshOverlays() {
   if (!currentPose) return;
   
   viewer.removeAllShapes();
   
   if (E('toggleContacts').checked) {
-    drawPairs(currentContacts, '#60a5fa');
+    drawPairLines(currentContacts, '#60a5fa');
   }
   
   if (E('toggleHB').checked) {
-    drawPairs(currentHB, '#34d399');
+    drawPairLines(currentHB, '#34d399');
   }
   
   if (E('toggleSB').checked) {
-    drawPairs(currentSB, '#f87171');
+    drawPairLines(currentSB, '#f87171');
   }
   
-  if (E('toggleHydrophobic').checked) {
-    drawPairs(currentHydrophobic, '#fbbf24');
+  if (E('toggleHydro').checked) {
+    drawPairLines(currentHydro, '#fbbf24');
   }
   
   viewer.render();
 }
 
-function drawPairs(pairs, color) {
-  // Limit display to first 400 pairs for performance
-  pairs.slice(0, 400).forEach(pr => {
+/**
+ * Draw dashed lines between atom pairs.
+ */
+function drawPairLines(pairs, color) {
+  // Limit to first 400 for performance
+  pairs.slice(0, 400).forEach(pair => {
     viewer.addLine({
-      start: {x: pr.x1, y: pr.y1, z: pr.z1},
-      end: {x: pr.x2, y: pr.y2, z: pr.z2},
+      start: {x: pair.x1, y: pair.y1, z: pair.z1},
+      end: {x: pair.x2, y: pair.y2, z: pair.z2},
       dashed: true,
       dashLength: 0.5,
       color,
@@ -1951,138 +2555,94 @@ function drawPairs(pairs, color) {
   });
 }
 
-// Viewer control functions
-function centerView() {
-  viewer.zoomTo();
-  viewer.render();
-}
-
-function resetRotation() {
-  viewer.rotate(90, 'y');
-  viewer.render();
-}
-
-function toggleSpin() {
-  spinning = !spinning;
-  if (spinning) {
-    viewer.spin(true);
-  } else {
-    viewer.spin(false);
-  }
-}
-
-function focusInterface() {
-  // Zoom to interface region (midpoint between centroids)
-  if (!currentA || !currentB0 || !currentPose) return;
+// ========================================================================================
+// INTERFACE ANALYSIS FUNCTIONS
+// ========================================================================================
+/**
+ * Compute detailed interface metrics between two protein structures.
+ * Detects contacts, H-bonds, salt bridges, and hydrophobic interactions.
+ */
+function computeInterfaceMetrics(proteinA, proteinB, contactCutoff) {
+  let contacts = 0;
+  let clash = 0;
+  let hbonds = 0;
+  let saltBridges = 0;
+  let hydrophobicContacts = 0;
   
-  const Bout = applyTransform(currentB0, currentPose.q, currentPose.t);
-  const cA = centroid(currentA);
-  const cB = centroid(Bout);
-  const mid = {
-    x: (cA.x + cB.x) / 2,
-    y: (cA.y + cB.y) / 2,
-    z: (cA.z + cB.z) / 2
-  };
-  
-  viewer.zoomTo({center: mid});
-  viewer.render();
-}
-
-// ========================= INTERFACE ANALYSIS =========================
-
-function computeInterfaceMetrics(A, B, contactCut) {
-  let contacts = 0, clash = 0, hb = 0, sb = 0, hyd = 0;
   const contactsPairs = [];
   const hbPairs = [];
   const sbPairs = [];
-  const hydrophobicPairs = [];
-  const residueInteractions = [];
+  const hydroPairs = [];
   
-  const clashFactor = parseFloat(E('clashFactor').value);
+  const clashFactor = parseFloat(E('clashFactor').value) || 0.85;
   
-  for (const b of B) {
-    for (const a of A) {
-      const d = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z);
-      const rv = (vdw[(a.elem || 'C').toUpperCase()] || 1.7) + 
-                  (vdw[(b.elem || 'C').toUpperCase()] || 1.7);
-      const clashCut = clashFactor * rv;
+  for (const atomB of proteinB) {
+    for (const atomA of proteinA) {
+      const distance = Math.hypot(
+        atomB.x - atomA.x,
+        atomB.y - atomA.y,
+        atomB.z - atomA.z
+      );
       
-      // Clash detection
-      if (d <= clashCut) {
-        const over = (clashCut - d + 1e-6) / clashCut;
-        clash += 6.0 * over * (1 / (1 + 0.5 * over));
+      // Get van der Waals radii
+      const radiusSum = (vdw[(atomA.elem || 'C').toUpperCase()] || 1.7) +
+                        (vdw[(atomB.elem || 'C').toUpperCase()] || 1.7);
+      const clashCut = clashFactor * radiusSum;
+      
+      // === Clash detection ===
+      if (distance <= clashCut) {
+        const overlap = (clashCut - distance + 1e-6) / clashCut;
+        clash += 6.0 * overlap * (1 / (1 + 0.5 * overlap));
       }
       
-      // Contact detection
-      if (d <= contactCut) {
+      // === Contact detection ===
+      if (distance <= contactCutoff) {
         contacts++;
-        contactsPairs.push({x1: a.x, y1: a.y, z1: a.z, x2: b.x, y2: b.y, z2: b.z});
-        
-        // Record residue-level interaction
-        residueInteractions.push({
-          resA: a.resn,
-          chainA: a.chain,
-          resiA: a.resi,
-          atomA: a.name,
-          resB: b.resn,
-          chainB: b.chain,
-          resiB: b.resi,
-          atomB: b.name,
-          distance: d,
-          type: 'contact'
+        contactsPairs.push({
+          x1: atomA.x, y1: atomA.y, z1: atomA.z,
+          x2: atomB.x, y2: atomB.y, z2: atomB.z
         });
       }
       
-      // Hydrogen bond detection (simplified geometric criterion)
-      const aN = a.name?.trim().startsWith('N');
-      const bO = b.name?.trim().startsWith('O');
-      const aO = a.name?.trim().startsWith('O');
-      const bN = b.name?.trim().startsWith('N');
+      // === Hydrogen bond detection (geometric criterion) ===
+      const atomAisN = atomA.name?.trim().startsWith('N');
+      const atomBisO = atomB.name?.trim().startsWith('O');
+      const atomAisO = atomA.name?.trim().startsWith('O');
+      const atomBisN = atomB.name?.trim().startsWith('N');
       
-      if ((aN && bO || aO && bN) && d <= 3.5) {
-        hb++;
-        hbPairs.push({x1: a.x, y1: a.y, z1: a.z, x2: b.x, y2: b.y, z2: b.z});
-        
-        residueInteractions.push({
-          resA: a.resn, chainA: a.chain, resiA: a.resi, atomA: a.name,
-          resB: b.resn, chainB: b.chain, resiB: b.resi, atomB: b.name,
-          distance: d,
-          type: 'hbond'
+      if ((atomAisN && atomBisO || atomAisO && atomBisN) && distance <= 3.5) {
+        hbonds++;
+        hbPairs.push({
+          x1: atomA.x, y1: atomA.y, z1: atomA.z,
+          x2: atomB.x, y2: atomB.y, z2: atomB.z
         });
       }
       
-      // Salt bridge detection
-      const acid = x => 
-        (x.resn === 'ASP' && x.name.startsWith('OD')) || 
-        (x.resn === 'GLU' && x.name.startsWith('OE'));
-      const base = x => 
-        (x.resn === 'LYS' && x.name === 'NZ') || 
-        (x.resn === 'ARG' && (x.name === 'NH1' || x.name === 'NH2' || x.name === 'NE')) || 
-        (x.resn === 'HIS' && (x.name === 'ND1' || x.name === 'NE2'));
+      // === Salt bridge detection ===
+      const isAcidic = atom => 
+        (atom.resn === 'ASP' && atom.name.startsWith('OD')) ||
+        (atom.resn === 'GLU' && atom.name.startsWith('OE'));
       
-      if ((acid(a) && base(b) || acid(b) && base(a)) && d <= 4.0) {
-        sb++;
-        sbPairs.push({x1: a.x, y1: a.y, z1: a.z, x2: b.x, y2: b.y, z2: b.z});
-        
-        residueInteractions.push({
-          resA: a.resn, chainA: a.chain, resiA: a.resi, atomA: a.name,
-          resB: b.resn, chainB: b.chain, resiB: b.resi, atomB: b.name,
-          distance: d,
-          type: 'saltbridge'
+      const isBasic = atom =>
+        (atom.resn === 'LYS' && atom.name === 'NZ') ||
+        (atom.resn === 'ARG' && (atom.name === 'NH1' || atom.name === 'NH2' || atom.name === 'NE')) ||
+        (atom.resn === 'HIS' && (atom.name === 'ND1' || atom.name === 'NE2'));
+      
+      if ((isAcidic(atomA) && isBasic(atomB) || isAcidic(atomB) && isBasic(atomA)) && distance <= 4.0) {
+        saltBridges++;
+        sbPairs.push({
+          x1: atomA.x, y1: atomA.y, z1: atomA.z,
+          x2: atomB.x, y2: atomB.y, z2: atomB.z
         });
       }
       
-      // Hydrophobic contact detection
-      if (hydrophobic.has(a.resn) && hydrophobic.has(b.resn) && 
-          (a.elem === 'C' || b.elem === 'C') && d <= 4.5) {
-        hyd++;
-        hydrophobicPairs.push({x1: a.x, y1: a.y, z1: a.z, x2: b.x, y2: b.y, z2: b.z});
-        
-        residueInteractions.push({
-          resA: a.resn, chainA: a.chain, resiA: a.resi, atomA: a.name,
-          resB: b.resn, chainB: b.chain, resiB: b.resi, atomB: b.name,
-          distance: d,
-          type: 'hydrophobic'
+      // === Hydrophobic contacts ===
+      if (hydrophobic.has(atomA.resn) && hydrophobic.has(atomB.resn) &&
+          (atomA.elem === 'C' || atomB.elem === 'C') && distance <= 4.5) {
+        hydrophobicContacts++;
+        hydroPairs.push({
+          x1: atomA.x, y1: atomA.y, z1: atomA.z,
+          x2: atomB.x, y2: atomB.y, z2: atomB.z
         });
       }
     }
@@ -2091,35 +2651,68 @@ function computeInterfaceMetrics(A, B, contactCut) {
   return {
     contacts,
     clash,
-    hb,
-    sb,
-    hydrophobics: hyd,
+    hb: hbonds,
+    sb: saltBridges,
+    hydrophobics: hydrophobicContacts,
     contactsPairs,
     hbPairs,
     sbPairs,
-    hydrophobicPairs,
-    residueInteractions
+    hydroPairs
   };
 }
 
-function residueCharges(atoms) {
-  // Compute residue-level charges and positions
-  const charges = new Map();
-  const qByResn = {ASP: -1, GLU: -1, LYS: +1, ARG: +1, HIS: +0.1};
-  const pos = new Map();
+/**
+ * Calculate residue-level electrostatic energy using Coulomb's law.
+ * Simplified model with formal charges.
+ */
+function coulombEnergy(proteinA, proteinB, k = 0.5, cutoff = 12) {
+  const chargesA = extractResidueCharges(proteinA);
+  const chargesB = extractResidueCharges(proteinB);
   
-  for (const a of atoms) {
-    const key = a.chain + ':' + a.resi;
-    if (!pos.has(key)) pos.set(key, []);
-    pos.get(key).push(a);
+  let energy = 0;
+  const cutoffSq = cutoff * cutoff;
+  
+  for (const chargeA of chargesA) {
+    for (const chargeB of chargesB) {
+      const dx = chargeA.x - chargeB.x;
+      const dy = chargeA.y - chargeB.y;
+      const dz = chargeA.z - chargeB.z;
+      const distSq = dx*dx + dy*dy + dz*dz;
+      
+      if (distSq > cutoffSq) continue;
+      
+      const dist = Math.sqrt(distSq) + 1e-3;  // Avoid division by zero
+      energy += k * (chargeA.q * chargeB.q) / dist;
+    }
   }
   
-  for (const [key, arr] of pos.entries()) {
-    const resn = arr[0].resn || 'UNK';
-    const q = qByResn[resn] || 0;
+  return energy;
+}
+
+/**
+ * Extract residue-level charges and positions.
+ */
+function extractResidueCharges(atoms) {
+  const chargeMap = new Map();
+  const residueAtoms = new Map();
+  
+  // Group atoms by residue
+  for (const atom of atoms) {
+    const key = atom.chain + ':' + atom.resi;
+    if (!residueAtoms.has(key)) {
+      residueAtoms.set(key, []);
+    }
+    residueAtoms.get(key).push(atom);
+  }
+  
+  // Assign charges and positions
+  for (const [key, atomList] of residueAtoms.entries()) {
+    const resName = atomList[0].resn || 'UNK';
+    const charge = residueCharges[resName] || 0;
     
-    if (q !== 0) {
-      let ca = arr.find(x => x.name === 'CA');
+    if (charge !== 0) {
+      // Use CA position if available, otherwise geometric center
+      let ca = atomList.find(a => a.name === 'CA');
       let x, y, z;
       
       if (ca) {
@@ -2127,433 +2720,115 @@ function residueCharges(atoms) {
         y = ca.y;
         z = ca.z;
       } else {
-        // Use geometric center if no CA
-        let sx = 0, sy = 0, sz = 0;
-        for (const a of arr) {
-          sx += a.x;
-          sy += a.y;
-          sz += a.z;
+        let sumX = 0, sumY = 0, sumZ = 0;
+        for (const a of atomList) {
+          sumX += a.x;
+          sumY += a.y;
+          sumZ += a.z;
         }
-        x = sx / arr.length;
-        y = sy / arr.length;
-        z = sz / arr.length;
+        x = sumX / atomList.length;
+        y = sumY / atomList.length;
+        z = sumZ / atomList.length;
       }
       
-      charges.set(key, {
-        x, y, z, q,
-        resn,
-        chain: arr[0].chain,
-        resi: arr[0].resi
+      chargeMap.set(key, {
+        x, y, z, q: charge,
+        resn: resName,
+        chain: atomList[0].chain,
+        resi: atomList[0].resi
       });
     }
   }
   
-  return Array.from(charges.values());
+  return Array.from(chargeMap.values());
 }
 
-function coulombResidueEnergy(A, B, k = 0.5, cut = 12) {
-  // Compute electrostatic interaction energy
-  const cA = residueCharges(A);
-  const cB = residueCharges(B);
-  let e = 0;
-  const cut2 = cut * cut;
-  
-  for (const a of cA) {
-    for (const b of cB) {
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      const dz = a.z - b.z;
-      const d2 = dx * dx + dy * dy + dz * dz;
-      
-      if (d2 > cut2) continue;
-      
-      const d = Math.sqrt(d2) + 1e-3;  // avoid division by zero
-      e += k * (a.q * b.q) / d;
-    }
-  }
-  
-  return e;
-}
-
-// ========================= RESIDUE TABLE =========================
-
-function populateResidueTable(interactions) {
-  const tbody = E('residueTableBody');
-  tbody.innerHTML = '';
-  
-  // Group and deduplicate interactions
-  const unique = new Map();
-  
-  for (const int of interactions) {
-    const key = `${int.chainA}:${int.resiA}-${int.chainB}:${int.resiB}`;
-    if (!unique.has(key) || unique.get(key).distance > int.distance) {
-      unique.set(key, int);
-    }
-  }
-  
-  const sorted = Array.from(unique.values()).sort((a, b) => a.distance - b.distance);
-  
-  sorted.slice(0, 200).forEach(int => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${int.resA}${int.resiA}</td>
-      <td>${int.chainA}</td>
-      <td>${int.resB}${int.resiB}</td>
-      <td>${int.chainB}</td>
-      <td>${int.distance.toFixed(2)}</td>
-      <td><span class="badge badge-blue">${int.type}</span></td>
-      <td>${estimateEnergyContribution(int).toFixed(2)}</td>
-      <td><button class="btn" style="padding:2px 6px;font-size:10px" onclick="highlightResidue('${int.chainA}',${int.resiA})">Focus</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function estimateEnergyContribution(interaction) {
-  // Rough energy estimate for different interaction types
-  const weights = {
-    contact: 0.5,
-    hbond: 2.0,
-    saltbridge: 3.0,
-    hydrophobic: 1.0
-  };
-  
-  const w = weights[interaction.type] || 0.5;
-  return -w / Math.max(0.1, interaction.distance);
-}
-
-function filterResidueTable() {
-  // Apply user-defined filters to residue table
-  const chain = E('filterChain').value;
-  const type = E('filterInteraction').value;
-  const minDist = parseFloat(E('filterMinDist').value);
-  const maxDist = parseFloat(E('filterMaxDist').value);
-  
-  const filtered = residueInteractions.filter(int => {
-    if (chain !== 'all' && int.chainA !== chain && int.chainB !== chain) return false;
-    if (type !== 'all' && int.type !== type) return false;
-    if (int.distance < minDist || int.distance > maxDist) return false;
-    return true;
-  });
-  
-  populateResidueTable(filtered);
-}
-
-function exportResidueTable() {
-  if (!residueInteractions.length) {
-    alert('No residue data to export');
+// ========================================================================================
+// EXPORT FUNCTIONS
+// ========================================================================================
+/**
+ * Download all top poses as a multi-model PDB file.
+ */
+function downloadAllPoses() {
+  if (!posesTop.length) {
+    alert('No poses to download. Run docking first.');
     return;
   }
   
-  const rows = ['ResidueA,ChainA,ResidueB,ChainB,Distance,Type,EnergyContrib'];
+  const lines = [];
   
-  residueInteractions.forEach(int => {
+  posesTop.forEach((pose, index) => {
+    lines.push(`MODEL     ${index + 1}`);
+    lines.push(formatPDB(currentA));
+    lines.push(formatPDB(applyTransform(currentB0, pose.q, pose.t), 1));
+    lines.push('ENDMDL');
+  });
+  
+  lines.push('END');
+  
+  downloadBlob(lines.join('\n'), 'all_poses.pdb');
+}
+
+/**
+ * Download currently displayed pose as PDB.
+ */
+function downloadCurrentPose() {
+  if (currentPoseIndex < 0) {
+    alert('No pose selected.');
+    return;
+  }
+  
+  downloadSinglePose(currentPoseIndex);
+}
+
+/**
+ * Download a specific pose by index.
+ */
+function downloadSinglePose(index) {
+  const pose = posesTop[index];
+  const transformedB = applyTransform(currentB0, pose.q, pose.t);
+  const pdbText = formatPDB(currentA) + '\n' + formatPDB(transformedB, 1);
+  downloadBlob(pdbText, `pose_${index + 1}.pdb`);
+}
+
+/**
+ * Download summary CSV with all pose data.
+ */
+function downloadCSV() {
+  if (!posesTop.length) {
+    alert('No poses to export.');
+    return;
+  }
+  
+  const rows = ['rank,score,contacts,clash,qx,qy,qz,qw,tx,ty,tz'];
+  
+  posesTop.forEach((pose, index) => {
     rows.push([
-      int.resA + int.resiA,
-      int.chainA,
-      int.resB + int.resiB,
-      int.chainB,
-      int.distance.toFixed(3),
-      int.type,
-      estimateEnergyContribution(int).toFixed(3)
+      index + 1,
+      pose.score.toFixed(4),
+      pose.contacts,
+      pose.clash.toFixed(4),
+      pose.q[0].toFixed(6),
+      pose.q[1].toFixed(6),
+      pose.q[2].toFixed(6),
+      pose.q[3].toFixed(6),
+      pose.t.x.toFixed(3),
+      pose.t.y.toFixed(3),
+      pose.t.z.toFixed(3)
     ].join(','));
   });
   
-  downloadBlob(rows.join('\n'), 'residue_interactions.csv');
+  downloadBlob(rows.join('\n'), 'poses_summary.csv');
 }
 
-function highlightResidue(chain, resi) {
-  // Highlight specific residue in viewer
-  viewer.removeAllLabels();
-  viewer.addLabel(`${chain}:${resi}`, {
-    position: {x: 0, y: 0, z: 0},  // 3Dmol will position automatically
-    backgroundColor: '#60a5fa',
-    fontColor: 'white'
-  });
-  viewer.render();
-}
-
-function highlightHotspots() {
-  // Find and highlight residues with most interactions
-  const counts = new Map();
-  
-  for (const int of residueInteractions) {
-    const keyA = `${int.chainA}:${int.resiA}`;
-    const keyB = `${int.chainB}:${int.resiB}`;
-    counts.set(keyA, (counts.get(keyA) || 0) + 1);
-    counts.set(keyB, (counts.get(keyB) || 0) + 1);
-  }
-  
-  const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
-  const hotspots = sorted.slice(0, 10);
-  
-  alert(`Top 10 hotspot residues:\n${hotspots.map(([k, v]) => `${k}: ${v} contacts`).join('\n')}`);
-}
-
-function showResidueNetwork() {
-  alert('Interaction network visualization coming soon! Would require a graph library like vis.js or D3 force layout.');
-}
-
-// ========================= ENERGY DECOMPOSITION =========================
-
-function updateEnergyDecomposition(metrics, elecEnergy) {
-  const container = E('energyComponents');
-  
-  const params = collectParams();
-  
-  const components = [
-    {label: 'Favorable Contacts', value: metrics.contacts * params.wContact, color: '#34d399'},
-    {label: 'Clash Penalty', value: -metrics.clash * params.wClash, color: '#f87171'},
-    {label: 'Hydrogen Bonds', value: metrics.hb * params.wHbond, color: '#60a5fa'},
-    {label: 'Salt Bridges', value: metrics.sb * params.wSaltBridge, color: '#a78bfa'},
-    {label: 'Hydrophobic', value: metrics.hydrophobics * params.wHydrophobic, color: '#fbbf24'},
-    {label: 'Electrostatics', value: -elecEnergy, color: '#f97316'}
-  ];
-  
-  const total = components.reduce((sum, c) => sum + c.value, 0);
-  
-  let html = '<div class="energy-bar">';
-  
-  components.forEach(comp => {
-    const fraction = Math.abs(comp.value) / Math.max(1, Math.abs(total));
-    const pct = (fraction * 100).toFixed(1);
-    const color = comp.value >= 0 ? comp.color : '#666';
-    
-    html += `<div class="energy-segment" style="flex:${fraction};background:${color}" title="${comp.label}: ${comp.value.toFixed(2)}">${pct}%</div>`;
-  });
-  
-  html += '</div>';
-  
-  html += '<ul class="small" style="margin-top:12px">';
-  components.forEach(comp => {
-    html += `<li><b>${comp.label}:</b> ${comp.value.toFixed(2)}</li>`;
-  });
-  html += `<li><b>Total Score:</b> ${total.toFixed(2)}</li>`;
-  html += '</ul>';
-  
-  container.innerHTML = html;
-}
-
-// ========================= QUALITY METRICS =========================
-
-function updateQualityMetrics(metrics, BSA) {
-  E('qualityClash').textContent = metrics.clash.toFixed(2);
-  
-  // Shape complementarity approximation (contact density)
-  const sc = Math.min(1, metrics.contacts / Math.max(1, BSA / 10));
-  E('qualityShape').textContent = sc.toFixed(3);
-  
-  E('qualityArea').textContent = BSA.toFixed(0);
-  
-  // Packing density (atoms per volume)
-  const volume = BSA * 2;  // rough estimate
-  const density = currentA.length / Math.max(1, volume);
-  E('qualityDensity').textContent = density.toFixed(3);
-  
-  // Geometric quality checks
-  const checks = E('qualityChecks');
-  checks.innerHTML = `
-    <div class="infobox small">
-      <b>✓ Interface Connectivity:</b> ${metrics.contacts} contacts form connected interface<br>
-      <b>✓ Clash Assessment:</b> ${metrics.clash < 5 ? 'Acceptable' : 'High clash detected'}<br>
-      <b>✓ Polar Contacts:</b> ${metrics.hb + metrics.sb} specific interactions<br>
-      <b>✓ Hydrophobic Core:</b> ${metrics.hydrophobics} hydrophobic contacts
-    </div>
-  `;
-}
-
-// ========================= STATISTICS =========================
-
-function updateStatisticsTable(poses) {
-  const tbody = E('statsTableBody');
-  tbody.innerHTML = '';
-  
-  const metrics = ['score', 'contacts', 'clash'];
-  
-  metrics.forEach(metric => {
-    const values = poses.map(p => p[metric] || 0);
-    const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
-    const std = Math.sqrt(variance);
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const sorted = [...values].sort((a, b) => a - b);
-    const median = sorted[Math.floor(sorted.length / 2)];
-    
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><b>${metric.charAt(0).toUpperCase() + metric.slice(1)}</b></td>
-      <td>${mean.toFixed(2)}</td>
-      <td>${std.toFixed(2)}</td>
-      <td>${min.toFixed(2)}</td>
-      <td>${max.toFixed(2)}</td>
-      <td>${median.toFixed(2)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function updateOverviewMetrics(poses) {
-  const grid = E('metricGrid');
-  
-  const best = poses[0];
-  const avgScore = poses.reduce((sum, p) => sum + p.score, 0) / poses.length;
-  const totalContacts = poses.reduce((sum, p) => sum + p.contacts, 0);
-  
-  grid.innerHTML = `
-    <div class="metric-card">
-      <div class="metric-value">${best.score.toFixed(1)}</div>
-      <div class="metric-label">Best Score</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-value">${avgScore.toFixed(1)}</div>
-      <div class="metric-label">Average Score</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-value">${poses.length}</div>
-      <div class="metric-label">Unique Poses</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-value">${Math.round(totalContacts / poses.length)}</div>
-      <div class="metric-label">Avg Contacts</div>
-    </div>
-  `;
-}
-
-function updateScoreDistribution(poses) {
-  const breakdown = E('interactionBreakdown');
-  
-  // Count interaction types across all poses
-  const types = {contact: 0, hbond: 0, saltbridge: 0, hydrophobic: 0};
-  
-  poses.forEach(p => {
-    const Bout = applyTransform(currentB0, p.q, p.t);
-    const m = computeInterfaceMetrics(currentA, Bout, parseFloat(E('contactCut').value));
-    types.contact += m.contacts;
-    types.hbond += m.hb;
-    types.saltbridge += m.sb;
-    types.hydrophobic += m.hydrophobics;
-  });
-  
-  const total = Object.values(types).reduce((a, b) => a + b, 0);
-  
-  breakdown.innerHTML = '<div class="energy-bar">' +
-    Object.entries(types).map(([type, count]) => {
-      const pct = (count / total * 100).toFixed(1);
-      const colors = {contact: '#60a5fa', hbond: '#34d399', saltbridge: '#a78bfa', hydrophobic: '#fbbf24'};
-      return `<div class="energy-segment" style="flex:${count};background:${colors[type]}">${pct}%</div>`;
-    }).join('') +
-    '</div>' +
-    '<div class="legend" style="margin-top:12px">' +
-    Object.entries(types).map(([type, count]) => {
-      const colors = {contact: '#60a5fa', hbond: '#34d399', saltbridge: '#a78bfa', hydrophobic: '#fbbf24'};
-      return `<div class="legend-item"><div class="legend-color" style="background:${colors[type]}"></div>${type}: ${count}</div>`;
-    }).join('') +
-    '</div>';
-}
-
-// ========================= POSE COMPARISON =========================
-
-function updateComparisonDropdowns(poses) {
-  const sel1 = E('comparePose1');
-  const sel2 = E('comparePose2');
-  
-  sel1.innerHTML = '';
-  sel2.innerHTML = '';
-  
-  poses.forEach((p, i) => {
-    sel1.add(new Option(`Pose ${i + 1}`, i));
-    sel2.add(new Option(`Pose ${i + 1}`, i));
-  });
-  
-  if (poses.length > 1) {
-    sel2.selectedIndex = 1;
-  }
-}
-
-function runComparison() {
-  const idx1 = parseInt(E('comparePose1').value);
-  const idx2 = parseInt(E('comparePose2').value);
-  
-  if (isNaN(idx1) || isNaN(idx2)) {
-    alert('Select two poses to compare');
+/**
+ * Download detailed JSON with interface analysis.
+ */
+function downloadJSON() {
+  if (!posesTop.length) {
+    alert('No poses to export.');
     return;
   }
   
-  const p1 = posesTop[idx1];
-  const p2 = posesTop[idx2];
-  
-  // Compute RMSD (simplified - just translation difference)
-  const rmsd = Math.hypot(
-    p1.t.x - p2.t.x,
-    p1.t.y - p2.t.y,
-    p1.t.z - p2.t.z
-  );
-  
-  const angleDiff = angleBetweenQuats(p1.q, p2.q);
-  
-  const results = E('comparisonResults');
-  results.innerHTML = `
-    <div class="infobox">
-      <h4>Comparison Results</h4>
-      <ul class="small">
-        <li><b>Score Difference:</b> ${Math.abs(p1.score - p2.score).toFixed(2)}</li>
-        <li><b>Contact Difference:</b> ${Math.abs(p1.contacts - p2.contacts)}</li>
-        <li><b>Rotation Angle:</b> ${angleDiff.toFixed(1)}°</li>
-        <li><b>Translation Distance:</b> ${rmsd.toFixed(2)} Å</li>
-      </ul>
-    </div>
-  `;
-}
-
-function runClustering() {
-  if (posesTop.length < 2) {
-    alert('Need at least 2 poses for clustering');
-    return;
-  }
-  
-  // Simple hierarchical clustering by similarity
-  const clusters = [];
-  const used = new Set();
-  
-  posesTop.forEach((p, i) => {
-    if (used.has(i)) return;
-    
-    const cluster = [i];
-    used.add(i);
-    
-    posesTop.forEach((q, j) => {
-      if (i === j || used.has(j)) return;
-      
-      const angleDiff = angleBetweenQuats(p.q, q.q);
-      const transDiff = Math.hypot(p.t.x - q.t.x, p.t.y - q.t.y, p.t.z - q.t.z);
-      
-      if (angleDiff < 30 && transDiff < 5) {
-        cluster.push(j);
-        used.add(j);
-      }
-    });
-    
-    clusters.push(cluster);
-  });
-  
-  const view = E('clusterView');
-  view.innerHTML = `
-    <div class="infobox">
-      <h4>Identified ${clusters.length} Clusters</h4>
-      ${clusters.map((c, i) => 
-        `<div><b>Cluster ${i + 1}:</b> ${c.length} poses (${c.map(idx => `#${idx + 1}`).join(', ')})</div>`
-      ).join('')}
-    </div>
-  `;
-}
-
-// ========================= TAB SWITCHING =========================
-
-function switchTab(name) {
-  ['basic', 'advanced', 'scoring'].forEach(t => {
-    E(`tab-${t}`).classList.remove('active');
-    document.querySelector(`.tab[onclick="switchTab('${t}')"]`)?.classList.remove('active');
-  });
-  
-  E(`tab-${name}`).classList.add('
+  const kElec = parseFloat(E('kElec').value) || 0.5;
+  const elecCut =
