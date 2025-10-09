@@ -5,11 +5,11 @@
 <title>Antibody–Antigen Docking • Parallel • Interface Analytics • Sequence→PDB</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Client-side protein–protein docking with worker pool, clash/contact scoring, diversity clustering, interface analytics (H-bonds, salt bridges, electrostatics, BSA proxy), and a Sequence→PDB builder." />
+<meta name="description" content="Client-side protein–protein docking with a worker pool, diversity clustering, interface analytics, rich exports, and a Sequence→PDB builder — all in one HTML file." />
 <style>
   :root{
     --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;
-    --accent:#60a5fa;--line:#1f2937;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--violet:#a78bfa;
+    --accent:#60a5fa;--line:#1f2937;--green:#34d399;--red:#f87171;--yellow:#fbbf24;
     --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
     --sans: Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
   }
@@ -42,7 +42,18 @@
   .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0}
   .muted{color:var(--muted)}
   .small{font-size:12px;color:var(--muted)}
-  #viewer,#seqViewer{width:100%;height:520px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a}
+  /* >>> Fix for stray black rectangle: keep viewer canvases inside their boxes */
+  #viewer,#seqViewer{
+    position:relative;           /* contain 3Dmol canvas */
+    width:100%;
+    height:520px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#0a0f1a;
+    overflow:hidden;             /* guard against overflow */
+  }
+  .tabsec{display:none; position:relative;}
+  .tabsec.active{display:block}
   .two{display:grid;gap:12px}
   @media(min-width:700px){.two{grid-template-columns:1fr 1fr}}
   .score{font-family:var(--mono);background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto}
@@ -54,8 +65,6 @@
   .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
   .tabbtn{padding:8px 12px;border-radius:999px;border:1px solid var(--line);cursor:pointer;background:#0b1220}
   .tabbtn.active{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0}
-  .tabsec{display:none}
-  .tabsec.active{display:block}
   .pill{padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#93c5fd}
   progress{width:260px;height:10px;border:1px solid #1f2937;border-radius:999px;background:#0b1220}
   progress::-webkit-progress-bar{background:#0b1220;border-radius:999px}
@@ -78,7 +87,7 @@
   </div>
 </header>
 
-<!-- DOCKING TAB -->
+<!-- Docking Tab -->
 <section id="dockTab" class="tabsec active">
   <div class="wrap grid">
     <div class="card">
@@ -113,7 +122,7 @@
       </div>
       <details style="margin-top:10px">
         <summary>About formats</summary>
-        <p class="muted">Protein–protein docking requires **PDB** (this page also accepts <code>.pdb.gz</code>). SMILES is not suitable for full proteins.</p>
+        <p class="muted">Protein–protein docking requires PDB. This page also accepts <code>.pdb.gz</code>. SMILES is not suitable for whole proteins.</p>
       </details>
     </div>
 
@@ -202,7 +211,7 @@
   </div>
 </section>
 
-<!-- SEQUENCE → PDB TAB -->
+<!-- Sequence → PDB -->
 <section id="seqTab" class="tabsec">
   <div class="wrap grid">
     <div class="card">
@@ -272,28 +281,51 @@ EVQLVESGGGLVQPGGSLRLSC..."></textarea>
 <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
 
 <script>
-/* ========================= Tabs ========================= */
+/* ========================= Tabs (with lazy viewer init) ========================= */
 const tabButtons = document.querySelectorAll('.tabbtn');
 tabButtons.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabButtons.forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.tabsec').forEach(s=>s.classList.remove('active'));
-    document.getElementById(btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'dockTab') document.getElementById('dockResults').classList.add('active');
-    if (btn.dataset.tab === 'seqTab') document.getElementById('dockResults').classList.remove('active');
+    const tabId = btn.dataset.tab;
+    document.getElementById(tabId).classList.add('active');
+
+    // Results panel follows docking tab
+    if (tabId === 'dockTab') document.getElementById('dockResults').classList.add('active');
+    else document.getElementById('dockResults').classList.remove('active');
+
+    // Ensure visible viewers are sized; lazily create the sequence viewer
+    if (tabId === 'seqTab') {
+      ensureSeqViewer();
+      seqViewer.resize(); seqViewer.render();
+    } else {
+      ensureMainViewer();
+      viewer.resize(); viewer.render();
+    }
   });
 });
 
-/* ========================= Viewers ========================= */
+/* ========================= 3Dmol viewers (lazy to avoid hidden-size bugs) ========================= */
 let viewer=null, seqViewer=null;
-function initViewers(){
-  viewer = $3Dmol.createViewer("viewer", {backgroundColor:"#0a0f1a"});
-  viewer.render();
-  seqViewer = $3Dmol.createViewer("seqViewer", {backgroundColor:"#0a0f1a"});
-  seqViewer.render();
+function ensureMainViewer(){
+  if (viewer) return;
+  const el = document.getElementById('viewer');
+  viewer = $3Dmol.createViewer(el, {backgroundColor:"#0a0f1a"});
+  // allow layout to settle
+  setTimeout(()=>{ viewer.resize(); viewer.render(); }, 0);
 }
-window.addEventListener('DOMContentLoaded', initViewers);
+function ensureSeqViewer(){
+  if (seqViewer) return;
+  const el = document.getElementById('seqViewer');
+  seqViewer = $3Dmol.createViewer(el, {backgroundColor:"#0a0f1a"});
+  setTimeout(()=>{ seqViewer.resize(); seqViewer.render(); }, 0);
+}
+window.addEventListener('DOMContentLoaded', ()=>{ ensureMainViewer(); });
+window.addEventListener('resize', ()=>{
+  if (document.getElementById('dockTab').classList.contains('active')) { viewer?.resize(); viewer?.render(); }
+  if (document.getElementById('seqTab').classList.contains('active'))  { seqViewer?.resize(); seqViewer?.render(); }
+});
 
 /* ========================= PDB helpers ========================= */
 function parsePDB(text) {
@@ -509,6 +541,7 @@ async function runDocking(){
   document.getElementById('poseControls').innerHTML="";
   document.getElementById('scoreBox').textContent="";
   setProgress(0); status('loading');
+  ensureMainViewer();
   try{
     await loadInputs();
 
@@ -564,12 +597,11 @@ async function runDocking(){
             merged.sort((a,b)=>b.score-a.score);
             // diversity filter
             const diverse = diverseTop(merged, dupAng, dupTrans);
-
             resolveAfterSampling(diverse, params);
           }
         }
       };
-      w.onerror = err=>{ console.error(err); w.terminate(); };
+      w.onerror = (err)=>{ console.error(err); w.terminate(); };
       w.postMessage({Apts, Bpts, params, start, end});
     }
 
@@ -577,8 +609,8 @@ async function runDocking(){
     alert(e.message||e);
     status('error');
     inProgress=false;
-  }finally{
-    // buttons reset handled in resolveAfterSampling/cancelDocking
+    const btn = document.getElementById('dockBtn'); const cancelBtn=document.getElementById('cancelBtn');
+    btn.disabled=false; cancelBtn.disabled=true; btn.textContent="▶️ Run Docking";
   }
 }
 
@@ -720,7 +752,7 @@ function showPose(i){
   const Eelec = coulombResidueEnergy(currentA, Bshow, kElec, elecCut);
   const BSA = metrics.contacts * 10.0; // proxy 10 Å²/contact
 
-  const enthalpyProxy = (metrics.contacts) - (metrics.clash) + (metrics.hb*0.5) + (metrics.sb*1.0) - (Eelec); // arbitrary weights
+  const enthalpyProxy = (metrics.contacts) - (metrics.clash) + (metrics.hb*0.5) + (metrics.sb*1.0) - (Eelec); // educational
   document.getElementById('scoreBox').textContent =
     `Pose ${i+1} — Score=${currentPose.score.toFixed(2)}  Contacts=${metrics.contacts}  Clash=${metrics.clash.toFixed(2)}  `+
     `HB=${metrics.hb}  SB=${metrics.sb}  Hydrophobics=${metrics.hydrophobics}  BSA≈${BSA.toFixed(0)} Å²  `+
@@ -880,7 +912,7 @@ function applyTransform(points, q, t){
   });
 }
 
-/* ========================= Sequence → PDB ========================= */
+/* ========================= Sequence → PDB (improved) ========================= */
 const aa3 = {'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','E':'GLU','Q':'GLN','G':'GLY','H':'HIS','I':'ILE','L':'LEU','K':'LYS','M':'MET','F':'PHE','P':'PRO','S':'SER','T':'THR','W':'TRP','Y':'TYR','V':'VAL'};
 function loadFASTA(){
   const f = document.getElementById('fastaFile').files[0];
@@ -891,22 +923,6 @@ function loadFASTA(){
   });
 }
 function cleanSequence(raw){ return (raw||"").toUpperCase().replace(/[^A-Z]/g,'').replace(/[^ARNDCEQGHILKMFPSTWYV]/g,'X'); }
-function buildFromCA(ca, chain, start, atomsMode){
-  const out=[]; const add=(x,y,z,name,resn,resi)=>out.push({x,y,z,name,elem:name.trim()==='O'?'O':name.trim()==='N'?'N':'C',resn,chain,resi});
-  for (let i=0;i<ca.length;i++){
-    const resi=start+i; const resn='ALA'; // will swap later
-    const c=ca[i], prev=ca[Math.max(0,i-1)], next=ca[Math.min(ca.length-1,i+1)];
-    const tx=next.x-prev.x, ty=next.y-prev.y, tz=next.z-prev.z; const tlen=Math.hypot(tx,ty,tz)||1; const ux=tx/tlen, uy=ty/tlen, uz=tz/tlen;
-    const nx=-uy, ny=ux, nz=0;
-    if (atomsMode==='BB') add(c.x-1.33*ux, c.y-1.33*uy, c.z-1.33*uz, " N  ", resn, resi);
-    add(c.x, c.y, c.z, " CA ", resn, resi);
-    if (atomsMode==='BB'){
-      add(c.x+1.52*ux, c.y+1.52*uy, c.z+1.52*uz, " C  ", resn, resi);
-      add(c.x+2.30*ux+0.5*nx, c.y+2.30*uy+0.5*ny, c.z+2.30*uz+0.5*nz, " O  ", resn, resi);
-    }
-  }
-  return out;
-}
 function helixCA(seq, radius, rise){
   const ca=[]; const turnDeg=100.0;
   for (let i=0;i<seq.length;i++){ const ang=i*turnDeg*Math.PI/180.0; ca.push({x:radius*Math.cos(ang),y:radius*Math.sin(ang),z:i*rise}); }
@@ -914,16 +930,33 @@ function helixCA(seq, radius, rise){
 }
 function strandCA(seq){ const ca=[]; for (let i=0;i<seq.length;i++){ const dir=(i%2===0?1:-1); ca.push({x:i*3.5,y:dir*1.2,z:0}); } return ca; }
 function coilCA(seq){ const ca=[]; let x=0,y=0,z=0; for (let i=0;i<seq.length;i++){ x+=(Math.random()*2-1)*2.5; y+=(Math.random()*2-1)*2.5; z+=3.2; ca.push({x,y,z}); } return ca; }
+function buildBackboneFromCA(ca, chain, start, atomsMode, seq){
+  const out=[]; // one residue → N, CA, C, O (approx) or only CA
+  for (let i=0;i<ca.length;i++){
+    const resi = start+i;
+    const resn = aa3[seq[i]] || 'UNK';
+    const c = ca[i], prev = ca[Math.max(0,i-1)], next = ca[Math.min(ca.length-1,i+1)];
+    const tx = next.x - prev.x, ty = next.y - prev.y, tz = next.z - prev.z;
+    const tlen = Math.hypot(tx,ty,tz)||1; const ux=tx/tlen, uy=ty/tlen, uz=tz/tlen;
+    const nx = -uy, ny = ux, nz = 0; // arbitrary normal for O
+    if (atomsMode==='BB') out.push({x:c.x-1.33*ux, y:c.y-1.33*uy, z:c.z-1.33*uz, name:" N  ", elem:"N", resn, chain, resi});
+    out.push({x:c.x, y:c.y, z:c.z, name:" CA ", elem:"C", resn, chain, resi});
+    if (atomsMode==='BB'){
+      out.push({x:c.x+1.52*ux, y:c.y+1.52*uy, z:c.z+1.52*uz, name:" C  ", elem:"C", resn, chain, resi});
+      out.push({x:c.x+2.30*ux+0.5*nx, y:c.y+2.30*uy+0.5*ny, z:c.z+2.30*uz+0.5*nz, name:" O  ", elem:"O", resn, chain, resi});
+    }
+  }
+  return out;
+}
 function seqToPDB(opts){
   const {rawSeq, chain, start, atomsMode, preset, radius, rise} = opts;
   const seq = cleanSequence(rawSeq); if (!seq) throw new Error("Enter a valid sequence.");
   let ca; if (preset==='HELIX') ca=helixCA(seq, radius, rise); else if (preset==='STRAND') ca=strandCA(seq); else ca=coilCA(seq);
-  const bb = buildFromCA(ca, chain, start, atomsMode);
-  // swap residue names to actual ones per residue
-  let idx=0; for (let i=0;i<bb.length;i++){ const step=(atomsMode==='BB'? (bb[i].name.trim()==='N'||bb[i].name.trim()==='CA'||bb[i].name.trim()==='C'||bb[i].name.trim()==='O') : bb[i].name.trim()==='CA'); if (step){ bb[i].resn = aa3[seq[idx]]||'UNK'; if (bb[i].name.trim()==='O'||bb[i].name.trim()==='N'||bb[i].name.trim()==='C'){}; if (bb[i].name.trim()==='CA') idx++; } }
+  const bb = buildBackboneFromCA(ca, chain, start, atomsMode, seq);
   return formatPDB(bb);
 }
 function seqPreview(){
+  ensureSeqViewer();
   const opts = {
     rawSeq: document.getElementById('seqInput').value,
     chain: (document.getElementById('seqChain').value||"A").charAt(0).toUpperCase(),
@@ -949,11 +982,12 @@ function seqDownload(){
     radius: parseFloat(document.getElementById('seqRadius').value)||2.3,
     rise: parseFloat(document.getElementById('seqRise').value)||1.5,
   };
-  try{ const pdb = seqToPDB(opts); const fn=document.getElementById('seqFilename').value||"sequence_model.pdb"; downloadBlob(pdb, fn); }catch(e){ alert(e.message||e); }
+  try{
+    const pdb = seqToPDB(opts);
+    const fn=document.getElementById('seqFilename').value||"sequence_model.pdb";
+    downloadBlob(pdb, fn);
+  }catch(e){ alert(e.message||e); }
 }
-
-/* ========================= Init ========================= */
-initViewers();
 </script>
 </body>
 </html>
