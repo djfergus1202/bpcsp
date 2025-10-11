@@ -220,12 +220,14 @@
       <div id="viewer" role="img" aria-label="3D viewer"></div>
       <div class="row" style="margin-top:8px;flex-wrap:wrap" id="poseControls"></div>
       <div class="row" style="margin-top:8px">
-        <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
-        <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
-        <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
-        <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
-      </div>
-      <div class="score" id="scoreBox" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:8px">
+  <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
+  <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
+  <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
+  <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
+  <!-- NEW -->
+  <label class="chip"><input type="checkbox" id="toggleRibbon" checked> Ribbon</label>
+</div>
       <div class="row" style="margin-top:8px">
         <button class="btn green" id="btnAllPDB">⬇ All Poses PDB (this complex)</button>
         <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
@@ -592,6 +594,17 @@ window.addEventListener('DOMContentLoaded', ()=>{
   loadSessionHistory();
   setTimeout(autoDemo, 300);
   updateNMRImage();
+  // overlays
+['toggleContacts','toggleHB','toggleSB','toggleHydro'].forEach(id=>E(id).addEventListener('change', refreshOverlays));
+  // NEW: ribbon toggle triggers a re-style of the current pose
+const rib = E('toggleRibbon');
+if (rib) {
+  rib.addEventListener('change', ()=>{
+    if (!combos.length) return;
+    const idx = combos[currentComboIndex]?.currentIndex ?? 0;
+    showPose(idx); // re-render with ribbon/stick choice
+  });
+}
 });
 
 /* Tabs */
@@ -997,7 +1010,6 @@ function applyTransform(points,q,t){
     return {x:ox+t.x,y:oy+t.y,z:oz+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name};
   });
 }
-
 /* Visualization / overlays */
 function updateComboSelect(){
   const sel=E('comboSelect'); sel.innerHTML='';
@@ -1029,12 +1041,32 @@ function showPose(i){
   viewer.clear();
   viewer.addModel(formatPDB(combo.Aviz),'pdb');
   viewer.addModel(formatPDB(TB,1),'pdb');
-  const rA=new Set(combo.Aviz.map(a=>a.resi)).size, rB=new Set(TB.map(a=>a.resi)).size;
-  const cartoon=rA>=8 && rB>=8;
-  if(cartoon){ viewer.setStyle({model:0},{cartoon:{color:'#60a5fa'}}); viewer.setStyle({model:1},{cartoon:{color:'#f97316'}}); }
-  else{ viewer.setStyle({model:0},{stick:{radius:.25}}); viewer.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}}); }
-  viewer.zoomTo();
+ const rA = new Set(combo.Aviz.map(a=>a.resi)).size;
+const rB = new Set(TB.map(a=>a.resi)).size;
+const wantRibbon = E('toggleRibbon')?.checked;
 
+// Do we have enough backbone atoms to draw true cartoons?
+const hasBackboneA = combo.Aviz.some(a=>a.name==='N') && combo.Aviz.some(a=>a.name==='CA') && combo.Aviz.some(a=>a.name==='C');
+const hasBackboneB = TB.some(a=>a.name==='N') && TB.some(a=>a.name==='CA') && TB.some(a=>a.name==='C');
+const canCartoon   = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
+
+viewer.setStyle({}, {}); // clear previous styles
+
+if (wantRibbon && canCartoon) {
+  // True ribbon (cartoon) with subtle arrows
+  viewer.setStyle({model:0},{cartoon:{color:'#60a5fa',arrows:true,thickness:0.5}});
+  viewer.setStyle({model:1},{cartoon:{color:'#f97316',arrows:true,thickness:0.5}});
+} else if (wantRibbon) {
+  // Fallback “trace” when only CA/backbone present
+  viewer.setStyle({model:0},{line:{linewidth:1.5}});
+  viewer.setStyle({model:1},{line:{linewidth:1.5,color:'#f97316'}});
+} else {
+  // Original sticks
+  viewer.setStyle({model:0},{stick:{radius:.25}});
+  viewer.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}});
+}
+
+viewer.zoomTo();
   const cutoff=parseFloat(E('contactCut').value);
   const metrics=computeInterfaceMetrics(combo.Aviz,TB,cutoff);
   currentContacts=metrics.contactsPairs.slice(0,800);
