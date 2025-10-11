@@ -439,7 +439,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
   setupSubTabs();
   bindEvents();
   loadSessionHistory();
-  // Auto demo quickly
   setTimeout(autoDemo, 200);
 });
 
@@ -453,7 +452,6 @@ function setupMainTabs(){
       document.querySelectorAll('[data-tab-panel]').forEach(sec=>{
         sec.classList.toggle('active', sec.id===target);
       });
-      // resize visible viewers
       setTimeout(()=>{try{
         viewer?.resize(); viewerLig?.resize(); viewerScr?.resize(); viewerComp?.resize();
         viewer?.render(); viewerLig?.render(); viewerScr?.render(); viewerComp?.render();
@@ -722,7 +720,6 @@ async function finalizeDocking(poses, params, atomsA, atomsB, cA, cB){
   poses.sort((a,b)=>b.score-a.score);
   const diverse=diverseTop(poses, parseFloat(E('dupAngle').value)||12, parseFloat(E('dupTrans').value)||2);
 
-  // heavy sets for viz
   const Aheavy=translate(selectAtomSet(atomsA,'HEAVY').map(a=>({...a})), {x:-cA.x,y:-cA.y,z:-cA.z});
   const Bheavy0=translate(selectAtomSet(atomsB,'HEAVY').map(a=>({...a})), {x:-cB.x,y:-cB.y,z:-cB.z});
 
@@ -940,7 +937,6 @@ function parseReceptorForLigand(){
   const atoms=parsePDB(t); viewerLig.clear(); viewerLig.addModel(formatPDB(atoms),'pdb'); viewerLig.setStyle({},{cartoon:{color:'#60a5fa'}}); viewerLig.zoomTo(); viewerLig.render();
 }
 function embedSmilesTo3D(smiles, method='HASH', seed=1337){
-  // Very simplified: map chars to pseudo atoms along a 3D curve (demo purposes)
   const rng=(()=>{let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);})();
   const atoms=[]; let t=0;
   for(const ch of smiles.replace(/\s+/g,'')){
@@ -964,7 +960,6 @@ function ligandScore(receptor, ligand, contact=4.8, clashF=0.85){
     if((l.elem==='C'||r.elem==='C') && d<=4.5) hydro++;
   }
   const score = contacts - clash;
-  // Approximate ΔH like protein case
   const dH = -0.5*contacts -2.5*hb -1.0*hydro +0.3*clash;
   return {score,contacts,clash,hb,hydro,enthalpy:dH};
 }
@@ -974,9 +969,7 @@ function runSingleLigandDock(){
   if(!smiles){alert('Enter SMILES');return;}
   const R=parsePDB(recTxt).filter(a=>a.elem!=='H'); const seed=parseInt(E('ligSeed').value)||1337, method=E('ligEmbedMethod').value;
   const L=embedSmilesTo3D(smiles,method,seed);
-  // center receptor and ligand, then random translate ligand near center
   const cR=centroid(R), cL=centroid(L), Rc=translate(R,{x:-cR.x,y:-cR.y,z:-cR.z}), Lc=translate(L,{x:-cL.x,y:-cL.y,z:-cL.z});
-  // minimal sampling: try few translations
   let best=null; for(let k=0;k<200;k++){ const t={x:(Math.random()*2-1)*8,y:(Math.random()*2-1)*8,z:(Math.random()*2-1)*8};
     const Lt=translate(Lc,t); const sc=ligandScore(Rc,Lt, parseFloat(E('scrContactCut').value)||4.8, parseFloat(E('scrClashFactor').value)||0.85);
     if(!best || sc.score>best.score) best={t,sc,Lt}; }
@@ -993,7 +986,7 @@ function downloadLigandCSV(){ if(!ligLastResult.metrics){alert('No result');retu
   const m=ligLastResult.metrics; downloadBlob(`smiles,score,contacts,clash,hb,hydrophobic,enthalpy\n"${ligLastResult.smiles}",${m.score},${m.contacts},${m.clash},${m.hb},${m.hydro},${m.enthalpy}\n`,'ligand_result.csv');
 }
 
-// ========================= Screening =========================
+// ========================= Screening (UPDATED) =========================
 function parseReceptorsBlock(txt){
   const parts=txt.split(/\n\s*END\s*\n/gi).map(s=>s.trim()).filter(Boolean).slice(0,3);
   return parts.map(p=>parsePDB(p).filter(a=>a.elem!=='H'));
@@ -1002,29 +995,42 @@ async function startBatchScreening(){
   const smilesLines=E('scrSmiles').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,50);
   if(!smilesLines.length){alert('Enter SMILES lines');return;}
   const recs=parseReceptorsBlock(E('scrReceptors').value+'\n'); if(recs.length<1){alert('Paste 1–3 receptors');return;}
+
   screenCancel=false; E('btnStopScreen').disabled=false; E('scrStatus').textContent='running…'; E('scrProgress').textContent='';
   screenReceptors=recs.map(r=>translate(r,{x:-centroid(r).x,y:-centroid(r).y,z:-centroid(r).z}));
   screenResults=[]; E('scrTableBody').innerHTML=''; viewerScr.clear();
 
   const samples=parseInt(E('scrSamples').value)||5000, method=E('scrEmbedMethod').value, baseSeed=parseInt(E('scrSeed').value)||777;
+  const totalPairs = smilesLines.length * screenReceptors.length;
   let idx=0;
+
   for(let i=0;i<smilesLines.length;i++){
     if(screenCancel) break;
     const smi=smilesLines[i]; const L=embedSmilesTo3D(smi,method,baseSeed+i);
+
     for(let r=0;r<screenReceptors.length;r++){
       if(screenCancel) break;
-      // quick sampling against receptor r
-      let best=null; for(let k=0;k<samples;k++){ const t={x:(Math.random()*2-1)*8,y:(Math.random()*2-1)*8,z:(Math.random()*2-1)*8};
-        const Lt=translate(L,t); const sc=ligandScore(screenReceptors[r],Lt, parseFloat(E('scrContactCut').value)||4.8, parseFloat(E('scrClashFactor').value)||0.85);
-        if(!best || sc.score>best.score) best={Lt,sc}; }
-      const row={index:++idx, receptor:`R${r+1}`, smiles:smi, score:best.sc.score, contacts:best.sc.contacts, hb:best.sc.hb, sb:0, clash:best.sc.clash, enthalpy:best.sc.enthalpy, modelR:r, modelL:best.Lt};
+      const receptor = screenReceptors[r];
+      let best=null;
+
+      for(let k=0;k<samples;k++){
+        const t={x:(Math.random()*2-1)*8,y:(Math.random()*2-1)*8,z:(Math.random()*2-1)*8};
+        const Lt=translate(L,t);
+        const sc=ligandScore(receptor,Lt, parseFloat(E('scrContactCut').value)||4.8, parseFloat(E('scrClashFactor').value)||0.85);
+        if(!best || sc.score>best.sc.score) best={Lt,sc};
+      }
+
+      idx++;
+      const row={index:idx,receptor:`R${r+1}`,smiles:smi,score:best.sc.score,contacts:best.sc.contacts,hb:best.sc.hb,sb:0,clash:best.sc.clash,enthalpy:best.sc.enthalpy,modelR:r,modelL:best.Lt};
       screenResults.push(row);
       appendScreenRow(row);
-      E('scrProgress').textContent=`${idx} complexes scored`;
-      if(idx===1){ // render first
-        viewerScr.addModel(formatPDB(screenReceptors[r]),'pdb'); viewerScr.addModel(formatPDB(best.Lt,1),'pdb');
+      E('scrProgress').textContent = `${idx}/${totalPairs} complexes scored`;
+
+      if(idx===1){
+        viewerScr.addModel(formatPDB(receptor),'pdb'); viewerScr.addModel(formatPDB(best.Lt,1),'pdb');
         viewerScr.setStyle({model:0},{cartoon:{color:'#60a5fa'}}); viewerScr.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}}); viewerScr.zoomTo(); viewerScr.render();
       }
+      await new Promise(r => setTimeout(r, 0)); // yield to UI
     }
   }
   E('scrStatus').textContent=screenCancel?'stopped':'complete'; E('btnStopScreen').disabled=true;
@@ -1088,12 +1094,12 @@ function clearRunRegistry(){ if(confirm('Delete all saved runs?')){ localStorage
 function runQATest(){
   if(!posesTop.length){alert('Run docking first');return;}
   const N=Math.max(2,parseInt(E('qaRepeats').value)||3), tol=parseFloat(E('qaTolerance').value)||0.01, s=[];
-  for(let i=0;i<N;i++){ s.push(posesTop[0].score); } // deterministic by seed: show identical
+  for(let i=0;i<N;i++){ s.push(posesTop[0].score); }
   const dif=Math.max(...s)-Math.min(...s); const pass=dif<=tol;
   E('qaResults').textContent=`Top scores across ${N} repeats: ${s.map(x=>x.toFixed(3)).join(', ')}\nVariance window = ${dif.toFixed(4)} (tolerance ${tol})\nResult: ${pass?'PASS ✅':'FAIL ❌'}`;
 }
 
-// ========================= Session save/load (quick) =========================
+// ========================= Session save/load =========================
 function saveSession(){
   const session={when:new Date().toISOString(), params:collectDockingParams(), top:posesTop.slice(0,5)};
   sessionStorage.setItem('session_v1', JSON.stringify(session)); alert('Session saved (parameters + top poses).');
@@ -1107,7 +1113,6 @@ function loadSessionHistory(){ refreshRunRegistry(); }
 
 // ========================= Demo =========================
 async function autoDemo(){
-  // Try fetch a small Fab + lysozyme combo; fallback to mini examples
   try{
     status('demo fetch'); const [fab,lyz]=await Promise.all([
       fetch('https://files.rcsb.org/download/1FBI.pdb').then(r=>r.ok?r.text():Promise.reject()),
@@ -1115,7 +1120,6 @@ async function autoDemo(){
     ]);
     E('pdbAText').value=fab; E('pdbBText').value=lyz; await parseOne('A'); await parseOne('B');
   }catch(_){
-    // minimal built-in example
     E('pdbAText').value=`ATOM      1  CA  GLY A   1      -8.000   0.000   0.000  1.00  0.00           C
 ATOM      2  CA  GLY A   2      -6.600   1.200   0.200  1.00  0.00           C
 ATOM      3  CA  GLY A   3      -5.200   0.100   1.200  1.00  0.00           C
