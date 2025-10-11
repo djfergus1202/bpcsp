@@ -991,35 +991,85 @@ function parseReceptorsBlock(txt){
   const parts=txt.split(/\n\s*END\s*\n/gi).map(s=>s.trim()).filter(Boolean).slice(0,3);
   return parts.map(p=>parsePDB(p).filter(a=>a.elem!=='H'));
 }
-async function startBatchScreening(){
-  const smilesLines=E('scrSmiles').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,50);
-  if(!smilesLines.length){alert('Enter SMILES lines');return;}
-  const recs=parseReceptorsBlock(E('scrReceptors').value+'\n'); if(recs.length<1){alert('Paste 1–3 receptors');return;}
+  async function startBatchScreening() {
+  const smilesLines = E('scrSmiles').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean).slice(0, 50);
+  if (!smilesLines.length) { alert('Enter SMILES lines'); return; }
 
-  screenCancel=false; E('btnStopScreen').disabled=false; E('scrStatus').textContent='running…'; E('scrProgress').textContent='';
-  screenReceptors=recs.map(r=>translate(r,{x:-centroid(r).x,y:-centroid(r).y,z:-centroid(r).z}));
-  screenResults=[]; E('scrTableBody').innerHTML=''; viewerScr.clear();
+  const recs = parseReceptorsBlock(E('scrReceptors').value + '\n');
+  if (recs.length < 1) { alert('Paste 1–3 receptors'); return; }
 
-  const samples=parseInt(E('scrSamples').value)||5000, method=E('scrEmbedMethod').value, baseSeed=parseInt(E('scrSeed').value)||777;
+  screenCancel = false;
+  E('btnStopScreen').disabled = false;
+  E('scrStatus').textContent = 'running…';
+  E('scrProgress').textContent = '';
+
+  screenReceptors = recs.map(r => translate(r, { x: -centroid(r).x, y: -centroid(r).y, z: -centroid(r).z }));
+  screenResults = [];
+  E('scrTableBody').innerHTML = '';
+  viewerScr.clear();
+
+  const samples = parseInt(E('scrSamples').value) || 5000;
+  const method = E('scrEmbedMethod').value;
+  const baseSeed = parseInt(E('scrSeed').value) || 777;
   const totalPairs = smilesLines.length * screenReceptors.length;
-  let idx=0;
+  let idx = 0;
 
-  for(let i=0;i<smilesLines.length;i++){
-    if(screenCancel) break;
-    const smi=smilesLines[i]; const L=embedSmilesTo3D(smi,method,baseSeed+i);
+  for (let i = 0; i < smilesLines.length; i++) {
+    const smi = smilesLines[i];
+    const L = embedSmilesTo3D(smi, method, baseSeed + i);
+    if (screenCancel) break;
 
-    for(let r=0;r<screenReceptors.length;r++){
-      if(screenCancel) break;
+    for (let r = 0; r < screenReceptors.length; r++) {
+      if (screenCancel) break;
       const receptor = screenReceptors[r];
-      let best=null;
+      let best = null;
 
-      for(let k=0;k<samples;k++){
-        const t={x:(Math.random()*2-1)*8,y:(Math.random()*2-1)*8,z:(Math.random()*2-1)*8};
-        const Lt=translate(L,t);
-        const sc=ligandScore(receptor,Lt, parseFloat(E('scrContactCut').value)||4.8, parseFloat(E('scrClashFactor').value)||0.85);
-        if(!best || sc.score>best.sc.score) best={Lt,sc};
+      for (let k = 0; k < samples; k++) {
+        const t = { x: (Math.random() * 2 - 1) * 8, y: (Math.random() * 2 - 1) * 8, z: (Math.random() * 2 - 1) * 8 };
+        const Lt = translate(L, t);
+        const sc = ligandScore(receptor, Lt,
+          parseFloat(E('scrContactCut').value) || 4.8,
+          parseFloat(E('scrClashFactor').value) || 0.85
+        );
+        if (!best || sc.score > best.sc.score) best = { Lt, sc };
       }
 
+      idx++;
+      const row = {
+        index: idx,
+        receptor: `R${r + 1}`,
+        smiles: smi,
+        score: best.sc.score,
+        contacts: best.sc.contacts,
+        hb: best.sc.hb,
+        sb: 0,
+        clash: best.sc.clash,
+        enthalpy: best.sc.enthalpy,
+        modelR: r,
+        modelL: best.Lt
+      };
+      screenResults.push(row);
+      appendScreenRow(row);
+
+      E('scrProgress').textContent = `${idx}/${totalPairs} complexes scored`;
+
+      if (idx === 1) {
+        viewerScr.addModel(formatPDB(receptor), 'pdb');
+        viewerScr.addModel(formatPDB(best.Lt, 1), 'pdb');
+        viewerScr.setStyle({ model: 0 }, { cartoon: { color: '#60a5fa' } });
+        viewerScr.setStyle({ model: 1 }, { stick: { radius: 0.25, color: '#f97316' } });
+        viewerScr.zoomTo();
+        viewerScr.render();
+      }
+
+      await new Promise(r => setTimeout(r)); // yield to UI
+    }
+  }
+
+  E('scrStatus').textContent = screenCancel ? 'stopped' : 'complete';
+  E('btnStopScreen').disabled = true;
+  updateScreeningMetrics();
+}
       idx++;
       const row={index:idx,receptor:`R${r+1}`,smiles:smi,score:best.sc.score,contacts:best.sc.contacts,hb:best.sc.hb,sb:0,clash:best.sc.clash,enthalpy:best.sc.enthalpy,modelR:r,modelL:best.Lt};
       screenResults.push(row);
@@ -1153,3 +1203,4 @@ END`;
 </script>
 </body>
 </html>
+
