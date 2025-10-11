@@ -20,7 +20,6 @@
   h1{margin:0 0 8px;font-size:30px;font-weight:700}
   h2{margin:0 0 10px;font-size:22px;font-weight:600}
   h3{margin:14px 0 6px;font-size:17px;font-weight:600}
-  h4{margin:10px 0 6px;font-size:15px;font-weight:600}
   p.lead{color:var(--muted);margin:6px 0 0;font-size:14px}
   section{padding:22px 16px;border-top:1px solid var(--line);background:var(--panel)}
   .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
@@ -60,14 +59,13 @@
   .table{width:100%;border-collapse:collapse;font-size:13px;background:#0a0f1a}
   .table th{background:#152034;padding:8px;text-align:left;border-bottom:2px solid var(--line);position:sticky;top:0;z-index:1}
   .table td{padding:6px 8px;border-bottom:1px solid #112033}
-  .table tr:hover{background:#0f1829;cursor:pointer}
+  .table tr:hover{background:#0f1829}
   .table-container{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
   #viewer,#viewerLig,#viewerScr,#viewerComp{position:relative;width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
   .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
   .metric-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
   .metric-value{font-size:20px;font-weight:700;color:var(--accent)}
   .metric-label{font-size:12px;color:var(--muted)}
-  .small{font-size:12px;color:#9ca3af}
   footer{padding:18px 16px;color:var(--muted);text-align:center;font-size:13px}
 </style>
 </head>
@@ -77,7 +75,7 @@
   <div class="wrap">
     <h1>🧬 Comprehensive Molecular Docking Suite</h1>
     <p class="lead">
-      Antibody–antigen docking • Single-ligand docking • Enhanced batch screening (≤50 SMILES × ≤3 receptors) •
+      Antibody–antigen docking • Single-ligand docking • Batch screening (≤50 SMILES × ≤3 receptors) •
       ΔH estimation • QA reproducibility • Run registry • All in your browser
     </p>
     <div class="tabs">
@@ -103,7 +101,7 @@
   <div class="wrap grid two">
     <div class="card">
       <h2>1️⃣ Load Proteins</h2>
-      <div class="row small">Upload PDBs or paste text. Parse, then pick chains.</div>
+      <div class="row small" style="color:#9ca3af">Upload PDBs or paste text. Parse, then pick chains.</div>
       <div class="row">
         <div style="flex:1;min-width:300px">
           <h3>Protein A (Antibody) <span class="pill" id="badgeA">0 atoms</span></h3>
@@ -127,7 +125,7 @@
         </div>
       </div>
       <details style="margin-top:10px"><summary><b>Input notes</b></summary>
-        <div class="small" style="padding-top:6px">
+        <div class="small" style="color:#9ca3af;padding-top:6px">
           <b>Formats:</b> PDB text, .pdb.gz • <b>Fetch:</b> RCSB via PDB ID • <b>Cartoon:</b> needs backbone atoms (N/CA/C/O)
         </div>
       </details>
@@ -211,7 +209,7 @@
   <div class="wrap grid two">
     <div class="card">
       <h2>🧪 Single Ligand Docking</h2>
-      <div class="small">SMILES→3D uses simplified embedding for demo; use RDKit/OpenBabel for production.</div>
+      <div class="small" style="color:#9ca3af">SMILES→3D uses simplified embedding for demo; use RDKit/OpenBabel for production.</div>
       <div class="row">
         <div style="flex:1;min-width:300px">
           <h3>Receptor PDB</h3>
@@ -243,91 +241,57 @@
   </div>
 </section>
 
-<!-- ====================== BATCH SCREENING (ENHANCED) ====================== -->
+<!-- ====================== BATCH SCREENING ====================== -->
 <section id="screenTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
-      <h2>📚 Enhanced Batch Screening (≤50 SMILES × ≤3 Receptors)</h2>
+      <h2>📚 Batch Screening (≤50 SMILES × ≤3 Receptors)</h2>
       <div class="grid three">
         <div>
-          <h3>Small Molecule Library (SMILES)</h3>
-          <textarea id="scrSmiles" placeholder="One SMILES per line (max 50)
-Examples:
-CC(=O)Oc1ccccc1C(=O)O
-CCO
-c1ccccc1
-CC(C)NCC(O)c1ccc(O)c(O)c1"></textarea>
-          <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="loadExampleSMILES()">Load 50 Examples</button>
-            <button class="btn purple" onclick="loadDruglikeSMILES()">FDA Drugs (20)</button>
-          </div>
-          <div class="small">SMILES = Simplified Molecular Input Line Entry System for small molecules</div>
+          <h3>SMILES Library</h3>
+          <textarea id="scrSmiles" placeholder="One SMILES per line (max 50)"></textarea>
         </div>
         <div>
-          <h3>Receptor Proteins (PDB format)</h3>
-          <textarea id="scrReceptors" placeholder="Paste 1-3 PDBs separated by a line with: END
-
-ATOM      1  CA  ALA A   1       0.000   0.000   0.000
-ATOM      2  CA  ALA A   2       3.800   0.000   0.000
-...
-END
-ATOM      1  CA  GLY B   1       0.000   0.000   0.000
-..."></textarea>
-          <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="loadExampleReceptors()">Load Example Receptors</button>
-            <button class="btn orange" onclick="convertSequenceToPDB()">Convert Sequence→PDB</button>
-          </div>
-          <div class="small">Delimiter must be exactly "END" on its own line.</div>
+          <h3>Receptors (PDBs)</h3>
+          <textarea id="scrReceptors" placeholder="Paste 2–3 PDBs separated by a line with only: END"></textarea>
+          <div class="small" style="color:#9ca3af">Delimiter must be exactly “END” on its own line.</div>
         </div>
         <div>
           <h3>Parameters</h3>
-          <div class="row"><label>Samples/Ligand</label><input type="number" id="scrSamples" value="1000" min="100" max="10000" step="100" /></div>
+          <div class="row"><label>Samples/Ligand</label><input type="number" id="scrSamples" value="5000" min="1000" step="500" /></div>
           <div class="row"><label>Contact (Å)</label><input type="number" id="scrContactCut" value="4.8" step="0.1" /></div>
           <div class="row"><label>Clash Factor</label><input type="number" id="scrClashFactor" value="0.85" step="0.05" /></div>
           <div class="row"><label>Seed</label><input type="number" id="scrSeed" value="777" /></div>
-          <div class="row"><label>3D Method</label><select id="scrEmbedMethod">
-            <option value="RDKIT">RDKit-like</option>
-            <option value="UFF">UFF-like</option>
-            <option value="FAST">Fast Heuristic</option>
-          </select></div>
-          <div class="row"><label>Parallel Workers</label><input type="number" id="scrWorkers" value="4" min="1" max="8" /></div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn primary" id="btnStartScreen">▶️ Start Screening</button>
-            <button class="btn red" id="btnStopScreen" disabled>✖ Stop</button>
-          </div>
-          <div class="infobox small">Optimized parallel processing for up to 50 compounds</div>
+          <div class="row"><label>3D Method</label><select id="scrEmbedMethod"><option value="HASH">HashCloud</option><option value="HELIX">RingHelix</option></select></div>
+          <div class="row" style="margin-top:10px"><button class="btn primary" id="btnStartScreen">▶️ Start Screening</button><button class="btn red" id="btnStopScreen" disabled>✖ Stop</button></div>
+          <div class="infobox small">Executes SMILES×Receptor sequentially; progress after each dock.</div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Screening Progress & Results</h2>
+      <h2>Results</h2>
       <div class="row" style="margin-bottom:8px">
-        <progress id="scrProgress" value="0" max="1" style="width:100%"></progress>
-        <span class="pill" id="scrStatus">idle</span>
-        <span class="small" id="scrProgressText"></span>
-      </div>
-      <div class="row" style="margin-bottom:8px">
-        <button class="btn green" id="btnScrCSV">⬇ Results CSV</button>
+        <button class="btn green" id="btnScrCSV">⬇ Full Results CSV</button>
         <button class="btn" id="btnScrJSON">⬇ JSON Export</button>
-        <button class="btn purple" id="btnScrTop10">📊 Top 10</button>
-        <button class="btn orange" onclick="sortResults('score')">Sort by Score</button>
-        <button class="btn orange" onclick="sortResults('enthalpy')">Sort by ΔH</button>
+        <button class="btn purple" id="btnScrTop10">📊 Show Top 10</button>
+        <span class="pill" id="scrStatus">idle</span>
+        <span class="small" id="scrProgress" style="color:#9ca3af"></span>
       </div>
-      <div class="table-container">
+      <div class="table-container" style="max-height:460px">
         <table class="table" id="scrTable">
           <thead><tr>
-            <th>#</th><th>Receptor</th><th>SMILES</th><th>Score</th><th>Contacts</th><th>H-bonds</th><th>Clash</th><th>ΔH (kcal/mol)</th><th>Time (ms)</th>
+            <th>#</th><th>Receptor</th><th>SMILES</th><th>Score</th><th>Contacts</th><th>H-bonds</th><th>SaltBr</th><th>Clash</th><th>ΔH (kcal/mol)</th>
           </tr></thead>
           <tbody id="scrTableBody"></tbody>
         </table>
       </div>
       <div id="viewerScr" style="height:420px;margin-top:12px"></div>
-      <div class="small" style="text-align:center;margin-top:4px">Click a row to visualize the docked pose.</div>
+      <div class="small" style="text-align:center;color:#9ca3af;margin-top:4px">Click a row to visualize that docked pose.</div>
     </div>
 
     <div class="card">
-      <h2>Enthalpy Distribution & Statistics</h2>
+      <h2>Enthalpy Distribution</h2>
       <div class="metric-grid" id="screenMetrics"></div>
       <div class="score" id="enthalpyBreakdown" style="margin-top:8px"></div>
       <div class="infobox small"><b>Interpretation:</b> more negative ΔH ⇒ stronger binding (approximate; entropy not included).</div>
@@ -419,33 +383,17 @@ ATOM      1  CA  GLY B   1       0.000   0.000   0.000
 <section id="aboutTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
-      <h2>About This Tool</h2>
-      <p>This educational platform demonstrates in-browser molecular docking with parallel sampling, simplified scoring, and interactive visualization. All computations run locally; nothing is uploaded to servers.</p>
-      
-      <h3>What are SMILES?</h3>
-      <p>SMILES (Simplified Molecular Input Line Entry System) are text representations of chemical structures for small molecules:</p>
-      <ul>
-        <li><code>CCO</code> = Ethanol</li>
-        <li><code>CC(=O)O</code> = Acetic acid</li>
-        <li><code>CC(=O)Oc1ccccc1C(=O)O</code> = Aspirin</li>
-        <li><code>CN1C=NC2=C1C(=O)N(C(=O)N2C)C</code> = Caffeine</li>
-      </ul>
-      
+      <h2>About</h2>
+      <p>This educational platform demonstrates in-browser docking with parallel sampling, simplified scoring, and interactive visualization. All computations run locally; nothing is uploaded.</p>
       <h3>Important Disclaimers</h3>
       <div class="errorbox">
         <p><b>We provide no warranties and we disclaim any loss in any way.</b></p>
-        <p><b>⚠️ SMILES are for small molecules only!</b> Protein sequences (like MSQTGSHPGR...) are NOT SMILES and cannot be docked as ligands.</p>
         <p>Scoring/embedding are simplified approximations; entropy, solvation, polarization, and induced fit are not fully modeled. Validate results independently with professional tools and experiments.</p>
       </div>
-      
       <h3>Recommended Workflow</h3>
       <div class="infobox small">Use this tool for hypothesis generation → export top poses → refine with AutoDock/HADDOCK/Rosetta → MD simulations → MM-PBSA/FEP → experimental validation (SPR/ITC).</div>
-      
-      <h3>Performance</h3>
-      <div class="infobox small">Enhanced batch screening uses parallel workers to process 50 compounds efficiently. Each compound takes ~100-500ms depending on parameters.</div>
-      
       <h3>Credits</h3>
-      <div class="small">3Dmol.js (Rego & Koes) • Pako (zlib) • RCSB PDB</div>
+      <div class="small" style="color:#9ca3af">3Dmol.js (Rego & Koes) • Pako (zlib) • RCSB PDB</div>
     </div>
   </div>
 </section>
@@ -464,12 +412,11 @@ ATOM      1  CA  GLY B   1       0.000   0.000   0.000
 <script>
 // ========================= GLOBALS =========================
 let viewer=null, viewerLig=null, viewerScr=null, viewerComp=null;
-let inProgress=false, cancelled=false, workerPool=[], screenWorkerPool=[];
+let inProgress=false, cancelled=false, workerPool=[];
 let pdbAAllAtoms=[], pdbBAllAtoms=[], currentA=null, currentB0=null;
 let posesTop=[], currentPose=null, currentPoseIndex=-1;
 let currentContacts=[], currentHB=[], currentSB=[], currentHydro=[];
-let ligLastResult={}, screenCancel=false, screenResults=[], screenReceptors=[];
-let totalJobs=0, completedJobs=0;
+let ligLastResult={}, screenCancel=false, screenResults=[], screenReceptors=[], screenCurrentSort='score';
 const REGISTRY_KEY='docking_registry_v1';
 
 // vdW radii (Å)
@@ -629,9 +576,7 @@ function parsePDB(text){
       x:parseFloat(line.substring(30,38)), y:parseFloat(line.substring(38,46)), z:parseFloat(line.substring(46,54)),
       elem: (line.length>=78? (line.substring(76,78).trim()||line.substring(12,16).trim()[0]) : line.substring(12,16).trim()[0]).toUpperCase()
     };
-    if (!isNaN(atom.x) && !isNaN(atom.y) && !isNaN(atom.z)) {
-      atoms.push(atom);
-    }
+    atoms.push(atom);
   }
   return atoms;
 }
@@ -912,7 +857,7 @@ function calculateEnthalpy(m,elec){
 
 // ========================= Metrics / Analysis UI =========================
 function updateMetricsDisplay(){
-  const tgt=E('metricsDisplay'); if(!currentPose){ tgt.innerHTML='<div class="small">Run docking to see metrics.</div>'; return; }
+  const tgt=E('metricsDisplay'); if(!currentPose){ tgt.innerHTML='<div class="small" style="color:#9ca3af">Run docking to see metrics.</div>'; return; }
   tgt.innerHTML=`
     <div class="metric-card"><div class="metric-value">${currentPose.score.toFixed(2)}</div><div class="metric-label">Score</div></div>
     <div class="metric-card"><div class="metric-value">${currentContacts.length}</div><div class="metric-label">Contacts</div></div>
@@ -991,61 +936,17 @@ function parseReceptorForLigand(){
   const t=E('ligReceptorPDB').value.trim(); if(!t){alert('Paste receptor PDB first'); return;}
   const atoms=parsePDB(t); viewerLig.clear(); viewerLig.addModel(formatPDB(atoms),'pdb'); viewerLig.setStyle({},{cartoon:{color:'#60a5fa'}}); viewerLig.zoomTo(); viewerLig.render();
 }
-function embedSmilesTo3D(smiles, method='RDKIT', seed=1337){
+function embedSmilesTo3D(smiles, method='HASH', seed=1337){
   const rng=(()=>{let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);})();
-  const cleanSmiles = smiles.replace(/\s+/g, '').replace(/[()[\]]/g, '');
-  const elements = {'Cl':'CL','Br':'BR','Si':'SI','Se':'SE','C':'C','N':'N','O':'O','S':'S','P':'P','F':'F','I':'I'};
-  const atoms = [];
-  let i = 0;
-  while (i < cleanSmiles.length) {
-    let elem = 'C';
-    let matched = false;
-    if (i < cleanSmiles.length - 1) {
-      const twoChar = cleanSmiles.substr(i, 2);
-      if (elements[twoChar]) {
-        elem = elements[twoChar];
-        i += 2;
-        matched = true;
-      }
-    }
-    if (!matched) {
-      const oneChar = cleanSmiles[i].toUpperCase();
-      if (elements[oneChar]) {
-        elem = elements[oneChar];
-      }
-      i++;
-    }
-    if (/[0-9=#@+\-:]/.test(cleanSmiles[i-1])) continue;
-    atoms.push(elem);
+  const atoms=[]; let t=0;
+  for(const ch of smiles.replace(/\s+/g,'')){
+    const elem = /[NOFPSClBrI]/i.test(ch)? ch.replace(/[a-z]/,'').toUpperCase().slice(0,2) : 'C';
+    const r = method==='HELIX' ? 6 : 4;
+    const x = r*Math.cos(t*0.6), y = (method==='HELIX'? t*0.8 : t*0.5), z = r*Math.sin(t*0.6);
+    atoms.push({name:'C',resn:'LIG',chain:'L',resi:atoms.length+1,x,y,z,elem});
+    t += 1 + (rng()*0.3);
   }
-  const coords = [];
-  const radius = 2.0;
-  for (let j = 0; j < atoms.length; j++) {
-    let x, y, z;
-    if (method === 'RDKIT') {
-      const angle = (j * 2.39996) + rng() * 0.5;
-      const height = j * 1.5;
-      x = radius * Math.cos(angle) + (rng() - 0.5) * 0.5;
-      y = height + (rng() - 0.5) * 0.5;
-      z = radius * Math.sin(angle) + (rng() - 0.5) * 0.5;
-    } else if (method === 'UFF') {
-      x = (j % 4) * 2.0 + (rng() - 0.5);
-      y = Math.floor(j / 4) * 2.0 + (rng() - 0.5);
-      z = Math.sin(j * 0.5) * 2.0 + (rng() - 0.5);
-    } else if (method === 'HASH' || method === 'HELIX') {
-      const t = j * 0.8;
-      x = radius * Math.cos(t);
-      y = t * 0.5;
-      z = radius * Math.sin(t);
-    } else {
-      const t = j * 0.8;
-      x = radius * Math.cos(t);
-      y = t * 0.5;
-      z = radius * Math.sin(t);
-    }
-    coords.push({name:'C',resn:'LIG',chain:'L',resi:j+1,x:x,y:y,z:z,elem:atoms[j]});
-  }
-  return coords;
+  return atoms;
 }
 function ligandScore(receptor, ligand, contact=4.8, clashF=0.85){
   let contacts=0, clash=0, hb=0, sb=0, hydro=0;
@@ -1085,399 +986,83 @@ function downloadLigandCSV(){ if(!ligLastResult.metrics){alert('No result');retu
   const m=ligLastResult.metrics; downloadBlob(`smiles,score,contacts,clash,hb,hydrophobic,enthalpy\n"${ligLastResult.smiles}",${m.score},${m.contacts},${m.clash},${m.hb},${m.hydro},${m.enthalpy}\n`,'ligand_result.csv');
 }
 
-// ========================= Enhanced Batch Screening =========================
+// ========================= Screening (UPDATED) =========================
 function parseReceptorsBlock(txt){
   const parts=txt.split(/\n\s*END\s*\n/gi).map(s=>s.trim()).filter(Boolean).slice(0,3);
   return parts.map(p=>parsePDB(p).filter(a=>a.elem!=='H'));
 }
-function createScreeningWorker() {
-  const code = `
-    const vdw = {H:1.2, C:1.7, N:1.55, O:1.52, S:1.8, P:1.8, F:1.47, CL:1.75, BR:1.85, I:1.98};
-    
-    function ligandScore(receptor, ligand, contact, clashF) {
-      let contacts = 0, clash = 0, hb = 0;
-      for (const l of ligand) {
-        for (const r of receptor) {
-          const d = Math.hypot(l.x - r.x, l.y - r.y, l.z - r.z);
-          const rs = (vdw[l.elem] || 1.7) + (vdw[r.elem] || 1.7);
-          const cc = clashF * rs;
-          if (d <= cc) {
-            const ov = (cc - d + 1e-6) / cc;
-            clash += 6.0 * ov / (1 + 0.5 * ov);
-          } else if (d <= contact) {
-            contacts++;
-          }
-          const isN = x => x.elem === 'N';
-          const isO = x => x.elem === 'O';
-          if (((isN(l) && isO(r)) || (isO(l) && isN(r))) && d <= 3.5) {
-            hb++;
-          }
-        }
-      }
-      return {
-        score: contacts - clash,
-        contacts: contacts,
-        clash: clash,
-        hb: hb,
-        enthalpy: -0.5 * contacts - 2.5 * hb + 0.3 * clash
-      };
-    }
-    
-    function translate(points, t) {
-      return points.map(p => ({
-        ...p,
-        x: p.x + t.x,
-        y: p.y + t.y,
-        z: p.z + t.z
-      }));
-    }
-    
-    function centroid(pts) {
-      let x = 0, y = 0, z = 0;
-      for (const p of pts) {
-        x += p.x; y += p.y; z += p.z;
-      }
-      const n = pts.length || 1;
-      return {x: x/n, y: y/n, z: z/n};
-    }
-    
-    self.onmessage = function(e) {
-      const { receptor, ligand, samples, params, jobId } = e.data;
-      
-      const cR = centroid(receptor);
-      const cL = centroid(ligand);
-      const Rc = translate(receptor, {x: -cR.x, y: -cR.y, z: -cR.z});
-      const Lc = translate(ligand, {x: -cL.x, y: -cL.y, z: -cL.z});
-      
-      let best = null;
-      const startTime = Date.now();
-      
-      for (let k = 0; k < samples; k++) {
-        const t = {
-          x: (Math.random() * 2 - 1) * 8,
-          y: (Math.random() * 2 - 1) * 8,
-          z: (Math.random() * 2 - 1) * 8
-        };
-        const Lt = translate(Lc, t);
-        const sc = ligandScore(Rc, Lt, params.contact, params.clashF);
-        
-        if (!best || sc.score > best.score) {
-          best = {t, sc, Lt};
-        }
-      }
-      
-      const time = Date.now() - startTime;
-      
-      self.postMessage({
-        jobId: jobId,
-        result: best,
-        receptor: Rc,
-        time: time
-      });
-    };
-  `;
-  
-  return new Worker(URL.createObjectURL(new Blob([code], {type: 'application/javascript'})));
-}
+async function startBatchScreening(){
+  const smilesLines=E('scrSmiles').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,50);
+  if(!smilesLines.length){alert('Enter SMILES lines');return;}
+  const recs=parseReceptorsBlock(E('scrReceptors').value+'\n'); if(recs.length<1){alert('Paste 1–3 receptors');return;}
 
+  screenCancel=false; E('btnStopScreen').disabled=false; E('scrStatus').textContent='running…'; E('scrProgress').textContent='';
+  screenReceptors=recs.map(r=>translate(r,{x:-centroid(r).x,y:-centroid(r).y,z:-centroid(r).z}));
+  screenResults=[]; E('scrTableBody').innerHTML=''; viewerScr.clear();
 
-async function startBatchScreening() {
-  const smilesLines = E('scrSmiles').value.split(/
-?
-/).map(s => s.trim()).filter(Boolean).slice(0, 50);
-  if (!smilesLines.length) { alert('Enter SMILES lines'); return; }
-
-  const recs = parseReceptorsBlock(E('scrReceptors').value + '
-');
-  if (recs.length < 1) { alert('Paste 1–3 receptors'); return; }
-
-  screenCancel = false;
-  E('btnStopScreen').disabled = false;
-  E('scrStatus').textContent = 'running…';
-  E('scrProgress').textContent = '';
-
-  screenReceptors = recs.map(r => translate(r, { x: -centroid(r).x, y: -centroid(r).y, z: -centroid(r).z }));
-  screenResults = [];
-  E('scrTableBody').innerHTML = '';
-  viewerScr.clear();
-
-  const samples = parseInt(E('scrSamples').value) || 5000;
-  const method = E('scrEmbedMethod').value;
-  const baseSeed = parseInt(E('scrSeed').value) || 777;
+  const samples=parseInt(E('scrSamples').value)||5000, method=E('scrEmbedMethod').value, baseSeed=parseInt(E('scrSeed').value)||777;
   const totalPairs = smilesLines.length * screenReceptors.length;
-  let idx = 0;
+  let idx=0;
 
-  for (let i = 0; i < smilesLines.length; i++) {
-    const smi = smilesLines[i];
-    const L = embedSmilesTo3D(smi, method, baseSeed + i);
-    if (screenCancel) break;
+  for(let i=0;i<smilesLines.length;i++){
+    if(screenCancel) break;
+    const smi=smilesLines[i]; const L=embedSmilesTo3D(smi,method,baseSeed+i);
 
-    for (let r = 0; r < screenReceptors.length; r++) {
-      if (screenCancel) break;
+    for(let r=0;r<screenReceptors.length;r++){
+      if(screenCancel) break;
       const receptor = screenReceptors[r];
-      let best = null;
+      let best=null;
 
-      for (let k = 0; k < samples; k++) {
-        const t = { x: (Math.random() * 2 - 1) * 8, y: (Math.random() * 2 - 1) * 8, z: (Math.random() * 2 - 1) * 8 };
-        const Lt = translate(L, t);
-        const sc = ligandScore(receptor, Lt,
-          parseFloat(E('scrContactCut').value) || 4.8,
-          parseFloat(E('scrClashFactor').value) || 0.85
-        );
-        if (!best || sc.score > best.sc.score) best = { Lt, sc };
+      for(let k=0;k<samples;k++){
+        const t={x:(Math.random()*2-1)*8,y:(Math.random()*2-1)*8,z:(Math.random()*2-1)*8};
+        const Lt=translate(L,t);
+        const sc=ligandScore(receptor,Lt, parseFloat(E('scrContactCut').value)||4.8, parseFloat(E('scrClashFactor').value)||0.85);
+        if(!best || sc.score>best.sc.score) best={Lt,sc};
       }
 
       idx++;
-      const row = {
-        index: idx,
-        receptor: `R${r + 1}`,
-        smiles: smi,
-        score: best.sc.score,
-        contacts: best.sc.contacts,
-        hb: best.sc.hb,
-        sb: 0,
-        clash: best.sc.clash,
-        enthalpy: best.sc.enthalpy,
-        modelR: r,
-        modelL: best.Lt
-      };
+      const row={index:idx,receptor:`R${r+1}`,smiles:smi,score:best.sc.score,contacts:best.sc.contacts,hb:best.sc.hb,sb:0,clash:best.sc.clash,enthalpy:best.sc.enthalpy,modelR:r,modelL:best.Lt};
       screenResults.push(row);
       appendScreenRow(row);
-
       E('scrProgress').textContent = `${idx}/${totalPairs} complexes scored`;
 
-      if (idx === 1) {
-        viewerScr.addModel(formatPDB(receptor), 'pdb');
-        viewerScr.addModel(formatPDB(best.Lt, 1), 'pdb');
-        viewerScr.setStyle({ model: 0 }, { cartoon: { color: '#60a5fa' } });
-        viewerScr.setStyle({ model: 1 }, { stick: { radius: 0.25, color: '#f97316' } });
-        viewerScr.zoomTo();
-        viewerScr.render();
+      if(idx===1){
+        viewerScr.addModel(formatPDB(receptor),'pdb'); viewerScr.addModel(formatPDB(best.Lt,1),'pdb');
+        viewerScr.setStyle({model:0},{cartoon:{color:'#60a5fa'}}); viewerScr.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}}); viewerScr.zoomTo(); viewerScr.render();
       }
-
-      await new Promise(r => setTimeout(r)); // yield to UI
+      await new Promise(r => setTimeout(r, 0)); // yield to UI
     }
   }
-
-  E('scrStatus').textContent = screenCancel ? 'stopped' : 'complete';
-  E('btnStopScreen').disabled = true;
+  E('scrStatus').textContent=screenCancel?'stopped':'complete'; E('btnStopScreen').disabled=true;
   updateScreeningMetrics();
 }
-
-
-function visualizeScreeningResult(row) {
-  if (!viewerScr) return;
-  
-  viewerScr.clear();
-  viewerScr.addModel(formatPDB(row.modelReceptor), 'pdb');
-  viewerScr.addModel(formatPDB(row.modelLigand, 1), 'pdb');
-  viewerScr.setStyle({model: 0}, {cartoon: {color: '#60a5fa'}});
-  viewerScr.setStyle({model: 1}, {stick: {radius: 0.25, color: '#f97316'}});
-  viewerScr.zoomTo();
-  viewerScr.render();
-}
-
 function appendScreenRow(row){
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${row.index}</td><td>${row.receptor}</td><td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis">${row.smiles}</td><td>${row.score.toFixed(2)}</td><td>${row.contacts}</td><td>${row.hb}</td><td>${row.clash.toFixed(2)}</td><td>${row.enthalpy.toFixed(2)}</td><td>${row.time}ms</td>`;
-  tr.addEventListener('click',()=>{ visualizeScreeningResult(row); });
+  tr.innerHTML=`<td>${row.index}</td><td>${row.receptor}</td><td class="small">${row.smiles}</td><td>${row.score.toFixed(2)}</td><td>${row.contacts}</td><td>${row.hb}</td><td>${row.sb}</td><td>${row.clash.toFixed(2)}</td><td>${row.enthalpy.toFixed(2)}</td>`;
+  tr.addEventListener('click',()=>{ viewerScr.clear(); viewerScr.addModel(formatPDB(screenReceptors[row.modelR]),'pdb'); viewerScr.addModel(formatPDB(row.modelL,1),'pdb'); viewerScr.setStyle({model:0},{cartoon:{color:'#60a5fa'}}); viewerScr.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}}); viewerScr.zoomTo(); viewerScr.render(); });
   E('scrTableBody').appendChild(tr);
 }
-
-function sortResults(by) {
-  if (by === 'score') {
-    screenResults.sort((a, b) => b.score - a.score);
-  } else if (by === 'enthalpy') {
-    screenResults.sort((a, b) => a.enthalpy - b.enthalpy);
-  }
-  
-  E('scrTableBody').innerHTML = '';
-  screenResults.forEach(row => appendScreenRow(row));
-}
-
 function showTop10Screening(){
   const sorted=[...screenResults].sort((a,b)=>a.enthalpy-b.enthalpy).slice(0,10);
-  const msg=sorted.map((r,i)=>`${i+1}. ${r.receptor} | ${r.smiles.substring(0,30)}... | ΔH=${r.enthalpy.toFixed(2)} kcal/mol`).join('\n');
-  E('enthalpyBreakdown').textContent = 'Top 10 Hits (by ΔH):\n' + msg;
+  const msg=sorted.map(r=>`${r.receptor}\t${r.smiles}\tΔH=${r.enthalpy.toFixed(2)}`).join('\n');
+  E('enthalpyBreakdown').textContent = 'Top 10 by ΔH (most negative first):\n' + msg;
 }
 function downloadScreeningCSV(){
   if(!screenResults.length){alert('No results');return;}
-  const rows=['index,receptor,smiles,score,contacts,hb,clash,enthalpy,time_ms'];
-  screenResults.forEach(r=>rows.push([r.index,r.receptor,`"${r.smiles}"`,r.score.toFixed(3),r.contacts,r.hb,r.clash.toFixed(3),r.enthalpy.toFixed(3),r.time].join(',')));
+  const rows=['index,receptor,smiles,score,contacts,hb,sb,clash,enthalpy'];
+  screenResults.forEach(r=>rows.push([r.index,r.receptor,`"${r.smiles}"`,r.score.toFixed(3),r.contacts,r.hb,r.sb,r.clash.toFixed(3),r.enthalpy.toFixed(3)].join(',')));
   downloadBlob(rows.join('\n'),'screening_results.csv');
 }
-function downloadScreeningJSON(){ 
-  if(!screenResults.length){alert('No results');return;} 
-  const exportData = {
-    timestamp: new Date().toISOString(),
-    parameters: {
-      samples: E('scrSamples').value,
-      contact: E('scrContactCut').value,
-      clashFactor: E('scrClashFactor').value,
-      method: E('scrEmbedMethod').value
-    },
-    results: screenResults.map(r => ({
-      index: r.index,
-      receptor: r.receptor,
-      smiles: r.smiles,
-      score: r.score,
-      contacts: r.contacts,
-      hb: r.hb,
-      clash: r.clash,
-      enthalpy: r.enthalpy,
-      time_ms: r.time
-    }))
-  };
-  downloadBlob(JSON.stringify(exportData,null,2),'screening_results.json'); 
-}
+function downloadScreeningJSON(){ if(!screenResults.length){alert('No results');return;} downloadBlob(JSON.stringify(screenResults,null,2),'screening_results.json'); }
 function updateScreeningMetrics(){
   const tgt=E('screenMetrics'); if(!screenResults.length){tgt.innerHTML=''; return;}
-  const ent=screenResults.map(r=>r.enthalpy), scores=screenResults.map(r=>r.score);
-  const min=Math.min(...ent), max=Math.max(...ent), avg=ent.reduce((a,b)=>a+b,0)/ent.length;
-  const maxScore=Math.max(...scores);
+  const ent=screenResults.map(r=>r.enthalpy), min=Math.min(...ent), max=Math.max(...ent), avg=ent.reduce((a,b)=>a+b,0)/ent.length;
   tgt.innerHTML = `
     <div class="metric-card"><div class="metric-value">${ent.length}</div><div class="metric-label">Complexes</div></div>
-    <div class="metric-card"><div class="metric-value">${maxScore.toFixed(2)}</div><div class="metric-label">Best Score</div></div>
     <div class="metric-card"><div class="metric-value">${min.toFixed(2)}</div><div class="metric-label">Best ΔH</div></div>
     <div class="metric-card"><div class="metric-value">${avg.toFixed(2)}</div><div class="metric-label">Mean ΔH</div></div>
+    <div class="metric-card"><div class="metric-value">${max.toFixed(2)}</div><div class="metric-label">Worst ΔH</div></div>
   `;
-}
-
-// ========================= Example SMILES Loading =========================
-function loadExampleSMILES() {
-  const examples = [
-    'CC(=O)Oc1ccccc1C(=O)O', // Aspirin
-    'CN1C=NC2=C1C(=O)N(C(=O)N2C)C', // Caffeine
-    'CC12CCC3C(C1CCC2O)CCC4=CC(=O)CCC34C', // Testosterone
-    'CC(C)Cc1ccc(cc1)C(C)C(=O)O', // Ibuprofen
-    'CN1CCC[C@H]1c2cccnc2', // Nicotine
-    'CCO', // Ethanol
-    'CC(=O)O', // Acetic acid
-    'c1ccccc1', // Benzene
-    'CC(C)(C)NCC(O)c1ccc(O)c(O)c1', // Salbutamol
-    'Cc1ccc(cc1)C(=O)c2ccccc2', // Benzophenone analog
-    'CCCC(=O)OC', // Methyl butyrate
-    'c1ccc2c(c1)ccc3c2cccc3', // Anthracene
-    'CC(C)NCC(O)COc1ccc(cc1)CCOCC2CC2', // Betaxolol analog
-    'Clc1ccc(cc1)C(c2ccccc2)N3CCNCC3', // Chlorpheniramine analog
-    'COc1ccc(cc1)CCNC', // Phenethylamine derivative
-    'O=C1NC(=O)SC1Cc2ccccc2', // Thiazolidinedione
-    'Fc1ccc(cc1)C(=O)CCCN2CCC(CC2)c3ccccc3', // Fluorophenyl derivative
-    'CC(C)C[C@H](NC(=O)OCc1ccccc1)C(=O)O', // Amino acid derivative
-    'COc1ccccc1OCC(O)CNC(C)C', // Propranolol analog
-    'CCN(CC)C(=O)c1ccccc1', // Diethylbenzamide
-    'c1ccc(cc1)COc2ccccc2', // Benzyl phenyl ether
-    'O=C(O)c1ccccc1O', // Salicylic acid
-    'CC(C)c1ccccc1O', // Thymol
-    'COc1cc(ccc1O)C=CC(=O)O', // Ferulic acid
-    'O=C1CCCCC1', // Cyclohexanone
-    'CCCCCCO', // 1-Hexanol
-    'CC(C)=CCCC(C)=CCO', // Geraniol
-    'CC1=CCC(CC1)C(=C)C', // Limonene
-    'COc1ccc(cc1)C=O', // Anisaldehyde
-    'CCOC(=O)C', // Ethyl acetate
-    'CC(C)(C)O', // tert-Butanol
-    'c1ccc2c(c1)oc3ccccc32', // Dibenzofuran
-    'Cc1ccc(cc1)N', // p-Toluidine
-    'O=C(C)Nc1ccccc1', // Acetanilide
-    'CCCCC(=O)O', // Valeric acid
-    'c1ccc(cc1)CCO', // Phenethyl alcohol
-    'COC(=O)c1ccccc1', // Methyl benzoate
-    'CC(C)CCO', // Isoamyl alcohol
-    'c1ccc(cc1)CC#N', // Phenylacetonitrile
-    'CCCCCCCC', // Octane
-    'O=Cc1ccccc1', // Benzaldehyde
-    'CC(=O)CC(C)C', // Methyl isobutyl ketone
-    'c1ccc(cc1)Cl', // Chlorobenzene
-    'CCOCC', // Diethyl ether
-    'CC(C)C', // Propane
-    'c1ccc(cc1)O', // Phenol
-    'CCCCO', // 1-Butanol
-    'CC(O)C', // Isopropanol
-    'CCN', // Ethylamine
-  ];
-  E('scrSmiles').value = examples.join('\n');
-}
-
-function loadDruglikeSMILES() {
-  const drugs = [
-    'CC(=O)Oc1ccccc1C(=O)O', // Aspirin
-    'CN1C=NC2=C1C(=O)N(C(=O)N2C)C', // Caffeine
-    'CC(C)Cc1ccc(cc1)C(C)C(=O)O', // Ibuprofen
-    'CN1CCC[C@H]1c2cccnc2', // Nicotine
-    'CC(C)(C)NCC(O)c1ccc(O)c(O)c1', // Salbutamol
-    'COc1ccccc1OCCNC(C)C', // Propranolol simplified
-    'Cc1c(C)c2OC(C)(COc3ccc(CC4SC(=O)NC4=O)cc3)CCc2c(C)c1O', // Troglitazone
-    'CC1(C)SC2C(NC(=O)Cc3ccccc3)C(=O)N2C1C(=O)O', // Penicillin G
-    'CN(C)CC(c1ccccc1)c2ccccc2', // Diphenhydramine simplified
-    'CC(=O)NC1C(O)OC(CO)C(O)C1O', // N-Acetylglucosamine
-    'O=C(O)Cc1ccccc1Nc2c(Cl)cccc2Cl', // Diclofenac
-    'CCc1ccccc1C(=O)O', // Phenylacetic acid derivative
-    'COc1ccc2nc(sc2c1)N(C)C', // Benzothiazole derivative
-    'O=C1NC(=O)C(c2ccccc2)N1', // Phenytoin simplified
-    'Clc1ccc(cc1)COC(Cn2ccnc2)c3ccc(Cl)cc3', // Econazole
-    'CC(C)NCC(O)COc1cccc2c1CCCC2', // Nadolol fragment
-    'O=C(CCCN1CCC(CC1)c2ccccc2)c3ccc(F)cc3', // Fluorophenyl derivative
-    'CC(=O)c1ccc(cc1)S(=O)(=O)N', // Sulfanilamide derivative
-    'COc1ccc(cc1OC)CC(=O)O', // Veratric acid
-    'CCN(CC)C(=O)c1ccc(N)cc1', // Procaine analog
-  ];
-  E('scrSmiles').value = drugs.join('\n');
-}
-
-function loadExampleReceptors() {
-  const receptor1 = `ATOM      1  CA  ALA A   1       0.000   0.000   0.000  1.00  0.00           C
-ATOM      2  CA  VAL A   2       3.800   0.000   0.000  1.00  0.00           C
-ATOM      3  CA  LEU A   3       5.700   3.300   0.000  1.00  0.00           C
-ATOM      4  CA  ILE A   4       4.500   6.500   2.000  1.00  0.00           C
-ATOM      5  CA  PHE A   5       2.000   5.000   4.500  1.00  0.00           C
-ATOM      6  CA  TRP A   6      -1.000   6.000   3.000  1.00  0.00           C
-ATOM      7  CA  TYR A   7      -3.500   3.500   1.500  1.00  0.00           C
-ATOM      8  CA  MET A   8      -2.800   0.000   1.000  1.00  0.00           C
-END`;
-  
-  const receptor2 = `ATOM      1  CA  GLY B   1       10.000   0.000   0.000  1.00  0.00           C
-ATOM      2  CA  SER B   2       13.800   0.000   0.000  1.00  0.00           C
-ATOM      3  CA  THR B   3       15.700   3.300   0.000  1.00  0.00           C
-ATOM      4  CA  ASP B   4       14.500   6.500   2.000  1.00  0.00           C
-ATOM      5  CA  GLU B   5       12.000   5.000   4.500  1.00  0.00           C
-ATOM      6  CA  LYS B   6       9.000   6.000   3.000  1.00  0.00           C
-ATOM      7  CA  ARG B   7       6.500   3.500   1.500  1.00  0.00           C
-ATOM      8  CA  HIS B   8       7.200   0.000   1.000  1.00  0.00           C
-END`;
-
-  E('scrReceptors').value = receptor1 + '\n' + receptor2;
-}
-
-function convertSequenceToPDB() {
-  const sequence = prompt('Enter protein sequence (one-letter amino acid code):');
-  if (!sequence) return;
-  
-  const aa3 = {
-    'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','E':'GLU','Q':'GLN','G':'GLY',
-    'H':'HIS','I':'ILE','L':'LEU','K':'LYS','M':'MET','F':'PHE','P':'PRO','S':'SER',
-    'T':'THR','W':'TRP','Y':'TYR','V':'VAL'
-  };
-  
-  let pdb = '';
-  let x = 0, y = 0, z = 0;
-  const clean = sequence.toUpperCase().replace(/[^ARNDCEQGHILKMFPSTWYV]/g, '');
-  
-  for (let i = 0; i < Math.min(clean.length, 100); i++) {
-    const aa = aa3[clean[i]] || 'ALA';
-    x = 3.8 * Math.cos(i * 0.6);
-    y = i * 1.5;
-    z = 3.8 * Math.sin(i * 0.6);
-    pdb += `ATOM  ${String(i+1).padStart(5)} CA   ${aa} A${String(i+1).padStart(4)}    ${x.toFixed(3).padStart(8)}${y.toFixed(3).padStart(8)}${z.toFixed(3).padStart(8)}  1.00  0.00           C\n`;
-  }
-  pdb += 'END';
-  
-  const current = E('scrReceptors').value;
-  if (current.trim()) {
-    E('scrReceptors').value = current + '\n' + pdb;
-  } else {
-    E('scrReceptors').value = pdb;
-  }
 }
 
 // ========================= QA & Registry =========================
@@ -1508,7 +1093,7 @@ function importRunRegistry(){
 function clearRunRegistry(){ if(confirm('Delete all saved runs?')){ localStorage.removeItem(REGISTRY_KEY); refreshRunRegistry(); } }
 function runQATest(){
   if(!posesTop.length){alert('Run docking first');return;}
-  const N=Math.max(2,parseInt(E('qaRepeats').value)||3), tol=parseFloat(E('qaTolerance').value)||0.01), s=[];
+  const N=Math.max(2,parseInt(E('qaRepeats').value)||3), tol=parseFloat(E('qaTolerance').value)||0.01, s=[];
   for(let i=0;i<N;i++){ s.push(posesTop[0].score); }
   const dif=Math.max(...s)-Math.min(...s); const pass=dif<=tol;
   E('qaResults').textContent=`Top scores across ${N} repeats: ${s.map(x=>x.toFixed(3)).join(', ')}\nVariance window = ${dif.toFixed(4)} (tolerance ${tol})\nResult: ${pass?'PASS ✅':'FAIL ❌'}`;
@@ -1550,10 +1135,9 @@ END`;
   runAntibodyDocking();
 }
 
-// ========================= Utilities =========================
+// ========================= Utilities used above =========================
 function resetAll(){
   cancelled=false; inProgress=false; workerPool.forEach(w=>{try{w.terminate();}catch(e){}}); workerPool=[];
-  screenWorkerPool.forEach(w=>{try{w.terminate();}catch(e){}}); screenWorkerPool=[];
   posesTop=[]; currentPose=null; currentA=null; currentB0=null; currentContacts=[]; currentHB=[]; currentSB=[]; currentHydro=[];
   viewer?.clear(); viewerLig?.clear(); viewerScr?.clear(); viewerComp?.clear(); drawPlaceholder(viewer);
   E('poseControls').innerHTML=''; E('scoreBox').innerHTML=''; updateMetricsDisplay(); status('idle'); setProgress(0);
@@ -1566,3 +1150,6 @@ END`;
   const egB=egA.replace(/ A /g,' B ').replace(/-8/g,'2').replace(/-6.600/g,'3.4').replace(/-5.200/g,'4.8');
   E(which==='A'?'pdbAText':'pdbBText').value = which==='A'?egA:egB; parseOne(which);
 }
+</script>
+</body>
+</html>
