@@ -5,10 +5,15 @@
 <title>Comprehensive Docking Suite • Student Edition • Antibody–Antigen • Ligand Screening • Enthalpy</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Student‑friendly in‑browser docking: antibody–antigen docking, ligand docking, batch virtual screening (50 SMILES × ≤3 receptors), chain pairing, clustering, consensus scoring, 3D viz, QA & registry — all local." />
+<meta name="description" content="Student-friendly in-browser docking: antibody–antigen docking, ligand docking, batch virtual screening (50 SMILES × ≤3 receptors), chain pairing, clustering, consensus scoring, 3D viz, QA & registry — all local." />
+
+<!-- External libs (loaded once) -->
+<script defer src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
+<script defer src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
+
 <style>
   :root{
-    --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--accent:#7dd3fc;--line:#1f2937; /* accent softened for students */
+    --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--accent:#7dd3fc;--line:#1f2937;
     --green:#34d399;--red:#f87171;--yellow:#fbbf24;--orange:#fb923c;--purple:#a78bfa;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial
   }
@@ -82,8 +87,8 @@
     <h1>🧬 Comprehensive Molecular Docking Suite — <span style="color:#a7f3d0">Student Edition</span></h1>
     <div class="byline">by DJF — The New Chemist</div>
     <p class="lead">
-      Antibody–antigen docking • Single‑ligand docking • Batch screening (≤50 SMILES × ≤3 receptors) •
-      Chain pairing • Diversity clustering • Consensus ranking • ΔH estimation • QA • Run registry — all in‑browser
+      Antibody–antigen docking • Single-ligand docking • Batch screening (≤50 SMILES × ≤3 receptors) •
+      Chain pairing • Diversity clustering • Consensus ranking • ΔH estimation • QA • Run registry — all in-browser
     </p>
 
     <div class="infobox" role="region" aria-label="Student guide">
@@ -91,7 +96,7 @@
       <div class="guide">
         <div class="step">1) <b>Load Proteins</b> in <span class="kbd">Antibody Docking</span>: paste PDB text or click <em>Example</em>. Then <b>Parse</b> to detect chains.</div>
         <div class="step">2) <b>Set Parameters</b>: samples control thoroughness; <em>All heavy</em> is most realistic. Press <b>Run Docking</b>.</div>
-        <div class="step">3) <b>Explore Results</b>: use the Complex picker, click pose buttons, and toggle overlays for contacts/H‑bonds/etc.</div>
+        <div class="step">3) <b>Explore Results</b>: use the Complex picker, click pose buttons, and toggle overlays for contacts/H-bonds/etc.</div>
         <div class="step">4) <b>Export</b> top poses as PDB/CSV/JSON and <b>validate with professional tools and experiments</b>.</div>
       </div>
     </div>
@@ -116,6 +121,7 @@
   </div>
 </header>
 
+<!-- ===================== ANTIBODY DOCKING ===================== -->
 <section id="dockTab" class="tabsec active" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -124,9 +130,11 @@
       <div class="row">
         <div style="flex:1;min-width:300px">
           <h3>Protein A (Antibody) <span class="pill" id="badgeA">0 atoms</span></h3>
-          <div class="row" role="group" aria-label="Protein A inputs"><input type="file" id="pdbAFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+          <div class="row" role="group" aria-label="Protein A inputs">
+            <input type="file" id="pdbAFile" accept=".pdb,.ent,.txt,.pdb.gz" />
             <button class="btn" onclick="useExample('A')">Example</button>
-            <button class="btn" onclick="fetchPDBFromRCSB('A')" title="Download by PDB ID from RCSB">Fetch PDB ID</button></div>
+            <button class="btn" onclick="fetchPDBFromRCSB('A')" title="Download by PDB ID from RCSB">Fetch PDB ID</button>
+          </div>
           <textarea id="pdbAText" placeholder="Paste PDB for Protein A" aria-label="Protein A PDB"></textarea>
           <div class="row"><label>Chains:</label><div id="chainsABox" class="chainchips"></div></div>
           <div id="chainWarnA" class="infobox small">Parse to populate chains.</div>
@@ -134,9 +142,11 @@
         </div>
         <div style="flex:1;min-width:300px">
           <h3>Protein B (Antigen) <span class="pill" id="badgeB">0 atoms</span></h3>
-          <div class="row" role="group" aria-label="Protein B inputs"><input type="file" id="pdbBFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+          <div class="row" role="group" aria-label="Protein B inputs">
+            <input type="file" id="pdbBFile" accept=".pdb,.ent,.txt,.pdb.gz" />
             <button class="btn" onclick="useExample('B')">Example</button>
-            <button class="btn" onclick="fetchPDBFromRCSB('B')" title="Download by PDB ID from RCSB">Fetch PDB ID</button></div>
+            <button class="btn" onclick="fetchPDBFromRCSB('B')" title="Download by PDB ID from RCSB">Fetch PDB ID</button>
+          </div>
           <textarea id="pdbBText" placeholder="Paste PDB for Protein B" aria-label="Protein B PDB"></textarea>
           <div class="row"><label>Chains:</label><div id="chainsBBox" class="chainchips"></div></div>
           <div id="chainWarnB" class="infobox small">Parse to populate chains.</div>
@@ -156,7 +166,10 @@
       <div class="row">
         <label>Samples</label><input type="number" id="samples" value="12000" min="1000" step="1000" title="More samples = more thorough (slower)">
         <label>Max Translation (Å)</label><input type="number" id="maxTrans" value="12" step="1">
-        <label>Atom Set</label><select id="atomMode" title="Which atoms to use for sampling/scoring"><option value="CA">Cα only</option><option value="BB">Backbone</option><option value="HEAVY" selected>All heavy</option></select>
+        <label>Atom Set</label>
+        <select id="atomMode" title="Which atoms to use for sampling/scoring">
+          <option value="CA">Cα only</option><option value="BB">Backbone</option><option value="HEAVY" selected>All heavy</option>
+        </select>
       </div>
       <h4 style="margin-top:8px">Scoring</h4>
       <div class="row">
@@ -171,15 +184,18 @@
         <label>Pairing</label>
         <select id="pairMode">
           <option value="AGG">Aggregate (all selected)</option>
-          <option value="A_EACH_B">A × each B‑chain</option>
-          <option value="CROSS">each A‑chain × each B‑chain</option>
+          <option value="A_EACH_B">A × each B-chain</option>
+          <option value="CROSS">each A-chain × each B-chain</option>
         </select>
-        <label>Top Poses</label><input type="number" id="topN" value="12" min="1" max="50" title="How many diverse top poses to keep">
-        <label>Rescore</label><select id="rescoreMode"><option value="NONE">Skip</option><option value="HEAVY">Heavy</option><option value="HEAVY_REFINE" selected>Heavy + refine</option></select>
+        <label>Top Poses</label><input type="number" id="topN" value="12" min="1" max="50">
+        <label>Rescore</label>
+        <select id="rescoreMode"><option value="NONE">Skip</option><option value="HEAVY">Heavy</option><option value="HEAVY_REFINE" selected>Heavy + refine</option></select>
         <label>Seed</label><input type="number" id="seed" value="42">
       </div>
       <div class="row">
-        <label>Diversity (°/Å)</label><input type="number" id="dupAngle" value="12" step="1" style="width:90px" title="Min angle between saved poses"><input type="number" id="dupTrans" value="2" step="0.5" style="width:90px" title="Min translation between saved poses">
+        <label>Diversity (°/Å)</label>
+        <input type="number" id="dupAngle" value="12" step="1" style="width:90px">
+        <input type="number" id="dupTrans" value="2" step="0.5" style="width:90px">
         <label>Clusters</label><input type="number" id="clustersK" value="6" min="1" max="24" style="width:90px">
       </div>
       <div class="row" style="margin-top:10px">
@@ -187,7 +203,7 @@
         <button class="btn red" id="cancelBtn" disabled>✖ Cancel</button>
         <button class="btn orange" id="resetBtn">🔄 Reset</button>
       </div>
-      <div class="infobox small"><b>Score = contacts×W<sub>c</sub> − clashes×W<sub>x</sub></b>. Clustering is pose‑diversity aware. Heavy rescoring refines ranks.</div>
+      <div class="infobox small"><b>Score = contacts×W<sub>c</sub> − clashes×W<sub>x</sub></b>. Clustering is pose-diversity aware. Heavy rescoring refines ranks.</div>
     </div>
   </div>
 
@@ -205,7 +221,7 @@
       <div class="row" style="margin-top:8px;flex-wrap:wrap" id="poseControls"></div>
       <div class="row" style="margin-top:8px">
         <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
-        <label class="chip"><input type="checkbox" id="toggleHB" checked> H‑bonds</label>
+        <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
         <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
         <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
       </div>
@@ -216,7 +232,7 @@
         <button class="btn" id="btnCSV">⬇ CSV</button>
         <button class="btn" id="btnJSON">⬇ JSON</button>
         <button class="btn purple" id="btnPNG">📸 PNG</button>
-        <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi‑MODEL PDB)</button>
+        <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi-MODEL PDB)</button>
       </div>
     </div>
 
@@ -225,20 +241,26 @@
       <div class="metric-grid" id="metricsDisplay"></div>
       <h4 style="margin-top:10px">Energy Parameters</h4>
       <div class="row">
-        <label>k<sub>elec</sub></label><input type="number" id="kElec" value="0.5" step="0.1" title="Coulombic scaling (unitless)">
+        <label>k<sub>elec</sub></label><input type="number" id="kElec" value="0.5" step="0.1">
         <label>Elec Cutoff (Å)</label><input type="number" id="elecCut" value="12" step="0.5">
         <label>Desolv W</label><input type="number" id="wDesolv" value="0.2" step="0.1">
       </div>
       <div class="infobox small">
-        <b>ΔH (kcal/mol) ≈</b> −0.5×contacts −2.5×H‑bonds −4.0×salt‑bridges −1.0×hydrophobic +0.3×clash + electrostatics +0.2×contacts (desolv).
+        <b>ΔH (kcal/mol) ≈</b> −0.5×contacts −2.5×H-bonds −4.0×salt-bridges −1.0×hydrophobic +0.3×clash + electrostatics +0.2×contacts (desolv).
       </div>
       <div class="infobox small"><b>Reproducibility:</b> Outputs include parameters & seed; registry stores signature.</div>
       <h3>Complex Summary</h3>
-      <div class="table-container small"><table class="table"><thead><tr><th>Complex</th><th>Top Score</th><th>Contacts</th><th>ΔH</th></tr></thead><tbody id="comboSummaryBody"></tbody></table></div>
+      <div class="table-container small">
+        <table class="table">
+          <thead><tr><th>Complex</th><th>Top Score</th><th>Contacts</th><th>ΔH</th></tr></thead>
+          <tbody id="comboSummaryBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ===================== LIGAND DOCKING ===================== -->
 <section id="ligTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -248,7 +270,10 @@
         <div style="flex:1;min-width:300px">
           <h3>Receptor PDB</h3>
           <textarea id="ligReceptorPDB" placeholder="Paste receptor PDB" aria-label="Ligand docking receptor PDB"></textarea>
-          <div class="row" style="margin-top:6px"><button class="btn" onclick="loadLigandDemoReceptor()">Load Example</button><button class="btn" onclick="parseReceptorForLigand()">Parse & Preview</button></div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="loadLigandDemoReceptor()">Load Example</button>
+            <button class="btn" onclick="parseReceptorForLigand()">Parse & Preview</button>
+          </div>
         </div>
         <div style="flex:1;min-width:300px">
           <h3>Ligand SMILES</h3>
@@ -275,6 +300,7 @@
   </div>
 </section>
 
+<!-- ===================== BATCH SCREENING ===================== -->
 <section id="screenTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -297,7 +323,7 @@
           <div class="row"><label>Seed</label><input type="number" id="scrSeed" value="777" /></div>
           <div class="row"><label>3D Method</label><select id="scrEmbedMethod"><option value="HASH">HashCloud</option><option value="HELIX">RingHelix</option></select></div>
           <div class="row"><label>Sort</label>
-            <select id="scrSort"><option value="score">Score ↓</option><option value="enthalpy">ΔH ↑ (most negative)</option><option value="consensus" selected>Consensus (rank‑sum)</option></select>
+            <select id="scrSort"><option value="score">Score ↓</option><option value="enthalpy">ΔH ↑ (most negative)</option><option value="consensus" selected>Consensus (rank-sum)</option></select>
           </div>
           <div class="row" style="margin-top:10px"><button class="btn primary" id="btnStartScreen">▶️ Start Screening</button><button class="btn red" id="btnStopScreen" disabled>✖ Stop</button></div>
           <div class="infobox small">Sequential SMILES×Receptor; consensus = rank(score↓, ΔH↑, contacts↓).</div>
@@ -335,6 +361,7 @@
   </div>
 </section>
 
+<!-- ===================== QA & REGISTRY ===================== -->
 <section id="qaTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -367,6 +394,7 @@
   </div>
 </section>
 
+<!-- ===================== ANALYSIS ===================== -->
 <section id="analysisTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -395,7 +423,7 @@
         </div>
       </div>
       <div id="residueTab" class="tabsec">
-        <h3>Residue‑Level Contacts</h3>
+        <h3>Residue-Level Contacts</h3>
         <div class="row">
           <label>Min Dist (Å)</label><input type="number" id="filterMinDist" value="0" step="0.5" style="width:90px" />
           <label>Max Dist (Å)</label><input type="number" id="filterMaxDist" value="6" step="0.5" style="width:90px" />
@@ -413,6 +441,7 @@
   </div>
 </section>
 
+<!-- ===================== OMICS (added the missing UI elements) ===================== -->
 <section id="omicsTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -426,58 +455,66 @@
       </div>
 
       <div id="proteomicsTab" class="tabsec active">
+        <h3>Protein Input (optional PDB for descriptors)</h3>
+        <textarea id="omicsProteinPDB" placeholder="Paste protein PDB (optional)"></textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="omicsLoadProteinDemo">Load Protein Demo</button>
+        </div>
         <h3>Virtual Proteomics: Glycolytic Enzymes</h3>
-        <p class="small" style="color:var(--muted)">A virtual MS analysis of our model cell's cytoplasm identified high‑abundance proteins in glycolysis. A selection is shown.</p>
         <div class="table-container">
           <table class="table">
             <thead><tr><th>Protein (Enzyme)</th><th>Subcellular Location</th><th>Function in Glycolysis</th></tr></thead>
             <tbody>
-              <tr><td>Hexokinase (HK)</td><td>Cytosol (often near mitochondria)</td><td>Phosphorylates glucose → glucose‑6‑phosphate.</td></tr>
-              <tr><td>Phosphoglucose Isomerase (PGI)</td><td>Cytosol</td><td>Glucose‑6‑phosphate → fructose‑6‑phosphate.</td></tr>
-              <tr><td>Phosphofructokinase (PFK‑1)</td><td>Cytosol</td><td>Key regulatory step to fructose‑1,6‑bisphosphate.</td></tr>
-              <tr><td>Aldolase</td><td>Cytosol</td><td>Cleaves FBP into two 3‑carbon sugars.</td></tr>
-              <tr><td>GAPDH</td><td>Cytosol</td><td>Oxidizes GAP, producing NADH.</td></tr>
-              <tr><td>Pyruvate Kinase (PK)</td><td>Cytosol</td><td>PEP + ADP → ATP + pyruvate.</td></tr>
+              <tr><td>Hexokinase (HK)</td><td>Cytosol (near mitochondria)</td><td>Glucose → glucose-6-phosphate.</td></tr>
+              <tr><td>PFK-1</td><td>Cytosol</td><td>Committed step to F1,6BP.</td></tr>
+              <tr><td>GAPDH</td><td>Cytosol</td><td>Oxidation step; NADH.</td></tr>
+              <tr><td>Pyruvate Kinase</td><td>Cytosol</td><td>PEP + ADP → ATP + pyruvate.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
       <div id="lipidomicsTab" class="tabsec">
-        <h3>Virtual Lipidomics: Cell Membrane Composition</h3>
-        <p class="small" style="color:var(--muted)">Typical plasma membrane profile dominated by phospholipids, cholesterol, and sphingolipids; essential for integrity, signaling, transport.</p>
-        <div class="score">
-          <b>Major Lipid Classes Identified:</b>
-          <ul>
-            <li><b>Phosphatidylcholine (PC):</b> Structural scaffold.</li>
-            <li><b>Phosphatidylethanolamine (PE):</b> Curvature regulation.</li>
-            <li><b>Phosphatidylserine (PS):</b> Inner leaflet; flips out in apoptosis signaling.</li>
-            <li><b>Cholesterol:</b> Tunes membrane fluidity; forms lipid rafts.</li>
-            <li><b>Sphingomyelin (SM):</b> Enriched in rafts; signaling roles.</li>
-          </ul>
-        </div>
+        <h3>Lipid SMILES (one per line)</h3>
+        <textarea id="omicsLipidSmiles" placeholder="Enter lipid SMILES, one per line"></textarea>
+        <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadLipidDemo">Load Lipid Demo</button></div>
       </div>
 
       <div id="metabolomicsTab" class="tabsec">
-        <h3>Virtual Metabolomics: Key Cellular Metabolites</h3>
-        <p class="small" style="color:var(--muted)">Metabolite profiling snapshot of energetic and biosynthetic state.</p>
-        <div class="table-container">
-          <table class="table">
-            <thead><tr><th>Metabolite</th><th>Pathway</th><th>Significance</th></tr></thead>
-            <tbody>
-              <tr><td>Glucose‑6‑Phosphate</td><td>Glycolysis / PPP</td><td>Hub; commits glucose to energy or biosynthesis.</td></tr>
-              <tr><td>Fructose‑1,6‑bisphosphate</td><td>Glycolysis</td><td>Product of committed step; high flux indicator.</td></tr>
-              <tr><td>Pyruvate</td><td>Glycolysis</td><td>Branch point → lactate / acetyl‑CoA / alanine.</td></tr>
-              <tr><td>ATP / ADP Ratio</td><td>Energy</td><td>Higher = energy‑replete; regulates pathways.</td></tr>
-              <tr><td>NADH / NAD<sup>+</sup> Ratio</td><td>Redox</td><td>Reflects redox state; influences pyruvate fate.</td></tr>
-            </tbody>
-          </table>
+        <h3>Carbohydrate SMILES (one per line) & DNA (FASTA-like)</h3>
+        <textarea id="omicsCarbSmiles" placeholder="Enter carbohydrate SMILES, one per line"></textarea>
+        <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadCarbDemo">Load Carb Demo</button></div>
+        <h3 style="margin-top:8px">DNA (FASTA)</h3>
+        <textarea id="omicsDNA" placeholder=">id&#10;ACGT..."></textarea>
+        <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadDNADemo">Load DNA Demo</button></div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="omicsAnalyzeBtn">▶️ Analyze</button>
+        <button class="btn green" id="omicsExportBtn">⬇ Export JSON</button>
+        <span class="pill" id="omicsStatus" aria-live="polite">idle</span>
+      </div>
+
+      <div class="grid two" style="margin-top:10px">
+        <div class="card">
+          <h3>Descriptors</h3>
+          <div class="table-container">
+            <table class="table">
+              <thead><tr><th>Key</th><th>Value</th></tr></thead>
+              <tbody id="omicsDescriptorBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Trends</h3>
+          <div class="score" id="omicsTrends" style="min-height:220px"></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ===================== NMR ===================== -->
 <section id="nmrTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -501,18 +538,19 @@
   </div>
 </section>
 
+<!-- ===================== ABOUT ===================== -->
 <section id="aboutTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
       <h2>About</h2>
-      <p>This educational platform demonstrates in‑browser docking with parallel sampling, simplified scoring, and interactive visualization. All computations run locally; nothing is uploaded.</p>
+      <p>This educational platform demonstrates in-browser docking with parallel sampling, simplified scoring, and interactive visualization. All computations run locally; nothing is uploaded.</p>
       <h3>Important Disclaimers</h3>
       <div class="errorbox">
         <p><b>No warranties; use at your own risk.</b></p>
-        <p>Scoring/embedding are simplified approximations; entropy, solvation, polarization, and induced fit are not fully modeled. <b>Always double‑check results and verify with experiments (e.g., SPR/ITC, crystallography, MD, MM‑PBSA/FEP).</b> Compare against professional tools.</p>
+        <p>Scoring/embedding are simplified approximations; entropy, solvation, polarization, and induced fit are not fully modeled. <b>Always double-check results and verify with experiments (e.g., SPR/ITC, crystallography, MD, MM-PBSA/FEP).</b> Compare against professional tools.</p>
       </div>
       <h3>Recommended Workflow</h3>
-      <div class="infobox small">Use for hypothesis generation → export top poses → refine with AutoDock/HADDOCK/Rosetta → MD → MM‑PBSA/FEP → <b>experimental validation</b>.</div>
+      <div class="infobox small">Use for hypothesis generation → export top poses → refine with AutoDock/HADDOCK/Rosetta → MD → MM-PBSA/FEP → <b>experimental validation</b>.</div>
       <h3>Credits</h3>
       <div class="small" style="color:#9ca3af">Lead & Concept: <b>DJF — The New Chemist</b> • 3D rendering: 3Dmol.js • Compression: Pako • Structure source: RCSB PDB</div>
     </div>
@@ -521,16 +559,13 @@
 
 <footer>
   <div class="wrap">
-    <p><b>Educational Use Only.</b> Results are approximate. <b>Always double‑check and verify with experiments</b> before making conclusions or decisions.</p>
+    <p><b>Educational Use Only.</b> Results are approximate. <b>Always double-check and verify with experiments</b> before making conclusions or decisions.</p>
     <p class="small">© Student Edition • No warranties • We disclaim any loss in any way • Validate results independently</p>
   </div>
 </footer>
-<script>
-<script defer src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
-<script defer src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
 
+<!-- ===================== APP SCRIPT (single, non-duplicated) ===================== -->
 <script>
-/* ========================= GLOBALS ========================= */
 let viewer=null, viewerLig=null, viewerScr=null, viewerComp=null;
 let inProgress=false, cancelled=false, workerPool=[];
 let pdbAAllAtoms=[], pdbBAllAtoms=[];
@@ -547,7 +582,6 @@ const E=id=>document.getElementById(id);
 const status=t=>E('statusPill').textContent=t;
 const setProgress=f=>{E('prog').value=Math.max(0,Math.min(1,f||0));};
 
-/* ========================= INIT ========================= */
 window.addEventListener('DOMContentLoaded', ()=>{
   ensureViewer('viewer'); ensureViewer('viewerLig'); ensureViewer('viewerScr'); ensureViewer('viewerComp');
   drawPlaceholder(viewer);
@@ -560,7 +594,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   updateNMRImage();
 });
 
-/* ========================= Tabs ========================= */
+/* Tabs */
 function setupMainTabs(){
   document.querySelectorAll('.tabbtn[data-tab]').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -582,15 +616,14 @@ function setupSubTabs(){
       wrap.querySelectorAll('.tabbtn[data-subtab]').forEach(b=>b.classList.remove('active'));
       wrap.querySelectorAll('.tabsec').forEach(s=>s.classList.remove('active'));
       btn.classList.add('active');
-      const subTabId=btn.dataset.subtab;
-      const tgt=wrap.querySelector('#'+subTabId);
+      const tgt=wrap.querySelector('#'+btn.dataset.subtab);
       if (tgt) tgt.classList.add('active');
       requestAnimationFrame(()=>{ viewerComp?.resize(); viewerComp?.render(); });
     });
   });
 }
 
-/* ========================= Viewers ========================= */
+/* Viewers */
 function ensureViewer(id){
   const el=E(id); if(!el) return;
   const opt={backgroundColor:'#0a0f1a'};
@@ -600,13 +633,12 @@ function ensureViewer(id){
   else if(id==='viewerComp' && !viewerComp) viewerComp=$3Dmol.createViewer(el,opt);
 }
 function drawPlaceholder(v){
-  if(!v) return;
-  v.addSphere({center:{x:-8,y:0,z:0},radius:4,color:'#60a5fa',alpha:.6});
+  if(!v) return; v.addSphere({center:{x:-8,y:0,z:0},radius:4,color:'#60a5fa',alpha:.6});
   v.addSphere({center:{x:8,y:0,z:0},radius:4,color:'#f97316',alpha:.6});
   v.zoomTo(); v.render();
 }
 
-/* ========================= Events ========================= */
+/* Events */
 function bindEvents(){
   // global
   E('btnDemo').addEventListener('click', autoDemo);
@@ -651,7 +683,7 @@ function bindEvents(){
   E('btnScrTop10').addEventListener('click', showTop10Screening);
 }
 
-/* ========================= Utils ========================= */
+/* Utils */
 async function fileToText(file){
   const name=(file?.name||'').toLowerCase(); const buf=await file.arrayBuffer();
   if(name.endsWith('.gz')){const u8=new Uint8Array(buf); const out=pako.inflate(u8); return new TextDecoder().decode(out);} 
@@ -702,13 +734,12 @@ function snapshotPNG(v){
   catch(e){ alert('PNG failed: '+e.message);}
 }
 
-/* ========================= PDB parsing / chains ========================= */
+/* PDB parsing / chains */
 function parsePDB(text){
   const atoms=[]; if(!text) return atoms;
-  const lines=text.split(/\r?\n/);
+  const lines=String(text).split(/\r?\n/);
   for(const line of lines){
     if(!(line.startsWith('ATOM')||line.startsWith('HETATM'))) continue;
-    // Guard short lines
     if(line.length<54) continue;
     const name=(line.substring(12,16)||'').trim();
     const resn=(line.substring(17,20)||'').trim()||'UNK';
@@ -754,7 +785,7 @@ function invertChains(which){ const box=which==='A'?E('chainsABox'):E('chainsBBo
 function filterChains(atoms, keep){ if(!keep||keep.size===0) return atoms; return atoms.filter(a=>keep.has(a.chain)); }
 function selectAtomSet(atoms, mode){ const bb=new Set(['N','CA','C','O']); return atoms.filter(a=>{ if(mode==='CA') return a.name==='CA'; if(mode==='BB') return bb.has(a.name); return a.elem!=='H'; }); }
 
-/* ========================= Worker (sampling/scoring) ========================= */
+/* Worker (sampling/scoring) */
 function makeDockWorker(){
   const code=`
     const vdw={H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
@@ -788,7 +819,7 @@ function diverseTop(sorted,deg,transA,limit){
   return out;
 }
 
-/* ========================= Docking driver ========================= */
+/* Docking driver */
 function enumerateCombos(){
   const mode=E('pairMode').value; const aSel=selectedChains('A'); const bSel=selectedChains('B');
   const Amap=groupByChain(pdbAAllAtoms), Bmap=groupByChain(pdbBAllAtoms);
@@ -814,6 +845,7 @@ async function runAntibodyDocking(){
   try{
     const textA=await ensureInputText('A'), textB=await ensureInputText('B');
     pdbAAllAtoms=parsePDB(textA); pdbBAllAtoms=parsePDB(textB);
+    if(!pdbAAllAtoms.length || !pdbBAllAtoms.length) throw new Error('Failed to parse one or both PDBs.');
     populateChainChips('A',pdbAAllAtoms); populateChainChips('B',pdbBAllAtoms);
 
     const params=collectDockingParams();
@@ -907,7 +939,6 @@ async function dockSingleCombo(idx, params, onProgress){
   if(params.rescoreMode!=='NONE'){ top=await heavyAtomRescore(Aheavy,Bheavy0,params,diverse, params.rescoreMode==='HEAVY_REFINE'); }
   combo.topPoses=top; combo.Aviz=Aheavy; combo.B0=Bheavy0;
 }
-
 function heavyAtomRescore(A,B0,params,coarse,refine=false){
   const {contactCut,clashFactor,wContact,wClash,soft}=params;
   function score(A,B){ let contacts=0, clash=0;
@@ -920,6 +951,17 @@ function heavyAtomRescore(A,B0,params,coarse,refine=false){
     }}
     return {score:wContact*contacts-clash,contacts,clash};
   }
+  function apply(B,q,t){
+    const [qx,qy,qz,qw]=q;
+    return B.map(p=>{
+      const vx=p.x,vy=p.y,vz=p.z;
+      const ix=qw*vx+qy*vz-qz*vy,iy=qw*vy+qz*vx-qx*vz,iz=qw*vz+qx*vy-qy*vx,iw=-qx*vx-qy*vy-qz*vz;
+      const ox=ix*qw+iw*(-qx)+iy*(-qz)-iz*(-qy);
+      const oy=iy*qw+iw*(-qy)+iz*(-qx)-ix*(-qz);
+      const oz=iz*qw+iw*(-qz)+ix*(-qy)-iy*(-qx);
+      return {x:ox+t.x,y:oy+t.y,z:oz+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name};
+    });
+  }
   function jiggle(p){ const r=()=> (Math.random()*2-1)*0.5;
     const dq=[p.q[0]+r()*0.01,p.q[1]+r()*0.01,p.q[2]+r()*0.01,p.q[3]+r()*0.01];
     const n=Math.hypot(...dq)||1; for(let i=0;i<4;i++) dq[i]/=n;
@@ -929,12 +971,12 @@ function heavyAtomRescore(A,B0,params,coarse,refine=false){
   const rescored=[];
   for(const p of coarse){
     let best={...p};
-    let TB=applyTransform(B0,p.q,p.t); let s=score(A,TB);
+    let TB=apply(B0,p.q,p.t); let s=score(A,TB);
     best.score=s.score; best.contacts=s.contacts; best.clash=s.clash;
     if(refine){
       for(let it=0;it<40;it++){
         const pp=jiggle(best);
-        const TB2=applyTransform(B0,pp.q,pp.t);
+        const TB2=apply(B0,pp.q,pp.t);
         const s2=score(A,TB2);
         if(s2.score>best.score){ best.q=pp.q; best.t=pp.t; best.score=s2.score; best.contacts=s2.contacts; best.clash=s2.clash; }
       }
@@ -956,7 +998,7 @@ function applyTransform(points,q,t){
   });
 }
 
-/* ========================= Visualization / overlays ========================= */
+/* Visualization / overlays */
 function updateComboSelect(){
   const sel=E('comboSelect'); sel.innerHTML='';
   combos.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`${i+1}. ${c.label}`; sel.appendChild(o); });
@@ -995,7 +1037,7 @@ function showPose(i){
 
   const cutoff=parseFloat(E('contactCut').value);
   const metrics=computeInterfaceMetrics(combo.Aviz,TB,cutoff);
-  currentContacts=metrics.contactsPairs.slice(0,800); // hard cap to avoid shape overload
+  currentContacts=metrics.contactsPairs.slice(0,800);
   currentHB=metrics.hbPairs.slice(0,400);
   currentSB=metrics.sbPairs.slice(0,400);
   currentHydro=metrics.hydroPairs.slice(0,400);
@@ -1070,7 +1112,7 @@ function calculateEnthalpy(m,elec){
   return w.contact*m.contacts + w.hbond*m.hb + w.salt*m.sb + w.hydro*m.hydrophobics + w.clash*m.clash + elec + w.desolv*m.contacts;
 }
 
-/* ========================= Clustering & Summary ========================= */
+/* Clustering & Summary */
 function clusterCurrentPoses(){
   const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length) return;
   const K=Math.max(1,parseInt(E('clustersK').value)||6); const poses=combo.topPoses;
@@ -1094,7 +1136,7 @@ function fillComboSummaryRow(i){
   E('comboSummaryBody').appendChild(tr);
 }
 
-/* ========================= Metrics / Analysis UI ========================= */
+/* Metrics / Analysis UI */
 function updateMetricsDisplay(){
   const combo=combos[currentComboIndex];
   if(!combo||!combo.topPoses.length){
@@ -1149,7 +1191,7 @@ function exportResidueData(){
   const table=E('residueTableBody').innerText||''; if(!table){alert('No data');return;} downloadBlob(table,'residue_contacts.txt');
 }
 
-/* ========================= Exports ========================= */
+/* Exports */
 function downloadAllPoses(){
   const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length){alert('No poses.');return;}
   const lines=[]; combo.topPoses.forEach((p,i)=>{lines.push(`MODEL     ${i+1}  ${combo.label}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL');});
@@ -1180,7 +1222,7 @@ function downloadAllComplexesPDB(){
   lines.push('END'); downloadBlob(lines.join('\n'),'all_complexes_all_poses.pdb');
 }
 
-/* ========================= Ligand docking (unchanged logic) ========================= */
+/* Ligand docking */
 function loadLigandDemoReceptor(){
   E('ligReceptorPDB').value=`ATOM      1  CA  ALA A   1      -8.000   0.000   0.000  1.00  0.00           C
 ATOM      2  CA  ALA A   2      -6.600   1.200   0.200  1.00  0.00           C
@@ -1217,6 +1259,7 @@ async function runSingleLigandDock() {
     const smiles = E('ligSmiles').value.trim();
     if (!receptorPDB || !smiles) throw new Error('Receptor PDB and Ligand SMILES are required.');
     const receptorAtoms = parsePDB(receptorPDB);
+    if (!receptorAtoms.length) throw new Error('Receptor PDB failed to parse.');
     const ligandAtoms   = embedSmilesTo3D(smiles, E('ligEmbedMethod').value, parseInt(E('ligSeed').value));
 
     const cR = centroid(receptorAtoms);
@@ -1255,18 +1298,21 @@ function scoreLigand(receptor, ligand){
   }
   return { score: contacts - 6.0 * clash, contacts, clash };
 }
-function downloadLigandPDB(){ if (!ligLastResult.score&&ligLastResult.score!==0) return; const pdb = formatPDB(ligLastResult.receptor) + "\n" + formatPDB(ligLastResult.ligand, 1); downloadBlob(pdb, 'ligand_complex.pdb'); }
-function downloadLigandCSV(){ if (!ligLastResult.score&&ligLastResult.score!==0) return; const row = `smiles,score,contacts,clash\n"${ligLastResult.smiles}",${ligLastResult.score.toFixed(3)},${ligLastResult.contacts},${ligLastResult.clash.toFixed(3)}`; downloadBlob(row, 'ligand_result.csv'); }
+function downloadLigandPDB(){ if (!('score' in ligLastResult)) return; const pdb = formatPDB(ligLastResult.receptor) + "\n" + formatPDB(ligLastResult.ligand, 1); downloadBlob(pdb, 'ligand_complex.pdb'); }
+function downloadLigandCSV(){ if (!('score' in ligLastResult)) return; const row = `smiles,score,contacts,clash\n"${ligLastResult.smiles}",${ligLastResult.score.toFixed(3)},${ligLastResult.contacts},${ligLastResult.clash.toFixed(3)}`; downloadBlob(row, 'ligand_result.csv'); }
 
-/* ========================= Batch Screening ========================= */
+/* Batch Screening */
 async function startBatchScreening(){
   E('btnStartScreen').disabled = true; E('btnStopScreen').disabled = false; E('scrStatus').textContent = 'running...'; screenCancel = false;
   try {
-    const smilesList = E('scrSmiles').value.trim().split(/\r?\n/).filter(s => s);
-    const raw = E('scrReceptors').value.trim();
-    // safer split: allow END with/without trailing newline / spaces
-    const receptorPDBs = raw.split(/\n\s*END\s*\n|^\s*END\s*$|\r\n\s*END\s*\r\n/m).map(s=>s.trim()).filter(Boolean);
+    const smilesList = E('scrSmiles').value.trim().split(/\r?\n/).map(s=>s.trim()).filter(s => s);
+    const raw = E('scrReceptors').value;
+
+    // Robust split on lines containing only END (allowing spaces and different newlines)
+    const receptorPDBs = String(raw||'').split(/\r?\n\s*END\s*(?:\r?\n|$)/).map(s=>s.trim()).filter(Boolean);
+
     if (smilesList.length > 50 || receptorPDBs.length > 3) throw new Error('Exceeded limits: max 50 SMILES, max 3 receptors.');
+    if (receptorPDBs.length===0) throw new Error('Please paste at least one receptor PDB and separate with END if multiple.');
 
     screenReceptors = receptorPDBs.map((pdb, i) => ({ id: `R${i+1}`, atoms: parsePDB(pdb)}));
     if (screenReceptors.some(r => r.atoms.length === 0)) throw new Error('One or more receptors failed to parse.');
@@ -1370,7 +1416,7 @@ function showTop10Screening(){
   E('enthalpyBreakdown').textContent = 'Top 10 ΔH Values:\n' + dHs.map(d => d.toFixed(2)).join(', ');
 }
 
-/* ========================= QA & Registry ========================= */
+/* QA & Registry */
 function saveCurrentRun(){
   if (!combos.length) { alert('No run data to save.'); return; }
   const topPose = combos[0]?.topPoses[0];
@@ -1418,7 +1464,7 @@ async function runQATest(){
   qaResults.textContent = `QA Test Results (${repeats} repeats):\nScores: ${scores.map(s=>s.toFixed(3)).join(', ')}\nAverage Score: ${avg.toFixed(3)}\nMax Difference: ${maxDiff.toFixed(3)}\nTolerance: ${tolerance.toFixed(3)}\nResult: ${pass ? '✅ PASSED' : '❌ FAILED'}`;
 }
 
-/* ========================= Session Save/Load ========================= */
+/* Session Save/Load */
 function saveSession(){
   const state = { pdbAText: E('pdbAText').value, pdbBText: E('pdbBText').value, params: collectDockingParams(), dockingResults: combos };
   downloadBlob(JSON.stringify(state), 'docking_session.json');
@@ -1438,7 +1484,7 @@ function loadSession(){
 }
 function loadSessionHistory(){ refreshRunRegistry(); }
 
-/* ====================== DEMO ====================== */
+/* Demo */
 function useExample(which){
   if(which==='A'){
     E('pdbAText').value=`ATOM      1  CA  GLY A   1      10.000  10.000  10.000  1.00  0.00           C
@@ -1450,16 +1496,16 @@ ATOM      2  CA  LEU B   2      17.000  14.000  15.500  1.00  0.00           C`;
 }
 async function autoDemo(){ useExample('A'); useExample('B'); E('samples').value=2000; await runAntibodyDocking(); }
 
-/* ====================== NMR DEMO (unchanged text template) ====================== */
+/* NMR & Omics */
 function bindOmicsAndNMREvents(){
-  // NMR buttons already exist
+  // NMR
   E('nmrSmiles').addEventListener('input', updateNMRImage);
   E('btnPredict1H').addEventListener('click', () => predictNMR('1H'));
   E('btnPredict13C').addEventListener('click', () => predictNMR('13C'));
   E('btnPredictCOSY').addEventListener('click', () => predictNMR('COSY'));
   E('btnPredictNOESY').addEventListener('click', () => predictNMR('NOESY'));
 
-  // Omics buttons
+  // Omics
   const B=(id,fn)=>{ const el=E(id); if(el) el.addEventListener('click', fn); };
   B('omicsLoadProteinDemo',()=>{E('omicsProteinPDB').value=`ATOM      1  CA  ALA A   1       0.000   0.000   0.000  1.00  0.00           C
 ATOM      2  CA  LEU A   2       1.500   1.200   0.200  1.00  0.00           C
@@ -1469,14 +1515,13 @@ END`;});
   B('omicsLoadLipidDemo',()=>{E('omicsLipidSmiles').value=`CCCCCCCCCCCC=CCCCCC(=O)OCCN(C)CH3
 CCOC(=O)CCCCCCCCCCCC
 CCCCCCCCCCCCCCCC(=O)OCCOP(=O)(O)OCCN`});
-  B('omicsLoadCarbDemo',()=>{E('omicsCarbSmiles').value=`OC[C@H]1O[C@@H](O)[C@H](O)[C@@H](O)[C@H]1O  /* glucose-like */
-O[C@H]1CO[C@@H](O)[C@H](O)[C@H]1O         /* fructose-like */`.replace(/\/\*.*?\*\//g,'').trim();});
+  B('omicsLoadCarbDemo',()=>{E('omicsCarbSmiles').value=`OC[C@H]1O[C@@H](O)[C@H](O)[C@@H](O)[C@H]1O
+O[C@H]1CO[C@@H](O)[C@H](O)[C@H]1O`;});
   B('omicsLoadDNADemo',()=>{E('omicsDNA').value=`>demo
 ACGTACGTGGCCGGTTTTAAAACGCGCGTTTACGCGCAGCGCGGATATATATATAGCGC`});
   B('omicsAnalyzeBtn', runOmicsAnalysis);
   B('omicsExportBtn', ()=>{ if(lastOmics) downloadBlob(JSON.stringify(lastOmics,null,2),'omics_results.json'); else alert('Run analysis first.');});
 }
-
 async function updateNMRImage(){
   const smiles = E('nmrSmiles').value.trim();
   const imgDiv = E('nmrMoleculeImage');
@@ -1488,25 +1533,25 @@ function predictNMR(type){
   const smiles = E('nmrSmiles').value.trim(); const output = E('nmrPredictionOutput');
   if (!smiles) { output.textContent = 'Please enter a SMILES string.'; return; }
   let txt = `--- THEORETICAL ${type} PREDICTION FOR ${smiles} ---\n\n`;
-  if (smiles === 'CC(=O)Oc1ccccc1C(=O)O'){ if(type==='1H'){ txt += `Aspirin, CDCl3 (typical):\n- CH3 singlet ~2.3 ppm (3H)\n- Ar multiplet 7.1–8.2 ppm (4H)\n- COOH broad >10 ppm`; }
-  else if(type==='13C'){ txt += `9 carbons: CH3 ~21; C=O(ester) ~169; C=O(acid) ~171; ring 120–155 ppm`; }
-  else if(type==='COSY'){ txt += `Ortho ring couplings visible; CH3 isolated`; }
-  else if(type==='NOESY'){ txt += `NOE: CH3 ↔ ortho aryl possible; ring proximities`; } }
-  else { txt += 'Demo provides a detailed aspirin template. For others, interpret via analogy.'; }
+  if (smiles === 'CC(=O)Oc1ccccc1C(=O)O'){
+    if(type==='1H'){ txt += `Aspirin, CDCl3 (typical):\n- CH3 singlet ~2.3 ppm (3H)\n- Ar multiplet 7.1–8.2 ppm (4H)\n- COOH broad >10 ppm`; }
+    else if(type==='13C'){ txt += `9 carbons: CH3 ~21; C=O(ester) ~169; C=O(acid) ~171; ring 120–155 ppm`; }
+    else if(type==='COSY'){ txt += `Ortho ring couplings visible; CH3 isolated`; }
+    else if(type==='NOESY'){ txt += `NOE: CH3 ↔ ortho aryl possible; ring proximities`; }
+  } else { txt += 'Demo provides a detailed aspirin template. For others, interpret via analogy.'; }
   output.textContent = txt;
 }
 
-/* ====================== OMICS ANALYZER ====================== */
+/* OMICS ANALYZER */
 let lastOmics=null;
 function runOmicsAnalysis(){
   E('omicsStatus').textContent='running...';
   try{
-    const proteinPDB = E('omicsProteinPDB').value.trim();
-    const lipidSmiles = E('omicsLipidSmiles').value.trim().split(/\r?\n/).filter(Boolean);
-    const carbSmiles  = E('omicsCarbSmiles').value.trim().split(/\r?\n/).filter(Boolean);
-    const dnaText     = E('omicsDNA').value.trim();
+    const proteinPDB = (E('omicsProteinPDB').value||'').trim();
+    const lipidSmiles = (E('omicsLipidSmiles').value||'').trim().split(/\r?\n/).filter(Boolean);
+    const carbSmiles  = (E('omicsCarbSmiles').value||'').trim().split(/\r?\n/).filter(Boolean);
+    const dnaText     = (E('omicsDNA').value||'').trim();
 
-    // Protein descriptors (from PDB)
     const protAtoms = parsePDB(proteinPDB);
     const aa = summarizeResidues(protAtoms);
     const protDesc = {
@@ -1516,17 +1561,12 @@ function runOmicsAnalysis(){
       acidic: aa.acidic, basic: aa.basic, polar: aa.polar, hydrophobic: aa.hydrophobic
     };
 
-    // Lipid descriptors
     const lipDesc = summarizeSmilesSet(lipidSmiles);
-    // Carb descriptors
     const carbDesc = summarizeSmilesSet(carbSmiles);
-    // DNA descriptors
     const dnaDesc = summarizeDNA(dnaText);
 
-    // Cross-modal trends (heuristic)
     const trends = inferTrends(protDesc, lipDesc, carbDesc, dnaDesc);
 
-    // write table
     const rows = [];
     const add = (k,v)=> rows.push(`<tr><td>${k}</td><td>${typeof v==='number'? (''+v): v}</td></tr>`);
     add('Protein residues', protDesc.residues);
@@ -1558,7 +1598,6 @@ function runOmicsAnalysis(){
   }
 }
 function summarizeResidues(atoms){
-  // approximate by CA residue names present
   const byRes=new Map();
   for(const a of atoms){ const key=(a.chain||'A')+':' +(a.resi||0); if(!byRes.has(key)) byRes.set(key,{resn:a.resn}); }
   const names=[...byRes.values()].map(x=>x.resn||'UNK');
@@ -1578,13 +1617,12 @@ function summarizeSmilesSet(list){
   return {count:list.length, avgHetPct:hetPct/list.length, avgUnsat:unsat/list.length, avgRings:rings/list.length};
 }
 function smilesDescriptors(s){
-  // crude textual heuristics (toolkit-free)
-  const atoms = (s.match(/[A-Z][a-z]?/g)||[]); // tokens like C, Cl, N, O, P, S
+  const atoms = (s.match(/[A-Z][a-z]?/g)||[]);
   const het   = atoms.filter(a=>!/^C$/.test(a)).length;
   const total = atoms.length||1;
   const hetPct = het/total;
-  const unsaturation = (s.match(/=/g)||[]).length + (s.match(/#|\/\\|\\\\|\//g)||[]).length*0.5;
-  const rings = (s.match(/\d/g)||[]).length/2; // naive
+  const unsaturation = (s.match(/=/g)||[]).length + (s.match(/#|\\\\|\\//g)||[]).length*0.5;
+  const rings = (s.match(/\d/g)||[]).length/2;
   return {hetPct, unsaturation, rings};
 }
 function summarizeDNA(txt){
@@ -1631,664 +1669,6 @@ function resetAll(){
   updateComboSelect(); E('poseControls').innerHTML=''; E('scoreBox').textContent=''; E('metricsDisplay').innerHTML='';
   viewer?.clear(); viewerLig?.clear(); viewerScr?.clear(); viewerComp?.clear();
   drawPlaceholder(viewer); status('idle'); setProgress(0);
-}
-</script>
-
-
-// ========================= Utils =========================
-async function fileToText(file){
-  const name=file.name.toLowerCase(); const buf=await file.arrayBuffer();
-  if(name.endsWith('.gz')){const u8=new Uint8Array(buf); const out=pako.inflate(u8); return new TextDecoder().decode(out);} 
-  return new TextDecoder().decode(buf);
-}
-async function handleFileUpload(which,file){ if(!file) return; try{ const text=await fileToText(file); E(which==='A'?'pdbAText':'pdbBText').value=text; parseOne(which); } catch(e){ alert('Error reading file: '+e.message); } }
-async function fetchPDBFromRCSB(which){
-  const pdbId=prompt(`Enter 4-character PDB ID for Protein ${which}:`); if(!pdbId) return; const id=pdbId.trim().toLowerCase(); if(id.length!==4){alert('PDB ID must be 4 chars');return;}
-  try{ status(`fetching ${id}…`); const res=await fetch(`https://files.rcsb.org/download/${id}.pdb`); if(!res.ok) throw new Error('RCSB error'); const txt=await res.text(); E(which==='A'?'pdbAText':'pdbBText').value=txt; await parseOne(which); status('idle'); }catch(e){ alert('Fetch failed: '+e.message); status('error'); }
-}
-function centroid(pts){let x=0,y=0,z=0; for(const p of pts){x+=p.x;y+=p.y;z+=p.z;} const n=pts.length||1; return {x:x/n,y:y/n,z:z/n};}
-function translate(points,t){return points.map(p=>({...p,x:p.x+t.x,y:p.y+t.y,z:p.z+t.z}));}
-function formatPDB(atoms,chainShift=0){
-  const lines=[]; let serial=1; for(const a of atoms){ const name=(a.name||'CA').padStart(4,' '),resn=(a.resn||'RES').padStart(3,' '), chain=String.fromCharCode((a.chain||'A').charCodeAt(0)+chainShift), resi=String(a.resi||1).padStart(4,' '), x=(a.x??0).toFixed(3).padStart(8,' '), y=(a.y??0).toFixed(3).padStart(8,' '), z=(a.z??0).toFixed(3).padStart(8,' '), elem=(a.elem||'C').toString().padStart(2,' '); lines.push(`ATOM  ${String(serial).padStart(5,' ')} ${name} ${resn} ${chain}${resi}    ${x}${y}${z}  1.00  0.00          ${elem}`); serial++; }
-  lines.push('TER','ENDMDL','END'); return lines.join('\n');
-}
-function downloadBlob(text, filename){ const url=URL.createObjectURL(new Blob([text],{type:'text/plain'})); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); }
-function snapshotPNG(v){ try{ v.render(); v.pngURI((uri)=>{ const a=document.createElement('a'); a.href=uri; a.download='viewer.png'; a.click(); }); }catch(e){ alert('PNG failed: '+e.message);} }
-
-// ========================= PDB parsing / chains =========================
-function parsePDB(text){
-  const atoms=[]; const lines=text.split(/\r?\n/);
-  for(const line of lines){ if(!line.startsWith('ATOM') && !line.startsWith('HETATM')) continue; const atom={ name:line.substring(12,16).trim(), resn:line.substring(17,20).trim(), chain:line.substring(21,22).trim()||'A', resi:parseInt(line.substring(22,26)), x:parseFloat(line.substring(30,38)), y:parseFloat(line.substring(38,46)), z:parseFloat(line.substring(46,54)), elem: (line.length>=78? (line.substring(76,78).trim()||line.substring(12,16).trim()[0]) : line.substring(12,16).trim()[0]).toUpperCase() }; atoms.push(atom); }
-  return atoms;
-}
-async function parseOne(which){
-  const t = E(which==='A'?'pdbAText':'pdbBText').value.trim(); if(!t){ alert('Paste PDB or upload file first.'); return; }
-  const atoms=parsePDB(t); if(!atoms.length){ alert('No atoms parsed — check PDB.'); return; }
-  if(which==='A'){ pdbAAllAtoms=atoms; populateChainChips('A',atoms); E('badgeA').textContent=`${atoms.length} atoms`; }
-  else{ pdbBAllAtoms=atoms; populateChainChips('B',atoms); E('badgeB').textContent=`${atoms.length} atoms`; }
-}
-function populateChainChips(which, atoms){
-  const box=which==='A'?E('chainsABox'):E('chainsBBox'); box.innerHTML=''; const chains=[...new Set(atoms.map(a=>a.chain))]; chains.forEach(c=>{ const id=`${which}_ch_${c}`; const lbl=document.createElement('label'); lbl.className='chip'; lbl.innerHTML=`<input type="checkbox" id="${id}" data-which="${which}" data-chain="${c}" checked> ${c}`; box.appendChild(lbl); });
-  const warn=which==='A'?E('chainWarnA'):E('chainWarnB'); warn.className='successbox small'; warn.textContent=`✓ Parsed ${atoms.length} atoms • Chains: ${chains.join(', ')||'—'}`;
-}
-function selectedChains(which){ const box=which==='A'?E('chainsABox'):E('chainsBBox'); const selected=[...box.querySelectorAll('input[type=checkbox]')].filter(cb=>cb.checked).map(cb=>cb.dataset.chain); return new Set(selected); }
-function selectAllChains(which){ const box=which==='A'?E('chainsABox'):E('chainsBBox'); box.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=true); }
-function invertChains(which){ const box=which==='A'?E('chainsABox'):E('chainsBBox'); box.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=!cb.checked); }
-function filterChains(atoms, keep){ if(!keep || keep.size===0) return atoms; return atoms.filter(a=>keep.has(a.chain)); }
-function selectAtomSet(atoms, mode){ const bb=new Set(['N','CA','C','O']); return atoms.filter(a=>{ if(mode==='CA') return a.name==='CA'; if(mode==='BB') return bb.has(a.name); return a.elem!=='H'; }); }
-
-// ========================= Worker (sampling/scoring) =========================
-function makeDockWorker(){
-  const code=`
-    const vdw={H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
-    function rand(seed){let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);}   
-    function randomQuat(r){const u1=r(),u2=r(),u3=r(); const a=Math.sqrt(1-u1),b=Math.sqrt(u1),t1=2*Math.PI*u2,t2=2*Math.PI*u3; return [a*Math.sin(t1),a*Math.cos(t1),b*Math.sin(t2),b*Math.cos(t2)];}
-    function rotate(points,q){const[qx,qy,qz,qw]=q; return points.map(p=>{const vx=p.x,vy=p.y,vz=p.z; const ix=qw*vx+qy*vz-qz*vy,iy=qw*vy+qz*vx-qx*vz,iz=qw*vz+qx*vy-qy*vx,iw=-qx*vx-qy*vy-qz*vz; const ox=ix*qw+iw*(-qx)+iy*(-qz)-iz*(-qy),oy=iy*qw+iw*(-qy)+iz*(-qx)-ix*(-qz),oz=iz*qw+iw*(-qz)+ix*(-qy)-iy*(-qx); return {x:ox,y:oy,z:oz,elem:p.elem};});}
-    function translate(points,t){return points.map(p=>({x:p.x+t.x,y:p.y+t.y,z:p.z+t.z,elem:p.elem}));}
-    function grid(coords,c){const m=new Map(),k=(ix,iy,iz)=>ix+"|"+iy+"|"+iz; for(let i=0;i<coords.length;i++){const x=coords[i].x,y=coords[i].y,z=coords[i].z,ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c),kk=k(ix,iy,iz); if(!m.has(kk)) m.set(kk,[]); m.get(kk).push(i);} return {c,m};}
-    function neigh(g,x,y,z){const c=g.c,ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c),out=[]; for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){const kk=(ix+dx)+"|"+(iy+dy)+"|"+(iz+dz); if(g.m.has(kk)) out.push(...g.m.get(kk));} return out;}
-    function scorePose(A,B,contact,clashFact,wC,wX,soft){const G=grid(A,contact); let contacts=0, clash=0; for(let i=0;i<B.length;i++){const x=B[i].x,y=B[i].y,z=B[i].z, eB=(B[i].elem||'C').toUpperCase(), neighs=neigh(G,x,y,z); for(const j of neighs){const a=A[j],dx=x-a.x,dy=y-a.y,dz=z-a.z, d=Math.hypot(dx,dy,dz), eA=(a.elem||'C').toUpperCase(); const rs=(vdw[eA]||1.7)+(vdw[eB]||1.7), clashCut=clashFact*rs; if(d<=clashCut){const ov=(clashCut-d+1e-6)/clashCut; clash+=wX*ov*(1/(1+soft*ov));} else if(d<=contact){contacts+=1;} } } return {score: wC*contacts - clash, contacts, clash}; }
-    self.onmessage=(ev)=>{ const {Apts,Bpts,params,start,end}=ev.data; const rng=rand(params.seed+start*1337); const best=[]; const total=end-start; for(let k=0;k<total;k++){ const q=randomQuat(rng), t={x:(rng()*2-1)*params.maxTrans, y:(rng()*2-1)*params.maxTrans, z:(rng()*2-1)*params.maxTrans}; const B=translate(rotate(Bpts,q),t), s=scorePose(Apts,B,params.contactCut,params.clashFactor,params.wContact,params.wClash,params.soft); best.push({score:s.score,contacts:s.contacts,clash:s.clash,q:[...q],t}); if((k&1023)===0) self.postMessage({type:'progress',count:k}); } best.sort((a,b)=>b.score-a.score); self.postMessage({type:'done',poses:best.slice(0,Math.min(200,total))}); };
-  `;
-  return new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})));
-}
-function angleBetweenQuats(q1,q2){const dot=q1[0]*q2[0]+q1[1]*q2[1]+q1[2]*q2[2]+q1[3]*q2[3]; return 2*Math.acos(Math.min(1,Math.abs(dot)))*180/Math.PI;}
-function diverseTop(sorted,deg,transA,limit){
-  const out=[]; const max=Math.max(1,limit||parseInt(E('topN').value)||10);
-  for(const p of sorted){ let dupe=false; for(const s of out){ const a=angleBetweenQuats(p.q,s.q); const t=Math.hypot(p.t.x-s.t.x,p.t.y-s.t.y,p.t.z-s.t.z); if(a<=deg && t<=transA){dupe=true;break;} } if(!dupe){out.push(p); if(out.length>=max) break;} }
-  return out;
-}
-
-// ========================= Docking driver (with chain pairing & multi-complex) =========================
-function enumerateCombos(){
-  const mode=E('pairMode').value; const aSel=selectedChains('A'); const bSel=selectedChains('B');
-  const Amap=groupByChain(pdbAAllAtoms), Bmap=groupByChain(pdbBAllAtoms);
-  const Akeys=[...Amap.keys()].filter(k=>aSel.has(k)); const Bkeys=[...Bmap.keys()].filter(k=>bSel.has(k));
-  const combosOut=[];
-  if(mode==='AGG'){
-    const A=filterChains(pdbAAllAtoms,aSel), B=filterChains(pdbBAllAtoms,bSel);
-    combosOut.push({label:`A{${Akeys.join('')}} vs B{${Bkeys.join('')}}`, Aatoms:A, Batoms:B});
-  } else if(mode==='A_EACH_B'){
-    const A=filterChains(pdbAAllAtoms,aSel);
-    for(const b of Bkeys){ combosOut.push({label:`A{${Akeys.join('')}} vs B{${b}}`, Aatoms:A, Batoms:Bmap.get(b)}); }
-  } else if(mode==='CROSS'){
-    for(const a of Akeys){ for(const b of Bkeys){ combosOut.push({label:`A{${a}} vs B{${b}}`, Aatoms:Amap.get(a), Batoms:Bmap.get(b)}); } }
-  }
-  return combosOut;
-}
-function groupByChain(atoms){ const m=new Map(); for(const a of atoms){ if(!m.has(a.chain)) m.set(a.chain,[]); m.get(a.chain).push(a); } return m; }
-
-async function runAntibodyDocking(){
-  if(inProgress) return; cancelled=false; inProgress=true; status('preparing'); setProgress(0);
-  E('dockBtn').disabled=true; E('cancelBtn').disabled=false; E('dockBtn').textContent='Running…';
-  try{
-    const textA=await ensureInputText('A'), textB=await ensureInputText('B');
-    pdbAAllAtoms=parsePDB(textA); pdbBAllAtoms=parsePDB(textB);
-    populateChainChips('A',pdbAAllAtoms); populateChainChips('B',pdbBAllAtoms);
-
-    const params=collectDockingParams();
-    const comboDefs=enumerateCombos();
-    if(!comboDefs.length) throw new Error('No chain combinations produced. Select at least one chain on each protein.');
-
-    combos=comboDefs.map(c=>({label:c.label, Aatoms:c.Aatoms, Batoms:c.Batoms, cA:null, cB:null, topPoses:[], currentIndex:0}));
-    updateComboSelect();
-
-    // Process combos sequentially (UI stays responsive)
-    let completed=0; const totalCombos=combos.length; let overallProgress=0; const totalSamples=(params.samples||10000)*totalCombos;
-    for(let i=0;i<combos.length;i++){
-      if(cancelled) break; status(`combo ${i+1}/${totalCombos} sampling…`);
-      await dockSingleCombo(i, params, (done)=>{ // progress callback (approx)
-        overallProgress = (completed*params.samples + done) / totalSamples; setProgress(overallProgress);
-      });
-      completed++;
-      fillComboSummaryRow(i);
-    }
-
-    setCurrentCombo(0);
-    finishDocking(); status(cancelled?'cancelled':'complete'); setProgress(1); inProgress=false;
-  }catch(e){ alert(e.message||'Docking error'); finishDocking(); status('error'); inProgress=false; }
-}
-function cancelDocking(){ cancelled=true; workerPool.forEach(w=>{try{w.terminate();}catch(e){}}); workerPool=[]; setProgress(0); status('cancelled'); finishDocking(); inProgress=false; }
-function finishDocking(){ E('dockBtn').disabled=false; E('cancelBtn').disabled=true; E('dockBtn').textContent='▶️ Run Docking'; }
-function collectDockingParams(){
-  return {samples:parseInt(E('samples').value),maxTrans:parseFloat(E('maxTrans').value),contactCut:parseFloat(E('contactCut').value), clashFactor:parseFloat(E('clashFactor').value),wContact:parseFloat(E('wContact').value),wClash:parseFloat(E('wClash').value),soft:parseFloat(E('soft').value), topN:Math.max(1,parseInt(E('topN').value)),seed:parseInt(E('seed').value)||42,atomMode:E('atomMode').value,rescoreMode:E('rescoreMode').value};
-}
-async function ensureInputText(which){ const file=E(which==='A'?'pdbAFile':'pdbBFile').files[0]; let t=E(which==='A'?'pdbAText':'pdbBText').value.trim(); if(!t && file){ t=await fileToText(file); } if(!t) throw new Error(`Provide PDB for Protein ${which} (file or text).`); return t; }
-
-async function dockSingleCombo(idx, params, onProgress){
-  const combo=combos[idx];
-  const aSel=combo.Aatoms, bSel=combo.Batoms;
-  const ptsA0=selectAtomSet(aSel,params.atomMode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
-  const ptsB0=selectAtomSet(bSel,params.atomMode).map(a=>({x:a.x,y:a.y,z:a.z,elem:a.elem}));
-  if(!ptsA0.length||!ptsB0.length) throw new Error('Atom selection empty. Try Backbone or Heavy mode.');
-  const cA=centroid(ptsA0), cB=centroid(ptsB0);
-  const ptsA=translate(ptsA0,{x:-cA.x,y:-cA.y,z:-cA.z});
-  const ptsB=translate(ptsB0,{x:-cB.x,y:-cB.y,z:-cB.z});
-  combo.cA=cA; combo.cB=cB;
-
-  const cores=Math.max(1,(navigator.hardwareConcurrency||4)-1), pool=Math.min(cores,8);
-  const total=params.samples, base=Math.floor(total/pool), extra=total%pool;
-  let all=[], done=0; workerPool=[];
-  const progressUnit=1024; // worker posts every 1024
-  await new Promise((resolve)=>{
-    for(let i=0;i<pool;i++){
-      const start=i*base+Math.min(i,extra), end=start+base+(i<extra?1:0);
-      const w=makeDockWorker(); workerPool.push(w);
-      w.onmessage=(m)=>{
-        if(cancelled) return;
-        const msg=m.data;
-        if(msg.type==='progress'){ done+=progressUnit; onProgress?.(Math.min(done,total)); }
-        if(msg.type==='done'){ all.push(msg.poses); w.terminate(); if(all.length===pool){ resolve(); } }
-      };
-      w.onerror=(e)=>{ console.error('worker error',e); w.terminate(); };
-      w.postMessage({Apts:ptsA,Bpts:ptsB,params,start,end});
-    }
-  });
-  workerPool=[];
-  const poses=all.flat(); poses.sort((a,b)=>b.score-a.score);
-  const diverse=diverseTop(poses, parseFloat(E('dupAngle').value)||12, parseFloat(E('dupTrans').value)||2, params.topN*3);
-
-  // heavy sets for viz/rescore
-  const Aheavy=translate(selectAtomSet(aSel,'HEAVY').map(a=>({...a})), {x:-cA.x,y:-cA.y,z:-cA.z});
-  const Bheavy0=translate(selectAtomSet(bSel,'HEAVY').map(a=>({...a})), {x:-cB.x,y:-cB.y,z:-cB.z});
-
-  let top=diverse;
-  if(params.rescoreMode!=='NONE'){ top=await heavyAtomRescore(Aheavy,Bheavy0,params,diverse, params.rescoreMode==='HEAVY_REFINE'); }
-  combo.topPoses=top; combo.Aviz=Aheavy; combo.B0=Bheavy0;
-}
-
-function heavyAtomRescore(A,B0,params,coarse,refine=false){
-  const {contactCut,clashFactor,wContact,wClash,soft}=params;
-  function score(A,B){ let contacts=0, clash=0; for(const b of B) for(const a of A){ const d=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z); const rs=(vdw[(a.elem||'C').toUpperCase()]||1.7)+(vdw[(b.elem||'C').toUpperCase()]||1.7), cut=clashFactor*rs; if(d<=cut){ const ov=(cut-d+1e-6)/cut; clash+=wClash*ov*(1/(1+soft*ov)); } else if(d<=contactCut){ contacts++; } } return {score:wContact*contacts-clash,contacts,clash}; }
-  function jiggle(p){ const r=()=> (Math.random()*2-1)*0.5; const dq=[p.q[0]+r()*0.01,p.q[1]+r()*0.01,p.q[2]+r()*0.01,p.q[3]+r()*0.01]; const n=Math.hypot(...dq); for(let i=0;i<4;i++) dq[i]/=n; const dt={x:p.t.x+r(),y:p.t.y+r(),z:p.t.z+r()}; return {q:dq,t:dt}; }
-  const rescored=[]; for(const p of coarse){ let best={...p}; let TB=applyTransform(B0,p.q,p.t); let s=score(A,TB); best.score=s.score; best.contacts=s.contacts; best.clash=s.clash; if(refine){ for(let it=0;it<40;it++){ const pp=jiggle(best); const TB2=applyTransform(B0,pp.q,pp.t); const s2=score(A,TB2); if(s2.score>best.score){ best.q=pp.q; best.t=pp.t; best.score=s2.score; best.contacts=s2.contacts; best.clash=s2.clash; } } } rescored.push(best); }
-  rescored.sort((a,b)=>b.score-a.score); return rescored.slice(0,parseInt(E('topN').value));
-}
-function applyTransform(points,q,t){ const [qx,qy,qz,qw]=q; return points.map(p=>{ const vx=p.x,vy=p.y,vz=p.z; const ix=qw*vx+qy*vz-qz*vy,iy=qw*vy+qz*vx-qx*vz,iz=qw*vz+qx*vy-qy*vx,iw=-qx*vx-qy*vy-qz*vz; const ox=ix*qw+iw*(-qx)+iy*(-qz)-iz*(-qy),oy=iy*qw+iw*(-qy)+iz*(-qx)-ix*(-qz),oz=iz*qw+iw*(-qz)+ix*(-qy)-iy*(-qx); return {x:ox+t.x,y:oy+t.y,z:oz+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name}; }); }
-
-// ========================= Visualization / overlays =========================
-function updateComboSelect(){ const sel=E('comboSelect'); sel.innerHTML=''; combos.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`${i+1}. ${c.label}`; sel.appendChild(o); }); E('comboSummaryBody').innerHTML=''; }
-function setCurrentCombo(i){ if(i<0||i>=combos.length) return; currentComboIndex=i; E('comboSelect').value=String(i); buildPoseButtons(combos[i].topPoses); if(combos[i].topPoses.length) showPose(0); updateMetricsDisplay(); }
-function buildPoseButtons(poses){ const c=E('poseControls'); c.innerHTML=''; poses.forEach((p,i)=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=`Pose ${i+1} (S=${p.score.toFixed(1)}, C=${p.contacts|0}, X=${p.clash.toFixed(1)})`; b.addEventListener('click',()=>showPose(i)); c.appendChild(b); const d=document.createElement('button'); d.className='btn green'; d.style.marginLeft='6px'; d.textContent='⬇ PDB'; d.addEventListener('click',()=>downloadSinglePose(i)); c.appendChild(d); }); updateComparisonDropdowns(poses); }
-function showPose(i){ const combo=combos[currentComboIndex]; if(!combo) return; if(i<0||i>=combo.topPoses.length) return; combo.currentIndex=i; const p=combo.topPoses[i]; const TB=applyTransform(combo.B0,p.q,p.t); viewer.clear(); viewer.addModel(formatPDB(combo.Aviz),'pdb'); viewer.addModel(formatPDB(TB,1),'pdb'); const rA=new Set(combo.Aviz.map(a=>a.resi)).size, rB=new Set(TB.map(a=>a.resi)).size, cartoon=rA>=8 && rB>=8; if(cartoon){ viewer.setStyle({model:0},{cartoon:{color:'#60a5fa'}}); viewer.setStyle({model:1},{cartoon:{color:'#f97316'}}); } else{ viewer.setStyle({model:0},{stick:{radius:.25}}); viewer.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}}); } viewer.zoomTo(); const cutoff=parseFloat(E('contactCut').value); const metrics=computeInterfaceMetrics(combo.Aviz,TB,cutoff); currentContacts=metrics.contactsPairs; currentHB=metrics.hbPairs; currentSB=metrics.sbPairs; currentHydro=metrics.hydroPairs||[]; refreshOverlays(); const kElec=parseFloat(E('kElec').value)||0.5, eCut=parseFloat(E('elecCut').value)||12; const elec=coulombEnergy(combo.Aviz,TB,kElec,eCut); const BSA=metrics.contacts*10.0; const dH=calculateEnthalpy(metrics,elec); E('scoreBox').innerHTML=`<b>${combo.label}</b> • <b>Pose ${i+1}</b><br> Score: ${p.score.toFixed(2)} | Contacts: ${metrics.contacts} | Clash: ${metrics.clash.toFixed(2)} | H-bonds: ${metrics.hb} | SaltBr: ${metrics.sb} | Hydrophobics: ${metrics.hydrophobics}<br> BSA ≈ ${BSA.toFixed(0)} Å² | Electrostatics: ${elec.toFixed(2)} kcal/mol | <b>ΔH ≈ ${dH.toFixed(2)} kcal/mol</b>`; updateMetricsDisplay(); updateEnergyDecomposition(metrics,elec,dH); viewer.render(); }
-function refreshOverlays(){ if(!combos.length) return; viewer.removeAllShapes(); if(E('toggleContacts').checked) drawLines(currentContacts,'#60a5fa'); if(E('toggleHB').checked) drawLines(currentHB,'#34d399'); if(E('toggleSB').checked) drawLines(currentSB,'#f87171'); if(E('toggleHydro').checked) drawLines(currentHydro,'#fbbf24'); viewer.render(); }
-function drawLines(pairs,color){ pairs.slice(0,400).forEach(p=>{ viewer.addLine({start:{x:p.x1,y:p.y1,z:p.z1},end:{x:p.x2,y:p.y2,z:p.z2},dashed:true,dashLength:.5,color,linewidth:2}); }); }
-function computeInterfaceMetrics(A,B,cut){ let contacts=0,clash=0,hb=0,sb=0,hydro=0; const contactsPairs=[],hbPairs=[],sbPairs=[],hydroPairs=[]; const clashFactor=parseFloat(E('clashFactor').value)||0.85; for(const b of B) for(const a of A){ const d=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z); const rs=(vdw[(a.elem||'C').toUpperCase()]||1.7)+(vdw[(b.elem||'C').toUpperCase()]||1.7), cutCl=clashFactor*rs; if(d<=cutCl){ const ov=(cutCl-d+1e-6)/cutCl; clash+=6.0*ov*(1/(1+0.5*ov)); } if(d<=cut){ contacts++; contactsPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); } const aN=a.name?.startsWith('N'), aO=a.name?.startsWith('O'), bN=b.name?.startsWith('N'), bO=b.name?.startsWith('O'); if(((aN&&bO)||(aO&&bN)) && d<=3.5){ hb++; hbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); } const isAcidic=at=> (at.resn==='ASP'&&at.name.startsWith('OD'))||(at.resn==='GLU'&&at.name.startsWith('OE')); const isBasic =at=> (at.resn==='LYS'&&at.name==='NZ')||(at.resn==='ARG'&&(at.name==='NH1'||at.name==='NH2'||at.name==='NE'))||(at.resn==='HIS'&&(at.name==='ND1'||at.name==='NE2')); if(((isAcidic(a)&&isBasic(b))||(isAcidic(b)&&isBasic(a))) && d<=4.0){ sb++; sbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); } if(hydrophobic.has(a.resn)&&hydrophobic.has(b.resn)&&(a.elem==='C'||b.elem==='C')&&d<=4.5){ hydro++; hydroPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); } } return {contacts,clash,hb,sb,hydrophobics:hydro,contactsPairs,hbPairs,sbPairs,hydroPairs}; }
-function coulombEnergy(A,B,k=0.5,cut=12){ const AA=residueChargesFor(A), BB=residueChargesFor(B); let E=0, cut2=cut*cut; for(const a of AA) for(const b of BB){ const dx=a.x-b.x,dy=a.y-b.y,dz=a.z-b.z, d2=dx*dx+dy*dy+dz*dz; if(d2>cut2) continue; E+=k*(a.q*b.q)/(Math.sqrt(d2)+1e-3); } return E; }
-function residueChargesFor(atoms){ const groups=new Map(); for(const a of atoms){ const key=a.chain+':'+a.resi; if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(a); } const out=[]; for(const [key,arr] of groups.entries()){ const res=arr[0].resn||'UNK', q=residueCharges[res]||0; if(!q) continue; const ca=arr.find(x=>x.name==='CA'); let x,y,z; if(ca){x=ca.x;y=ca.y;z=ca.z;} else{ let sx=0,sy=0,sz=0; for(const a of arr){sx+=a.x; sy+=a.y; sz+=a.z;} x=sx/arr.length; y=sy/arr.length; z=sz/arr.length; } out.push({x,y,z,q,resn:res}); } return out; }
-function calculateEnthalpy(m,elec){ const w={contact:-0.5,hbond:-2.5,salt:-4.0,hydro:-1.0,clash:+0.3,desolv:+0.2}; return w.contact*m.contacts + w.hbond*m.hb + w.salt*m.sb + w.hydro*m.hydrophobics + w.clash*m.clash + elec + w.desolv*m.contacts; }
-
-// ========================= Clustering & Summary =========================
-function clusterCurrentPoses(){ const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length) return; const K=Math.max(1,parseInt(E('clustersK').value)||6); const poses=combo.topPoses; const centers=poses.slice(0,Math.min(K,poses.length)); const assign=new Array(poses.length).fill(0);
-  // distance = quaternion angle + scaled translation
-  function d(p,q){ const a=angleBetweenQuats(p.q,q.q), t=Math.hypot(p.t.x-q.t.x,p.t.y-q.t.y,p.t.z-q.t.z); return a+5*t; }
-  for(let iter=0;iter<6;iter++){
-    // assign
-    for(let i=0;i<poses.length;i++){ let best=0,bestd=Infinity; for(let c=0;c<centers.length;c++){ const dd=d(poses[i],centers[c]); if(dd<bestd){bestd=dd;best=c;} } assign[i]=best; }
-    // update
-    for(let c=0;c<centers.length;c++){ const members=poses.filter((_,i)=>assign[i]===c); if(members.length){ members.sort((a,b)=>b.score-a.score); centers[c]=members[0]; } }
-  }
-  // reorder by clusters then score
-  const ordered=poses.map((p,i)=>({p,i,cl:assign[i]})).sort((a,b)=> a.cl-b.cl || b.p.score-a.p.score).map(x=>x.p);
-  combo.topPoses=ordered; buildPoseButtons(combo.topPoses); showPose(0);
-}
-function fillComboSummaryRow(i){ const combo=combos[i]; const top=combo.topPoses[0]; if(!top) return; const TB=applyTransform(combo.B0,top.q,top.t); const metrics=computeInterfaceMetrics(combo.Aviz,TB,parseFloat(E('contactCut').value)); const elec=coulombEnergy(combo.Aviz,TB,parseFloat(E('kElec').value)||0.5,parseFloat(E('elecCut').value)||12); const dH=calculateEnthalpy(metrics,elec); const tr=document.createElement('tr'); tr.innerHTML=`<td>${combo.label}</td><td>${top.score.toFixed(2)}</td><td>${metrics.contacts}</td><td>${dH.toFixed(2)}</td>`; E('comboSummaryBody').appendChild(tr); }
-
-// ========================= Metrics / Analysis UI =========================
-function updateMetricsDisplay(){ const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length){ E('metricsDisplay').innerHTML='<div class="small" style="color:#9ca3af">Run docking to see metrics.</div>'; return; } const p=combo.topPoses[combo.currentIndex]; E('metricsDisplay').innerHTML=`<div class="metric-card"><div class="metric-value">${p.score.toFixed(2)}</div><div class="metric-label">Score</div></div><div class="metric-card"><div class="metric-value">${currentContacts.length}</div><div class="metric-label">Contacts</div></div><div class="metric-card"><div class="metric-value">${currentHB.length}</div><div class="metric-label">H-bonds</div></div><div class="metric-card"><div class="metric-value">${currentSB.length}</div><div class="metric-label">Salt Bridges</div></div>`; }
-function updateEnergyDecomposition(m,elec,dH){ const box=E('energyComponents'); const parts=[["Contacts","+"+(m.contacts),-0.5*m.contacts],["H-bonds","+"+(m.hb),-2.5*m.hb],["SaltBr","+"+(m.sb),-4.0*m.sb],["Hydrophobic","+"+(m.hydrophobics),-1.0*m.hydrophobics],["Clash","+"+m.clash,(+0.3*m.clash)],["Electrostatics","",elec],["Desolv","+"+m.contacts,+0.2*m.contacts]]; box.innerHTML=parts.map(([k,c,v])=>`<div class="metric-card"><div class="metric-value">${v.toFixed(2)}</div><div class="metric-label">${k} ${c}</div></div>`).join(''); E('enthalpyDetail').textContent = `ΔH ≈ ${dH.toFixed(2)} kcal/mol (contacts, H-bonds, salt bridges, hydrophobic, clash, electrostatics, desolvation).`; }
-function updateComparisonDropdowns(poses){ const s1=E('comparePose1'), s2=E('comparePose2'); s1.innerHTML=''; s2.innerHTML=''; poses.forEach((p,i)=>{ const o1=document.createElement('option'); o1.value=i; o1.textContent=`Pose ${i+1}`; s1.appendChild(o1); const o2=document.createElement('option'); o2.value=i; o2.textContent=`Pose ${i+1}`; s2.appendChild(o2); }); if(poses.length>=2){ s1.value=0; s2.value=1; } }
-function comparePoses(){ const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length) return; const i1=parseInt(E('comparePose1').value), i2=parseInt(E('comparePose2').value); if(!(combo.topPoses[i1]&&combo.topPoses[i2])) return; const TB1=applyTransform(combo.B0,combo.topPoses[i1].q,combo.topPoses[i1].t); viewerComp.clear(); viewerComp.addModel(formatPDB(combo.Aviz),'pdb'); viewerComp.addModel(formatPDB(TB1,1),'pdb'); viewerComp.setStyle({model:0},{cartoon:{color:'#60a5fa'}}); viewerComp.setStyle({model:1},{cartoon:{color:'#f97316'}}); viewerComp.zoomTo(); viewerComp.render(); const a=angleBetweenQuats(combo.topPoses[i1].q, combo.topPoses[i2].q), t=Math.hypot(combo.topPoses[i1].t.x-combo.topPoses[i2].t.x,combo.topPoses[i1].t.y-combo.topPoses[i2].t.y,combo.topPoses[i1].t.z-combo.topPoses[i2].t.z); E('comparisonResults').textContent = `Pose1 score=${combo.topPoses[i1].score.toFixed(2)}, Pose2 score=${combo.topPoses[i2].score.toFixed(2)}\nΔangle ≈ ${a.toFixed(1)}°, Δtranslation ≈ ${t.toFixed(2)} Å`; }
-function filterResidueContacts(){ const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length) return; const min=parseFloat(E('filterMinDist').value)||0, max=parseFloat(E('filterMaxDist').value)||6; const p=combo.topPoses[combo.currentIndex]; const TB=applyTransform(combo.B0,p.q,p.t); const rows=[]; for(const b of TB) for(const a of combo.Aviz){ const d=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z); if(d<min||d>max) continue; const type=(a.name?.startsWith('N')&&b.name?.startsWith('O')||a.name?.startsWith('O')&&b.name?.startsWith('N'))&&d<=3.5?'H-bond': (hydrophobic.has(a.resn)&&hydrophobic.has(b.resn)?'Hydrophobic': (d<=4?'Contact':'Proximal')); const e=type==='H-bond'?-2.5:type==='Hydrophobic'?-1.0:type==='Contact'?-0.5:0; rows.push(`<tr><td>${a.resn}${a.resi}</td><td>${a.chain}</td><td>${b.resn||'-'}${b.resi||'-'}</td><td>${b.chain||'-'}</td><td>${d.toFixed(2)}</td><td>${type}</td><td>${e.toFixed(2)}</td></tr>`); } E('residueTableBody').innerHTML=rows.slice(0,1000).join(''); }
-function exportResidueData(){ const table=E('residueTableBody').innerText||''; if(!table){alert('No data');return;} downloadBlob(table,'residue_contacts.txt'); }
-
-// ========================= Exports =========================
-function downloadAllPoses(){ const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length){alert('No poses.');return;} const lines=[]; combo.topPoses.forEach((p,i)=>{lines.push(`MODEL     ${i+1}  ${combo.label}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL');}); lines.push('END'); downloadBlob(lines.join('\n'),'all_poses_'+safe(combo.label)+'.pdb'); }
-function safe(s){return s.replace(/[^a-z0-9]+/gi,'_');}
-function downloadSinglePose(i){ const combo=combos[currentComboIndex]; if(!combo) return; const p=combo.topPoses[i]; const TB=applyTransform(combo.B0,p.q,p.t); const pdb=formatPDB(combo.Aviz)+'\n'+formatPDB(TB,1); downloadBlob(pdb,`pose_${i+1}_`+safe(combo.label)+`.pdb`); }
-function downloadCurrentPose(){ const combo=combos[currentComboIndex]; if(!combo){alert('No complex selected.');return;} downloadSinglePose(combo.currentIndex||0); }
-function downloadCSV(){ if(!combos.length){alert('No data');return;} const rows=['complex,rank,score,contacts,clash,qx,qy,qz,qw,tx,ty,tz']; combos.forEach((combo)=>{ combo.topPoses.forEach((p,i)=>rows.push([`"${combo.label}"`,i+1,p.score.toFixed(4),p.contacts,p.clash.toFixed(4),p.q[0].toFixed(6),p.q[1].toFixed(6),p.q[2].toFixed(6),p.q[3].toFixed(6),p.t.x.toFixed(3),p.t.y.toFixed(3),p.t.z.toFixed(3)].join(','))); }); downloadBlob(rows.join('\n'),'poses_summary_all_complexes.csv'); }
-function downloadJSON(){ if(!combos.length){alert('No data');return;} const out={params:collectDockingParams(), complexes:combos.map(c=>({label:c.label, topPoses:c.topPoses}))}; downloadBlob(JSON.stringify(out,null,2),'poses_all_complexes.json'); }
-function downloadAllComplexesPDB(){ if(!combos.length){alert('No complexes');return;} const lines=[]; let model=1; combos.forEach((combo)=>{ combo.topPoses.forEach((p,i)=>{ lines.push(`MODEL     ${model++}  ${combo.label}  pose ${i+1}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL'); }); }); lines.push('END'); downloadBlob(lines.join('\n'),'all_complexes_all_poses.pdb'); }
-
-// ========================= Ligand docking (CODE CONTINUES HERE) =========================
-function loadLigandDemoReceptor(){ E('ligReceptorPDB').value=`ATOM      1  CA  ALA A   1      -8.000   0.000   0.000  1.00  0.00           C\nATOM      2  CA  ALA A   2      -6.600   1.200   0.200  1.00  0.00           C\nATOM      3  CA  ALA A   3      -5.200   0.100   1.200  1.00  0.00           C\nATOM      4  CA  ALA A   4      -3.800   1.400   1.400  1.00  0.00           C\nATOM      5  CA  ALA A   5      -2.400   0.500   2.200  1.00  0.00           C\nEND`; }
-function parseReceptorForLigand(){ const t=E('ligReceptorPDB').value.trim(); if(!t){alert('Paste receptor PDB first'); return;} const atoms=parsePDB(t); viewerLig.clear(); viewerLig.addModel(formatPDB(atoms),'pdb'); viewerLig.setStyle({},{cartoon:{color:'#60a5fa'}}); viewerLig.zoomTo(); viewerLig.render(); }
-function embedSmilesTo3D(smiles, method='HASH', seed=1337){ 
-    const rng = (()=>{let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);})();
-    const atoms = smiles.replace(/[^a-zA-Z]/g, '').split('').map(e => ({elem: e.toUpperCase(), x: 0, y: 0, z: 0}));
-    if (method === 'HASH') {
-        for (let i = 0; i < atoms.length; i++) {
-            atoms[i].x = (rng() - 0.5) * 4;
-            atoms[i].y = (rng() - 0.5) * 4;
-            atoms[i].z = (rng() - 0.5) * 4;
-        }
-    } else { // RingHelix
-        const R = 2.0, pitch = 1.5;
-        for (let i = 0; i < atoms.length; i++) {
-            const angle = 2 * Math.PI * i / Math.min(atoms.length, 8);
-            atoms[i].x = R * Math.cos(angle);
-            atoms[i].y = R * Math.sin(angle);
-            atoms[i].z = i * pitch / Math.min(atoms.length, 8);
-        }
-    }
-    return atoms;
-}
-async function runSingleLigandDock() {
-    const ligStatus = E('ligStatus'); ligStatus.textContent = 'running...';
-    try {
-        const receptorPDB = E('ligReceptorPDB').value.trim();
-        const smiles = E('ligSmiles').value.trim();
-        if (!receptorPDB || !smiles) throw new Error('Receptor PDB and Ligand SMILES are required.');
-        const receptorAtoms = parsePDB(receptorPDB);
-        const ligandAtoms = embedSmilesTo3D(smiles, E('ligEmbedMethod').value, parseInt(E('ligSeed').value));
-
-        const cR = centroid(receptorAtoms);
-        const receptorCentered = translate(receptorAtoms, {x: -cR.x, y: -cR.y, z: -cR.z});
-        const cL = centroid(ligandAtoms);
-        const ligandCentered = translate(ligandAtoms, {x: -cL.x, y: -cL.y, z: -cL.z});
-
-        // Simplified docking - 5000 random poses
-        let bestPose = { score: -Infinity };
-        const rng = (()=>{let s=42; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);})();
-        for (let i = 0; i < 5000; i++) {
-            const q = [rng()*2-1, rng()*2-1, rng()*2-1, rng()*2-1];
-            const n = Math.hypot(...q);
-            q.forEach((v,i)=>q[i]=v/n);
-            const t = { x: (rng() - 0.5) * 5, y: (rng() - 0.5) * 5, z: (rng() - 0.5) * 5 };
-            const posedLigand = applyTransform(ligandCentered, q, t);
-            const {score, contacts, clash} = scoreLigand(receptorCentered, posedLigand);
-            if (score > bestPose.score) {
-                bestPose = { score, contacts, clash, q, t, ligand: posedLigand, receptor: receptorCentered, smiles, receptorPDB };
-            }
-        }
-        
-        ligLastResult = bestPose;
-        viewerLig.clear();
-        viewerLig.addModel(formatPDB(bestPose.receptor), 'pdb');
-        viewerLig.addModel(formatPDB(bestPose.ligand, 1), 'pdb');
-        viewerLig.setStyle({model: 0}, {stick: {radius: 0.2, color: '#60a5fa'}});
-        viewerLig.setStyle({model: 1}, {stick: {radius: 0.3, color: '#f97316'}});
-        viewerLig.zoomTo();
-        viewerLig.render();
-        E('ligScore').textContent = `Best Score: ${bestPose.score.toFixed(2)}, Contacts: ${bestPose.contacts}, Clash: ${bestPose.clash.toFixed(2)}`;
-        ligStatus.textContent = 'complete';
-    } catch (e) {
-        alert('Ligand Docking Failed: ' + e.message);
-        ligStatus.textContent = 'error';
-    }
-}
-function scoreLigand(receptor, ligand) {
-    let contacts = 0, clash = 0;
-    const contactCut = parseFloat(E('contactCut').value) || 4.8;
-    const clashFactor = parseFloat(E('clashFactor').value) || 0.85;
-    for (const l of ligand) {
-        for (const r of receptor) {
-            const d = Math.hypot(l.x - r.x, l.y - r.y, l.z - r.z);
-            const rs = (vdw[(l.elem||'C').toUpperCase()] || 1.7) + (vdw[(r.elem||'C').toUpperCase()] || 1.7);
-            if (d < rs * clashFactor) {
-                clash += (rs * clashFactor - d);
-            } else if (d < contactCut) {
-                contacts++;
-            }
-        }
-    }
-    return { score: contacts - 6.0 * clash, contacts, clash };
-}
-function downloadLigandPDB() { if (!ligLastResult.score) return; const pdb = formatPDB(ligLastResult.receptor) + "\n" + formatPDB(ligLastResult.ligand, 1); downloadBlob(pdb, 'ligand_complex.pdb'); }
-function downloadLigandCSV() { if (!ligLastResult.score) return; const row = `smiles,score,contacts,clash\n"${ligLastResult.smiles}",${ligLastResult.score.toFixed(3)},${ligLastResult.contacts},${ligLastResult.clash.toFixed(3)}`; downloadBlob(row, 'ligand_result.csv'); }
-
-// ========================= Batch Screening =========================
-async function startBatchScreening() {
-    E('btnStartScreen').disabled = true; E('btnStopScreen').disabled = false; E('scrStatus').textContent = 'running...'; screenCancel = false;
-    try {
-        const smilesList = E('scrSmiles').value.trim().split('\n').filter(s => s);
-        const receptorPDBs = E('scrReceptors').value.trim().split(/\nEND\n/);
-        if (smilesList.length > 50 || receptorPDBs.length > 3) throw new Error('Exceeded limits: max 50 SMILES, max 3 receptors.');
-        
-        screenReceptors = receptorPDBs.map((pdb, i) => ({ id: `R${i+1}`, atoms: parsePDB(pdb)}));
-        if (screenReceptors.some(r => r.atoms.length === 0)) throw new Error('One or more receptors failed to parse.');
-        
-        screenResults = [];
-        E('scrTableBody').innerHTML = ''; let count = 0;
-        const totalJobs = smilesList.length * screenReceptors.length;
-
-        for (const receptor of screenReceptors) {
-            for (const smiles of smilesList) {
-                if (screenCancel) break;
-                E('scrProgress').textContent = `Processing ${++count} of ${totalJobs}...`;
-                // Yield to the event loop for UI responsiveness
-                await new Promise(resolve => setTimeout(() => {
-                    const result = dockSingleLigandToReceptor(smiles, receptor.atoms, receptor.id);
-                    screenResults.push(result);
-                    resolve();
-                }, 0));
-            }
-            if (screenCancel) break;
-        }
-        
-        // Final sort and display
-        sortAndDisplayScreeningResults();
-        E('scrStatus').textContent = screenCancel ? 'stopped' : 'complete';
-    } catch (e) {
-        alert('Screening failed: ' + e.message); E('scrStatus').textContent = 'error';
-    }
-    E('btnStartScreen').disabled = false; E('btnStopScreen').disabled = true;
-}
-
-function dockSingleLigandToReceptor(smiles, receptorAtoms, receptorId) {
-    const embedMethod = E('scrEmbedMethod').value;
-    const seed = parseInt(E('scrSeed').value);
-    const ligandAtoms = embedSmilesTo3D(smiles, embedMethod, seed + smiles.length);
-    
-    const cR = centroid(receptorAtoms);
-    const receptorCentered = translate(receptorAtoms.map(a=>({...a})), {x: -cR.x, y: -cR.y, z: -cR.z});
-    const cL = centroid(ligandAtoms);
-    const ligandCentered = translate(ligandAtoms, {x: -cL.x, y: -cL.y, z: -cL.z});
-
-    let bestPose = { score: -Infinity };
-    const rng = (()=>{let s=seed; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);})();
-    const samples = parseInt(E('scrSamples').value);
-
-    for (let i = 0; i < samples; i++) {
-        const q = [rng()*2-1, rng()*2-1, rng()*2-1, rng()*2-1];
-        const n = Math.hypot(...q); q.forEach((v,i)=>q[i]=v/n);
-        const t = { x: (rng() - 0.5) * 8, y: (rng() - 0.5) * 8, z: (rng() - 0.5) * 8 };
-        const posedLigand = applyTransform(ligandCentered, q, t);
-        const { score, contacts, clash } = scoreLigand(receptorCentered, posedLigand);
-        if (score > bestPose.score) {
-            bestPose = { score, contacts, clash, q, t };
-        }
-    }
-    
-    const metrics = computeInterfaceMetrics(receptorCentered, applyTransform(ligandCentered, bestPose.q, bestPose.t), parseFloat(E('scrContactCut').value));
-    const dH = calculateEnthalpy(metrics, 0); // Simplified dH for screening
-    return { ...bestPose, smiles, receptorId, hb: metrics.hb, sb: metrics.sb, dH };
-}
-
-function sortAndDisplayScreeningResults() {
-    const sortBy = E('scrSort').value;
-    if (sortBy === 'score') screenResults.sort((a,b) => b.score - a.score);
-    else if (sortBy === 'enthalpy') screenResults.sort((a,b) => a.dH - b.dH);
-    else { // consensus
-        // rank by each metric
-        const scoreRank = [...screenResults].sort((a,b) => b.score - a.score).map((r,i)=> ({...r, rank: i}));
-        const dHRank = [...screenResults].sort((a,b) => a.dH - b.dH).map((r,i)=> ({...r, rank: i}));
-        const contactRank = [...screenResults].sort((a,b) => a.contacts - b.contacts).map((r,i)=> ({...r, rank: i}));
-        
-        const rankMap = new Map();
-        const updateMap = (arr) => arr.forEach((item, i) => {
-            const mapKey = item.receptorId + '||' + item.smiles;
-            if (!rankMap.has(mapKey)) rankMap.set(mapKey, { consensus: 0, item });
-            rankMap.get(mapKey).consensus += i;
-        });
-
-        updateMap(scoreRank); updateMap(dHRank); updateMap(contactRank);
-        screenResults.forEach(r => {
-            const mapKey = r.receptorId + '||' + r.smiles;
-            r.cRank = rankMap.get(mapKey).consensus;
-        });
-        screenResults.sort((a,b) => a.cRank - b.cRank);
-    }
-    
-    const body = E('scrTableBody'); body.innerHTML = '';
-    screenResults.forEach((r, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${i+1}</td><td>${r.receptorId}</td><td class="small">${r.smiles}</td><td>${r.score.toFixed(2)}</td><td>${r.contacts}</td><td>${r.hb}</td><td>${r.sb}</td><td>${r.clash.toFixed(2)}</td><td>${r.dH.toFixed(2)}</td><td>${r.cRank || '-'}</td>`;
-        tr.addEventListener('click', () => visualizeScreeningPose(r));
-        body.appendChild(tr);
-    });
-}
-function visualizeScreeningPose(result) {
-    const receptor = screenReceptors.find(r => r.id === result.receptorId);
-    if (!receptor) return;
-    const ligand = embedSmilesTo3D(result.smiles);
-    const cR = centroid(receptor.atoms);
-    const receptorCentered = translate(receptor.atoms.map(a=>({...a})), {x: -cR.x, y: -cR.y, z: -cR.z});
-    const cL = centroid(ligand);
-    const ligandCentered = translate(ligand, {x: -cL.x, y: -cL.y, z: -cL.z});
-    const posedLigand = applyTransform(ligandCentered, result.q, result.t);
-    
-    viewerScr.clear();
-    viewerScr.addModel(formatPDB(receptorCentered), 'pdb');
-    viewerScr.addModel(formatPDB(posedLigand, 1), 'pdb');
-    viewerScr.setStyle({model: 0}, {cartoon: {color: '#60a5fa'}});
-    viewerScr.setStyle({model: 1}, {stick: {radius: 0.3, color: '#f97316'}});
-    viewerScr.zoomTo();
-    viewerScr.render();
-}
-function downloadScreeningCSV() { const header = 'rank,receptor,smiles,score,contacts,clash,h_bonds,salt_bridges,delta_h,consensus_rank\n'; const rows = screenResults.map((r,i) => [i+1, r.receptorId, `"${r.smiles}"`, r.score.toFixed(3), r.contacts, r.clash.toFixed(3), r.hb, r.sb, r.dH.toFixed(3), r.cRank||''].join(',')).join('\n'); downloadBlob(header+rows, 'screening_results.csv'); }
-function downloadScreeningJSON() { downloadBlob(JSON.stringify(screenResults, null, 2), 'screening_results.json'); }
-function showTop10Screening() {
-    const top10 = screenResults.slice(0, 10);
-    const dHs = top10.map(r => r.dH);
-    const min = Math.min(...dHs), max = Math.max(...dHs), avg = dHs.reduce((a,b) => a+b, 0) / dHs.length;
-    E('screenMetrics').innerHTML = `<div class="metric-card"><div class="metric-value">${min.toFixed(2)}</div><div class="metric-label">Min ΔH</div></div><div class="metric-card"><div class="metric-value">${max.toFixed(2)}</div><div class="metric-label">Max ΔH</div></div><div class="metric-card"><div class="metric-value">${avg.toFixed(2)}</div><div class="metric-label">Avg ΔH</div></div>`;
-    E('enthalpyBreakdown').textContent = 'Top 10 ΔH Values:\n' + dHs.map(d => d.toFixed(2)).join(', ');
-}
-
-// ========================= QA & Registry =========================
-function saveCurrentRun() {
-    if (!combos.length) { alert('No run data to save.'); return; }
-    const topPose = combos[0]?.topPoses[0];
-    const run = {
-        timestamp: new Date().toISOString(),
-        type: 'Antibody Docking',
-        description: combos.map(c => c.label).join('; '),
-        topScore: topPose ? topPose.score.toFixed(3) : 'N/A',
-        signature: '...' + (Math.random().toString(36).substring(2, 8)),
-        data: { combos }
-    };
-    const registry = JSON.parse(localStorage.getItem(REGISTRY_KEY) || '[]');
-    registry.unshift(run);
-    localStorage.setItem(REGISTRY_KEY, JSON.stringify(registry.slice(0, 50)));
-    refreshRunRegistry();
-}
-function refreshRunRegistry() {
-    const registry = JSON.parse(localStorage.getItem(REGISTRY_KEY) || '[]');
-    const body = E('registryTableBody'); body.innerHTML = '';
-    registry.forEach((run, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${new Date(run.timestamp).toLocaleString()}</td><td>${run.type}</td><td>${run.description}</td><td>${run.topScore}</td><td>${run.signature}</td><td><button class="btn small" onclick="loadRun(${i})">Load</button></td>`;
-        body.appendChild(tr);
-    });
-}
-function loadRun(index) {
-    const registry = JSON.parse(localStorage.getItem(REGISTRY_KEY) || '[]');
-    const run = registry[index];
-    if (run && run.data.combos) {
-        combos = run.data.combos;
-        updateComboSelect();
-        setCurrentCombo(0);
-        alert('Run loaded.');
-    }
-}
-function clearRunRegistry() { if (confirm('Clear entire run registry?')) { localStorage.removeItem(REGISTRY_KEY); refreshRunRegistry(); }}
-function exportAllRuns() { const data = localStorage.getItem(REGISTRY_KEY) || '[]'; downloadBlob(data, 'docking_registry.json'); }
-function importRunRegistry() { E('importRegistryFile').click(); E('importRegistryFile').onchange = async (e) => { try { const text = await fileToText(e.target.files[0]); const data = JSON.parse(text); if (Array.isArray(data)) { localStorage.setItem(REGISTRY_KEY, JSON.stringify(data)); refreshRunRegistry(); alert('Registry imported.'); } else { alert('Invalid format.'); } } catch(err) { alert('Import failed: ' + err.message); } }; }
-
-async function runQATest() {
-    const repeats = parseInt(E('qaRepeats').value);
-    const tolerance = parseFloat(E('qaTolerance').value);
-    const qaResults = E('qaResults');
-    qaResults.textContent = 'Running QA test...';
-    
-    // Use the first combo from the last run if available
-    if (!combos.length || !combos[0]) { qaResults.textContent = 'No docking run available to test.'; return; }
-    
-    const scores = [];
-    const params = collectDockingParams();
-    for (let i = 0; i < repeats; i++) {
-        await dockSingleCombo(0, params, ()=>{}); // no progress update
-        const topScore = combos[0]?.topPoses[0]?.score;
-        if (topScore||topScore===0) scores.push(topScore);
-    }
-    
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const maxDiff = Math.max(...scores) - Math.min(...scores);
-    const pass = maxDiff <= tolerance;
-    
-    qaResults.textContent = `QA Test Results (${repeats} repeats):\n`
-        + `Scores: ${scores.map(s=>s.toFixed(3)).join(', ')}\n`
-        + `Average Score: ${avg.toFixed(3)}\n`
-        + `Max Difference: ${maxDiff.toFixed(3)}\n`
-        + `Tolerance: ${tolerance.toFixed(3)}\n`
-        + `Result: ${pass ? '✅ PASSED' : '❌ FAILED'}`;
-}
-
-// ========================= Session Save/Load =========================
-function saveSession() {
-    const state = {
-        pdbAText: E('pdbAText').value,
-        pdbBText: E('pdbBText').value,
-        params: collectDockingParams(),
-        dockingResults: combos
-    };
-    downloadBlob(JSON.stringify(state), 'docking_session.json');
-}
-function loadSession() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = async (e) => {
-        try {
-            const text = await e.target.files[0].text();
-            const state = JSON.parse(text);
-            E('pdbAText').value = state.pdbAText || '';
-            E('pdbBText').value = state.pdbBText || '';
-            if (state.params) {
-                Object.keys(state.params).forEach(k => {
-                    const el = E(k);
-                    if (el && state.params[k]!==undefined) el.value = state.params[k];
-                });
-            }
-            if (state.dockingResults) {
-                combos = state.dockingResults;
-                updateComboSelect();
-                setCurrentCombo(0);
-            }
-            alert('Session loaded.');
-        } catch(err) {
-            alert('Failed to load session: ' + err.message);
-        }
-    };
-    input.click();
-}
-function loadSessionHistory() { refreshRunRegistry(); }
-
-// ====================== DEMO ======================
-function useExample(which){
-  if(which==='A'){ E('pdbAText').value=`ATOM      1  CA  GLY A   1      10.000  10.000  10.000  1.00  0.00           C\nATOM      2  CA  ALA A   2      12.000  11.000  10.500  1.00  0.00           C`; }
-  else{ E('pdbBText').value=`ATOM      1  CA  PRO B   1      15.000  15.000  15.000  1.00  0.00           C\nATOM      2  CA  LEU B   2      17.000  14.000  15.500  1.00  0.00           C`; }
-}
-async function autoDemo(){ useExample('A'); useExample('B'); E('samples').value=2000; await runAntibodyDocking(); }
-
-// ====================== OMICS AND NMR EVENTS (NEW) ======================
-  {<section id="omicsTab" class="tabsec" data-tab-panel>
-  <div class="wrap">
-    <div class="card">
-      <h2>🔬 Omics Analyzer (Protein • Lipids • Carbohydrates • DNA)</h2>
-      <div class="infobox small">
-        Load a protein PDB (text), lipid SMILES (one per line), carbohydrate SMILES (one per line), and DNA (FASTA or plain). Click <b>Analyze</b> to compute per-modality descriptors and <b>Common Trends</b> across modalities. All computations are approximate and for education.
-      </div>
-
-      <div class="grid three" style="margin-top:8px">
-        <div>
-          <h3>Protein (PDB)</h3>
-          <textarea id="omicsProteinPDB" placeholder="Paste protein PDB text here"></textarea>
-          <div class="row" style="margin-top:6px">
-            <button class="btn" id="omicsLoadProteinDemo">Example</button>
-          </div>
-        </div>
-        <div>
-          <h3>Lipids (SMILES)</h3>
-          <textarea id="omicsLipidSmiles" placeholder="One SMILES per line (e.g., PC-like fragments)"></textarea>
-          <div class="row" style="margin-top:6px">
-            <button class="btn" id="omicsLoadLipidDemo">Example</button>
-          </div>
-        </div>
-        <div>
-          <h3>Carbohydrates (SMILES)</h3>
-          <textarea id="omicsCarbSmiles" placeholder="One SMILES per line (e.g., glucose, sucrose)"></textarea>
-          <div class="row" style="margin-top:6px">
-            <button class="btn" id="omicsLoadCarbDemo">Example</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid two" style="margin-top:8px">
-        <div>
-          <h3>DNA (FASTA or Plain)</h3>
-          <textarea id="omicsDNA" placeholder=">seq1&#10;ATGCGT..."></textarea>
-          <div class="row" style="margin-top:6px">
-            <button class="btn" id="omicsLoadDNADemo">Example</button>
-          </div>
-        </div>
-        <div>
-          <h3>Actions</h3>
-          <div class="row" style="margin-top:6px">
-            <button class="btn primary" id="omicsAnalyzeBtn">▶️ Analyze</button>
-            <button class="btn green" id="omicsExportBtn">⬇ Export JSON</button>
-            <span class="pill" id="omicsStatus" aria-live="polite">idle</span>
-          </div>
-          <div class="small" style="color:#9ca3af;margin-top:6px">
-            Metrics include: protein hydrophobicity & charge density; lipid/carbohydrate heteroatom% & unsaturation index; DNA GC%, CpG, 2-mer/3-mer spectra; plus cross-modal trend heuristics.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>📊 Omics Results</h2>
-      <div class="grid two">
-        <div>
-          <h3>Per-Modality Descriptors</h3>
-          <div class="table-container">
-            <table class="table">
-              <thead><tr><th>Metric</th><th>Value</th></tr></thead>
-              <tbody id="omicsDescriptorBody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <h3>Common Trends</h3>
-          <div class="score" id="omicsTrends" style="min-height:160px"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-    }
-
-    let predictionText = `--- THEORETICAL ${type} PREDICTION FOR ${smiles} ---\n\n`;
-
-    if (smiles === 'CC(=O)Oc1ccccc1C(=O)O') { // Aspirin
-        if (type === '1H') {
-            predictionText += `Aspirin proton environments (typical in CDCl3):\n\n- Methyl (−CH3): sharp singlet, ~δ 2.3 ppm (3H).\n- Aromatic (−C6H4−): multiplet system, δ 7.1–8.2 ppm (4H).\n- Acid −COOH: broad singlet, solvent‑dependent, often δ > 10 ppm; exchanges with D2O.`;
-        } else if (type === '13C') {
-            predictionText += `Nine unique carbons:\n\n- CH3 ~ δ 21 ppm.\n- Ester C=O ~ δ 169 ppm.\n- Acid C=O ~ δ 171 ppm.\n- Aromatics (6 signals) ~ δ 120–155 ppm; C–O aromatic often ~151 ppm.`;
-        } else if (type === 'COSY') {
-            predictionText += `COSY shows J‑coupled protons: strong ortho couplings linking adjacent aromatics; methyl isolated.`;
-        } else if (type === 'NOESY') {
-            predictionText += `NOESY shows spatial proximities: possible cross‑peak between methyl (~2.3 ppm) and ortho aromatic (~7.1 ppm); adjacent aromatics correlate.`;
-        }
-    } else {
-        predictionText += 'This demo includes a detailed template for Aspirin. For other molecules, interpret using analogous chemical shift/coupling logic.';
-    }
-    output.textContent = predictionText;
-}
-
-function resetAll(){
-  pdbAAllAtoms=[]; pdbBAllAtoms=[]; combos=[]; currentComboIndex=-1;
-  ['pdbAText','pdbBText'].forEach(id=>E(id).value='');
-  updateComboSelect();
-  E('poseControls').innerHTML='';
-  E('scoreBox').textContent='';
-  E('metricsDisplay').innerHTML='';
-  viewer?.clear(); viewerLig?.clear(); viewerScr?.clear(); viewerComp?.clear();
-  drawPlaceholder(viewer);
-  status('idle'); setProgress(0);
 }
 </script>
 </body>
