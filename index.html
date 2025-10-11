@@ -1182,7 +1182,8 @@ function createScreeningWorker() {
 
 
 async function startBatchScreening() {
-  const smilesLines = E('scrSmiles').value.split(/?
+  const smilesLines = E('scrSmiles').value.split(/
+?
 /).map(s => s.trim()).filter(Boolean).slice(0, 50);
   if (!smilesLines.length) { alert('Enter SMILES lines'); return; }
 
