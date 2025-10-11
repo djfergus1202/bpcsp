@@ -70,7 +70,7 @@
   .metric-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
   .metric-value{font-size:20px;font-weight:800;color:var(--accent)}
   .metric-label{font-size:12px;color:var(--muted)}
-  footer{padding:18px 16px;color:var(--muted);text-align:center;font-size:13px}
+  footer{padding:18px 16px;color:#9ca3af;text-align:center;font-size:13px}
   .small{font-size:12px}
   .guide{display:grid;gap:8px;margin-top:12px}
   .step{background:#0a0f1a;border:1px dashed #334155;border-radius:10px;padding:10px}
@@ -221,20 +221,23 @@
       <div class="row" style="margin-top:8px;flex-wrap:wrap" id="poseControls"></div>
       <div class="row" style="margin-top:8px">
         <div class="row" style="margin-top:8px">
-  <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
-  <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
-  <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
-  <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
-  <!-- NEW -->
-  <label class="chip"><input type="checkbox" id="toggleRibbon" checked> Ribbon</label>
-</div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn green" id="btnAllPDB">⬇ All Poses PDB (this complex)</button>
-        <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
-        <button class="btn" id="btnCSV">⬇ CSV</button>
-        <button class="btn" id="btnJSON">⬇ JSON</button>
-        <button class="btn purple" id="btnPNG">📸 PNG</button>
-        <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi-MODEL PDB)</button>
+          <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
+          <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
+          <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
+          <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
+          <!-- NEW -->
+          <label class="chip"><input type="checkbox" id="toggleRibbon" checked> Ribbon</label>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn green" id="btnAllPDB">⬇ All Poses PDB (this complex)</button>
+          <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
+          <button class="btn" id="btnCSV">⬇ CSV</button>
+          <button class="btn" id="btnJSON">⬇ JSON</button>
+          <button class="btn purple" id="btnPNG">📸 PNG</button>
+          <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi-MODEL PDB)</button>
+        </div>
+        <!-- NEW: score/metrics readout target -->
+        <div class="score" id="scoreBox" style="margin-top:8px"></div>
       </div>
     </div>
 
@@ -594,17 +597,16 @@ window.addEventListener('DOMContentLoaded', ()=>{
   loadSessionHistory();
   setTimeout(autoDemo, 300);
   updateNMRImage();
-  // overlays
-['toggleContacts','toggleHB','toggleSB','toggleHydro'].forEach(id=>E(id).addEventListener('change', refreshOverlays));
+
   // NEW: ribbon toggle triggers a re-style of the current pose
-const rib = E('toggleRibbon');
-if (rib) {
-  rib.addEventListener('change', ()=>{
-    if (!combos.length) return;
-    const idx = combos[currentComboIndex]?.currentIndex ?? 0;
-    showPose(idx); // re-render with ribbon/stick choice
-  });
-}
+  const rib = E('toggleRibbon');
+  if (rib) {
+    rib.addEventListener('change', ()=>{
+      if (!combos.length) return;
+      const idx = combos[currentComboIndex]?.currentIndex ?? 0;
+      showPose(idx); // re-render with ribbon/stick choice
+    });
+  }
 });
 
 /* Tabs */
@@ -677,7 +679,7 @@ function bindEvents(){
   E('btnPNG').addEventListener('click', ()=>snapshotPNG(viewer));
   E('btnAllComplexesPDB').addEventListener('click', downloadAllComplexesPDB);
 
-  // overlays
+  // overlays (single binding here)
   ['toggleContacts','toggleHB','toggleSB','toggleHydro'].forEach(id=>E(id).addEventListener('change', refreshOverlays));
 
   // file inputs
@@ -1041,32 +1043,33 @@ function showPose(i){
   viewer.clear();
   viewer.addModel(formatPDB(combo.Aviz),'pdb');
   viewer.addModel(formatPDB(TB,1),'pdb');
- const rA = new Set(combo.Aviz.map(a=>a.resi)).size;
-const rB = new Set(TB.map(a=>a.resi)).size;
-const wantRibbon = E('toggleRibbon')?.checked;
 
-// Do we have enough backbone atoms to draw true cartoons?
-const hasBackboneA = combo.Aviz.some(a=>a.name==='N') && combo.Aviz.some(a=>a.name==='CA') && combo.Aviz.some(a=>a.name==='C');
-const hasBackboneB = TB.some(a=>a.name==='N') && TB.some(a=>a.name==='CA') && TB.some(a=>a.name==='C');
-const canCartoon   = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
+  const rA = new Set(combo.Aviz.map(a=>a.resi)).size;
+  const rB = new Set(TB.map(a=>a.resi)).size;
+  const wantRibbon = E('toggleRibbon')?.checked;
 
-viewer.setStyle({}, {}); // clear previous styles
+  // Do we have enough backbone atoms to draw true cartoons?
+  const hasBackboneA = combo.Aviz.some(a=>a.name==='N') && combo.Aviz.some(a=>a.name==='CA') && combo.Aviz.some(a=>a.name==='C');
+  const hasBackboneB = TB.some(a=>a.name==='N') && TB.some(a=>a.name==='CA') && TB.some(a=>a.name==='C');
+  const canCartoon   = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
 
-if (wantRibbon && canCartoon) {
-  // True ribbon (cartoon) with subtle arrows
-  viewer.setStyle({model:0},{cartoon:{color:'#60a5fa',arrows:true,thickness:0.5}});
-  viewer.setStyle({model:1},{cartoon:{color:'#f97316',arrows:true,thickness:0.5}});
-} else if (wantRibbon) {
-  // Fallback “trace” when only CA/backbone present
-  viewer.setStyle({model:0},{line:{linewidth:1.5}});
-  viewer.setStyle({model:1},{line:{linewidth:1.5,color:'#f97316'}});
-} else {
-  // Original sticks
-  viewer.setStyle({model:0},{stick:{radius:.25}});
-  viewer.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}});
-}
+  viewer.setStyle({}, {}); // clear previous styles
 
-viewer.zoomTo();
+  if (wantRibbon && canCartoon) {
+    // True ribbon (cartoon) with subtle arrows
+    viewer.setStyle({model:0},{cartoon:{color:'#60a5fa',arrows:true,thickness:0.5}});
+    viewer.setStyle({model:1},{cartoon:{color:'#f97316',arrows:true,thickness:0.5}});
+  } else if (wantRibbon) {
+    // Fallback “trace” when only CA/backbone present
+    viewer.setStyle({model:0},{line:{linewidth:1.5}});
+    viewer.setStyle({model:1},{line:{linewidth:1.5,color:'#f97316'}});
+  } else {
+    // Original sticks
+    viewer.setStyle({model:0},{stick:{radius:.25}});
+    viewer.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}});
+  }
+
+  viewer.zoomTo();
   const cutoff=parseFloat(E('contactCut').value);
   const metrics=computeInterfaceMetrics(combo.Aviz,TB,cutoff);
   currentContacts=metrics.contactsPairs.slice(0,800);
