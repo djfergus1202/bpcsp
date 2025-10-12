@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Comprehensive Docking Suite • Student Edition • Antibody–Antigen • Ligand Screening • Enthalpy</title>
+<title>Comprehensive Docking Suite • Student Edition • Antibody–Antigen • CDR • Ligand Screening • Enthalpy</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Student-friendly in-browser docking: antibody–antigen docking, ligand docking, batch virtual screening (50 SMILES × ≤3 receptors), chain pairing, clustering, consensus scoring, 3D viz, QA & registry — all local." />
+<meta name="description" content="Student-friendly in-browser docking: antibody–antigen docking, CDR mapping (Kabat/Chothia/IMGT), ligand docking, batch screening, clustering, consensus scoring, 3D viz, QA & registry — all local." />
 
 <!-- External libs (loaded once) -->
 <script defer src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
@@ -65,7 +65,7 @@
   .table td{padding:6px 8px;border-bottom:1px solid #112033}
   .table tr:hover{background:#0f1829}
   .table-container{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
-  #viewer,#viewerLig,#viewerScr,#viewerComp{position:relative;width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
+  #viewer,#viewerLig,#viewerScr,#viewerComp,#viewerCDR{position:relative;width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
   .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
   .metric-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
   .metric-value{font-size:20px;font-weight:800;color:var(--accent)}
@@ -78,6 +78,11 @@
   .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
   .kbd{font-family:var(--mono);background:#111827;border:1px solid #374151;border-radius:6px;padding:2px 6px;font-size:12px}
   [aria-live]{min-width:40px}
+  /* CDR cards */
+  .scheme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+  .scheme-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:8px}
+  .cdr-highlight{background:#1e293b;border-left:3px solid var(--accent);padding:6px 8px;margin:6px 0;border-radius:6px}
+  .cdr-region{font-family:var(--mono);font-size:11px;color:#fbbf24;background:#1a1a2e;padding:2px 4px;border-radius:4px;margin:2px}
 </style>
 </head>
 <body>
@@ -87,8 +92,8 @@
     <h1>🧬 Comprehensive Molecular Docking Suite — <span style="color:#a7f3d0">Student Edition</span></h1>
     <div class="byline">by DJF — The New Chemist</div>
     <p class="lead">
-      Antibody–antigen docking • Single-ligand docking • Batch screening (≤50 SMILES × ≤3 receptors) •
-      Chain pairing • Diversity clustering • Consensus ranking • ΔH estimation • QA • Run registry — all in-browser
+      Antibody–antigen docking • <b>CDR mapping</b> (Kabat/Chothia/IMGT) • Single-ligand docking • Batch screening (≤50 SMILES × ≤3 receptors) •
+      Chain pairing • Clustering • Consensus ranking • ΔH estimation • QA • Run registry — all in-browser
     </p>
 
     <div class="infobox" role="region" aria-label="Student guide">
@@ -97,12 +102,15 @@
         <div class="step">1) <b>Load Proteins</b> in <span class="kbd">Antibody Docking</span>: paste PDB text or click <em>Example</em>. Then <b>Parse</b> to detect chains.</div>
         <div class="step">2) <b>Set Parameters</b>: samples control thoroughness; <em>All heavy</em> is most realistic. Press <b>Run Docking</b>.</div>
         <div class="step">3) <b>Explore Results</b>: use the Complex picker, click pose buttons, and toggle overlays for contacts/H-bonds/etc.</div>
-        <div class="step">4) <b>Export</b> top poses as PDB/CSV/JSON and <b>validate with professional tools and experiments</b>.</div>
+        <div class="step">4) <b>Analyze CDRs</b> in the CDR tab (paste antibody PDB) and visualize per-scheme mappings.</div>
+        <div class="step">5) <b>Export</b> top poses as PDB/CSV/JSON and <b>validate with professional tools and experiments</b>.</div>
       </div>
     </div>
 
     <div class="tabs" role="tablist">
       <button class="tabbtn active" data-tab="dockTab" role="tab" aria-selected="true">🧷 Antibody Docking</button>
+      <button class="tabbtn" data-tab="cdrTab" role="tab">🔬 CDR Analysis</button>
+      <button class="tabbtn" data-tab="fragmentTab" role="tab">📐 Fragment Generator</button>
       <button class="tabbtn" data-tab="ligTab" role="tab">🧪 Ligand Docking</button>
       <button class="tabbtn" data-tab="screenTab" role="tab">📚 Batch Screening</button>
       <button class="tabbtn" data-tab="qaTab" role="tab">✅ QA & Registry</button>
@@ -121,7 +129,7 @@
   </div>
 </header>
 
-<!-- ===================== ANTIBODY DOCKING ===================== -->
+<!-- ===================== ANTIBODY DOCKING (X5 core) ===================== -->
 <section id="dockTab" class="tabsec active" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -217,28 +225,24 @@
         <button class="btn" id="btnNextCombo">Next ▶</button>
         <button class="btn" id="btnClusters" title="Group poses into K clusters">📎 Cluster Poses</button>
       </div>
+      <div class="row" style="margin-top:6px">
+        <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
+        <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
+        <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
+        <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
+        <label class="chip"><input type="checkbox" id="toggleRibbon" checked> Ribbon</label>
+      </div>
       <div id="viewer" role="img" aria-label="3D viewer"></div>
       <div class="row" style="margin-top:8px;flex-wrap:wrap" id="poseControls"></div>
       <div class="row" style="margin-top:8px">
-        <div class="row" style="margin-top:8px">
-          <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
-          <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
-          <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
-          <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
-          <!-- NEW -->
-          <label class="chip"><input type="checkbox" id="toggleRibbon" checked> Ribbon</label>
-        </div>
-        <div class="row" style="margin-top:8px">
-          <button class="btn green" id="btnAllPDB">⬇ All Poses PDB (this complex)</button>
-          <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
-          <button class="btn" id="btnCSV">⬇ CSV</button>
-          <button class="btn" id="btnJSON">⬇ JSON</button>
-          <button class="btn purple" id="btnPNG">📸 PNG</button>
-          <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi-MODEL PDB)</button>
-        </div>
-        <!-- NEW: score/metrics readout target -->
-        <div class="score" id="scoreBox" style="margin-top:8px"></div>
+        <button class="btn green" id="btnAllPDB">⬇ All Poses PDB (this complex)</button>
+        <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
+        <button class="btn" id="btnCSV">⬇ CSV</button>
+        <button class="btn" id="btnJSON">⬇ JSON</button>
+        <button class="btn purple" id="btnPNG">📸 PNG</button>
+        <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi-MODEL PDB)</button>
       </div>
+      <div class="score" id="scoreBox" style="margin-top:8px"></div>
     </div>
 
     <div class="card">
@@ -265,7 +269,76 @@
   </div>
 </section>
 
-<!-- ===================== LIGAND DOCKING ===================== -->
+<!-- ===================== CDR ANALYSIS (merged) ===================== -->
+<section id="cdrTab" class="tabsec" data-tab-panel>
+  <div class="wrap grid two">
+    <div class="card">
+      <h2>CDR Identification & Mapping</h2>
+      <textarea id="cdrPDB" placeholder="Paste antibody PDB for CDR analysis" style="height:200px"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" onclick="runCDRAnalysis()">Analyze CDRs</button>
+        <select id="schemeSelect" title="Numbering scheme">
+          <option value="Kabat">Kabat</option>
+          <option value="Chothia">Chothia</option>
+          <option value="IMGT">IMGT</option>
+        </select>
+        <button class="btn" onclick="copyAbPDBToCDR()">Use Antibody PDB A</button>
+      </div>
+      <div class="scheme-grid" id="cdrResults"></div>
+      <div class="infobox" style="margin-top:10px">
+        <strong>Numbering Schemes:</strong><br>
+        • <strong>Kabat:</strong> Sequence variability-based. • <strong>Chothia:</strong> Structural features. • <strong>IMGT:</strong> Standardized across species.<br>
+        <span class="small">Heuristic anchoring is used here; for research work, validate with ANARCI/IMGT/AbNum.</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>CDR Visualization</h2>
+      <div id="viewerCDR"></div>
+      <div class="row" style="margin-top:8px">
+        <label class="chip"><input type="checkbox" id="showCDR1" checked> CDR1</label>
+        <label class="chip"><input type="checkbox" id="showCDR2" checked> CDR2</label>
+        <label class="chip"><input type="checkbox" id="showCDR3" checked> CDR3</label>
+        <label class="chip"><input type="checkbox" id="showFrameworks" checked> Frameworks</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>CDR Sequence Details</h2>
+      <div id="cdrSequenceTable" class="table-container"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FRAGMENT GENERATOR (merged) ===================== -->
+<section id="fragmentTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>CA-Trace Fragment Generator</h2>
+      <div class="grid three">
+        <div>
+          <h3>Input PDB</h3>
+          <textarea id="fragPDB" placeholder="Paste PDB for fragment generation"></textarea>
+        </div>
+        <div>
+          <h3>Parameters</h3>
+          <div class="row"><label>Window Size</label><input type="number" id="windowSize" value="10" min="3" max="30"></div>
+          <div class="row"><label>Step Size</label><input type="number" id="stepSize" value="1" min="1" max="10"></div>
+          <div class="row"><label>Chain Filter</label><input type="text" id="chainFilter" placeholder="e.g., H,L"></div>
+        </div>
+        <div>
+          <h3>Actions</h3>
+          <button class="btn primary" onclick="generateFragments()">Generate Fragments</button>
+          <button class="btn green" onclick="downloadFragments()">⬇ Download All</button>
+        </div>
+      </div>
+      <div id="fragmentResults" style="margin-top:20px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LIGAND DOCKING (X5) ===================== -->
 <section id="ligTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -305,7 +378,7 @@
   </div>
 </section>
 
-<!-- ===================== BATCH SCREENING ===================== -->
+<!-- ===================== BATCH SCREENING (X5) ===================== -->
 <section id="screenTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -366,7 +439,7 @@
   </div>
 </section>
 
-<!-- ===================== QA & REGISTRY ===================== -->
+<!-- ===================== QA & REGISTRY (X5) ===================== -->
 <section id="qaTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -399,7 +472,7 @@
   </div>
 </section>
 
-<!-- ===================== ANALYSIS ===================== -->
+<!-- ===================== ANALYSIS (X5) ===================== -->
 <section id="analysisTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -446,7 +519,7 @@
   </div>
 </section>
 
-<!-- ===================== OMICS (added the missing UI elements) ===================== -->
+<!-- ===================== OMICS (X5) ===================== -->
 <section id="omicsTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -519,7 +592,7 @@
   </div>
 </section>
 
-<!-- ===================== NMR ===================== -->
+<!-- ===================== NMR (X5) ===================== -->
 <section id="nmrTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -543,7 +616,7 @@
   </div>
 </section>
 
-<!-- ===================== ABOUT ===================== -->
+<!-- ===================== ABOUT + DISCLAIMERS ===================== -->
 <section id="aboutTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -552,12 +625,13 @@
       <h3>Important Disclaimers</h3>
       <div class="errorbox">
         <p><b>No warranties; use at your own risk.</b></p>
-        <p>Scoring/embedding are simplified approximations; entropy, solvation, polarization, and induced fit are not fully modeled. <b>Always double-check results and verify with experiments (e.g., SPR/ITC, crystallography, MD, MM-PBSA/FEP).</b> Compare against professional tools.</p>
+        <p>Scoring/embedding are simplified approximations; entropy, solvation, polarization, water networks, induced fit, glycan effects, and protonation/tautomer states are not fully modeled. <b>Always double-check results and verify with experiments (e.g., SPR/ITC, crystallography, MD, MM-PBSA/FEP).</b> Compare against professional tools.</p>
+        <p><b>Regulatory note:</b> This is not validated for GLP/Part 11/CSV and is not suitable for regulated decision-making. Educational/research prototyping only.</p>
       </div>
       <h3>Recommended Workflow</h3>
       <div class="infobox small">Use for hypothesis generation → export top poses → refine with AutoDock/HADDOCK/Rosetta → MD → MM-PBSA/FEP → <b>experimental validation</b>.</div>
       <h3>Credits</h3>
-      <div class="small" style="color:#9ca3af">Lead & Concept: <b>DJF — The New Chemist</b> • 3D rendering: 3Dmol.js • Compression: Pako • Structure source: RCSB PDB</div>
+      <div class="small" style="color:#9ca3af">Lead & Concept: <b>DJF — The New Chemist</b> • 3D rendering: 3Dmol.js • Compression: Pako • Structures: RCSB PDB</div>
     </div>
   </div>
 </section>
@@ -569,9 +643,10 @@
   </div>
 </footer>
 
-<!-- ===================== APP SCRIPT (single, non-duplicated) ===================== -->
+<!-- ===================== APP SCRIPT (integrated) ===================== -->
 <script>
-let viewer=null, viewerLig=null, viewerScr=null, viewerComp=null;
+/* ===== Shared state & helpers ===== */
+let viewer=null, viewerLig=null, viewerScr=null, viewerComp=null, viewerCDR=null;
 let inProgress=false, cancelled=false, workerPool=[];
 let pdbAAllAtoms=[], pdbBAllAtoms=[];
 let combos=[], currentComboIndex=-1;
@@ -588,25 +663,18 @@ const status=t=>E('statusPill').textContent=t;
 const setProgress=f=>{E('prog').value=Math.max(0,Math.min(1,f||0));};
 
 window.addEventListener('DOMContentLoaded', ()=>{
-  ensureViewer('viewer'); ensureViewer('viewerLig'); ensureViewer('viewerScr'); ensureViewer('viewerComp');
+  ensureViewer('viewer'); ensureViewer('viewerLig'); ensureViewer('viewerScr'); ensureViewer('viewerComp'); ensureViewer('viewerCDR');
   drawPlaceholder(viewer);
   setupMainTabs();
   setupSubTabs();
   bindEvents();
   bindOmicsAndNMREvents();
+  bindCDRControls();
   loadSessionHistory();
   setTimeout(autoDemo, 300);
-  updateNMRImage();
 
-  // NEW: ribbon toggle triggers a re-style of the current pose
   const rib = E('toggleRibbon');
-  if (rib) {
-    rib.addEventListener('change', ()=>{
-      if (!combos.length) return;
-      const idx = combos[currentComboIndex]?.currentIndex ?? 0;
-      showPose(idx); // re-render with ribbon/stick choice
-    });
-  }
+  if (rib) { rib.addEventListener('change', ()=>{ if (!combos.length) return; const idx = combos[currentComboIndex]?.currentIndex ?? 0; showPose(idx); }); }
 });
 
 /* Tabs */
@@ -618,8 +686,8 @@ function setupMainTabs(){
       const target=btn.dataset.tab;
       document.querySelectorAll('[data-tab-panel]').forEach(sec=>{ sec.classList.toggle('active', sec.id===target); });
       requestAnimationFrame(()=>{
-        try{ viewer?.resize(); viewerLig?.resize(); viewerScr?.resize(); viewerComp?.resize();
-             viewer?.render(); viewerLig?.render(); viewerScr?.render(); viewerComp?.render(); }catch(e){}
+        try{ viewer?.resize(); viewerLig?.resize(); viewerScr?.resize(); viewerComp?.resize(); viewerCDR?.resize();
+             viewer?.render(); viewerLig?.render(); viewerScr?.render(); viewerComp?.render(); viewerCDR?.render(); }catch(e){}
       });
     });
   });
@@ -646,6 +714,7 @@ function ensureViewer(id){
   else if(id==='viewerLig' && !viewerLig) viewerLig=$3Dmol.createViewer(el,opt);
   else if(id==='viewerScr' && !viewerScr) viewerScr=$3Dmol.createViewer(el,opt);
   else if(id==='viewerComp' && !viewerComp) viewerComp=$3Dmol.createViewer(el,opt);
+  else if(id==='viewerCDR' && !viewerCDR) viewerCDR=$3Dmol.createViewer(el,opt);
 }
 function drawPlaceholder(v){
   if(!v) return; v.addSphere({center:{x:-8,y:0,z:0},radius:4,color:'#60a5fa',alpha:.6});
@@ -679,7 +748,7 @@ function bindEvents(){
   E('btnPNG').addEventListener('click', ()=>snapshotPNG(viewer));
   E('btnAllComplexesPDB').addEventListener('click', downloadAllComplexesPDB);
 
-  // overlays (single binding here)
+  // overlays
   ['toggleContacts','toggleHB','toggleSB','toggleHydro'].forEach(id=>E(id).addEventListener('change', refreshOverlays));
 
   // file inputs
@@ -875,7 +944,7 @@ async function runAntibodyDocking(){
 
     for(let i=0;i<combos.length;i++){
       if(cancelled) break; status(`combo ${i+1}/${totalCombos} sampling…`);
-      await dockSingleCombo(i, params, (done,total)=>{ // per-combo progress
+      await dockSingleCombo(i, params, (done,total)=>{ 
         const base=completed*(params.samples||10000);
         sampleDone = base + Math.min(done,total);
         setProgress(sampleDone/Math.max(1,totalSamples));
@@ -1048,23 +1117,18 @@ function showPose(i){
   const rB = new Set(TB.map(a=>a.resi)).size;
   const wantRibbon = E('toggleRibbon')?.checked;
 
-  // Do we have enough backbone atoms to draw true cartoons?
   const hasBackboneA = combo.Aviz.some(a=>a.name==='N') && combo.Aviz.some(a=>a.name==='CA') && combo.Aviz.some(a=>a.name==='C');
   const hasBackboneB = TB.some(a=>a.name==='N') && TB.some(a=>a.name==='CA') && TB.some(a=>a.name==='C');
   const canCartoon   = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
 
-  viewer.setStyle({}, {}); // clear previous styles
-
+  viewer.setStyle({}, {});
   if (wantRibbon && canCartoon) {
-    // True ribbon (cartoon) with subtle arrows
     viewer.setStyle({model:0},{cartoon:{color:'#60a5fa',arrows:true,thickness:0.5}});
     viewer.setStyle({model:1},{cartoon:{color:'#f97316',arrows:true,thickness:0.5}});
   } else if (wantRibbon) {
-    // Fallback “trace” when only CA/backbone present
     viewer.setStyle({model:0},{line:{linewidth:1.5}});
     viewer.setStyle({model:1},{line:{linewidth:1.5,color:'#f97316'}});
   } else {
-    // Original sticks
     viewer.setStyle({model:0},{stick:{radius:.25}});
     viewer.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}});
   }
@@ -1115,7 +1179,7 @@ function computeInterfaceMetrics(A,B,cut){
     const aN=a.name?.startsWith('N'), aO=a.name?.startsWith('O'), bN=b.name?.startsWith('N'), bO=b.name?.startsWith('O');
     if(((aN&&bO)||(aO&&bN)) && d<=3.5){ hb++; hbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
     const isAcidic=at=> (at.resn==='ASP'&&at.name.startsWith('OD'))||(at.resn==='GLU'&&at.name.startsWith('OE'));
-    const isBasic =at=> (at.resn==='LYS'&&at.name==='NZ')||(at.resn==='ARG'&&(at.name==='NH1'||at.name==='NH2'||at.name==='NE'))||(at.resn==='HIS'&&(at.name==='ND1'||at.name==='NE2'));
+    const isBasic =at=> (at.resn==='LYS'&&at.name==='NZ')||(at.resn==='ARG'&&(at.name==='NH1'||'NH2'||at.name==='NE'))||(at.resn==='HIS'&&(at.name==='ND1'||at.name==='NE2'));
     if(((isAcidic(a)&&isBasic(b))||(isAcidic(b)&&isBasic(a))) && d<=4.0){ sb++; sbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
     if(hydrophobic.has(a.resn)&&hydrophobic.has(b.resn)&&(a.elem==='C'||b.elem==='C')&&d<=4.5){ hydro++; hydroPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
   }
@@ -1257,7 +1321,7 @@ function downloadAllComplexesPDB(){
   lines.push('END'); downloadBlob(lines.join('\n'),'all_complexes_all_poses.pdb');
 }
 
-/* Ligand docking */
+/* Ligand docking (X5) */
 function loadLigandDemoReceptor(){
   E('ligReceptorPDB').value=`ATOM      1  CA  ALA A   1      -8.000   0.000   0.000  1.00  0.00           C
 ATOM      2  CA  ALA A   2      -6.600   1.200   0.200  1.00  0.00           C
@@ -1275,10 +1339,8 @@ function embedSmilesTo3D(smiles, method='HASH', seed=1337){
   const rng = (()=>{let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);})();
   const atoms = smiles.replace(/[^A-Za-z]/g, '').split('').map(e => ({elem: e.toUpperCase(), x: 0, y: 0, z: 0}));
   if (method === 'HASH') {
-    for (let i = 0; i < atoms.length; i++) {
-      atoms[i].x = (rng() - 0.5) * 4; atoms[i].y = (rng() - 0.5) * 4; atoms[i].z = (rng() - 0.5) * 4;
-    }
-  } else { // RingHelix
+    for (let i = 0; i < atoms.length; i++) { atoms[i].x = (rng() - 0.5) * 4; atoms[i].y = (rng() - 0.5) * 4; atoms[i].z = (rng() - 0.5) * 4; }
+  } else {
     const R = 2.0, pitch = 1.5;
     for (let i = 0; i < atoms.length; i++) {
       const angle = 2 * Math.PI * i / Math.min(atoms.length, 8);
@@ -1336,14 +1398,12 @@ function scoreLigand(receptor, ligand){
 function downloadLigandPDB(){ if (!('score' in ligLastResult)) return; const pdb = formatPDB(ligLastResult.receptor) + "\n" + formatPDB(ligLastResult.ligand, 1); downloadBlob(pdb, 'ligand_complex.pdb'); }
 function downloadLigandCSV(){ if (!('score' in ligLastResult)) return; const row = `smiles,score,contacts,clash\n"${ligLastResult.smiles}",${ligLastResult.score.toFixed(3)},${ligLastResult.contacts},${ligLastResult.clash.toFixed(3)}`; downloadBlob(row, 'ligand_result.csv'); }
 
-/* Batch Screening */
+/* Batch Screening (X5) */
 async function startBatchScreening(){
   E('btnStartScreen').disabled = true; E('btnStopScreen').disabled = false; E('scrStatus').textContent = 'running...'; screenCancel = false;
   try {
     const smilesList = E('scrSmiles').value.trim().split(/\r?\n/).map(s=>s.trim()).filter(s => s);
     const raw = E('scrReceptors').value;
-
-    // Robust split on lines containing only END (allowing spaces and different newlines)
     const receptorPDBs = String(raw||'').split(/\r?\n\s*END\s*(?:\r?\n|$)/).map(s=>s.trim()).filter(Boolean);
 
     if (smilesList.length > 50 || receptorPDBs.length > 3) throw new Error('Exceeded limits: max 50 SMILES, max 3 receptors.');
@@ -1451,7 +1511,7 @@ function showTop10Screening(){
   E('enthalpyBreakdown').textContent = 'Top 10 ΔH Values:\n' + dHs.map(d => d.toFixed(2)).join(', ');
 }
 
-/* QA & Registry */
+/* QA & Registry (X5) */
 function saveCurrentRun(){
   if (!combos.length) { alert('No run data to save.'); return; }
   const topPose = combos[0]?.topPoses[0];
@@ -1531,16 +1591,260 @@ ATOM      2  CA  LEU B   2      17.000  14.000  15.500  1.00  0.00           C`;
 }
 async function autoDemo(){ useExample('A'); useExample('B'); E('samples').value=2000; await runAntibodyDocking(); }
 
-/* NMR & Omics */
+/* ===== CDR / Fragment module (merged) ===== */
+const AntibodyPDB = (function() {
+  const THREE_LETTER_TO_ONE = { ALA:'A', ARG:'R', ASN:'N', ASP:'D', CYS:'C', GLN:'Q', GLU:'E', GLY:'G', HIS:'H', ILE:'I', LEU:'L', LYS:'K', MET:'M', PHE:'F', PRO:'P', SER:'S', THR:'T', TRP:'W', TYR:'Y', VAL:'V', SEC:'U', PYL:'O' };
+  function parsePDB(pdbText) {
+    const lines = pdbText.split(/\r?\n/);
+    const atomsByChainResidue = new Map();
+    for (const line of lines) {
+      if (!line.startsWith('ATOM')) continue;
+      const atomName = line.slice(12, 16).trim();
+      const resName = line.slice(17, 20).trim();
+      const chainId = line.slice(21, 22).trim() || ' ';
+      const resSeq = parseInt(line.slice(22, 26).trim(), 10);
+      const iCode = line.slice(26, 27).trim();
+      const x = parseFloat(line.slice(30, 38).trim());
+      const y = parseFloat(line.slice(38, 46).trim());
+      const z = parseFloat(line.slice(46, 54).trim());
+      const key = `${chainId}|${resSeq}|${iCode || ''}`;
+      let entry = atomsByChainResidue.get(key);
+      if (!entry) { entry = { chain: chainId, resSeq, iCode, resName, atoms: [] }; atomsByChainResidue.set(key, entry); }
+      entry.atoms.push({ atomName, x, y, z });
+      if (atomName === 'CA') entry.ca = { x, y, z };
+    }
+    const chains = new Map();
+    for (const entry of atomsByChainResidue.values()) {
+      const arr = chains.get(entry.chain) || [];
+      arr.push(entry);
+      chains.set(entry.chain, arr);
+    }
+    const perChain = {};
+    for (const [chainId, residues] of chains) {
+      residues.sort((a,b)=> a.resSeq-b.resSeq || (a.iCode||'').localeCompare(b.iCode||''));
+      const caTrace = residues.filter(r=>r.ca).map(r => ({ resSeq:r.resSeq, iCode:r.iCode||'', resName:r.resName, x:r.ca.x, y:r.ca.y, z:r.ca.z }));
+      const seqOne = residues.map(r => THREE_LETTER_TO_ONE[r.resName.toUpperCase()] || 'X').join('');
+      perChain[chainId] = {
+        chainId,
+        sequence: seqOne,
+        residues: residues.map(r => ({ resSeq:r.resSeq, iCode:r.iCode||'', resName:r.resName, oneLetter: THREE_LETTER_TO_ONE[r.resName.toUpperCase()] || 'X', hasCA:Boolean(r.ca) })),
+        caTrace
+      };
+    }
+    return { chains: perChain };
+  }
+  function classifyChainType(seq){
+    const len = seq.length;
+    const likelyVariableLen = len >= 95 && len <= 130;
+    const hasCys = (seq.match(/C/g) || []).length >= 2;
+    const hasTrp = seq.includes('W');
+    const heavySigns = [ /GGG/.test(seq), /WGQG/.test(seq), /VLVL|TLVL/.test(seq) ];
+    const lightSigns = [ /FGG/.test(seq), /LQMT|IQMT|MQMT/.test(seq), /WYQQ/.test(seq) ];
+    let scoreH=0, scoreL=0;
+    if (likelyVariableLen) {scoreH++; scoreL++;}
+    if (hasCys) {scoreH++; scoreL++;}
+    if (hasTrp) {scoreH++; scoreL++;}
+    for (const r of heavySigns) if (r) scoreH++;
+    for (const r of lightSigns) if (r) scoreL++;
+    if (scoreH >= scoreL + 1) return 'H';
+    if (scoreL >= scoreH + 1) return 'L';
+    return 'Unknown';
+  }
+  const CDR_INDEX_RANGES = {
+    Kabat: { H: { CDR1: [26,35], CDR2: [50,65], CDR3: [95,115] }, L: { CDR1: [23,34], CDR2: [49,56], CDR3: [88,98] } },
+    Chothia:{ H: { CDR1: [26,32], CDR2: [52,56], CDR3: [95,110] }, L: { CDR1: [26,32], CDR2: [50,52], CDR3: [91,96] } },
+    IMGT:  { H: { CDR1: [27,38], CDR2: [56,65], CDR3: [103,117] }, L: { CDR1: [27,38], CDR2: [56,65], CDR3: [103,117] } }
+  };
+  function anchorAlignmentOffsets(seq, chainType){
+    const idxCys = seq.indexOf('C');
+    const idxTrp = seq.indexOf('W', Math.max(20, idxCys + 10));
+    const base = idxCys >= 0 ? idxCys - 23 : 0;
+    const trpAdj = idxTrp >= 0 ? (idxTrp - (chainType === 'H' ? 41 : 35)) : 0;
+    return Math.round(0.6*base + 0.3*trpAdj);
+  }
+  function computeCDRsForChain(chainData, scheme='Kabat'){
+    const seq = chainData.sequence || '';
+    if (!seq) return { scheme, cdrs: [], frames: [], note: 'No sequence' };
+    const chainType = classifyChainType(seq);
+    const ranges = CDR_INDEX_RANGES[scheme] || CDR_INDEX_RANGES.Kabat;
+    const rangesForChain = ranges[chainType === 'H' ? 'H' : 'L'];
+    const offset = anchorAlignmentOffsets(seq, chainType);
+    const cdrs = Object.entries(rangesForChain).map(([region,[s,e]])=>{
+      const start = Math.max(0, Math.min(s + offset, seq.length - 1));
+      const end   = Math.max(0, Math.min(e + offset, seq.length - 1));
+      return { region, start, end, sequence: seq.slice(start, end + 1) };
+    });
+    const frames = [];
+    if (cdrs[0].start > 0) frames.push({ region: 'FR1', start: 0, end: cdrs[0].start - 1 });
+    frames.push({ region: 'FR2', start: cdrs[0].end + 1, end: cdrs[1].start - 1 });
+    frames.push({ region: 'FR3', start: cdrs[1].end + 1, end: cdrs[2].start - 1 });
+    frames.push({ region: 'FR4', start: cdrs[2].end + 1, end: seq.length - 1 });
+    return { scheme, chainType, cdrs, frames, note: 'Heuristic mapping' };
+  }
+  function annotateAntibodyChains(parsed){
+    const result = {};
+    for (const chainId of Object.keys(parsed.chains)) {
+      const chain = parsed.chains[chainId];
+      const type = classifyChainType(chain.sequence);
+      result[chainId] = {
+        chainId, chainType: type, sequenceLength: chain.sequence.length,
+        cdrs: {
+          Kabat: computeCDRsForChain(chain,'Kabat'),
+          Chothia: computeCDRsForChain(chain,'Chothia'),
+          IMGT: computeCDRsForChain(chain,'IMGT')
+        },
+        caTrace: chain.caTrace
+      };
+    }
+    return result;
+  }
+  function makeFragments(chainData, windowSize=10, step=1){
+    const { caTrace } = chainData;
+    if (!caTrace || !caTrace.length) return [];
+    const frags=[];
+    for (let i=0; i+windowSize<=caTrace.length; i+=step) {
+      const coords=caTrace.slice(i,i+windowSize);
+      frags.push({ startIndex:i, endIndex:i+windowSize-1, sequence: coords.map(r=>THREE_LETTER_TO_ONE[r.resName.toUpperCase()]||'X').join(''), caCoords: coords });
+    }
+    return frags;
+  }
+  return { parsePDB, classifyChainType, computeCDRsForChain, annotateAntibodyChains, makeFragments };
+})();
+
+/* CDR UI */
+let currentParsedAb=null, currentCDRAnnotations=null;
+function bindCDRControls(){
+  ['showCDR1','showCDR2','showCDR3','showFrameworks'].forEach(id=>{
+    const el=E(id); if(el){ el.addEventListener('change', ()=>{ if(currentParsedAb&&currentCDRAnnotations){ visualizeCDRs(currentParsedAb,currentCDRAnnotations,E('schemeSelect').value); } }); }
+  });
+}
+function copyAbPDBToCDR(){ const txt=E('pdbAText').value.trim(); if(!txt){alert('No Antibody PDB in Protein A');return;} E('cdrPDB').value=txt; }
+function runCDRAnalysis(){
+  const pdbText = E('cdrPDB').value || E('pdbAText').value;
+  if (!pdbText) { alert('Please provide a PDB structure'); return; }
+  const parsed = AntibodyPDB.parsePDB(pdbText);
+  const annotations = AntibodyPDB.annotateAntibodyChains(parsed);
+  const scheme = E('schemeSelect').value;
+  currentParsedAb = parsed;
+  currentCDRAnnotations = annotations;
+  displayCDRResults(annotations, scheme);
+  visualizeCDRs(parsed, annotations, scheme);
+  displayCDRSequenceTable(annotations, scheme);
+}
+function displayCDRResults(annotations, scheme){
+  const container=E('cdrResults'); let html='';
+  for (const chainId in annotations) {
+    const chain=annotations[chainId];
+    const cdrData=chain.cdrs[scheme];
+    html += `
+      <div class="scheme-card">
+        <h4>Chain ${chainId} (${chain.chainType})</h4>
+        <div style="font-size:12px;color:#9ca3af">Length: ${chain.sequenceLength} aa</div>
+        ${cdrData.cdrs.map(cdr=>`
+          <div class="cdr-highlight">
+            <strong>${cdr.region}</strong>:
+            <span class="cdr-region">${cdr.sequence||'-'}</span>
+            <span style="font-size:11px;color:#6b7280">[${cdr.start}-${cdr.end}]</span>
+          </div>
+        `).join('')}
+      </div>`;
+  }
+  container.innerHTML=html || '<div class="infobox small">No chains parsed.</div>';
+}
+function visualizeCDRs(parsed, annotations, scheme){
+  if (!viewerCDR) return; viewerCDR.clear();
+  for (const chainId in parsed.chains) {
+    const chain = parsed.chains[chainId];
+    const cdrData = annotations[chainId]?.cdrs[scheme];
+    if (!cdrData) continue;
+    let pdbText='';
+    chain.caTrace.forEach((res, idx)=>{
+      pdbText += `ATOM  ${String(idx+1).padStart(5)} CA   ${res.resName.padEnd(3)} ${chainId}${String(res.resSeq).padStart(4)}    ${res.x.toFixed(3).padStart(8)}${res.y.toFixed(3).padStart(8)}${res.z.toFixed(3).padStart(8)}  1.00  0.00           C\n`;
+    });
+    viewerCDR.addModel(pdbText,'pdb');
+    const modelIdx = viewerCDR.getNumModels()-1;
+    const show = {1:E('showCDR1')?.checked,2:E('showCDR2')?.checked,3:E('showCDR3')?.checked};
+    const cols=['#f87171','#fbbf24','#34d399'];
+    cdrData.cdrs.forEach((cdr,i)=>{
+      if (show[i+1]) {
+        viewerCDR.setStyle(
+          {model:modelIdx, resi: Array.from({length: cdr.end-cdr.start+1}, (_,k)=> cdr.start + k + 1)},
+          {cartoon:{color:cols[i%3]}}
+        );
+      }
+    });
+    if (E('showFrameworks')?.checked) { viewerCDR.setStyle({model:modelIdx}, {cartoon:{color:'#4b5563'}}); }
+  }
+  viewerCDR.zoomTo(); viewerCDR.render();
+}
+function displayCDRSequenceTable(annotations, scheme){
+  const container=E('cdrSequenceTable');
+  let html='<table class="table"><thead><tr><th>Chain</th><th>Type</th><th>Region</th><th>Sequence</th><th>Position</th></tr></thead><tbody>';
+  for (const chainId in annotations) {
+    const chain=annotations[chainId];
+    const cdrData=chain.cdrs[scheme];
+    cdrData.cdrs.forEach(cdr=>{
+      html+=`<tr><td>${chainId}</td><td>${chain.chainType}</td><td>${cdr.region}</td><td style="font-family:monospace">${cdr.sequence}</td><td>${cdr.start+1}-${cdr.end+1}</td></tr>`;
+    });
+  }
+  html+='</tbody></table>'; container.innerHTML=html;
+}
+
+/* Fragment generator */
+function generateFragments(){
+  const pdbText = E('fragPDB').value;
+  if (!pdbText) { alert('Please provide a PDB structure'); return; }
+  const windowSize = parseInt(E('windowSize').value) || 10;
+  const stepSize = parseInt(E('stepSize').value) || 1;
+  const chainFilter = E('chainFilter').value.split(',').map(s=>s.trim()).filter(Boolean);
+
+  const parsed = AntibodyPDB.parsePDB(pdbText);
+  const resultsContainer = E('fragmentResults');
+  let html = '<h3>Generated Fragments</h3>'; let allFragments=[];
+
+  for (const chainId in parsed.chains) {
+    if (chainFilter.length && !chainFilter.includes(chainId)) continue;
+    const chain = parsed.chains[chainId];
+    const fragments = AntibodyPDB.makeFragments(chain, windowSize, stepSize);
+    allFragments.push({chainId, fragments});
+    html += `<div class="card">
+      <h4>Chain ${chainId}: ${fragments.length} fragments</h4>
+      <div style="max-height:200px;overflow:auto">
+        ${fragments.slice(0, 10).map((frag,i)=>`
+          <div style="font-family:monospace;font-size:12px;padding:4px;background:#0a0f1a;margin:2px 0;border-radius:4px">
+            Fragment ${i+1}: ${frag.sequence} [${frag.startIndex}-${frag.endIndex}]
+          </div>`).join('')}
+        ${fragments.length > 10 ? `<div style="color:#9ca3af;font-size:12px">... and ${fragments.length - 10} more</div>` : ''}
+      </div>
+    </div>`;
+  }
+  resultsContainer.innerHTML = html;
+  window.generatedFragments = allFragments;
+}
+function downloadFragments(){
+  if (!window.generatedFragments || !window.generatedFragments.length) { alert('No fragments generated yet'); return; }
+  let pdbContent=''; let fragNum=1;
+  window.generatedFragments.forEach(({chainId,fragments})=>{
+    fragments.forEach(frag=>{
+      pdbContent += `MODEL     ${fragNum}\n`;
+      frag.caCoords.forEach((coord,i)=>{
+        pdbContent += `ATOM  ${String(i+1).padStart(5)} CA   ${coord.resName.padEnd(3)} ${chainId}${String(coord.resSeq).padStart(4)}    ${coord.x.toFixed(3).padStart(8)}${coord.y.toFixed(3).padStart(8)}${coord.z.toFixed(3).padStart(8)}  1.00  0.00           C\n`;
+      });
+      pdbContent += `ENDMDL\n`; fragNum++;
+    });
+  });
+  pdbContent += 'END\n';
+  downloadBlob(pdbContent, 'fragments.pdb');
+}
+
+/* NMR & Omics (X5) */
 function bindOmicsAndNMREvents(){
-  // NMR
   E('nmrSmiles').addEventListener('input', updateNMRImage);
   E('btnPredict1H').addEventListener('click', () => predictNMR('1H'));
   E('btnPredict13C').addEventListener('click', () => predictNMR('13C'));
   E('btnPredictCOSY').addEventListener('click', () => predictNMR('COSY'));
   E('btnPredictNOESY').addEventListener('click', () => predictNMR('NOESY'));
 
-  // Omics
   const B=(id,fn)=>{ const el=E(id); if(el) el.addEventListener('click', fn); };
   B('omicsLoadProteinDemo',()=>{E('omicsProteinPDB').value=`ATOM      1  CA  ALA A   1       0.000   0.000   0.000  1.00  0.00           C
 ATOM      2  CA  LEU A   2       1.500   1.200   0.200  1.00  0.00           C
@@ -1577,7 +1881,7 @@ function predictNMR(type){
   output.textContent = txt;
 }
 
-/* OMICS ANALYZER */
+/* OMICS ANALYZER (X5) */
 let lastOmics=null;
 function runOmicsAnalysis(){
   E('omicsStatus').textContent='running...';
@@ -1702,7 +2006,7 @@ function resetAll(){
   pdbAAllAtoms=[]; pdbBAllAtoms=[]; combos=[]; currentComboIndex=-1;
   ['pdbAText','pdbBText'].forEach(id=>E(id).value='');
   updateComboSelect(); E('poseControls').innerHTML=''; E('scoreBox').textContent=''; E('metricsDisplay').innerHTML='';
-  viewer?.clear(); viewerLig?.clear(); viewerScr?.clear(); viewerComp?.clear();
+  viewer?.clear(); viewerLig?.clear(); viewerScr?.clear(); viewerComp?.clear(); viewerCDR?.clear();
   drawPlaceholder(viewer); status('idle'); setProgress(0);
 }
 </script>
