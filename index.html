@@ -274,6 +274,54 @@
       </div>
 
       <div class="card" style="margin-top: 1.5rem;">
+        <h2>C-Alpha Trace Input <span class="pill pill-green">Import Structure</span></h2>
+        <p class="lead">Import antibody fragment C-alpha coordinates from PDB or custom format</p>
+        
+        <div style="margin-top: 1rem;">
+          <label for="calpha-trace-input" style="display: block; margin-bottom: 0.5rem;">
+            Paste C-Alpha Trace Coordinates
+          </label>
+          <textarea 
+            id="calpha-trace-input" 
+            placeholder="Format: X Y Z (one line per residue)&#10;Example:&#10;10.234 15.678 20.123&#10;11.456 16.789 21.234&#10;12.678 17.890 22.345&#10;...or paste PDB ATOM/HETATM lines with CA atoms"
+            style="min-height: 180px; font-family: var(--mono); font-size: 12px;"
+          ></textarea>
+        </div>
+        
+        <div class="btn-group" style="margin-top: 1rem;">
+          <button class="btn primary" onclick="abDesign_parseCAlphaTrace()">
+            📍 Parse C-Alpha Trace
+          </button>
+          <button class="btn" onclick="abDesign_loadCAlphaFile()">
+            📂 Load from File
+          </button>
+          <button class="btn" onclick="abDesign_clearCAlphaTrace()">
+            🗑️ Clear
+          </button>
+        </div>
+        <input type="file" id="calpha-file-input" accept=".pdb,.txt,.xyz" style="display: none;" onchange="abDesign_handleCAlphaFile(event)">
+        
+        <div id="calpha-status" class="infobox" style="margin-top: 1rem; display: none;">
+          <strong>Status:</strong> <span id="calpha-status-text"></span>
+        </div>
+        
+        <div id="calpha-stats" style="margin-top: 1rem; display: none;">
+          <div class="result-item">
+            <span class="result-label">Residues Parsed</span>
+            <span class="result-value" id="calpha-count">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Chain Length (Å)</span>
+            <span class="result-value" id="calpha-length">0.0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Radius of Gyration</span>
+            <span class="result-value" id="calpha-rg">0.0 Å</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.5rem;">
         <h2>Predicted Properties <span class="pill pill-purple">ML-Based (Sim)</span></h2>
         
         <div class="affinity-meter">
@@ -2832,6 +2880,185 @@ function abDesign_displayCandidates(candidates) {
   
   E('fragment-candidates').innerHTML = html;
 }
+
+// C-Alpha Trace Functions
+let abDesign_calphaCoords = [];
+let abDesign_calphaPDB = '';
+
+function abDesign_parseCAlphaTrace() {
+  const input = E('calpha-trace-input').value.trim();
+  
+  if (!input) {
+    alert('Please paste C-alpha trace coordinates');
+    return;
+  }
+  
+  abDesign_calphaCoords = [];
+  const lines = input.split('\n');
+  let isPDB = false;
+  
+  // Check if input is PDB format
+  if (lines[0].startsWith('ATOM') || lines[0].startsWith('HETATM')) {
+    isPDB = true;
+  }
+  
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    
+    if (isPDB) {
+      // Parse PDB format (only CA atoms)
+      if ((line.startsWith('ATOM') || line.startsWith('HETATM')) && line.includes(' CA ')) {
+        const x = parseFloat(line.substring(30, 38).trim());
+        const y = parseFloat(line.substring(38, 46).trim());
+        const z = parseFloat(line.substring(46, 54).trim());
+        
+        if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+          abDesign_calphaCoords.push({ x, y, z });
+        }
+      }
+    } else {
+      // Parse simple XYZ format
+      const parts = line.trim().split(/\s+/);
+      if (parts.length >= 3) {
+        const x = parseFloat(parts[0]);
+        const y = parseFloat(parts[1]);
+        const z = parseFloat(parts[2]);
+        
+        if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+          abDesign_calphaCoords.push({ x, y, z });
+        }
+      }
+    }
+  }
+  
+  if (abDesign_calphaCoords.length === 0) {
+    alert('No valid coordinates found. Format: X Y Z (one line per residue)', 'error');
+    return;
+  }
+  
+  // Generate PDB from coordinates
+  abDesign_calphaPDB = abDesign_generatePDBFromCAlpha(abDesign_calphaCoords);
+  
+  // Calculate statistics
+  const stats = abDesign_calculateCAlphaStats(abDesign_calphaCoords);
+  
+  // Update UI
+  E('calpha-status').style.display = 'block';
+  E('calpha-status-text').textContent = `Successfully parsed ${abDesign_calphaCoords.length} C-alpha atoms`;
+  E('calpha-status').className = 'successbox';
+  
+  E('calpha-stats').style.display = 'block';
+  E('calpha-count').textContent = abDesign_calphaCoords.length;
+  E('calpha-length').textContent = stats.length.toFixed(2) + ' Å';
+  E('calpha-rg').textContent = stats.rg.toFixed(2) + ' Å';
+  
+  // Visualize in 3D viewer
+  abDesign_visualizeCAlpha();
+  
+  alert(`Parsed ${abDesign_calphaCoords.length} C-alpha atoms successfully!`);
+}
+
+function abDesign_generatePDBFromCAlpha(coords) {
+  let pdb = 'HEADER    C-ALPHA TRACE FROM USER INPUT\n';
+  pdb += 'REMARK   Generated by Antibody Design Suite\n';
+  
+  coords.forEach((coord, i) => {
+    const atomNum = i + 1;
+    const resNum = i + 1;
+    
+    pdb += 'ATOM  ';
+    pdb += String(atomNum).padStart(5) + '  ';
+    pdb += 'CA  ';
+    pdb += 'GLY ';
+    pdb += 'A';
+    pdb += String(resNum).padStart(4) + '    ';
+    pdb += coord.x.toFixed(3).padStart(8);
+    pdb += coord.y.toFixed(3).padStart(8);
+    pdb += coord.z.toFixed(3).padStart(8);
+    pdb += '  1.00  0.00           C\n';
+  });
+  
+  pdb += 'END\n';
+  return pdb;
+}
+
+function abDesign_calculateCAlphaStats(coords) {
+  if (coords.length === 0) return { length: 0, rg: 0 };
+  
+  // Calculate total chain length
+  let totalLength = 0;
+  for (let i = 1; i < coords.length; i++) {
+    const dx = coords[i].x - coords[i-1].x;
+    const dy = coords[i].y - coords[i-1].y;
+    const dz = coords[i].z - coords[i-1].z;
+    totalLength += Math.sqrt(dx*dx + dy*dy + dz*dz);
+  }
+  
+  // Calculate center of mass
+  let cx = 0, cy = 0, cz = 0;
+  coords.forEach(c => {
+    cx += c.x;
+    cy += c.y;
+    cz += c.z;
+  });
+  cx /= coords.length;
+  cy /= coords.length;
+  cz /= coords.length;
+  
+  // Calculate radius of gyration
+  let rg2 = 0;
+  coords.forEach(c => {
+    const dx = c.x - cx;
+    const dy = c.y - cy;
+    const dz = c.z - cz;
+    rg2 += dx*dx + dy*dy + dz*dz;
+  });
+  const rg = Math.sqrt(rg2 / coords.length);
+  
+  return { length: totalLength, rg };
+}
+
+function abDesign_visualizeCAlpha() {
+  if (!viewerDesign || abDesign_calphaCoords.length === 0) return;
+  
+  viewerDesign.clear();
+  viewerDesign.addModel(abDesign_calphaPDB, 'pdb');
+  viewerDesign.setStyle({}, {cartoon: {color: 'spectrum', thickness: 0.8}});
+  viewerDesign.addStyle({}, {sphere: {radius: 0.3, color: 'lightblue'}});
+  viewerDesign.zoomTo();
+  viewerDesign.render();
+}
+
+function abDesign_loadCAlphaFile() {
+  E('calpha-file-input').click();
+}
+
+function abDesign_handleCAlphaFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    E('calpha-trace-input').value = e.target.result;
+    abDesign_parseCAlphaTrace();
+  };
+  reader.readAsText(file);
+}
+
+function abDesign_clearCAlphaTrace() {
+  E('calpha-trace-input').value = '';
+  abDesign_calphaCoords = [];
+  abDesign_calphaPDB = '';
+  
+  E('calpha-status').style.display = 'none';
+  E('calpha-stats').style.display = 'none';
+  
+  // Reload demo structure
+  abDesign_loadDemoStructure();
+  
+  alert('C-alpha trace cleared');
+}
+
 /* ======================================================== */
 /* ===== END OF NAMESPACED AbDesigner SCRIPT ============== */
 /* ======================================================== */
