@@ -2,123 +2,159 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Comprehensive Docking Suite • Student Edition • Antibody–Antigen • CDR • Ligand Screening • Enthalpy</title>
+<title>Comprehensive Docking & Antibody Design Suite • Student Edition</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Student-friendly in-browser docking: antibody–antigen docking, CDR mapping (Kabat/Chothia/IMGT), ligand docking, batch screening, clustering, consensus scoring, 3D viz, QA & registry — all local." />
+<meta name="description" content="In-browser antibody design (CDR, scaffold) and molecular docking (antibody–antigen, ligand screening, CDR mapping), 3D visualization, and analysis." />
 
-<!-- libs -->
 <script defer src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
 <script defer src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
+<script defer src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 
 <style>
   :root{
-    /* palette - royal blue, emerald green, white accents */
-    --bg:#081019;             /* deep space */
-    --panel:#0f172a;          /* indigo-slate */
-    --panel-2:#0a1222;
-    --text:#e6f1ff;           /* near-white */
-    --muted:#97a9c6;
-    --accent:#3b82f6;         /* royal blue */
-    --accent-2:#10b981;       /* emerald */
-    --line:#1e293b;
-
-    --green:#10b981;--red:#ef4444;--yellow:#f59e0b;--orange:#fb923c;--purple:#8b5cf6;
-    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Cantarell,"Noto Sans",Arial
+    --bg:#0b1220;--panel:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--accent:#7dd3fc;--line:#1f2937;
+    --green:#34d399;--red:#f87171;--yellow:#fbbf24;--orange:#fb923c;--purple:#a78bfa;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;background:radial-gradient(1400px 700px at 10% -10%, #12203f 0%, transparent 60%),
-                     radial-gradient(1000px 600px at 120% 0%, #0a2a1a 0%, transparent 60%),
-                     var(--bg);
-       color:var(--text);font-family:var(--sans);line-height:1.6}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
   a{color:var(--accent);text-decoration:none}
-  header{position:sticky;top:0;z-index:20;padding:20px 16px;background:linear-gradient(180deg, rgba(3,7,18,.85), rgba(3,7,18,.55));backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  header{padding:34px 16px;background:radial-gradient(1200px 600px at 15% -10%,#1d2a4a,transparent 60%),radial-gradient(1000px 500px at 120% 10%,#2a1e4a,transparent 60%)}
   .wrap{max-width:1400px;margin:0 auto}
-  h1{margin:0 0 6px;font-size:28px;font-weight:800;letter-spacing:.2px}
-  .byline{color:#93c5fd;font-weight:700;margin-top:4px}
-  h2{margin:0 0 10px;font-size:20px;font-weight:800}
-  h3{margin:14px 0 6px;font-size:16px;font-weight:700}
+  h1{margin:0 0 8px;font-size:30px;font-weight:800}
+  .byline{color:#93c5fd;font-weight:700;margin-top:6px}
+  h2{margin:0 0 10px;font-size:22px;font-weight:700}
+  h3{margin:14px 0 6px;font-size:17px;font-weight:700}
+  h4{margin:14px 0 6px;font-size:15px;font-weight:700}
   p.lead{color:var(--muted);margin:6px 0 0;font-size:14px}
-
-  /* layout: unified workflow = left sidebar + main canvas */
-  .app{display:grid;grid-template-columns:280px 1fr;gap:14px;padding:14px}
-  @media(max-width:980px){.app{grid-template-columns:1fr}}
-
-  .sidebar{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;position:sticky;top:90px;height:max-content}
-  .side-title{font-size:12px;color:#c7e5ff;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
-  .nav{display:grid;gap:8px}
-  .nav button{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line);background:linear-gradient(180deg,#0c1426,#0b1220);color:#dce7ff;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:800;transition:.18s;font-size:13px}
-  .nav button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(59,130,246,.15)}
-  .nav button.active{background:linear-gradient(180deg,#1d4ed8,#1e40af);border-color:transparent;color:#fff}
-
-  .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .kbd{font-family:var(--mono);background:#111827;border:1px solid #374151;border-radius:6px;padding:2px 6px;font-size:12px}
-  .pill{padding:2px 10px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#a7f3d0;font-weight:800;background:linear-gradient(180deg,#0d1b2a,#0a1220)}
-
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;font-weight:800;border:1px solid var(--line);background:linear-gradient(180deg,#0c1426,#0b1220);cursor:pointer;font-size:13px;transition:.18s;color:#dbeafe}
-  .btn:hover:not([disabled]){transform:translateY(-1px);box-shadow:0 8px 20px rgba(16,185,129,.18)}
-  .btn.primary{background:linear-gradient(180deg,#1d4ed8,#1e40af);border:0;color:#fff}
-  .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0;color:#eafff7}
-  .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0;color:#fff}
-  .btn.purple{background:linear-gradient(180deg,#7c3aed,#6d28d9);border:0;color:#fff}
-  .btn.orange{background:linear-gradient(180deg,#fb923c,#f97316);border:0;color:#2a0f00}
-  .btn[disabled]{opacity:.55;cursor:not-allowed}
-
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-  .grid{display:grid;gap:14px}
-  .grid.two{grid-template-columns:1.05fr .95fr}
-  .grid.three{grid-template-columns:repeat(3,1fr)}
-  @media(max-width:1100px){.grid.two,.grid.three{grid-template-columns:1fr}}
-
-  label{font-weight:700;font-size:12px}
-  input[type=number],input[type=text],textarea,select{background:#0a0f1a;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:80px}
-  textarea{width:100%;min-height:110px;resize:vertical}
-
+  section{padding:22px 16px;border-top:1px solid var(--line);background:var(--panel)}
+  .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:980px){.grid.two{grid-template-columns:1.05fr .95fr}}
+  @media(min-width:1100px){.grid.three{grid-template-columns:repeat(3,1fr)}}
+  @media(min-width:1200px){.grid.four{grid-template-columns:repeat(4,1fr)}}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .card{background:#0b1220;border:1px solid var(--line);border-radius:14px;padding:14px}
-
-  .table{width:100%;border-collapse:collapse;font-size:13px;background:#0a0f1a}
-  .table th{background:#13203a;padding:8px;text-align:left;border-bottom:2px solid var(--line);position:sticky;top:0;z-index:1}
-  .table td{padding:6px 8px;border-bottom:1px solid #112033}
-  .table tr:hover{background:#0f1829}
-  .table-container{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
-
-  .score{font-family:var(--mono);background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto;font-size:12px;line-height:1.5;white-space:pre-wrap}
-  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
-  .metric-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
-  .metric-value{font-size:20px;font-weight:800;color:#7dd3fc}
-  .metric-label{font-size:12px;color:#9fb4d7}
-
+  label{font-weight:700;font-size:13px}
+  input[type=number],input[type=text],input[type=file],textarea,select{background:#0a0f1a;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:80px;width:100%}
+  textarea{width:100%;min-height:110px;resize:vertical}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-weight:700;border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:13px;transition:.2s;color:var(--text)}
+  .btn:hover:not([disabled]){transform:translateY(-1px);box-shadow:0 6px 16px rgba(125,211,252,.25);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#2563eb,#1e40af);border:0;color:white}
+  .btn.green{background:linear-gradient(180deg,#059669,#047857);border:0;color:white}
+  .btn.red{background:linear-gradient(180deg,#dc2626,#b91c1c);border:0;color:white}
+  .btn.purple{background:linear-gradient(180deg,#7c3aed,#6d28d9);border:0;color:white}
+  .btn.orange{background:linear-gradient(180deg,#fb923c,#f97316);border:0;color:white}
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+  .btn-group{display:flex;gap:1rem;flex-wrap:wrap}
+  .pill{padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#93c5fd;font-weight:800;display:inline-block;}
+  .pill-green{color:var(--green);border-color:var(--green);}
+  .pill-purple{color:var(--purple);border-color:var(--purple);}
+  progress{width:260px;height:10px;border:1px solid var(--line);border-radius:999px;background:#0b1220}
+  progress::-webkit-progress-value{background:#7dd3fc;border-radius:999px;transition:width .3s}
   .infobox{border:1px solid #334155;border-left:4px solid var(--accent);border-radius:10px;padding:10px;background:#0a0f1a;color:#cbd5e1;margin:10px 0;font-size:13px}
   .errorbox{border:1px solid #7f1d1d;border-left:4px solid #dc2626;border-radius:10px;padding:10px;background:#1a0c0c;color:#fecaca;margin:10px 0}
   .successbox{border:1px solid #065f46;border-left:4px solid #10b981;border-radius:10px;padding:10px;background:#0a1f1a;color:#a7f3d0;margin:10px 0}
-
-  #viewer,#viewerLig,#viewerScr,#viewerComp,#viewerCDR{position:relative;width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
-
+  .score{font-family:var(--mono);background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;font-size:12px;line-height:1.5;white-space:pre-wrap}
+  .chainchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .chip{border:1px solid #334155;border-radius:999px;padding:2px 8px;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+  .chip input{accent-color:#7dd3fc;width:auto;min-width:auto;}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .tabbtn{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1220;cursor:pointer;font-size:14px;font-weight:800;transition:.2s;color:var(--text)}
+  .tabbtn:hover{background:#152034}
+  .tabbtn.active{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0;color:#fff}
+  .tabsec{display:none}
+  .tabsec.active{display:block}
+  .table{width:100%;border-collapse:collapse;font-size:13px;background:#0a0f1a}
+  .table th{background:#152034;padding:8px;text-align:left;border-bottom:2px solid var(--line);position:sticky;top:0;z-index:1}
+  .table td{padding:6px 8px;border-bottom:1px solid #112033}
+  .table tr:hover{background:#0f1829}
+  .table-container{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
+  #viewer,#viewerLig,#viewerScr,#viewerComp,#viewerCDR,#viewerDesign{position:relative;width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;overflow:hidden}
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
+  .metric-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+  .metric-value{font-size:20px;font-weight:800;color:var(--accent)}
+  .metric-label{font-size:12px;color:var(--muted)}
   footer{padding:18px 16px;color:#9ca3af;text-align:center;font-size:13px}
-
-  /* CDR */
+  .small{font-size:12px}
+  .guide{display:grid;gap:8px;margin-top:12px}
+  .step{background:#0a0f1a;border:1px dashed #334155;border-radius:10px;padding:10px}
+  #nmrMoleculeImage { min-height: 200px; background-size: contain; background-position: center; background-repeat: no-repeat; border-radius: 8px; border: 1px solid var(--line); margin-bottom: 12px; }
+  .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .kbd{font-family:var(--mono);background:#111827;border:1px solid #374151;border-radius:6px;padding:2px 6px;font-size:12px}
+  [aria-live]{min-width:40px}
   .scheme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
   .scheme-card{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:8px}
-  .cdr-highlight{background:#12233e;border-left:3px solid var(--accent-2);padding:6px 8px;margin:6px 0;border-radius:6px}
-  .cdr-region{font-family:var(--mono);font-size:11px;color:#fbbf24;background:#071425;padding:2px 4px;border-radius:4px;margin:2px}
-
-  /* compact progress at header */
-  progress{width:220px;height:10px;border:1px solid var(--line);border-radius:999px;background:#0b1220}
-  progress::-webkit-progress-value{background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:999px;transition:width .3s}
+  .cdr-highlight{background:#1e293b;border-left:3px solid var(--accent);padding:6px 8px;margin:6px 0;border-radius:6px}
+  .cdr-region{font-family:var(--mono);font-size:11px;color:#fbbf24;background:#1a1a2e;padding:2px 4px;border-radius:4px;margin:2px}
+  
+  /* === Styles for Antibody Designer components === */
+  .ig-selector { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .ig-option { padding: 1rem; background: var(--panel); border: 2px solid var(--line); border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.3s; }
+  .ig-option:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .ig-option.selected { background: #152034; border-color: var(--green); }
+  .ig-option h3 { margin: 0; color: var(--accent); font-size: 1.5rem; }
+  .ig-option p { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted); }
+  .cdr-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .cdr-item { background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--line); }
+  .cdr-label { font-weight: 600; color: var(--green); margin-bottom: 0.5rem; font-size: 0.9rem; }
+  .cdr-sequence { font-family: var(--mono); font-size: 1.1rem; color: var(--text); letter-spacing: 1px; word-break: break-all; }
+  .affinity-meter { margin: 1rem 0; }
+  .meter-bar { height: 30px; background: var(--bg); border: 1px solid var(--line); border-radius: 15px; overflow: hidden; position: relative; }
+  .meter-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #7dd3fc); transition: width 0.5s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 1rem; }
+  .meter-value { color: white; font-weight: 600; font-size: 0.9rem; }
+  .viewer-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 10px; }
+  .result-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+  .result-label { color: var(--muted); font-weight: 500; }
+  .result-value { color: var(--green); font-weight: 600; font-family: var(--mono); }
+  @media (max-width: 768px) {
+    .ig-selector { grid-template-columns: repeat(2, 1fr); }
+    .cdr-panel { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap">
-    <h1>🧬 Comprehensive Molecular Docking Suite — <span style="color:#a7f3d0">Student Edition</span></h1>
+    <h1>🧬 Comprehensive Molecular Design & Docking Suite — <span style="color:#a7f3d0">Student Edition</span></h1>
     <div class="byline">by DJF — The New Chemist</div>
-    <p class="lead">Antibody–antigen docking • <b>CDR mapping</b> (Kabat/Chothia/IMGT) • Single‑ligand docking • Batch screening • Clustering • Consensus ranking • ΔH estimation • QA & registry — all in‑browser.</p>
+    <p class="lead">
+      <b>Design:</b> Antibody CDR/scaffold generation • Epitope DB • Property prediction
+      <b>Docking:</b> Antibody–antigen • Ligand screening
+      <b>Analysis:</b> CDR mapping (Kabat/IMGT) • Pose clustering • ΔH estimation • QA
+    </p>
 
-    <div class="topbar" style="margin-top:10px">
-      <button class="btn" id="btnDemo" title="Load small example proteins and run a quick docking">🎯 Load Demo & Dock</button>
+    <div class="infobox" role="region" aria-label="Student guide">
+      <b>Quick Start (Students):</b>
+      <div class="guide">
+        <div class="step">1) <b>Design an Ab</b> in <span class="kbd">🎨 Ab Design</span>: Pick a target (e.g., IgG), scaffold (e.g., scFv), and click <b>Generate Antibody</b>.</div>
+        <div class="step">2) <b>Analyze CDRs</b> in <span class="kbd">🔬 CDR Analysis</span>: Paste a PDB to map its CDRs by Kabat/Chothia/IMGT.</div>
+        <div class="step">3) <b>Dock Proteins</b> in <span class="kbd">🧷 Antibody Docking</span>: Load PDBs (or <em>Example</em>), <b>Parse</b>, and <b>Run Docking</b>.</div>
+        <div class="step">4) <b>Explore Results</b>: Use the Complex picker, click pose buttons, and toggle overlays for contacts/H-bonds.</div>
+        <div class="step">5) <b>Validate</b> all results with professional tools and experiments. This is an educational guide.</div>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tabbtn active" data-tab="abDesignTab" role="tab">🎨 Ab Design</button>
+      <button class="tabbtn" data-tab="epitopesTab" role="tab">🎯 Epitope DB</button>
+      <button class="tabbtn" data-tab="dockTab" role="tab" aria-selected="true">🧷 Antibody Docking</button>
+      <button class="tabbtn" data-tab="cdrTab" role="tab">🔬 CDR Analysis</button>
+      <button class="tabbtn" data-tab="fragmentTab" role="tab">📐 Fragment Generator</button>
+      <button class="tabbtn" data-tab="fragLibTab" role="tab">🧩 Fragment Library</button>
+      <button class="tabbtn" data-tab="ligTab" role="tab">🧪 Ligand Docking</button>
+      <button class="tabbtn" data-tab="screenTab" role="tab">📚 Batch Screening</button>
+      <button class="tabbtn" data-tab="designAnalysisTab" role="tab">📈 Design Analysis</button>
+      <button class="tabbtn" data-tab="analysisTab" role="tab">📊 Docking Analysis</button>
+      <button class="tabbtn" data-tab="designExportTab" role="tab">💾 Design Export</button>
+      <button class="tabbtn" data-tab="qaTab" role="tab">✅ QA & Registry</button>
+      <button class="tabbtn" data-tab="omicsTab" role="tab">🔬 Omics Analysis</button>
+      <button class="tabbtn" data-tab="nmrTab" role="tab">📡 NMR Prediction</button>
+      <button class="tabbtn" data-tab="aboutTab" role="tab">ℹ️ About</button>
+    </div>
+    <div class="topbar">
+      <button class="btn" id="btnDemo" title="Load small example proteins and run a quick docking">🎯 Load Docking Demo</button>
       <button class="btn green" id="btnSaveSession" title="Download a JSON snapshot of this session">💾 Save Session</button>
       <button class="btn purple" id="btnLoadSession" title="Load a previously saved session (.json)">📂 Load Session</button>
       <span class="pill" id="statusPill" aria-live="polite">idle</span>
@@ -127,593 +163,810 @@
   </div>
 </header>
 
-<div class="app wrap">
-  <!-- unified left nav -->
-  <aside class="sidebar">
-    <div class="side-title">Workflow</div>
-    <div class="nav" role="tablist" aria-label="Main sections">
-      <button class="active" data-tab="dockTab" role="tab" aria-selected="true">🧷 Antibody Docking</button>
-      <button data-tab="cdrTab" role="tab">🔬 CDR Analysis</button>
-      <button data-tab="fragmentTab" role="tab">📐 Fragment Generator</button>
-      <button data-tab="fragmentScoringTab" role="tab">📈 Fragment Scoring</button>
-      <button data-tab="ligTab" role="tab">🧪 Ligand Docking</button>
-      <button data-tab="screenTab" role="tab">📚 Batch Screening</button>
-      <button data-tab="analysisTab" role="tab">📊 Analysis</button>
-      <button data-tab="qaTab" role="tab">✅ QA & Registry</button>
-      <button data-tab="omicsTab" role="tab">🧫 Omics</button>
-      <button data-tab="nmrTab" role="tab">📡 NMR</button>
-      <button data-tab="aboutTab" role="tab">ℹ️ About</button>
+<section id="abDesignTab" class="tabsec active" data-tab-panel>
+  <div class="wrap grid two">
+    <div>
+      <div class="card">
+        <h2>Select Target Immunoglobulin <span class="pill">Step 1</span></h2>
+        
+        <div class="ig-selector">
+          <div class="ig-option" onclick="abDesign_selectIg('IgG')" id="ig-IgG">
+            <h3>IgG</h3>
+            <p>Most abundant<br>Therapeutic Abs</p>
+          </div>
+          <div class="ig-option" onclick="abDesign_selectIg('IgA')" id="ig-IgA">
+            <h3>IgA</h3>
+            <p>Mucosal immunity<br>Secretory</p>
+          </div>
+          <div class="ig-option" onclick="abDesign_selectIg('IgM')" id="ig-IgM">
+            <h3>IgM</h3>
+            <p>Pentameric<br>Complement</p>
+          </div>
+          <div class="ig-option" onclick="abDesign_selectIg('IgD')" id="ig-IgD">
+            <h3>IgD</h3>
+            <p>B cell receptor<br>Signaling</p>
+          </div>
+          <div class="ig-option" onclick="abDesign_selectIg('IgE')" id="ig-IgE">
+            <h3>IgE</h3>
+            <p>Allergic response<br>Mast cells</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.5rem;">
+        <h2>Choose Scaffold Type <span class="pill">Step 2</span></h2>
+        
+        <div class="form-group">
+          <select id="scaffold-type" onchange="abDesign_updateScaffoldInfo()">
+            <option value="scFv">scFv - Single Chain Variable Fragment (27 kDa)</option>
+            <option value="Fab">Fab - Fragment Antigen Binding (50 kDa)</option>
+            <option value="IgG">Full IgG - Complete Antibody (150 kDa)</option>
+            <option value="Bispecific">Bispecific - Dual Targeting (150 kDa)</option>
+          </select>
+        </div>
+        
+        <div id="scaffold-info" class="infobox" style="margin-top: 1rem; padding: 1rem;">
+          </div>
+      </div>
+      
+      <div class="card" style="margin-top: 1.5rem;">
+          <h2>3D Structure Viewer</h2>
+          <div class="viewer-controls">
+            <button class="btn" onclick="abDesign_resetView()">Reset</button>
+            <button class="btn" onclick="abDesign_toggleSpin()">Spin</button>
+            <button class="btn" onclick="abDesign_changeStyle('cartoon')">Cartoon</button>
+            <button class="btn" onclick="abDesign_changeStyle('stick')">Stick</button>
+            <button class="btn" onclick="abDesign_changeStyle('sphere')">Sphere</button>
+          </div>
+        <div id="viewerDesign" style="height: 450px;"></div>
+      </div>
     </div>
-  </aside>
 
-  <main>
-    <!-- DOCKING -->
-    <section id="dockTab" class="panel" data-tab-panel>
-      <div class="grid two">
-        <div class="card">
-          <h2>1️⃣ Load Proteins</h2>
-          <div class="row" style="color:#9fb4d7">Upload PDBs or paste text. Parse, then pick chains. <em>Tip:</em> click <b>Example</b> to try quickly.</div>
-          <div class="row">
-            <div style="flex:1;min-width:300px">
-              <h3>Protein A (Antibody) <span class="pill" id="badgeA">0 atoms</span></h3>
-              <div class="row" role="group" aria-label="Protein A inputs">
-                <input type="file" id="pdbAFile" accept=".pdb,.ent,.txt,.pdb.gz" />
-                <button class="btn" onclick="useExample('A')">Example</button>
-                <button class="btn" onclick="fetchPDBFromRCSB('A')" title="Download by PDB ID from RCSB">Fetch PDB ID</button>
-              </div>
-              <textarea id="pdbAText" placeholder="Paste PDB for Protein A" aria-label="Protein A PDB"></textarea>
-              <div class="row"><label>Chains:</label><div id="chainsABox" class="row" style="gap:6px"></div></div>
-              <div id="chainWarnA" class="infobox">Parse to populate chains.</div>
-              <div class="row"><button class="btn" onclick="parseOne('A')">🔎 Parse A</button><button class="btn" onclick="selectAllChains('A')">Select All</button><button class="btn" onclick="invertChains('A')">Invert</button></div>
-            </div>
-            <div style="flex:1;min-width:300px">
-              <h3>Protein B (Antigen) <span class="pill" id="badgeB">0 atoms</span></h3>
-              <div class="row" role="group" aria-label="Protein B inputs">
-                <input type="file" id="pdbBFile" accept=".pdb,.ent,.txt,.pdb.gz" />
-                <button class="btn" onclick="useExample('B')">Example</button>
-                <button class="btn" onclick="fetchPDBFromRCSB('B')" title="Download by PDB ID from RCSB">Fetch PDB ID</button>
-              </div>
-              <textarea id="pdbBText" placeholder="Paste PDB for Protein B" aria-label="Protein B PDB"></textarea>
-              <div class="row"><label>Chains:</label><div id="chainsBBox" class="row" style="gap:6px"></div></div>
-              <div id="chainWarnB" class="infobox">Parse to populate chains.</div>
-              <div class="row"><button class="btn" onclick="parseOne('B')">🔎 Parse B</button><button class="btn" onclick="selectAllChains('B')">Select All</button><button class="btn" onclick="invertChains('B')">Invert</button></div>
-            </div>
+    <div>
+      <div class="card">
+        <h2>CDR Design <span class="pill pill-green">Auto-Generated</span></h2>
+        
+        <div class="cdr-panel" id="cdr-display">
+          <div class="cdr-item">
+            <div class="cdr-label">CDR H1</div>
+            <div class="cdr-sequence" id="cdr-h1">GFTFSSY</div>
+          </div>
+          <div class="cdr-item">
+            <div class="cdr-label">CDR H2</div>
+            <div class="cdr-sequence" id="cdr-h2">ISGSGGST</div>
+          </div>
+          <div class="cdr-item">
+            <div class="cdr-label">CDR H3</div>
+            <div class="cdr-sequence" id="cdr-h3">AREGYCSSGSCYFD</div>
+          </div>
+          <div class="cdr-item">
+            <div class="cdr-label">CDR L1</div>
+            <div class="cdr-sequence" id="cdr-l1">QSISSY</div>
+          </div>
+          <div class="cdr-item">
+            <div class="cdr-label">CDR L2</div>
+            <div class="cdr-sequence" id="cdr-l2">AAS</div>
+          </div>
+          <div class="cdr-item">
+            <div class="cdr-label">CDR L3</div>
+            <div class="cdr-sequence" id="cdr-l3">QQYGSSPT</div>
           </div>
         </div>
-
-        <div class="card">
-          <h2>2️⃣ Docking Parameters</h2>
-          <h3>Sampling</h3>
-          <div class="row">
-            <label>Samples</label><input type="number" id="samples" value="12000" min="1000" step="1000" title="More samples = more thorough (slower)">
-            <label>Max Translation (Å)</label><input type="number" id="maxTrans" value="12" step="1">
-            <label>Atom Set</label>
-            <select id="atomMode" title="Which atoms to use for sampling/scoring">
-              <option value="CA">Cα only</option><option value="BB">Backbone</option><option value="HEAVY" selected>All heavy</option>
-            </select>
-          </div>
-          <h3>Scoring</h3>
-          <div class="row">
-            <label>Contact (Å)</label><input type="number" id="contactCut" value="4.8" step="0.1">
-            <label>Clash Factor</label><input type="number" id="clashFactor" value="0.85" step="0.05">
-            <label>Contact W</label><input type="number" id="wContact" value="1.0" step="0.1">
-            <label>Clash W</label><input type="number" id="wClash" value="6.0" step="0.1">
-            <label>Softness</label><input type="number" id="soft" value="0.5" step="0.1">
-          </div>
-          <h3>Pairing & Output</h3>
-          <div class="row">
-            <label>Pairing</label>
-            <select id="pairMode">
-              <option value="AGG">Aggregate (all selected)</option>
-              <option value="A_EACH_B">A × each B-chain</option>
-              <option value="CROSS">each A-chain × each B-chain</option>
-            </select>
-            <label>Top Poses</label><input type="number" id="topN" value="12" min="1" max="50">
-            <label>Rescore</label>
-            <select id="rescoreMode"><option value="NONE">Skip</option><option value="HEAVY">Heavy</option><option value="HEAVY_REFINE" selected>Heavy + refine</option></select>
-            <label>Seed</label><input type="number" id="seed" value="42">
-          </div>
-          <div class="row">
-            <label>Diversity (°/Å)</label>
-            <input type="number" id="dupAngle" value="12" step="1" style="width:90px">
-            <input type="number" id="dupTrans" value="2" step="0.5" style="width:90px">
-            <label>Clusters</label><input type="number" id="clustersK" value="6" min="1" max="24" style="width:90px">
-          </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn primary" id="dockBtn">▶️ Run Docking</button>
-            <button class="btn red" id="cancelBtn" disabled>✖ Cancel</button>
-            <button class="btn orange" id="resetBtn">🔄 Reset</button>
-          </div>
-          <div class="infobox"><b>Score = contacts×W<sub>c</sub> − clashes×W<sub>x</sub></b>. Clustering is pose‑diversity aware. Heavy rescoring refines ranks.</div>
+        
+        <div class="btn-group" style="margin-top: 1.5rem;">
+          <button class="btn primary" onclick="abDesign_generateAntibody()">
+            🧬 Generate Antibody
+          </button>
+          <button class="btn" onclick="abDesign_optimizeCDRs()">
+            ⚡ Optimize CDRs
+          </button>
+        </div>
+        
+        <div class="btn-group" style="margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem;">
+            <label class="chip">Highlight:</label>
+            <button class="btn small" onclick="abDesign_highlightCDR('H1')">H1</button>
+            <button class="btn small" onclick="abDesign_highlightCDR('H2')">H2</button>
+            <button class="btn small" onclick="abDesign_highlightCDR('H3')">H3</button>
+            <button class="btn small" onclick="abDesign_highlightCDR('L1')">L1</button>
+            <button class="btn small" onclick="abDesign_highlightCDR('L2')">L2</button>
+            <button class="btn small" onclick="abDesign_highlightCDR('L3')">L3</button>
         </div>
       </div>
 
-      <div class="grid two">
-        <div class="card">
-          <h2>3️⃣ Complex Selector • 3D Visualization & Results</h2>
-          <div class="row">
-            <label>Complex</label>
-            <select id="comboSelect" style="min-width:260px" aria-label="Complex selector"></select>
-            <button class="btn" id="btnPrevCombo">◀ Prev</button>
-            <button class="btn" id="btnNextCombo">Next ▶</button>
-            <button class="btn" id="btnClusters" title="Group poses into K clusters">📎 Cluster Poses</button>
+      <div class="card" style="margin-top: 1.5rem;">
+        <h2>Predicted Properties <span class="pill pill-purple">ML-Based (Sim)</span></h2>
+        
+        <div class="affinity-meter">
+          <label>Predicted Affinity (KD)</label>
+          <div class="meter-bar">
+            <div class="meter-fill" id="affinity-meter" style="width: 75%;">
+              <span class="meter-value">10 nM</span>
+            </div>
           </div>
+        </div>
+        
+        <div class="results-panel" style="background: transparent; border: none; padding: 0;">
+          <div class="result-item">
+            <span class="result-label">Specificity Score</span>
+            <span class="result-value" id="specificity-score">0.85</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Stability (Tm)</span>
+            <span class="result-value" id="stability-tm">72°C</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Humanization</span>
+            <span class="result-value" id="humanization">92%</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Expression Yield</span>
+            <span class="result-value" id="expression">High</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="epitopesTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>Immunoglobulin Epitope Database <span class="pill pill-green">35 Validated Epitopes (Sim)</span></h2>
+      
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ig Class</th>
+              <th>Region</th>
+              <th>Position</th>
+              <th>Accessibility</th>
+              <th>Conservation</th>
+              <th>Clinical Relevance</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="epitope-tbody">
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dockTab" class="tabsec" data-tab-panel>
+  <div class="wrap grid two">
+    <div class="card">
+      <h2>1️⃣ Load Proteins</h2>
+      <div class="row small" style="color:#9ca3af">Upload PDBs or paste text. Parse, then pick chains. <em>Tip:</em> click <b>Example</b> to try quickly.</div>
+      <div class="row">
+        <div style="flex:1;min-width:300px">
+          <h3>Protein A (Antibody) <span class="pill" id="badgeA">0 atoms</span></h3>
+          <div class="row" role="group" aria-label="Protein A inputs">
+            <input type="file" id="pdbAFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+            <button class="btn" onclick="useExample('A')">Example</button>
+            <button class="btn" onclick="fetchPDBFromRCSB('A')" title="Download by PDB ID from RCSB">Fetch PDB ID</button>
+          </div>
+          <textarea id="pdbAText" placeholder="Paste PDB for Protein A" aria-label="Protein A PDB"></textarea>
+          <div class="row"><label>Chains:</label><div id="chainsABox" class="chainchips"></div></div>
+          <div id="chainWarnA" class="infobox small">Parse to populate chains.</div>
+          <div class="row"><button class="btn" onclick="parseOne('A')">🔎 Parse A</button><button class="btn" onclick="selectAllChains('A')">Select All</button><button class="btn" onclick="invertChains('A')">Invert</button></div>
+        </div>
+        <div style="flex:1;min-width:300px">
+          <h3>Protein B (Antigen) <span class="pill" id="badgeB">0 atoms</span></h3>
+          <div class="row" role="group" aria-label="Protein B inputs">
+            <input type="file" id="pdbBFile" accept=".pdb,.ent,.txt,.pdb.gz" />
+            <button class="btn" onclick="useExample('B')">Example</button>
+            <button class="btn" onclick="fetchPDBFromRCSB('B')" title="Download by PDB ID from RCSB">Fetch PDB ID</button>
+          </div>
+          <textarea id="pdbBText" placeholder="Paste PDB for Protein B" aria-label="Protein B PDB"></textarea>
+          <div class="row"><label>Chains:</label><div id="chainsBBox" class="chainchips"></div></div>
+          <div id="chainWarnB" class="infobox small">Parse to populate chains.</div>
+          <div class="row"><button class="btn" onclick="parseOne('B')">🔎 Parse B</button><button class="btn" onclick="selectAllChains('B')">Select All</button><button class="btn" onclick="invertChains('B')">Invert</button></div>
+        </div>
+      </div>
+      <details style="margin-top:10px"><summary><b>Student Notes</b> — formats & tips</summary>
+        <div class="small" style="color:#9ca3af;padding-top:6px">
+          <b>Formats:</b> PDB text, .pdb.gz • <b>Fetch:</b> RCSB via PDB ID • <b>Cartoon:</b> needs backbone atoms (N/CA/C/O)
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>2️⃣ Docking Parameters</h2>
+      <h4>Sampling</h4>
+      <div class="row">
+        <label>Samples</label><input type="number" id="samples" value="12000" min="1000" step="1000" title="More samples = more thorough (slower)">
+        <label>Max Translation (Å)</label><input type="number" id="maxTrans" value="12" step="1">
+        <label>Atom Set</label>
+        <select id="atomMode" title="Which atoms to use for sampling/scoring">
+          <option value="CA">Cα only</option><option value="BB">Backbone</option><option value="HEAVY" selected>All heavy</option>
+        </select>
+      </div>
+      <h4 style="margin-top:8px">Scoring</h4>
+      <div class="row">
+        <label>Contact (Å)</label><input type="number" id="contactCut" value="4.8" step="0.1">
+        <label>Clash Factor</label><input type="number" id="clashFactor" value="0.85" step="0.05">
+        <label>Contact W</label><input type="number" id="wContact" value="1.0" step="0.1">
+        <label>Clash W</label><input type="number" id="wClash" value="6.0" step="0.1">
+        <label>Softness</label><input type="number" id="soft" value="0.5" step="0.1">
+      </div>
+      <h4 style="margin-top:8px">Pairing & Output</h4>
+      <div class="row">
+        <label>Pairing</label>
+        <select id="pairMode">
+          <option value="AGG">Aggregate (all selected)</option>
+          <option value="A_EACH_B">A × each B-chain</option>
+          <option value="CROSS">each A-chain × each B-chain</option>
+        </select>
+        <label>Top Poses</label><input type="number" id="topN" value="12" min="1" max="50">
+        <label>Rescore</label>
+        <select id="rescoreMode"><option value="NONE">Skip</option><option value="HEAVY">Heavy</option><option value="HEAVY_REFINE" selected>Heavy + refine</option></select>
+        <label>Seed</label><input type="number" id="seed" value="42">
+      </div>
+      <div class="row">
+        <label>Diversity (°/Å)</label>
+        <input type="number" id="dupAngle" value="12" step="1" style="width:90px">
+        <input type="number" id="dupTrans" value="2" step="0.5" style="width:90px">
+        <label>Clusters</label><input type="number" id="clustersK" value="6" min="1" max="24" style="width:90px">
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="dockBtn">▶️ Run Docking</button>
+        <button class="btn red" id="cancelBtn" disabled>✖ Cancel</button>
+        <button class="btn orange" id="resetBtn">🔄 Reset</button>
+      </div>
+      <div class="infobox small"><b>Score = contacts×W<sub>c</sub> − clashes×W<sub>x</sub></b>. Clustering is pose-diversity aware. Heavy rescoring refines ranks.</div>
+    </div>
+  </div>
+
+  <div class="wrap grid two">
+    <div class="card">
+      <h2>3️⃣ Complex Selector • 3D Visualization & Results</h2>
+      <div class="row">
+        <label>Complex</label>
+        <select id="comboSelect" style="min-width:260px" aria-label="Complex selector"></select>
+        <button class="btn" id="btnPrevCombo">◀ Prev</button>
+        <button class="btn" id="btnNextCombo">Next ▶</button>
+        <button class="btn" id="btnClusters" title="Group poses into K clusters">📎 Cluster Poses</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <label class="chip"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
+        <label class="chip"><input type="checkbox" id="toggleHB" checked> H-bonds</label>
+        <label class="chip"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
+        <label class="chip"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
+        <label class="chip"><input type="checkbox" id="toggleRibbon" checked> Ribbon</label>
+      </div>
+      <div id="viewer" role="img" aria-label="3D viewer"></div>
+      <div class="row" style="margin-top:8px;flex-wrap:wrap" id="poseControls"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn green" id="btnAllPDB">⬇ All Poses PDB (this complex)</button>
+        <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
+        <button class="btn" id="btnCSV">⬇ CSV</button>
+        <button class="btn" id="btnJSON">⬇ JSON</button>
+        <button class="btn purple" id="btnPNG">📸 PNG</button>
+        <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi-MODEL PDB)</button>
+      </div>
+      <div class="score" id="scoreBox" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Interface Metrics & Enthalpy</h2>
+      <div class="metric-grid" id="metricsDisplay"></div>
+      <h4 style="margin-top:10px">Energy Parameters</h4>
+      <div class="row">
+        <label>k<sub>elec</sub></label><input type="number" id="kElec" value="0.5" step="0.1">
+        <label>Elec Cutoff (Å)</label><input type="number" id="elecCut" value="12" step="0.5">
+        <label>Desolv W</label><input type="number" id="wDesolv" value="0.2" step="0.1">
+      </div>
+      <div class="infobox small">
+        <b>ΔH (kcal/mol) ≈</b> −0.5×contacts −2.5×H-bonds −4.0×salt-bridges −1.0×hydrophobic +0.3×clash + electrostatics +0.2×contacts (desolv).
+      </div>
+      <div class="infobox small"><b>Reproducibility:</b> Outputs include parameters & seed; registry stores signature.</div>
+      <h3>Complex Summary</h3>
+      <div class="table-container small">
+        <table class="table">
+          <thead><tr><th>Complex</th><th>Top Score</th><th>Contacts</th><th>ΔH</th></tr></thead>
+          <tbody id="comboSummaryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cdrTab" class="tabsec" data-tab-panel>
+  <div class="wrap grid two">
+    <div class="card">
+      <h2>CDR Identification & Mapping</h2>
+      <textarea id="cdrPDB" placeholder="Paste antibody PDB for CDR analysis" style="height:200px"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" onclick="runCDRAnalysis()">Analyze CDRs</button>
+        <select id="schemeSelect" title="Numbering scheme">
+          <option value="Kabat">Kabat</option>
+          <option value="Chothia">Chothia</option>
+          <option value="IMGT">IMGT</option>
+        </select>
+        <button class="btn" onclick="copyAbPDBToCDR()">Use Antibody PDB A</button>
+      </div>
+      <div class="scheme-grid" id="cdrResults"></div>
+      <div class="infobox" style="margin-top:10px">
+        <strong>Numbering Schemes:</strong><br>
+        • <strong>Kabat:</strong> Sequence variability-based. • <strong>Chothia:</strong> Structural features. • <strong>IMGT:</strong> Standardized across species.<br>
+        <span class="small">Heuristic anchoring is used here; for research work, validate with ANARCI/IMGT/AbNum.</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>CDR Visualization</h2>
+      <div id="viewerCDR"></div>
+      <div class="row" style="margin-top:8px">
+        <label class="chip"><input type="checkbox" id="showCDR1" checked> CDR1</label>
+        <label class="chip"><input type="checkbox" id="showCDR2" checked> CDR2</label>
+        <label class="chip"><input type="checkbox" id="showCDR3" checked> CDR3</label>
+        <label class="chip"><input type="checkbox" id="showFrameworks" checked> Frameworks</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>CDR Sequence Details</h2>
+      <div id="cdrSequenceTable" class="table-container"></div>
+    </div>
+  </div>
+</section>
+
+<section id="fragmentTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>CA-Trace Fragment Generator</h2>
+      <div class="grid three">
+        <div>
+          <h3>Input PDB</h3>
+          <textarea id="fragPDB" placeholder="Paste PDB for fragment generation"></textarea>
+        </div>
+        <div>
+          <h3>Parameters</h3>
+          <div class="row"><label>Window Size</label><input type="number" id="windowSize" value="10" min="3" max="30"></div>
+          <div class="row"><label>Step Size</label><input type="number" id="stepSize" value="1" min="1" max="10"></div>
+          <div class="row"><label>Chain Filter</label><input type="text" id="chainFilter" placeholder="e.g., H,L"></div>
+        </div>
+        <div>
+          <h3>Actions</h3>
+          <button class="btn primary" onclick="generateFragments()">Generate Fragments</button>
+          <button class="btn green" onclick="downloadFragments()">⬇ Download All</button>
+        </div>
+      </div>
+      <div id="fragmentResults" style="margin-top:20px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="fragLibTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="grid two">
+      <div class="card">
+        <h2>Fragment Library (Upload)</h2>
+        <span class="pill pill-blue">235 Fragments Loaded (Sim)</span>
+        
+        <div class="form-group" style="margin-top:1rem">
+          <label>Upload Fragment JSON</label>
+          <input type="file" id="fragment-upload" accept=".json" onchange="abDesign_loadFragments(event)">
+        </div>
+        
+        <div class="form-group" style="margin-top:1rem">
+          <label>Or Paste Fragment Data</label>
+          <textarea id="fragment-data" placeholder='[{"chain":"A","sequence":"DKPRAHLTVV",...}]'></textarea>
+        </div>
+        
+        <button class="btn primary" onclick="abDesign_processFragments()" style="margin-top:1rem">
+          Process Fragments
+        </button>
+      </div>
+      
+      <div class="card">
+        <h2>Top CDR Candidates</h2>
+        
+        <div id="fragment-candidates">
+          <div class="results-panel">
+            <div class="result-item">
+              <span class="result-label">Best H3:</span>
+              <span class="result-value">VCAQCPPGTF (Score: 78)</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Best L1:</span>
+              <span class="result-value">SVSEVGSNWF (Score: 70)</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Best L3:</span>
+              <span class="result-value">QFWNYLERCR (Score: 71)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ligTab" class="tabsec" data-tab-panel>
+  <div class="wrap grid two">
+    <div class="card">
+      <h2>🧪 Single Ligand Docking</h2>
+      <div class="small" style="color:#9ca3af">SMILES→3D uses a simplified embedding for demonstration. For research, use RDKit / OpenBabel.</div>
+      <div class="row">
+        <div style="flex:1;min-width:300px">
+          <h3>Receptor PDB</h3>
+          <textarea id="ligReceptorPDB" placeholder="Paste receptor PDB" aria-label="Ligand docking receptor PDB"></textarea>
           <div class="row" style="margin-top:6px">
-            <label class="row"><input type="checkbox" id="toggleContacts" checked> Contacts</label>
-            <label class="row"><input type="checkbox" id="toggleHB" checked> H‑bonds</label>
-            <label class="row"><input type="checkbox" id="toggleSB" checked> Salt bridges</label>
-            <label class="row"><input type="checkbox" id="toggleHydro"> Hydrophobic</label>
-            <label class="row"><input type="checkbox" id="toggleRibbon" checked> Ribbon</label>
-          </div>
-          <div id="viewer" role="img" aria-label="3D viewer"></div>
-          <div class="row" style="margin-top:8px;flex-wrap:wrap" id="poseControls"></div>
-          <div class="row" style="margin-top:8px">
-            <button class="btn green" id="btnAllPDB">⬇ All Poses PDB (this complex)</button>
-            <button class="btn green" id="btnCurrentPDB">⬇ Current PDB</button>
-            <button class="btn" id="btnCSV">⬇ CSV</button>
-            <button class="btn" id="btnJSON">⬇ JSON</button>
-            <button class="btn purple" id="btnPNG">📸 PNG</button>
-            <button class="btn" id="btnAllComplexesPDB">⬇ All Complexes (multi‑MODEL PDB)</button>
-          </div>
-          <div class="score" id="scoreBox" style="margin-top:8px"></div>
-        </div>
-
-        <div class="card">
-          <h2>Interface Metrics & Enthalpy</h2>
-          <div class="metric-grid" id="metricsDisplay"></div>
-          <h3 style="margin-top:10px">Energy Parameters</h3>
-          <div class="row">
-            <label>k<sub>elec</sub></label><input type="number" id="kElec" value="0.5" step="0.1">
-            <label>Elec Cutoff (Å)</label><input type="number" id="elecCut" value="12" step="0.5">
-            <label>Desolv W</label><input type="number" id="wDesolv" value="0.2" step="0.1">
-          </div>
-          <div class="infobox"><b>ΔH (kcal/mol) ≈</b> −0.5×contacts −2.5×H‑bonds −4.0×salt‑bridges −1.0×hydrophobic +0.3×clash + electrostatics +0.2×contacts (desolv).</div>
-          <h3>Complex Summary</h3>
-          <div class="table-container">
-            <table class="table">
-              <thead><tr><th>Complex</th><th>Top Score</th><th>Contacts</th><th>ΔH</th></tr></thead>
-              <tbody id="comboSummaryBody"></tbody>
-            </table>
+            <button class="btn" onclick="loadLigandDemoReceptor()">Load Example</button>
+            <button class="btn" onclick="parseReceptorForLigand()">Parse & Preview</button>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- CDR -->
-    <section id="cdrTab" class="panel" data-tab-panel hidden>
-      <div class="grid two">
-        <div class="card">
-          <h2>CDR Identification & Mapping</h2>
-          <textarea id="cdrPDB" placeholder="Paste antibody PDB for CDR analysis" style="height:200px"></textarea>
-          <div class="row" style="margin-top:10px">
-            <button class="btn primary" onclick="runCDRAnalysis()">Analyze CDRs</button>
-            <select id="schemeSelect" title="Numbering scheme">
-              <option value="Kabat">Kabat</option>
-              <option value="Chothia">Chothia</option>
-              <option value="IMGT">IMGT</option>
-            </select>
-            <button class="btn" onclick="copyAbPDBToCDR()">Use Antibody PDB A</button>
-          </div>
-          <div class="scheme-grid" id="cdrResults"></div>
-          <div class="infobox" style="margin-top:10px">
-            <strong>Numbering Schemes:</strong>
-            • <strong>Kabat</strong> (variability) • <strong>Chothia</strong> (structural) • <strong>IMGT</strong> (standardized).<br>
-            <span class="small">Heuristic anchoring is used here; for research work, validate with ANARCI/IMGT/AbNum.</span>
-          </div>
-        </div>
-        <div class="card">
-          <h2>CDR Visualization</h2>
-          <div id="viewerCDR"></div>
-          <div class="row" style="margin-top:8px">
-            <label class="row"><input type="checkbox" id="showCDR1" checked> CDR1</label>
-            <label class="row"><input type="checkbox" id="showCDR2" checked> CDR2</label>
-            <label class="row"><input type="checkbox" id="showCDR3" checked> CDR3</label>
-            <label class="row"><input type="checkbox" id="showFrameworks" checked> Frameworks</label>
-          </div>
-        </div>
-      </div>
-      <div class="card" style="margin-top:14px">
-        <h2>CDR Sequence Details</h2>
-        <div id="cdrSequenceTable" class="table-container"></div>
-      </div>
-    </section>
-
-    <!-- FRAGMENT GENERATOR -->
-    <section id="fragmentTab" class="panel" data-tab-panel hidden>
-      <div class="card">
-        <h2>CA‑Trace Fragment Generator</h2>
-        <div class="grid three">
-          <div>
-            <h3>Input PDB</h3>
-            <textarea id="fragPDB" placeholder="Paste PDB for fragment generation"></textarea>
-          </div>
-          <div>
-            <h3>Parameters</h3>
-            <div class="row"><label>Window Size</label><input type="number" id="windowSize" value="10" min="3" max="30"></div>
-            <div class="row"><label>Step Size</label><input type="number" id="stepSize" value="1" min="1" max="10"></div>
-            <div class="row"><label>Chain Filter</label><input type="text" id="chainFilter" placeholder="e.g., H,L"></div>
-          </div>
-          <div>
-            <h3>Actions</h3>
-            <button class="btn primary" onclick="generateFragments()">Generate Fragments</button>
-            <button class="btn green" onclick="downloadFragments()">⬇ Download All</button>
-          </div>
-        </div>
-        <div id="fragmentResults" style="margin-top:20px"></div>
-      </div>
-    </section>
-
-    <!-- FRAGMENT SCORING -->
-    <section id="fragmentScoringTab" class="panel" data-tab-panel hidden>
-      <div class="card">
-        <h2>📈 Robust Antibody Fragment Analyzer & Optimizer</h2>
-        <p class="small">Upload a PDB to heuristically estimate developability parameters, then score the candidate.</p>
-        <div class="grid two">
-          <div>
-            <h3>1. Load Fragment PDB</h3>
-            <textarea id="fragScorePDB" placeholder="Paste PDB for fragment analysis" style="height:150px"></textarea>
-            <div class="row" style="margin-top:6px">
-              <button class="btn primary" id="btnAnalyzePDBForScoring">🔎 Analyze PDB</button>
-              <button class="btn" onclick="copyAbPDBToFragmentScorer()">Use Antibody PDB A</button>
-            </div>
-          </div>
-          <div>
-            <div class="infobox small">
-              <b>PDB Analysis (Heuristic):</b>
-              <br>• <b>Stability/Aggregation:</b> Estimated from hydrophobic residue ratio.
-              <br>• <b>Glycosylation:</b> Counts N‑X‑S/T sequence motifs.
-              <br>• <b>Other values (Affinity, Internalization, Epitope):</b> Cannot be derived from a PDB. Please set manually.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="grid two">
-          <div>
-            <h3>2. Fragment Parameters (Edit estimates)</h3>
-            <div class="row"><label>Name</label><input type="text" id="fragScoreName" value="PDB-Candidate"></div>
-            <div class="row"><label>Affinity (KD, nM)</label><input type="number" id="fragScoreKD" value="0.5" step="0.1"></div>
-            <div class="row"><label>Internalization (0-1)</label><input type="number" id="fragScoreInternal" value="0.88" step="0.01" max="1" min="0"></div>
-            <div class="row"><label>Stability (0-1)</label><input type="number" id="fragScoreStable" value="0.95" step="0.01" max="1" min="0"></div>
-            <div class="row"><label>Aggregation (0-1)</label><input type="number" id="fragScoreAgg" value="0.1" step="0.01" max="1" min="0"></div>
-            <div class="row"><label>Glycosylation Sites</label><input type="number" id="fragScoreGlyco" value="2" step="1" min="0"></div>
-            <h3>Class & Engineering</h3>
-            <div class="row"><label>Epitope Class</label>
-              <select id="fragScoreEpitope">
-                <option value="synergistic" selected>synergistic</option>
-                <option value="non_overlapping">non_overlapping</option>
-                <option value="agonistic">agonistic</option>
-                <option value="inhibitory">inhibitory</option>
-                <option value="neutralizing">neutralizing</option>
-                <option value="other">other</option>
-              </select>
-            </div>
-            <div class="row"><label>Fc Subclass</label>
-              <select id="fragScoreSubclass">
-                <option value="IgG1" selected>IgG1</option>
-                <option value="IgG2">IgG2</option>
-                <option value="IgG3">IgG3</option>
-                <option value="IgG4">IgG4</option>
-                <option value="IgA">IgA</option>
-                <option value="IgM">IgM</option>
-              </select>
-            </div>
-            <div class="row" style="margin-top:10px">
-              <label class="row"><input type="checkbox" id="fragScoreFc" checked> Fc‑Engineered</label>
-            </div>
-          </div>
-          <div>
-            <h3>3. Analysis Output</h3>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" id="btnRunFragScore">▶️ Score Fragment</button>
-            </div>
-            <pre class="score" id="fragScoreOutput" style="min-height: 280px; white-space: pre-wrap; margin-top: 10px;"></pre>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- LIGAND -->
-    <section id="ligTab" class="panel" data-tab-panel hidden>
-      <div class="grid two">
-        <div class="card">
-          <h2>🧪 Single Ligand Docking</h2>
-          <div class="small" style="color:#9fb4d7">SMILES→3D uses a simplified embedding for demonstration. For research, use RDKit / OpenBabel.</div>
-          <div class="row">
-            <div style="flex:1;min-width:300px">
-              <h3>Receptor PDB</h3>
-              <textarea id="ligReceptorPDB" placeholder="Paste receptor PDB" aria-label="Ligand docking receptor PDB"></textarea>
-              <div class="row" style="margin-top:6px">
-                <button class="btn" onclick="loadLigandDemoReceptor()">Load Example</button>
-                <button class="btn" onclick="parseReceptorForLigand()">Parse & Preview</button>
-              </div>
-            </div>
-            <div style="flex:1;min-width:300px">
-              <h3>Ligand SMILES</h3>
-              <textarea id="ligSmiles" placeholder="e.g., CC(=O)Oc1ccccc1C(=O)O (aspirin)" aria-label="Ligand SMILES"></textarea>
-              <div class="row" style="margin-top:6px">
-                <label>3D Method</label><select id="ligEmbedMethod"><option value="HASH">HashCloud</option><option value="HELIX">RingHelix</option></select>
-                <label>Seed</label><input type="number" id="ligSeed" value="1337" style="width:90px" />
-                <button class="btn primary" onclick="runSingleLigandDock()">▶️ Dock</button>
-              </div>
-            </div>
-          </div>
-          <div class="infobox small"><b>Note:</b> Posing uses receptor center sampling; score = contacts − clash (same core terms).</div>
-        </div>
-        <div class="card">
-          <h2>Ligand Docking Result</h2>
-          <div id="viewerLig"></div>
-          <div class="score" id="ligScore" style="margin-top:8px"></div>
-          <div class="row" style="margin-top:8px">
-            <button class="btn green" id="btnLigPDB">⬇ Complex PDB</button>
-            <button class="btn" id="btnLigCSV">⬇ CSV Result</button>
-            <span class="pill" id="ligStatus" aria-live="polite">idle</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SCREENING -->
-    <section id="screenTab" class="panel" data-tab-panel hidden>
-      <div class="card">
-        <h2>📚 Batch Screening (≤50 SMILES × ≤3 Receptors)</h2>
-        <div class="grid three">
-          <div>
-            <h3>SMILES Library</h3>
-            <textarea id="scrSmiles" placeholder="One SMILES per line (max 50)"></textarea>
-          </div>
-          <div>
-            <h3>Receptors (PDBs)</h3>
-            <textarea id="scrReceptors" placeholder="Paste 2–3 PDBs separated by a line with only: END"></textarea>
-            <div class="small" style="color:#9fb4d7">Delimiter must be exactly “END” on its own line.</div>
-          </div>
-          <div>
-            <h3>Parameters</h3>
-            <div class="row"><label>Samples/Ligand</label><input type="number" id="scrSamples" value="5000" min="1000" step="500" /></div>
-            <div class="row"><label>Contact (Å)</label><input type="number" id="scrContactCut" value="4.8" step="0.1" /></div>
-            <div class="row"><label>Clash Factor</label><input type="number" id="scrClashFactor" value="0.85" step="0.05" /></div>
-            <div class="row"><label>Seed</label><input type="number" id="scrSeed" value="777" /></div>
-            <div class="row"><label>3D Method</label><select id="scrEmbedMethod"><option value="HASH">HashCloud</option><option value="HELIX">RingHelix</option></select></div>
-            <div class="row"><label>Sort</label>
-              <select id="scrSort"><option value="score">Score ↓</option><option value="enthalpy">ΔH ↑ (most negative)</option><option value="consensus" selected>Consensus (rank‑sum)</option></select>
-            </div>
-            <div class="row" style="margin-top:10px"><button class="btn primary" id="btnStartScreen">▶️ Start Screening</button><button class="btn red" id="btnStopScreen" disabled>✖ Stop</button></div>
-            <div class="infobox small">Sequential SMILES×Receptor; consensus = rank(score↓, ΔH↑, contacts↓).</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Results</h2>
-        <div class="row" style="margin-bottom:8px">
-          <button class="btn green" id="btnScrCSV">⬇ Full Results CSV</button>
-          <button class="btn" id="btnScrJSON">⬇ JSON Export</button>
-          <button class="btn purple" id="btnScrTop10">📊 Show Top 10</button>
-          <span class="pill" id="scrStatus" aria-live="polite">idle</span>
-          <span class="small" id="scrProgress" style="color:#9fb4d7"></span>
-        </div>
-        <div class="table-container" style="max-height:420px">
-          <table class="table" id="scrTable">
-            <thead><tr>
-              <th>#</th><th>Receptor</th><th>SMILES</th><th>Score</th><th>Contacts</th><th>H‑bonds</th><th>SaltBr</th><th>Clash</th><th>ΔH (kcal/mol)</th><th>CRank</th>
-            </tr></thead>
-            <tbody id="scrTableBody"></tbody>
-          </table>
-        </div>
-        <div id="viewerScr" style="height:420px;margin-top:12px"></div>
-        <div class="small" style="text-align:center;color:#9fb4d7;margin-top:4px">Click a row to visualize that docked pose.</div>
-      </div>
-
-      <div class="card">
-        <h2>Enthalpy Distribution</h2>
-        <div class="metric-grid" id="screenMetrics"></div>
-        <div class="score" id="enthalpyBreakdown" style="margin-top:8px"></div>
-        <div class="infobox small"><b>Interpretation:</b> more negative ΔH ⇒ stronger binding (approximate; entropy not included).</div>
-      </div>
-    </section>
-
-    <!-- QA / REGISTRY -->
-    <section id="qaTab" class="panel" data-tab-panel hidden>
-      <div class="grid two">
-        <div class="card">
-          <h2>📋 Run Registry & Session Management</h2>
+        <div style="flex:1;min-width:300px">
+          <h3>Ligand SMILES</h3>
+          <textarea id="ligSmiles" placeholder="e.g., CC(=O)Oc1ccccc1C(=O)O (aspirin)" aria-label="Ligand SMILES"></textarea>
           <div class="row" style="margin-top:6px">
-            <button class="btn green" onclick="saveCurrentRun()">💾 Save Current Run</button>
-            <button class="btn" onclick="refreshRunRegistry()">🔄 Refresh</button>
-            <button class="btn" onclick="exportAllRuns()">⬇ Export Registry</button>
-            <button class="btn purple" onclick="importRunRegistry()">⬆ Import Registry</button>
-            <button class="btn red" onclick="clearRunRegistry()">🗑️ Clear</button>
-          </div>
-          <input type="file" id="importRegistryFile" accept=".json" style="display:none" />
-          <div class="table-container" style="margin-top:10px">
-            <table class="table">
-              <thead><tr><th>Timestamp</th><th>Type</th><th>Description</th><th>Top Score</th><th>Signature</th><th>Actions</th></tr></thead>
-              <tbody id="registryTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card">
-          <h2>✅ Quality Assurance (Reproducibility)</h2>
-          <div class="row" style="margin-top:6px">
-            <label>Repeats</label><input type="number" id="qaRepeats" value="3" min="2" max="10" style="width:90px" />
-            <label>Tolerance</label><input type="number" id="qaTolerance" value="0.01" step="0.01" style="width:90px" />
-            <button class="btn primary" onclick="runQATest()">▶️ Run QA Test</button>
-          </div>
-          <div class="score" id="qaResults" style="margin-top:10px;min-height:120px"></div>
-          <div class="infobox small">Runs N repeats with same seed; passes if top scores within tolerance.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ANALYSIS -->
-    <section id="analysisTab" class="panel" data-tab-panel hidden>
-      <div class="card">
-        <h2>📊 Analysis Tools</h2>
-        <div class="row" style="margin-top:6px;gap:8px">
-          <button class="btn subtab active" data-subtab="energyTab">Energy Decomposition</button>
-          <button class="btn subtab" data-subtab="compareTab">Pose Comparison</button>
-          <button class="btn subtab" data-subtab="residueTab">Residue Contacts</button>
-        </div>
-        <div id="energyTab" class="subpanel" style="margin-top:10px">
-          <h3>Energy Component Analysis</h3>
-          <div id="energyComponents" class="metric-grid"></div>
-          <h3>ΔH Details</h3>
-          <div class="score" id="enthalpyDetail"></div>
-        </div>
-        <div id="compareTab" class="subpanel" hidden style="margin-top:10px">
-          <h3>Compare Poses</h3>
-          <div class="row">
-            <label>Pose 1</label><select id="comparePose1"></select>
-            <label>Pose 2</label><select id="comparePose2"></select>
-            <button class="btn primary" onclick="comparePoses()">Compare</button>
-          </div>
-          <div class="grid two" style="margin-top:10px">
-            <div><div id="viewerComp" style="height:420px"></div></div>
-            <div><div class="score" id="comparisonResults" style="min-height:420px"></div></div>
-          </div>
-        </div>
-        <div id="residueTab" class="subpanel" hidden style="margin-top:10px">
-          <h3>Residue‑Level Contacts</h3>
-          <div class="row">
-            <label>Min Dist (Å)</label><input type="number" id="filterMinDist" value="0" step="0.5" style="width:90px" />
-            <label>Max Dist (Å)</label><input type="number" id="filterMaxDist" value="6" step="0.5" style="width:90px" />
-            <button class="btn" onclick="filterResidueContacts()">Filter</button>
-            <button class="btn green" onclick="exportResidueData()">⬇ Export</button>
-          </div>
-          <div class="table-container" style="margin-top:8px">
-            <table class="table">
-              <thead><tr><th>Residue A</th><th>Chain A</th><th>Residue B</th><th>Chain B</th><th>Distance (Å)</th><th>Type</th><th>Energy</th></tr></thead>
-              <tbody id="residueTableBody"></tbody>
-            </table>
+            <label>3D Method</label><select id="ligEmbedMethod"><option value="HASH">HashCloud</option><option value="HELIX">RingHelix</option></select>
+            <label>Seed</label><input type="number" id="ligSeed" value="1337" style="width:90px" />
+            <button class="btn primary" onclick="runSingleLigandDock()">▶️ Dock</button>
           </div>
         </div>
       </div>
-    </section>
+      <div class="infobox small"><b>Note:</b> Posing uses receptor center sampling; score = contacts − clash (same core terms).</div>
+    </div>
+    <div class="card">
+      <h2>Ligand Docking Result</h2>
+      <div id="viewerLig"></div>
+      <div class="score" id="ligScore" style="margin-top:8px"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn green" id="btnLigPDB">⬇ Complex PDB</button>
+        <button class="btn" id="btnLigCSV">⬇ CSV Result</button>
+        <span class="pill" id="ligStatus" aria-live="polite">idle</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- OMICS -->
-    <section id="omicsTab" class="panel" data-tab-panel hidden>
-      <div class="card">
-        <h2>🧫 Virtual Omics Analysis (Theoretical)</h2>
-        <div class="infobox">Educational illustration of proteomics, lipidomics, metabolomics using glycolysis. Not a simulator.</div>
-        <div class="row" style="gap:8px;flex-wrap:wrap">
-          <button class="btn subtab active" data-subtab="proteomicsTab">Proteomics</button>
-          <button class="btn subtab" data-subtab="lipidomicsTab">Lipidomics</button>
-          <button class="btn subtab" data-subtab="metabolomicsTab">Metabolomics</button>
+<section id="screenTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>📚 Batch Screening (≤50 SMILES × ≤3 Receptors)</h2>
+      <div class="grid three">
+        <div>
+          <h3>SMILES Library</h3>
+          <textarea id="scrSmiles" placeholder="One SMILES per line (max 50)"></textarea>
         </div>
-        <div id="proteomicsTab" class="subpanel" style="margin-top:10px">
-          <h3>Protein Input (optional PDB for descriptors)</h3>
-          <textarea id="omicsProteinPDB" placeholder="Paste protein PDB (optional)"></textarea>
-          <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadProteinDemo">Load Protein Demo</button></div>
-          <h3>Virtual Proteomics: Glycolytic Enzymes</h3>
-          <div class="table-container">
-            <table class="table">
-              <thead><tr><th>Protein (Enzyme)</th><th>Subcellular Location</th><th>Function in Glycolysis</th></tr></thead>
-              <tbody>
-                <tr><td>Hexokinase (HK)</td><td>Cytosol (near mitochondria)</td><td>Glucose → glucose‑6‑phosphate.</td></tr>
-                <tr><td>PFK‑1</td><td>Cytosol</td><td>Committed step to F1,6BP.</td></tr>
-                <tr><td>GAPDH</td><td>Cytosol</td><td>Oxidation step; NADH.</td></tr>
-                <tr><td>Pyruvate Kinase</td><td>Cytosol</td><td>PEP + ADP → ATP + pyruvate.</td></tr>
-              </tbody>
-            </table>
+        <div>
+          <h3>Receptors (PDBs)</h3>
+          <textarea id="scrReceptors" placeholder="Paste 2–3 PDBs separated by a line with only: END"></textarea>
+          <div class="small" style="color:#9ca3af">Delimiter must be exactly “END” on its own line.</div>
+        </div>
+        <div>
+          <h3>Parameters</h3>
+          <div class="row"><label>Samples/Ligand</label><input type="number" id="scrSamples" value="5000" min="1000" step="500" /></div>
+          <div class="row"><label>Contact (Å)</label><input type="number" id="scrContactCut" value="4.8" step="0.1" /></div>
+          <div class="row"><label>Clash Factor</label><input type="number" id="scrClashFactor" value="0.85" step="0.05" /></div>
+          <div class="row"><label>Seed</label><input type="number" id="scrSeed" value="777" /></div>
+          <div class="row"><label>3D Method</label><select id="scrEmbedMethod"><option value="HASH">HashCloud</option><option value="HELIX">RingHelix</option></select></div>
+          <div class="row"><label>Sort</label>
+            <select id="scrSort"><option value="score">Score ↓</option><option value="enthalpy">ΔH ↑ (most negative)</option><option value="consensus" selected>Consensus (rank-sum)</option></select>
           </div>
+          <div class="row" style="margin-top:10px"><button class="btn primary" id="btnStartScreen">▶️ Start Screening</button><button class="btn red" id="btnStopScreen" disabled>✖ Stop</button></div>
+          <div class="infobox small">Sequential SMILES×Receptor; consensus = rank(score↓, ΔH↑, contacts↓).</div>
         </div>
-        <div id="lipidomicsTab" class="subpanel" hidden style="margin-top:10px">
-          <h3>Lipid SMILES (one per line)</h3>
-          <textarea id="omicsLipidSmiles" placeholder="Enter lipid SMILES, one per line"></textarea>
-          <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadLipidDemo">Load Lipid Demo</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Results</h2>
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn green" id="btnScrCSV">⬇ Full Results CSV</button>
+        <button class="btn" id="btnScrJSON">⬇ JSON Export</button>
+        <button class="btn purple" id="btnScrTop10">📊 Show Top 10</button>
+        <span class="pill" id="scrStatus" aria-live="polite">idle</span>
+        <span class="small" id="scrProgress" style="color:#9ca3af"></span>
+      </div>
+      <div class="table-container" style="max-height:460px">
+        <table class="table" id="scrTable">
+          <thead><tr>
+            <th>#</th><th>Receptor</th><th>SMILES</th><th>Score</th><th>Contacts</th><th>H-bonds</th><th>SaltBr</th><th>Clash</th><th>ΔH (kcal/mol)</th><th>CRank</th>
+          </tr></thead>
+          <tbody id="scrTableBody"></tbody>
+        </table>
+      </div>
+      <div id="viewerScr" style="height:420px;margin-top:12px"></div>
+      <div class="small" style="text-align:center;color:#9ca3af;margin-top:4px">Click a row to visualize that docked pose.</div>
+    </div>
+
+    <div class="card">
+      <h2>Enthalpy Distribution</h2>
+      <div class="metric-grid" id="screenMetrics"></div>
+      <div class="score" id="enthalpyBreakdown" style="margin-top:8px"></div>
+      <div class="infobox small"><b>Interpretation:</b> more negative ΔH ⇒ stronger binding (approximate; entropy not included).</div>
+    </div>
+  </div>
+</section>
+
+<section id="designAnalysisTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="grid two">
+      <div class="card">
+        <h2>Affinity Prediction</h2>
+        <div id="affinity-chart" style="height: 400px;"></div>
+      </div>
+      
+      <div class="card">
+        <h2>CDR Properties</h2>
+        <div id="cdr-properties-chart" style="height: 400px;"></div>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top: 1.5rem;">
+      <h2>Therapeutic Applications</h2>
+      <div id="therapeutic-apps">
         </div>
-        <div id="metabolomicsTab" class="subpanel" hidden style="margin-top:10px">
-          <h3>Carbohydrate SMILES (one per line) & DNA (FASTA‑like)</h3>
-          <textarea id="omicsCarbSmiles" placeholder="Enter carbohydrate SMILES, one per line"></textarea>
-          <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadCarbDemo">Load Carb Demo</button></div>
-          <h3 style="margin-top:8px">DNA (FASTA)</h3>
-          <textarea id="omicsDNA" placeholder=">id&#10;ACGT..."></textarea>
-          <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadDNADemo">Load DNA Demo</button></div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" id="omicsAnalyzeBtn">▶️ Analyze</button>
-          <button class="btn green" id="omicsExportBtn">⬇ Export JSON</button>
-          <span class="pill" id="omicsStatus" aria-live="polite">idle</span>
+    </div>
+  </div>
+</section>
+
+<section id="analysisTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>📊 Docking Analysis Tools</h2>
+      <div class="tabs" style="margin-top:6px">
+        <button class="tabbtn active" data-subtab="energyTab">Energy Decomposition</button>
+        <button class="tabbtn" data-subtab="compareTab">Pose Comparison</button>
+        <button class="tabbtn" data-subtab="residueTab">Residue Contacts</button>
+      </div>
+      <div id="energyTab" class="tabsec active">
+        <h3>Energy Component Analysis</h3>
+        <div id="energyComponents" class="metric-grid"></div>
+        <h4>ΔH Details</h4>
+        <div class="score" id="enthalpyDetail"></div>
+      </div>
+      <div id="compareTab" class="tabsec">
+        <h3>Compare Poses</h3>
+        <div class="row">
+          <label>Pose 1</label><select id="comparePose1"></select>
+          <label>Pose 2</label><select id="comparePose2"></select>
+          <button class="btn primary" onclick="comparePoses()">Compare</button>
         </div>
         <div class="grid two" style="margin-top:10px">
-          <div class="card">
-            <h3>Descriptors</h3>
-            <div class="table-container">
-              <table class="table">
-                <thead><tr><th>Key</th><th>Value</th></tr></thead>
-                <tbody id="omicsDescriptorBody"></tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Trends</h3>
-            <div class="score" id="omicsTrends" style="min-height:220px"></div>
-          </div>
+          <div><div id="viewerComp" style="height:420px"></div></div>
+          <div><div class="score" id="comparisonResults" style="min-height:420px"></div></div>
         </div>
       </div>
-    </section>
-
-    <!-- NMR -->
-    <section id="nmrTab" class="panel" data-tab-panel hidden>
-      <div class="grid two">
-        <div class="card">
-          <h2>📡 Theoretical NMR Prediction</h2>
-          <div class="infobox small">Enter a SMILES string to get a theoretical description of what its NMR spectra might look like. This is an educational guide, not a simulator.</div>
-          <h3>SMILES Input</h3>
-          <textarea id="nmrSmiles" placeholder="Enter SMILES string">CC(=O)Oc1ccccc1C(=O)O</textarea>
-          <h3>Structure Preview</h3>
-          <div id="nmrMoleculeImage" style="min-height:200px;border:1px solid var(--line);border-radius:8px;background:#0a0f1a;display:flex;align-items:center;justify-content:center">(preview)</div>
-          <div class="row" style="margin-top:8px">
-            <button class="btn primary" id="btnPredict1H">Predict ¹H NMR</button>
-            <button class="btn" id="btnPredict13C">Predict ¹³C NMR</button>
-            <button class="btn" id="btnPredictCOSY">Predict COSY</button>
-            <button class="btn" id="btnPredictNOESY">Predict NOESY</button>
-          </div>
+      <div id="residueTab" class="tabsec">
+        <h3>Residue-Level Contacts</h3>
+        <div class="row">
+          <label>Min Dist (Å)</label><input type="number" id="filterMinDist" value="0" step="0.5" style="width:90px" />
+          <label>Max Dist (Å)</label><input type="number" id="filterMaxDist" value="6" step="0.5" style="width:90px" />
+          <button class="btn" onclick="filterResidueContacts()">Filter</button>
+          <button class="btn green" onclick="exportResidueData()">⬇ Export</button>
         </div>
-        <div class="card">
-          <h2>Prediction Output</h2>
-          <div class="score" id="nmrPredictionOutput" style="min-height:300px">Prediction results will appear here.</div>
+        <div class="table-container" style="margin-top:8px">
+          <table class="table">
+            <thead><tr><th>Residue A</th><th>Chain A</th><th>Residue B</th><th>Chain B</th><th>Distance (Å)</th><th>Type</th><th>Energy</th></tr></thead>
+            <tbody id="residueTableBody"></tbody>
+          </table>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <!-- ABOUT -->
-    <section id="aboutTab" class="panel" data-tab-panel hidden>
+<section id="designExportTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="grid three">
       <div class="card">
-        <h2>About</h2>
-        <p>This educational platform demonstrates in‑browser docking with parallel sampling, simplified scoring, and interactive visualization. All computations run locally; nothing is uploaded.</p>
-        <h3>Important Disclaimers</h3>
-        <div class="errorbox">
-          <p><b>No warranties; use at your own risk.</b></p>
-          <p>Scoring/embedding are simplified approximations; entropy, solvation, polarization, water networks, induced fit, glycan effects, and protonation/tautomer states are not fully modeled. <b>Always double‑check results and verify with experiments (e.g., SPR/ITC, crystallography, MD, MM‑PBSA/FEP).</b> Compare against professional tools.</p>
-          <p><b>Regulatory note:</b> Not validated for GLP/Part 11/CSV; not for regulated decision‑making. Educational/research prototyping only.</p>
-        </div>
-        <h3>Recommended Workflow</h3>
-        <div class="infobox small">Use for hypothesis generation → export top poses → refine with AutoDock/HADDOCK/Rosetta → MD → MM‑PBSA/FEP → <b>experimental validation</b>.</div>
-        <h3>Credits</h3>
-        <div class="small" style="color:#9fb4d7">Lead & Concept: <b>DJF — The New Chemist</b> • 3D rendering: 3Dmol.js • Compression: Pako • Structures: RCSB PDB</div>
+        <h2>PDB Structure</h2>
+        <p style="color: var(--muted); margin-bottom: 1rem;">
+          Export 3D structure in PDB format for molecular dynamics or docking
+        </p>
+        <button class="btn primary" onclick="abDesign_exportPDB()">
+          📄 Download PDB
+        </button>
       </div>
-    </section>
-  </main>
-</div>
+      
+      <div class="card">
+        <h2>Sequences</h2>
+        <p style="color: var(--muted); margin-bottom: 1rem;">
+          Export CDR and framework sequences in FASTA format
+        </p>
+        <button class="btn primary" onclick="abDesign_exportFASTA()">
+          🧬 Download FASTA
+        </button>
+      </div>
+      
+      <div class="card">
+        <h2>Analysis Report</h2>
+        <p style="color: var(--muted); margin-bottom: 1rem;">
+          Complete analysis including predictions and properties
+        </p>
+        <button class="btn primary" onclick="abDesign_exportReport()">
+          📊 Download Report
+        </button>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top: 1.5rem;">
+      <h2>Export Preview</h2>
+      <textarea id="export-preview" style="height: 400px; font-family: var(--mono);" readonly>
+Select an export option to preview the data...
+      </textarea>
+    </div>
+  </div>
+</section>
+
+<section id="qaTab" class="tabsec" data-tab-panel>
+  <div class="wrap grid two">
+    <div class="card">
+      <h2>📋 Run Registry & Session Management</h2>
+      <div class="row" style="margin-top:6px">
+        <button class="btn green" onclick="saveCurrentRun()">💾 Save Current Run</button>
+        <button class="btn" onclick="refreshRunRegistry()">🔄 Refresh</button>
+        <button class="btn" onclick="exportAllRuns()">⬇ Export Registry</button>
+        <button class="btn purple" onclick="importRunRegistry()">⬆ Import Registry</button>
+        <button class="btn red" onclick="clearRunRegistry()">🗑️ Clear</button>
+      </div>
+      <input type="file" id="importRegistryFile" accept=".json" style="display:none" />
+      <div class="table-container" style="margin-top:10px">
+        <table class="table">
+          <thead><tr><th>Timestamp</th><th>Type</th><th>Description</th><th>Top Score</th><th>Signature</th><th>Actions</th></tr></thead>
+          <tbody id="registryTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>✅ Quality Assurance (Reproducibility)</h2>
+      <div class="row" style="margin-top:6px">
+        <label>Repeats</label><input type="number" id="qaRepeats" value="3" min="2" max="10" style="width:90px" />
+        <label>Tolerance</label><input type="number" id="qaTolerance" value="0.01" step="0.01" style="width:90px" />
+        <button class="btn primary" onclick="runQATest()">▶️ Run QA Test</button>
+      </div>
+      <div class="score" id="qaResults" style="margin-top:10px;min-height:120px"></div>
+      <div class="infobox small">Runs N repeats with same seed; passes if top scores within tolerance.</div>
+    </div>
+  </div>
+</section>
+
+<section id="omicsTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>🔬 Virtual Omics Analysis of a Theoretical Eukaryotic Cell</h2>
+      <div class="infobox">This is a theoretical analysis for educational purposes. It illustrates data types from proteomics, lipidomics, and metabolomics, using glycolysis as the example pathway.</div>
+
+      <div class="tabs" style="margin-top:6px">
+        <button class="tabbtn active" data-subtab="proteomicsTab">Proteomics</button>
+        <button class="tabbtn" data-subtab="lipidomicsTab">Lipidomics</button>
+        <button class="tabbtn" data-subtab="metabolomicsTab">Metabolomics</button>
+      </div>
+
+      <div id="proteomicsTab" class="tabsec active">
+        <h3>Protein Input (optional PDB for descriptors)</h3>
+        <textarea id="omicsProteinPDB" placeholder="Paste protein PDB (optional)"></textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="omicsLoadProteinDemo">Load Protein Demo</button>
+        </div>
+        <h3>Virtual Proteomics: Glycolytic Enzymes</h3>
+        <div class="table-container">
+          <table class="table">
+            <thead><tr><th>Protein (Enzyme)</th><th>Subcellular Location</th><th>Function in Glycolysis</th></tr></thead>
+            <tbody>
+              <tr><td>Hexokinase (HK)</td><td>Cytosol (near mitochondria)</td><td>Glucose → glucose-6-phosphate.</td></tr>
+              <tr><td>PFK-1</td><td>Cytosol</td><td>Committed step to F1,6BP.</td></tr>
+              <tr><td>GAPDH</td><td>Cytosol</td><td>Oxidation step; NADH.</td></tr>
+              <tr><td>Pyruvate Kinase</td><td>Cytosol</td><td>PEP + ADP → ATP + pyruvate.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="lipidomicsTab" class="tabsec">
+        <h3>Lipid SMILES (one per line)</h3>
+        <textarea id="omicsLipidSmiles" placeholder="Enter lipid SMILES, one per line"></textarea>
+        <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadLipidDemo">Load Lipid Demo</button></div>
+      </div>
+
+      <div id="metabolomicsTab" class="tabsec">
+        <h3>Carbohydrate SMILES (one per line) & DNA (FASTA-like)</h3>
+        <textarea id="omicsCarbSmiles" placeholder="Enter carbohydrate SMILES, one per line"></textarea>
+        <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadCarbDemo">Load Carb Demo</button></div>
+        <h3 style="margin-top:8px">DNA (FASTA)</h3>
+        <textarea id="omicsDNA" placeholder=">id&#10;ACGT..."></textarea>
+        <div class="row" style="margin-top:6px"><button class="btn" id="omicsLoadDNADemo">Load DNA Demo</button></div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="omicsAnalyzeBtn">▶️ Analyze</button>
+        <button class="btn green" id="omicsExportBtn">⬇ Export JSON</button>
+        <span class="pill" id="omicsStatus" aria-live="polite">idle</span>
+      </div>
+
+      <div class="grid two" style="margin-top:10px">
+        <div class="card">
+          <h3>Descriptors</h3>
+          <div class="table-container">
+            <table class="table">
+              <thead><tr><th>Key</th><th>Value</th></tr></thead>
+              <tbody id="omicsDescriptorBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Trends</h3>
+          <div class="score" id="omicsTrends" style="min-height:220px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="nmrTab" class="tabsec" data-tab-panel>
+  <div class="wrap grid two">
+    <div class="card">
+      <h2>📡 Theoretical NMR Prediction</h2>
+      <div class="infobox small">Enter a SMILES string to get a theoretical description of what its NMR spectra might look like. This is an educational guide, not a simulator.</div>
+      <h3>SMILES Input</h3>
+      <textarea id="nmrSmiles" placeholder="Enter SMILES string">CC(=O)Oc1ccccc1C(=O)O</textarea>
+      <h3>Structure Preview</h3>
+      <div id="nmrMoleculeImage"></div>
+      <div class="row">
+        <button class="btn primary" id="btnPredict1H">Predict ¹H NMR</button>
+        <button class="btn" id="btnPredict13C">Predict ¹³C NMR</button>
+        <button class="btn" id="btnPredictCOSY">Predict COSY</button>
+        <button class="btn" id="btnPredictNOESY">Predict NOESY</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Prediction Output</h2>
+      <div class="score" id="nmrPredictionOutput" style="min-height:300px">Prediction results will appear here.</div>
+    </div>
+  </div>
+</section>
+
+<section id="aboutTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>About</h2>
+      <p>This educational platform demonstrates in-browser design and docking with parallel sampling, simplified scoring, and interactive visualization. All computations run locally; nothing is uploaded.</p>
+      <h3>Important Disclaimers</h3>
+      <div class="errorbox">
+        <p><b>No warranties; use at your own risk.</b></p>
+        <p>Scoring/embedding are simplified approximations; entropy, solvation, polarization, water networks, induced fit, glycan effects, and protonation/tautomer states are not fully modeled. <b>Always double-check results and verify with experiments (e.g., SPR/ITC, crystallography, MD, MM-PBSA/FEP).</b> Compare against professional tools.</p>
+        <p><b>Regulatory note:</b> This is not validated for GLP/Part 11/CSV and is not suitable for regulated decision-making. Educational/research prototyping only.</p>
+      </div>
+      <h3>Recommended Workflow</h3>
+      <div class="infobox small">Use for hypothesis generation → export top poses → refine with AutoDock/HADDOCK/Rosetta → MD → MM-PBSA/FEP → <b>experimental validation</b>.</div>
+      <h3>Credits</h3>
+      <div class="small" style="color:#9ca3af">Lead & Concept: <b>DJF — The New Chemist</b> • 3D rendering: 3Dmol.js • Compression: Pako • Plotting: Plotly.js • Structures: RCSB PDB</div>
+    </div>
+  </div>
+</section>
 
 <footer>
   <div class="wrap">
-    <p><b>Educational Use Only.</b> Results are approximate. <b>Always double‑check and verify with experiments</b> before making conclusions.</p>
-    <p class="small">© Student Edition • No warranties • Validate results independently</p>
+    <p><b>Educational Use Only.</b> Results are approximate. <b>Always double-check and verify with experiments</b> before making conclusions or decisions.</p>
+    <p class="small">© Student Edition • No warranties • We disclaim any loss in any way • Validate results independently</p>
   </div>
 </footer>
 
 <script>
 /* ===== Shared state & helpers ===== */
 let viewer=null, viewerLig=null, viewerScr=null, viewerComp=null, viewerCDR=null;
+let viewerDesign = null; // <-- NEW, from AbDesigner
 let inProgress=false, cancelled=false, workerPool=[];
 let pdbAAllAtoms=[], pdbBAllAtoms=[];
 let combos=[], currentComboIndex=-1;
 let currentContacts=[], currentHB=[], currentSB=[], currentHydro=[];
 let ligLastResult={}, screenCancel=false, screenResults=[], screenReceptors=[];
 const REGISTRY_KEY='docking_registry_v2';
+
+// --- AbDesigner Namespaced Globals ---
+let abDesign_selectedIg = 'IgG';
+let abDesign_currentAntibody = null;
+let abDesign_antibodyCount = 0;
+let abDesign_fragments = [];
+let abDesign_spinning = false;
+// --- End AbDesigner Globals ---
 
 const vdw={H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
 const hydrophobic=new Set(['ALA','VAL','LEU','ILE','PRO','PHE','MET','TRP','TYR','CYS']);
@@ -724,8 +977,13 @@ const status=t=>E('statusPill').textContent=t;
 const setProgress=f=>{E('prog').value=Math.max(0,Math.min(1,f||0));};
 
 window.addEventListener('DOMContentLoaded', ()=>{
+  // Initialize ALL viewers
   ensureViewer('viewer'); ensureViewer('viewerLig'); ensureViewer('viewerScr'); ensureViewer('viewerComp'); ensureViewer('viewerCDR');
+  ensureViewer('viewerDesign'); // <-- NEW
+  
   drawPlaceholder(viewer);
+  drawPlaceholder(viewerDesign); // <-- NEW
+  
   setupMainTabs();
   setupSubTabs();
   bindEvents();
@@ -736,35 +994,44 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
   const rib = E('toggleRibbon');
   if (rib) { rib.addEventListener('change', ()=>{ if (!combos.length) return; const idx = combos[currentComboIndex]?.currentIndex ?? 0; showPose(idx); }); }
+  
+  // --- AbDesigner Init Calls ---
+  abDesign_loadEpitopes();
+  abDesign_initializeCharts();
+  abDesign_loadDemoStructure(); 
+  E('scaffold-type')?.addEventListener('change', abDesign_updateScaffoldInfo);
+  abDesign_updateScaffoldInfo(); // Initial call
+  abDesign_selectIg('IgG'); // Initial call
+  // --- End AbDesigner Init ---
 });
 
 /* Tabs */
 function setupMainTabs(){
-  document.querySelectorAll('.sidebar .nav button').forEach(btn=>{
+  document.querySelectorAll('.tabbtn[data-tab]').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      document.querySelectorAll('.sidebar .nav button').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tabbtn[data-tab]').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       const target=btn.dataset.tab;
-      document.querySelectorAll('[data-tab-panel]').forEach(sec=>{
-        if(sec.id===target){sec.hidden=false;sec.scrollIntoView({behavior:'smooth',block:'start'});} else {sec.hidden=true;}
-      });
+      document.querySelectorAll('[data-tab-panel]').forEach(sec=>{ sec.classList.toggle('active', sec.id===target); });
       requestAnimationFrame(()=>{
-        try{ viewer?.resize(); viewerLig?.resize(); viewerScr?.resize(); viewerComp?.resize(); viewerCDR?.resize();
-             viewer?.render(); viewerLig?.render(); viewerScr?.render(); viewerComp?.render(); viewerCDR?.render(); }catch(e){}
+        try{ 
+          viewer?.resize(); viewerLig?.resize(); viewerScr?.resize(); viewerComp?.resize(); viewerCDR?.resize(); viewerDesign?.resize();
+          viewer?.render(); viewerLig?.render(); viewerScr?.render(); viewerComp?.render(); viewerCDR?.render(); viewerDesign?.render(); 
+        }catch(e){}
       });
     });
   });
 }
 function setupSubTabs(){
-  document.querySelectorAll('.btn.subtab').forEach(btn=>{
+  document.querySelectorAll('.tabbtn[data-subtab]').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      const container = btn.closest('.card, .panel');
-      container.querySelectorAll('.btn.subtab').forEach(b=>b.classList.remove('active'));
-      container.querySelectorAll('.subpanel').forEach(p=>p.hidden=true);
+      const wrap=btn.closest('.card');
+      wrap.querySelectorAll('.tabbtn[data-subtab]').forEach(b=>b.classList.remove('active'));
+      wrap.querySelectorAll('.tabsec').forEach(s=>s.classList.remove('active'));
       btn.classList.add('active');
-      const tgt = container.querySelector('#'+btn.dataset.subtab);
-      if (tgt) tgt.hidden=false;
-      requestAnimationFrame(()=>{ viewerComp?.resize(); viewerComp?.render(); viewerCDR?.resize(); viewerCDR?.render(); });
+      const tgt=wrap.querySelector('#'+btn.dataset.subtab);
+      if (tgt) tgt.classList.add('active');
+      requestAnimationFrame(()=>{ viewerComp?.resize(); viewerComp?.render(); });
     });
   });
 }
@@ -778,10 +1045,11 @@ function ensureViewer(id){
   else if(id==='viewerScr' && !viewerScr) viewerScr=$3Dmol.createViewer(el,opt);
   else if(id==='viewerComp' && !viewerComp) viewerComp=$3Dmol.createViewer(el,opt);
   else if(id==='viewerCDR' && !viewerCDR) viewerCDR=$3Dmol.createViewer(el,opt);
+  else if(id==='viewerDesign' && !viewerDesign) viewerDesign=$3Dmol.createViewer(el,opt); // <-- NEW
 }
 function drawPlaceholder(v){
   if(!v) return; v.addSphere({center:{x:-8,y:0,z:0},radius:4,color:'#60a5fa',alpha:.6});
-  v.addSphere({center:{x:8,y:0,z:0},radius:4,color:'#10b981',alpha:.6});
+  v.addSphere({center:{x:8,y:0,z:0},radius:4,color:'#f97316',alpha:.6});
   v.zoomTo(); v.render();
 }
 
@@ -828,13 +1096,9 @@ function bindEvents(){
   E('btnScrCSV').addEventListener('click', downloadScreeningCSV);
   E('btnScrJSON').addEventListener('click', downloadScreeningJSON);
   E('btnScrTop10').addEventListener('click', showTop10Screening);
-
-  // fragment scoring
-  E('btnAnalyzePDBForScoring').addEventListener('click', runPDBFragmentAnalysis);
-  E('btnRunFragScore').addEventListener('click', runFragmentScoring);
 }
 
-/* ===== Utility helpers ===== */
+/* Utils */
 async function fileToText(file){
   const name=(file?.name||'').toLowerCase(); const buf=await file.arrayBuffer();
   if(name.endsWith('.gz')){const u8=new Uint8Array(buf); const out=pako.inflate(u8); return new TextDecoder().decode(out);} 
@@ -882,7 +1146,8 @@ function downloadBlob(text, filename){
 }
 function snapshotPNG(v){
   try{ v.render(); v.pngURI((uri)=>{ const a=document.createElement('a'); a.href=uri; a.download='viewer.png'; a.click(); }); }
-  catch(e){ alert('PNG failed: '+e.message);} }
+  catch(e){ alert('PNG failed: '+e.message);}
+}
 
 /* PDB parsing / chains */
 function parsePDB(text){
@@ -917,12 +1182,12 @@ function populateChainChips(which, atoms){
   const chains=[...new Set(atoms.map(a=>a.chain||'A'))];
   chains.forEach(c=>{
     const id=`${which}_ch_${c}`;
-    const lbl=document.createElement('label'); lbl.style.border='1px solid #334155'; lbl.style.borderRadius='999px'; lbl.style.padding='2px 8px'; lbl.style.display='inline-flex'; lbl.style.alignItems='center'; lbl.style.gap='6px'; lbl.style.fontSize='13px';
+    const lbl=document.createElement('label'); lbl.className='chip';
     lbl.innerHTML=`<input type="checkbox" id="${id}" data-which="${which}" data-chain="${c}" checked> ${c}`;
     box.appendChild(lbl);
   });
   const warn=which==='A'?E('chainWarnA'):E('chainWarnB');
-  warn.className='successbox';
+  warn.className='successbox small';
   warn.textContent=`✓ Parsed ${atoms.length} atoms • Chains: ${chains.join(', ')||'—'}`;
 }
 function selectedChains(which){
@@ -939,11 +1204,11 @@ function selectAtomSet(atoms, mode){ const bb=new Set(['N','CA','C','O']); retur
 function makeDockWorker(){
   const code=`
     const vdw={H:1.2,C:1.7,N:1.55,O:1.52,S:1.8,P:1.8,F:1.47,CL:1.75,BR:1.85,I:1.98};
-    function rand(seed){let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);} 
+    function rand(seed){let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);}
     function randomQuat(r){const u1=r(),u2=r(),u3=r(); const a=Math.sqrt(1-u1),b=Math.sqrt(u1),t1=2*Math.PI*u2,t2=2*Math.PI*u3; return [a*Math.sin(t1),a*Math.cos(t1),b*Math.sin(t2),b*Math.cos(t2)];}
     function rotate(points,q){const[qx,qy,qz,qw]=q; return points.map(p=>{const vx=p.x,vy=p.y,vz=p.z; const ix=qw*vx+qy*vz-qz*vy,iy=qw*vy+qz*vx-qx*vz,iz=qw*vz+qx*vy-qy*vx,iw=-qx*vx-qy*vy-qz*vz; const ox=ix*qw+iw*(-qx)+iy*(-qz)-iz*(-qy),oy=iy*qw+iw*(-qy)+iz*(-qx)-ix*(-qz),oz=iz*qw+iw*(-qz)+ix*(-qy)-iy*(-qx); return {x:ox,y:oy,z:oz,elem:p.elem};});}
     function translate(points,t){return points.map(p=>({x:p.x+t.x,y:p.y+t.y,z:p.z+t.z,elem:p.elem}));}
-    function grid(coords,c){const m=new Map(),k=(ix,iy,iz)=>ix+"|"+iy+"|"+iz; for(let i=0;i<coords.length;i++){const x=coords[i].x,y=coords[i].y,z=coords[i].z,ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c),kk=k(ix,iy,iz); if(m.has(kk)) m.get(kk).push(i); else m.set(kk,[i]);} return {c,m};}
+    function grid(coords,c){const m=new Map(),k=(ix,iy,iz)=>ix+"|"+iy+"|"+iz; for(let i=0;i<coords.length;i++){const x=coords[i].x,y=coords[i].y,z=coords[i].z,ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c),kk=k(ix,iy,iz); if(!m.has(kk)) m.set(kk,[]); m.get(kk).push(i);} return {c,m};}
     function neigh(g,x,y,z){const c=g.c,ix=Math.floor(x/c),iy=Math.floor(y/c),iz=Math.floor(z/c),out=[]; for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){const kk=(ix+dx)+"|"+(iy+dy)+"|"+(iz+dz); if(g.m.has(kk)) out.push(...g.m.get(kk));} return out;}
     function scorePose(A,B,contact,clashFact,wC,wX,soft){const G=grid(A,contact); let contacts=0, clash=0; for(let i=0;i<B.length;i++){const x=B[i].x,y=B[i].y,z=B[i].z, eB=(B[i].elem||'C').toUpperCase(), neighs=neigh(G,x,y,z); for(const j of neighs){const a=A[j],dx=x-a.x,dy=y-a.y,dz=z-a.z, d=Math.hypot(dx,dy,dz), eA=(a.elem||'C').toUpperCase(); const rs=(vdw[eA]||1.7)+(vdw[eB]||1.7), clashCut=clashFact*rs; if(d<=clashCut){const ov=(clashCut-d+1e-6)/clashCut; clash+=wX*ov*(1/(1+soft*ov));} else if(d<=contact){contacts+=1;} } } return {score: wC*contacts - clash, contacts, clash}; }
     self.onmessage=(ev)=>{ const {Apts,Bpts,params,start,end}=ev.data; const rng=rand(params.seed+start*1337); const best=[]; const total=end-start; for(let k=0;k<total;k++){ const q=randomQuat(rng), t={x:(rng()*2-1)*params.maxTrans, y:(rng()*2-1)*params.maxTrans, z:(rng()*2-1)*params.maxTrans}; const B=translate(rotate(Bpts,q),t), s=scorePose(Apts,B,params.contactCut,params.clashFactor,params.wContact,params.wClash,params.soft); best.push({score:s.score,contacts:s.contacts,clash:s.clash,q:[...q],t}); if(((k+1)&1023)===0) self.postMessage({type:'progress', done:(k+1), total}); } best.sort((a,b)=>b.score-a.score); self.postMessage({type:'done',poses:best.slice(0,Math.min(200,total))}); };
@@ -1147,7 +1412,6 @@ function applyTransform(points,q,t){
     return {x:ox+t.x,y:oy+t.y,z:oz+t.z,elem:p.elem,resn:p.resn,chain:p.chain,resi:p.resi,name:p.name};
   });
 }
-
 /* Visualization / overlays */
 function updateComboSelect(){
   const sel=E('comboSelect'); sel.innerHTML='';
@@ -1186,18 +1450,18 @@ function showPose(i){
 
   const hasBackboneA = combo.Aviz.some(a=>a.name==='N') && combo.Aviz.some(a=>a.name==='CA') && combo.Aviz.some(a=>a.name==='C');
   const hasBackboneB = TB.some(a=>a.name==='N') && TB.some(a=>a.name==='CA') && TB.some(a=>a.name==='C');
-  const canCartoon     = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
+  const canCartoon    = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
 
   viewer.setStyle({}, {});
   if (wantRibbon && canCartoon) {
-    viewer.setStyle({model:0},{cartoon:{color:'#3b82f6',arrows:true,thickness:0.5}});
-    viewer.setStyle({model:1},{cartoon:{color:'#10b981',arrows:true,thickness:0.5}});
+    viewer.setStyle({model:0},{cartoon:{color:'#60a5fa',arrows:true,thickness:0.5}});
+    viewer.setStyle({model:1},{cartoon:{color:'#f97316',arrows:true,thickness:0.5}});
   } else if (wantRibbon) {
     viewer.setStyle({model:0},{line:{linewidth:1.5}});
-    viewer.setStyle({model:1},{line:{linewidth:1.5,color:'#10b981'}});
+    viewer.setStyle({model:1},{line:{linewidth:1.5,color:'#f97316'}});
   } else {
     viewer.setStyle({model:0},{stick:{radius:.25}});
-    viewer.setStyle({model:1},{stick:{radius:.25,color:'#10b981'}});
+    viewer.setStyle({model:1},{stick:{radius:.25,color:'#f97316'}});
   }
 
   viewer.zoomTo();
@@ -1226,8 +1490,8 @@ function refreshOverlays(){
   viewer.removeAllShapes();
   if(E('toggleContacts').checked) drawLines(currentContacts,'#60a5fa');
   if(E('toggleHB').checked)       drawLines(currentHB,'#34d399');
-  if(E('toggleSB').checked)       drawLines(currentSB,'#ef4444');
-  if(E('toggleHydro').checked)    drawLines(currentHydro,'#f59e0b');
+  if(E('toggleSB').checked)       drawLines(currentSB,'#f87171');
+  if(E('toggleHydro').checked)    drawLines(currentHydro,'#fbbf24');
   viewer.render();
 }
 function drawLines(pairs,color){
@@ -1246,7 +1510,7 @@ function computeInterfaceMetrics(A,B,cut){
     const aN=a.name?.startsWith('N'), aO=a.name?.startsWith('O'), bN=b.name?.startsWith('N'), bO=b.name?.startsWith('O');
     if(((aN&&bO)||(aO&&bN)) && d<=3.5){ hb++; hbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
     const isAcidic=at=> (at.resn==='ASP'&&at.name.startsWith('OD'))||(at.resn==='GLU'&&at.name.startsWith('OE'));
-    const isBasic =at=> (at.resn==='LYS'&&at.name==='NZ')||(at.resn==='ARG'&&(at.name==='NH1'||at.name==='NH2'||at.name==='NE'))||(at.resn==='HIS'&&(at.name==='ND1'||at.name==='NE2'));
+    const isBasic =at=> (at.resn==='LYS'&&at.name==='NZ')||(at.resn==='ARG'&&(at.name==='NH1'||'NH2'||at.name==='NE'))||(at.resn==='HIS'&&(at.name==='ND1'||at.name==='NE2'));
     if(((isAcidic(a)&&isBasic(b))||(isAcidic(b)&&isBasic(a))) && d<=4.0){ sb++; sbPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
     if(hydrophobic.has(a.resn)&&hydrophobic.has(b.resn)&&(a.elem==='C'||b.elem==='C')&&d<=4.5){ hydro++; hydroPairs.push({x1:a.x,y1:a.y,z1:a.z,x2:b.x,y2:b.y,z2:b.z}); }
   }
@@ -1306,13 +1570,13 @@ function fillComboSummaryRow(i){
 function updateMetricsDisplay(){
   const combo=combos[currentComboIndex];
   if(!combo||!combo.topPoses.length){
-    E('metricsDisplay').innerHTML='<div class="small" style="color:#9fb4d7">Run docking to see metrics.</div>'; return;
+    E('metricsDisplay').innerHTML='<div class="small" style="color:#9ca3af">Run docking to see metrics.</div>'; return;
   }
   const p=combo.topPoses[combo.currentIndex];
   E('metricsDisplay').innerHTML=
     `<div class="metric-card"><div class="metric-value">${p.score.toFixed(2)}</div><div class="metric-label">Score</div></div>
      <div class="metric-card"><div class="metric-value">${currentContacts.length}</div><div class="metric-label">Contacts</div></div>
-     <div class="metric-card"><div class="metric-value">${currentHB.length}</div><div class="metric-label">H‑bonds</div></div>
+     <div class="metric-card"><div class="metric-value">${currentHB.length}</div><div class="metric-label">H-bonds</div></div>
      <div class="metric-card"><div class="metric-value">${currentSB.length}</div><div class="metric-label">Salt Bridges</div></div>`;
 }
 function updateEnergyDecomposition(m,elec,dH){
@@ -1325,7 +1589,7 @@ function updateComparisonDropdowns(poses){
   const s1=E('comparePose1'), s2=E('comparePose2');
   s1.innerHTML=''; s2.innerHTML='';
   poses.forEach((p,i)=>{ const o1=document.createElement('option'); o1.value=i; o1.textContent=`Pose ${i+1}`; s1.appendChild(o1);
-                          const o2=document.createElement('option'); o2.value=i; o2.textContent=`Pose ${i+1}`; s2.appendChild(o2); });
+                        const o2=document.createElement('option'); o2.value=i; o2.textContent=`Pose ${i+1}`; s2.appendChild(o2); });
   if(poses.length>=2){ s1.value=0; s2.value=1; }
 }
 function comparePoses(){
@@ -1334,7 +1598,7 @@ function comparePoses(){
   if(!(combo.topPoses[i1]&&combo.topPoses[i2])) return;
   const TB1=applyTransform(combo.B0,combo.topPoses[i1].q,combo.topPoses[i1].t);
   viewerComp.clear(); viewerComp.addModel(formatPDB(combo.Aviz),'pdb'); viewerComp.addModel(formatPDB(TB1,1),'pdb');
-  viewerComp.setStyle({model:0},{cartoon:{color:'#3b82f6'}}); viewerComp.setStyle({model:1},{cartoon:{color:'#10b981'}});
+  viewerComp.setStyle({model:0},{cartoon:{color:'#60a5fa'}}); viewerComp.setStyle({model:1},{cartoon:{color:'#f97316'}});
   viewerComp.zoomTo(); viewerComp.render();
   const a=angleBetweenQuats(combo.topPoses[i1].q, combo.topPoses[i2].q);
   const t=Math.hypot(combo.topPoses[i1].t.x-combo.topPoses[i2].t.x,combo.topPoses[i1].t.y-combo.topPoses[i2].t.y,combo.topPoses[i1].t.z-combo.topPoses[i2].t.z);
@@ -1354,16 +1618,13 @@ function filterResidueContacts(){
   E('residueTableBody').innerHTML=rows.slice(0,1000).join('');
 }
 function exportResidueData(){
-  const tBody=E('residueTableBody');
-  if(!tBody || !tBody.children.length){alert('No data');return;}
-  const rows=[...tBody.children].map(tr=>[...tr.children].map(td=>td.innerText).join('\t')).join('\n');
-  downloadBlob(rows,'residue_contacts.tsv');
+  const table=E('residueTableBody').innerText||''; if(!table){alert('No data');return;} downloadBlob(table,'residue_contacts.txt');
 }
 
 /* Exports */
 function downloadAllPoses(){
   const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length){alert('No poses.');return;}
-  const lines=[]; combo.topPoses.forEach((p,i)=>{lines.push(`MODEL      ${i+1}  ${combo.label}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL');});
+  const lines=[]; combo.topPoses.forEach((p,i)=>{lines.push(`MODEL        ${i+1}  ${combo.label}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL');});
   lines.push('END'); downloadBlob(lines.join('\n'),'all_poses_'+safe(combo.label)+'.pdb');
 }
 function safe(s){return s.replace(/[^a-z0-9]+/gi,'_');}
@@ -1387,11 +1648,11 @@ function downloadJSON(){
 function downloadAllComplexesPDB(){
   if(!combos.length){alert('No complexes');return;}
   const lines=[]; let model=1;
-  combos.forEach((combo)=>{ combo.topPoses.forEach((p,i)=>{ lines.push(`MODEL      ${model++}  ${combo.label}  pose ${i+1}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL'); }); });
+  combos.forEach((combo)=>{ combo.topPoses.forEach((p,i)=>{ lines.push(`MODEL        ${model++}  ${combo.label}  pose ${i+1}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL'); }); });
   lines.push('END'); downloadBlob(lines.join('\n'),'all_complexes_all_poses.pdb');
 }
 
-/* Ligand docking */
+/* Ligand docking (X5) */
 function loadLigandDemoReceptor(){
   E('ligReceptorPDB').value=`ATOM      1  CA  ALA A   1       -8.000   0.000   0.000  1.00  0.00           C
 ATOM      2  CA  ALA A   2       -6.600   1.200   0.200  1.00  0.00           C
@@ -1403,7 +1664,7 @@ END`;
 function parseReceptorForLigand(){
   const t=E('ligReceptorPDB').value.trim(); if(!t){alert('Paste receptor PDB first'); return;}
   const atoms=parsePDB(t); viewerLig.clear(); viewerLig.addModel(formatPDB(atoms),'pdb');
-  viewerLig.setStyle({},{cartoon:{color:'#3b82f6'}}); viewerLig.zoomTo(); viewerLig.render();
+  viewerLig.setStyle({},{cartoon:{color:'#60a5fa'}}); viewerLig.zoomTo(); viewerLig.render();
 }
 function embedSmilesTo3D(smiles, method='HASH', seed=1337){
   const rng = (()=>{let s=seed>>>0; return ()=>((s=(1664525*s+1013904223)>>>0)/0xFFFFFFFF);})();
@@ -1445,7 +1706,7 @@ async function runSingleLigandDock() {
     }
     ligLastResult = bestPose;
     viewerLig.clear(); viewerLig.addModel(formatPDB(bestPose.receptor), 'pdb'); viewerLig.addModel(formatPDB(bestPose.ligand, 1), 'pdb');
-    viewerLig.setStyle({model: 0}, {stick: {radius: 0.2, color: '#3b82f6'}}); viewerLig.setStyle({model: 1}, {stick: {radius: 0.3, color: '#10b981'}});
+    viewerLig.setStyle({model: 0}, {stick: {radius: 0.2, color: '#60a5fa'}}); viewerLig.setStyle({model: 1}, {stick: {radius: 0.3, color: '#f97316'}});
     viewerLig.zoomTo(); viewerLig.render();
     E('ligScore').textContent = `Best Score: ${bestPose.score.toFixed(2)}, Contacts: ${bestPose.contacts}, Clash: ${bestPose.clash.toFixed(2)}`;
     ligStatus.textContent = 'complete';
@@ -1468,7 +1729,7 @@ function scoreLigand(receptor, ligand){
 function downloadLigandPDB(){ if (!('score' in ligLastResult)) return; const pdb = formatPDB(ligLastResult.receptor) + "\n" + formatPDB(ligLastResult.ligand, 1); downloadBlob(pdb, 'ligand_complex.pdb'); }
 function downloadLigandCSV(){ if (!('score' in ligLastResult)) return; const row = `smiles,score,contacts,clash\n"${ligLastResult.smiles}",${ligLastResult.score.toFixed(3)},${ligLastResult.contacts},${ligLastResult.clash.toFixed(3)}`; downloadBlob(row, 'ligand_result.csv'); }
 
-/* Batch Screening */
+/* Batch Screening (X5) */
 async function startBatchScreening(){
   E('btnStartScreen').disabled = true; E('btnStopScreen').disabled = false; E('scrStatus').textContent = 'running...'; screenCancel = false;
   try {
@@ -1561,7 +1822,7 @@ function visualizeScreeningPose(result){
   const posedLigand = applyTransform(ligandCentered, result.q, result.t);
 
   viewerScr.clear(); viewerScr.addModel(formatPDB(receptorCentered), 'pdb'); viewerScr.addModel(formatPDB(posedLigand, 1), 'pdb');
-  viewerScr.setStyle({model: 0}, {cartoon: {color: '#3b82f6'}}); viewerScr.setStyle({model: 1}, {stick: {radius: 0.3, color: '#10b981'}});
+  viewerScr.setStyle({model: 0}, {cartoon: {color: '#60a5fa'}}); viewerScr.setStyle({model: 1}, {stick: {radius: 0.3, color: '#f97316'}});
   viewerScr.zoomTo(); viewerScr.render();
 }
 function downloadScreeningCSV(){
@@ -1581,7 +1842,7 @@ function showTop10Screening(){
   E('enthalpyBreakdown').textContent = 'Top 10 ΔH Values:\n' + dHs.map(d => d.toFixed(2)).join(', ');
 }
 
-/* QA & Registry */
+/* QA & Registry (X5) */
 function saveCurrentRun(){
   if (!combos.length) { alert('No run data to save.'); return; }
   const topPose = combos[0]?.topPoses[0];
@@ -1597,7 +1858,7 @@ function refreshRunRegistry(){
   const body = E('registryTableBody'); body.innerHTML = '';
   registry.forEach((run, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${new Date(run.timestamp).toLocaleString()}</td><td>${run.type}</td><td>${run.description}</td><td>${run.topScore}</td><td>${run.signature}</td><td><button class='btn' onclick='loadRun(${i})'>Load</button></td>`;
+    tr.innerHTML = `<td>${new Date(run.timestamp).toLocaleString()}</td><td>${run.type}</td><td>${run.description}</td><td>${run.topScore}</td><td>${run.signature}</td><td><button class="btn small" onclick="loadRun(${i})">Load</button></td>`;
     body.appendChild(tr);
   });
 }
@@ -1661,7 +1922,7 @@ ATOM      2  CA  LEU B   2       17.000  14.000  15.500  1.00  0.00           C`
 }
 async function autoDemo(){ useExample('A'); useExample('B'); E('samples').value=2000; await runAntibodyDocking(); }
 
-/* ===== CDR / Fragment module ===== */
+/* ===== CDR / Fragment module (merged) ===== */
 const AntibodyPDB = (function() {
   const THREE_LETTER_TO_ONE = { ALA:'A', ARG:'R', ASN:'N', ASP:'D', CYS:'C', GLN:'Q', GLU:'E', GLY:'G', HIS:'H', ILE:'I', LEU:'L', LYS:'K', MET:'M', PHE:'F', PRO:'P', SER:'S', THR:'T', TRP:'W', TYR:'Y', VAL:'V', SEC:'U', PYL:'O' };
   function parsePDB(pdbText) {
@@ -1781,120 +2042,6 @@ const AntibodyPDB = (function() {
   return { parsePDB, classifyChainType, computeCDRsForChain, annotateAntibodyChains, makeFragments };
 })();
 
-/* Antibody Fragment class for scoring */
-class AntibodyFragment {
-  constructor({ name, affinityKD, kon=null, koff=null, internalizationRate, stabilityScore, aggregationRisk=0.5, epitopeClass, subclass, glycosylationSites=1, fcEngineering=false }){
-    this.name=name;
-    this.affinityKD=affinityKD; this.kon=kon; this.koff=koff;
-    this.internalizationRate=internalizationRate; this.stabilityScore=stabilityScore; this.aggregationRisk=aggregationRisk;
-    this.epitopeClass=epitopeClass; this.subclass=subclass; this.glycosylationSites=glycosylationSites; this.fcEngineering=fcEngineering;
-  }
-  compositeScore(){
-    const kdTerm = Math.max(0, Math.min(1, 1/Math.log10(1+this.affinityKD)) ); // lower KD → higher
-    const internal = Math.max(0, Math.min(1, this.internalizationRate));
-    const stability = Math.max(0, Math.min(1, this.stabilityScore));
-    const aggPenalty = 1 - Math.max(0, Math.min(1, this.aggregationRisk));
-    const fcBoost = (this.fcEngineering && this.subclass==='IgG1') ? 0.05 : 0;
-    const epitopeBoost = ({neutralizing:0.06, synergistic:0.04, inhibitory:0.03, agonistic:-0.02, non_overlapping:0.02})[this.epitopeClass]||0;
-    const glycoPenalty = this.glycosylationSites>3 ? -0.03*(this.glycosylationSites-3) : 0;
-    const raw = 0.35*kdTerm + 0.2*internal + 0.25*stability + 0.2*aggPenalty + fcBoost + epitopeBoost + glycoPenalty;
-    return Math.max(0, Math.min(1, raw));
-  }
-  explainFragment(){
-    const s=this.compositeScore();
-    const reasons=[];
-    if(this.affinityKD<1) reasons.push('sub‑nanomolar KD implies strong binding'); else if(this.affinityKD<10) reasons.push('single‑digit nM KD is favorable');
-    if(this.internalizationRate>0.6) reasons.push('high internalization may aid payload delivery');
-    if(this.stabilityScore>0.8) reasons.push('high stability supports manufacturability');
-    if(this.aggregationRisk<0.2) reasons.push('low aggregation risk reduces developability flags');
-    if(this.fcEngineering) reasons.push('Fc engineering can tune effector function/PK');
-    if(this.glycosylationSites>3) reasons.push('many N‑glyco motifs may complicate heterogeneity');
-    return `Fragment: ${this.name}\nScore (0‑1): ${s.toFixed(3)}\nKD (nM): ${this.affinityKD}\nInternalization: ${this.internalizationRate}\nStability: ${this.stabilityScore}\nAggregation risk: ${this.aggregationRisk}\nSubclass: ${this.subclass}; Epitope: ${this.epitopeClass}; Fc‑eng: ${this.fcEngineering}\nWhy this fragment is promising:\n- ${reasons.join('\n- ') || 'set parameters to generate rationale.'}`;
-  }
-}
-
-/* Fragment scorer wiring */
-function runFragmentScoring() {
-  try {
-    const params = {
-      name: E('fragScoreName').value || 'Candidate',
-      affinityKD: parseFloat(E('fragScoreKD').value),
-      internalizationRate: parseFloat(E('fragScoreInternal').value),
-      stabilityScore: parseFloat(E('fragScoreStable').value),
-      aggregationRisk: parseFloat(E('fragScoreAgg').value),
-      epitopeClass: E('fragScoreEpitope').value,
-      subclass: E('fragScoreSubclass').value,
-      glycosylationSites: parseInt(E('fragScoreGlyco').value),
-      fcEngineering: E('fragScoreFc').checked,
-    };
-
-    if ([params.affinityKD, params.internalizationRate, params.stabilityScore].some(x=>isNaN(x))) {
-      throw new Error('Please enter valid numbers for KD, Internalization, and Stability.');
-    }
-
-    const fragment = new AntibodyFragment(params);
-    E('fragScoreOutput').textContent = fragment.explainFragment();
-  } catch (e) {
-    E('fragScoreOutput').textContent = 'Error: ' + e.message;
-  }
-}
-
-function runPDBFragmentAnalysis() {
-  const pdbText = E('fragScorePDB').value.trim();
-  if (!pdbText) { alert('Please paste a PDB structure first.'); return; }
-  const outputBox = E('fragScoreOutput');
-
-  try {
-    const parsed = AntibodyPDB.parsePDB(pdbText);
-    if (!parsed.chains || Object.keys(parsed.chains).length === 0) {
-      throw new Error('Could not parse any chains from the PDB.');
-    }
-
-    let totalResidues = 0;
-    let hydrophobicResidues = 0;
-    let glycosylationSites = 0;
-    let sequence = '';
-
-    for (const chainId in parsed.chains) {
-      const chain = parsed.chains[chainId];
-      sequence += chain.residues.map(r=>r.oneLetter).join('');
-      for (const res of chain.residues) {
-        totalResidues++;
-        if (hydrophobic.has(res.resName.toUpperCase())) { 
-          hydrophobicResidues++;
-        }
-      }
-    }
-
-    for (let i = 0; i < sequence.length - 2; i++) {
-      if (sequence[i] === 'N' && sequence[i+1] !== 'P' && (sequence[i+2] === 'S' || sequence[i+2] === 'T')) {
-        glycosylationSites++;
-      }
-    }
-
-    const hydrophobicRatio = (hydrophobicResidues / Math.max(1, totalResidues));
-    const estimatedStability = Math.max(0.5, Math.min(0.95, 1.0 - (hydrophobicRatio * 0.75)));
-    const estimatedAggregation = Math.max(0.05, Math.min(0.8, hydrophobicRatio * 0.6));
-
-    E('fragScoreName').value = "PDB-Analyzed-Fragment";
-    E('fragScoreStable').value = estimatedStability.toFixed(2);
-    E('fragScoreAgg').value = estimatedAggregation.toFixed(2);
-    E('fragScoreGlyco').value = glycosylationSites;
-    E('fragScoreSubclass').value = 'IgG1';
-    E('fragScoreFc').checked = (glycosylationSites > 0);
-
-    outputBox.textContent = `PDB Analysis Complete:\n- Total Residues: ${totalResidues}\n- Hydrophobic Ratio: ${hydrophobicRatio.toFixed(3)}\n- N-Glyco Sites (N-X-S/T): ${glycosylationSites}\n\nPopulated Stability, Aggregation, and Glycosylation fields.\n\nPlease set Affinity, Internalization, and Epitope manually.`;
-
-  } catch (e) {
-    outputBox.textContent = 'PDB Analysis Error: ' + e.message;
-  }
-}
-function copyAbPDBToFragmentScorer(){
-  const txt = E('pdbAText').value.trim();
-  if(!txt) { alert('No Antibody PDB in Protein A'); return; }
-  E('fragScorePDB').value = txt;
-}
-
 /* CDR UI */
 let currentParsedAb=null, currentCDRAnnotations=null;
 function bindCDRControls(){
@@ -1923,12 +2070,12 @@ function displayCDRResults(annotations, scheme){
     html += `
       <div class="scheme-card">
         <h4>Chain ${chainId} (${chain.chainType})</h4>
-        <div style="font-size:12px;color:#9fb4d7">Length: ${chain.sequenceLength} aa</div>
+        <div style="font-size:12px;color:#9ca3af">Length: ${chain.sequenceLength} aa</div>
         ${cdrData.cdrs.map(cdr=>`
           <div class="cdr-highlight">
             <strong>${cdr.region}</strong>:
             <span class="cdr-region">${cdr.sequence||'-'}</span>
-            <span style="font-size:11px;color:#9fb4d7">[${cdr.start}-${cdr.end}]</span>
+            <span style="font-size:11px;color:#6b7280">[${cdr.start}-${cdr.end}]</span>
           </div>
         `).join('')}
       </div>`;
@@ -1937,104 +2084,758 @@ function displayCDRResults(annotations, scheme){
 }
 function visualizeCDRs(parsed, annotations, scheme){
   if (!viewerCDR) return; viewerCDR.clear();
-  // Build a CA-Only visualization for each chain
-  const show1=E('showCDR1').checked, show2=E('showCDR2').checked, show3=E('showCDR3').checked, showF=E('showFrameworks').checked;
-  let modelIndex=0;
   for (const chainId in parsed.chains) {
-    const ch = parsed.chains[chainId];
-    const pdbLines=[]; // create fake PDB with CA positions as "CA" atoms
-    let serial=1, resi=1;
-    ch.caTrace.forEach(ca=>{
-      const xs=ca.x.toFixed(3).padStart(8,' '), ys=ca.y.toFixed(3).padStart(8,' '), zs=ca.z.toFixed(3).padStart(8,' ');
-      pdbLines.push(`ATOM  ${String(serial).padStart(5,' ')}  CA  ${ca.resName.padStart(3,' ')} ${String(chainId).slice(0,1)}${String(resi).padStart(4,' ')}    ${xs}${ys}${zs}  1.00  0.00           C`);
-      serial++; resi++;
+    const chain = parsed.chains[chainId];
+    const cdrData = annotations[chainId]?.cdrs[scheme];
+    if (!cdrData) continue;
+    let pdbText='';
+    chain.caTrace.forEach((res, idx)=>{
+      pdbText += `ATOM  ${String(idx+1).padStart(5)} CA   ${res.resName.padEnd(3)} ${chainId}${String(res.resSeq).padStart(4)}    ${res.x.toFixed(3).padStart(8)}${res.y.toFixed(3).padStart(8)}${res.z.toFixed(3).padStart(8)}  1.00  0.00           C\n`;
     });
-    pdbLines.push('TER','END');
-    viewerCDR.addModel(pdbLines.join('\n'),'pdb');
-    const colors={FR:'#4b5563', CDR1:'#3b82f6', CDR2:'#34d399', CDR3:'#f59e0b'};
-    // default style
-    viewerCDR.setStyle({model:modelIndex},{line:{linewidth:1}});
-    const cdat = annotations[chainId].cdrs[scheme];
-    // highlight frames
-    if (showF){ cdat.frames.forEach(fr=> viewerCDR.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.0}, {model:modelIndex, atomsel:{chain:chainId, resi:[]} })); }
-    // highlight CDRs with cartoons if we have CA it will fallback to line
-    const drawRange=(start,end,color)=>{
-      viewerCDR.setStyle({model:modelIndex, chain:chainId, resi: Array.from({length:end-start+1},(_,k)=>k+start) }, {stick:{radius:0.4,color}});
-    };
-    if (show1){ const r=cdat.cdrs.find(x=>x.region==='CDR1'); if(r) drawRange(r.start+1,r.end+1,colors.CDR1); }
-    if (show2){ const r=cdat.cdrs.find(x=>x.region==='CDR2'); if(r) drawRange(r.start+1,r.end+1,colors.CDR2); }
-    if (show3){ const r=cdat.cdrs.find(x=>x.region==='CDR3'); if(r) drawRange(r.start+1,r.end+1,colors.CDR3); }
-    modelIndex++;
+    viewerCDR.addModel(pdbText,'pdb');
+    const modelIdx = viewerCDR.getNumModels()-1;
+    const show = {1:E('showCDR1')?.checked,2:E('showCDR2')?.checked,3:E('showCDR3')?.checked};
+    const cols=['#f87171','#fbbf24','#34d399'];
+    cdrData.cdrs.forEach((cdr,i)=>{
+      if (show[i+1]) {
+        viewerCDR.setStyle(
+          {model:modelIdx, resi: Array.from({length: cdr.end-cdr.start+1}, (_,k)=> cdr.start + k + 1)},
+          {cartoon:{color:cols[i%3]}}
+        );
+      }
+    });
+    if (E('showFrameworks')?.checked) { viewerCDR.setStyle({model:modelIdx}, {cartoon:{color:'#4b5563'}}); }
   }
   viewerCDR.zoomTo(); viewerCDR.render();
 }
 function displayCDRSequenceTable(annotations, scheme){
-  const host=E('cdrSequenceTable');
-  const rows=[`<table class="table"><thead><tr><th>Chain</th><th>Region</th><th>Start</th><th>End</th><th>Sequence</th></tr></thead><tbody>`];
-  for (const chainId in annotations){
-    const cdat=annotations[chainId].cdrs[scheme];
-    cdat.cdrs.forEach(c=> rows.push(`<tr><td>${chainId}</td><td>${c.region}</td><td>${c.start}</td><td>${c.end}</td><td style="font-family:var(--mono)">${c.sequence}</td></tr>`));
+  const container=E('cdrSequenceTable');
+  let html='<table class="table"><thead><tr><th>Chain</th><th>Type</th><th>Region</th><th>Sequence</th><th>Position</th></tr></thead><tbody>';
+  for (const chainId in annotations) {
+    const chain=annotations[chainId];
+    const cdrData=chain.cdrs[scheme];
+    cdrData.cdrs.forEach(cdr=>{
+      html+=`<tr><td>${chainId}</td><td>${chain.chainType}</td><td>${cdr.region}</td><td style="font-family:monospace">${cdr.sequence}</td><td>${cdr.start+1}-${cdr.end+1}</td></tr>`;
+    });
   }
-  rows.push('</tbody></table>'); host.innerHTML=rows.join('');
+  html+='</tbody></table>'; container.innerHTML=html;
 }
 
 /* Fragment generator */
 function generateFragments(){
-  const pdb=E('fragPDB').value.trim(); if(!pdb){alert('Paste PDB first'); return;}
-  const parsed=AntibodyPDB.parsePDB(pdb);
-  const ws=parseInt(E('windowSize').value)||10; const st=parseInt(E('stepSize').value)||1;
-  const filter=(E('chainFilter').value||'').split(',').map(s=>s.trim()).filter(Boolean);
-  const out=[];
-  for(const cid in parsed.chains){ if(filter.length && !filter.includes(cid)) continue; const ch=parsed.chains[cid]; const frs=AntibodyPDB.makeFragments(ch,ws,st); frs.forEach((f,idx)=> out.push({chain:cid, idx, ...f})); }
-  const host=E('fragmentResults');
-  if(!out.length){ host.innerHTML='<div class="infobox">No fragments produced. Check CA trace.</div>'; return; }
-  const rows=['<div class="table-container"><table class="table"><thead><tr><th>#</th><th>Chain</th><th>Start</th><th>End</th><th>Sequence</th></tr></thead><tbody>'];
-  out.forEach((f,i)=> rows.push(`<tr><td>${i+1}</td><td>${f.chain}</td><td>${f.startIndex}</td><td>${f.endIndex}</td><td style="font-family:var(--mono)">${f.sequence}</td></tr>`));
-  rows.push('</tbody></table></div>'); host.innerHTML=rows.join('');
-  host.dataset.fragments = JSON.stringify(out);
+  const pdbText = E('fragPDB').value;
+  if (!pdbText) { alert('Please provide a PDB structure'); return; }
+  const windowSize = parseInt(E('windowSize').value) || 10;
+  const stepSize = parseInt(E('stepSize').value) || 1;
+  const chainFilter = E('chainFilter').value.split(',').map(s=>s.trim()).filter(Boolean);
+
+  const parsed = AntibodyPDB.parsePDB(pdbText);
+  const resultsContainer = E('fragmentResults');
+  let html = '<h3>Generated Fragments</h3>'; let allFragments=[];
+
+  for (const chainId in parsed.chains) {
+    if (chainFilter.length && !chainFilter.includes(chainId)) continue;
+    const chain = parsed.chains[chainId];
+    const fragments = AntibodyPDB.makeFragments(chain, windowSize, stepSize);
+    allFragments.push({chainId, fragments});
+    html += `<div class="card">
+      <h4>Chain ${chainId}: ${fragments.length} fragments</h4>
+      <div style="max-height:200px;overflow:auto">
+        ${fragments.slice(0, 10).map((frag,i)=>`
+          <div style="font-family:monospace;font-size:12px;padding:4px;background:#0a0f1a;margin:2px 0;border-radius:4px">
+            Fragment ${i+1}: ${frag.sequence} [${frag.startIndex}-${frag.endIndex}]
+          </div>`).join('')}
+        ${fragments.length > 10 ? `<div style="color:#9ca3af;font-size:12px">... and ${fragments.length - 10} more</div>` : ''}
+      </div>
+    </div>`;
+  }
+  resultsContainer.innerHTML = html;
+  window.generatedFragments = allFragments;
 }
 function downloadFragments(){
-  const host=E('fragmentResults'); const data=host.dataset.fragments; if(!data){alert('Generate fragments first');return;}
-  downloadBlob(data,'fragments.json');
+  if (!window.generatedFragments || !window.generatedFragments.length) { alert('No fragments generated yet'); return; }
+  let pdbContent=''; let fragNum=1;
+  window.generatedFragments.forEach(({chainId,fragments})=>{
+    fragments.forEach(frag=>{
+      pdbContent += `MODEL        ${fragNum}\n`;
+      frag.caCoords.forEach((coord,i)=>{
+        pdbContent += `ATOM  ${String(i+1).padStart(5)} CA   ${coord.resName.padEnd(3)} ${chainId}${String(coord.resSeq).padStart(4)}    ${coord.x.toFixed(3).padStart(8)}${coord.y.toFixed(3).padStart(8)}${coord.z.toFixed(3).padStart(8)}  1.00  0.00           C\n`;
+      });
+      pdbContent += `ENDMDL\n`; fragNum++;
+    });
+  });
+  pdbContent += 'END\n';
+  downloadBlob(pdbContent, 'fragments.pdb');
 }
 
-/* Omics + NMR stubs */
+/* NMR & Omics (X5) */
 function bindOmicsAndNMREvents(){
-  const svgPreview=(sm)=>{ const box=E('nmrMoleculeImage'); box.textContent=''; const svg=`<svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="280" height="180" fill="#0a0f1a" stroke="#1e293b"/><g transform="translate(20,20)"><path d="M0,80 C40,10 80,150 120,60 C150,10 190,120 230,40" fill="none" stroke="#3b82f6" stroke-width="2"/><circle cx="0" cy="80" r="4" fill="#10b981"/><circle cx="230" cy="40" r="4" fill="#10b981"/></g><text x="14" y="22" fill="#9fb4d7" font-size="10" font-family="monospace">${(sm||'').slice(0,28)}</text></svg>`; box.innerHTML=svg; };
-  svgPreview(E('nmrSmiles').value);
-  E('btnPredict1H').addEventListener('click',()=>{ const sm=E('nmrSmiles').value.trim(); svgPreview(sm); E('nmrPredictionOutput').textContent = `¹H NMR (theoretical):\n- Aromatic region: 6.5–8.0 ppm (m)\n- Aliphatic CH3: 0.9–1.3 ppm (t/d)\n- O–CH3 / O–CH2: 3.3–4.2 ppm\n- Exchangeable (OH/NH): 1–5 ppm (broad)\nNote: solvent, pH, and substitution pattern shift values.`; });
-  E('btnPredict13C').addEventListener('click',()=>{ E('nmrPredictionOutput').textContent = `¹³C NMR (theoretical):\n- Carbonyl (C=O): 160–210 ppm\n- Aromatic sp2: 110–150 ppm\n- O‑alkyl: 55–80 ppm, alkyl: 10–45 ppm.`; });
-  E('btnPredictCOSY').addEventListener('click',()=>{ E('nmrPredictionOutput').textContent = 'COSY (theoretical): nearest‑neighbor scalar couplings; expect cross‑peaks between vicinal protons.'; });
-  E('btnPredictNOESY').addEventListener('click',()=>{ E('nmrPredictionOutput').textContent = 'NOESY (theoretical): through‑space correlations; proximity <5 Å shows NOE cross‑peaks.'; });
+  E('nmrSmiles').addEventListener('input', updateNMRImage);
+  E('btnPredict1H').addEventListener('click', () => predictNMR('1H'));
+  E('btnPredict13C').addEventListener('click', () => predictNMR('13C'));
+  E('btnPredictCOSY').addEventListener('click', () => predictNMR('COSY'));
+  E('btnPredictNOESY').addEventListener('click', () => predictNMR('NOESY'));
 
-  E('omicsLoadProteinDemo').addEventListener('click',()=>{ E('omicsProteinPDB').value = E('pdbAText').value || 'Paste any protein PDB.'; });
-  E('omicsLoadLipidDemo').addEventListener('click',()=>{ E('omicsLipidSmiles').value = 'CCCCCCCCCCCC=O\nCC(C)COC(=O)CCCCCCC'; });
-  E('omicsLoadCarbDemo').addEventListener('click',()=>{ E('omicsCarbSmiles').value = 'OC[C@H]1O[C@@H](O)[C@H](O)[C@@H](O)[C@H]1O'; });
-  E('omicsLoadDNADemo').addEventListener('click',()=>{ E('omicsDNA').value = '>demo\nATGCGTACGTAGCTAGCTAGCTAGCTA'; });
-  E('omicsAnalyzeBtn').addEventListener('click',()=>{
-    E('omicsStatus').textContent='analyzing…';
-    const desc=[]; if(E('omicsProteinPDB').value.trim()) desc.push(['ProteinDescriptor','InputPDB','Yes']);
-    if(E('omicsLipidSmiles').value.trim()) desc.push(['LipidCount','n', E('omicsLipidSmiles').value.trim().split(/\n/).filter(Boolean).length]);
-    if(E('omicsCarbSmiles').value.trim()) desc.push(['CarbCount','n', E('omicsCarbSmiles').value.trim().split(/\n/).filter(Boolean).length]);
-    if(E('omicsDNA').value.trim()) desc.push(['DNA Length','bp', E('omicsDNA').value.replace(/>.*\n/,'').trim().length]);
-    const tbody=E('omicsDescriptorBody'); tbody.innerHTML = desc.map(r=>`<tr><td>${r[0]}</td><td>${r[2]}</td></tr>`).join('') || '<tr><td colspan=2>No inputs.</td></tr>';
-    E('omicsTrends').textContent = 'Trend: glycolysis central carbon flux ↑ with higher HK/PFK expression (illustrative).';
-    E('omicsStatus').textContent='ready';
-  });
-  E('omicsExportBtn').addEventListener('click',()=>{
-    const data = { protein: E('omicsProteinPDB').value, lipids:E('omicsLipidSmiles').value, carbs:E('omicsCarbSmiles').value, dna:E('omicsDNA').value };
-    downloadBlob(JSON.stringify(data,null,2),'omics_data.json');
-  });
+  const B=(id,fn)=>{ const el=E(id); if(el) el.addEventListener('click', fn); };
+  B('omicsLoadProteinDemo',()=>{E('omicsProteinPDB').value=`ATOM      1  CA  ALA A   1         0.000   0.000   0.000  1.00  0.00           C
+ATOM      2  CA  LEU A   2         1.500   1.200   0.200  1.00  0.00           C
+ATOM      3  CA  LYS A   3         3.000   0.100   1.000  1.00  0.00           C
+ATOM      4  CA  ASP A   4         4.300   1.400   1.400  1.00  0.00           C
+END`;});
+  B('omicsLoadLipidDemo',()=>{E('omicsLipidSmiles').value=`CCCCCCCCCCCC=CCCCCC(=O)OCCN(C)CH3
+CCOC(=O)CCCCCCCCCCCC
+CCCCCCCCCCCCCCCC(=O)OCCOP(=O)(O)OCCN`});
+  B('omicsLoadCarbDemo',()=>{E('omicsCarbSmiles').value=`OC[C@H]1O[C@@H](O)[C@H](O)[C@@H](O)[C@H]1O
+O[C@H]1CO[C@@H](O)[C@H](O)[C@H]1O`;});
+  B('omicsLoadDNADemo',()=>{E('omicsDNA').value=`>demo
+ACGTACGTGGCCGGTTTTAAAACGCGCGTTTACGCGCAGCGCGGATATATATATAGCGC`});
+  B('omicsAnalyzeBtn', runOmicsAnalysis);
+  B('omicsExportBtn', ()=>{ if(lastOmics) downloadBlob(JSON.stringify(lastOmics,null,2),'omics_results.json'); else alert('Run analysis first.');});
+}
+async function updateNMRImage(){
+  const smiles = E('nmrSmiles').value.trim();
+  const imgDiv = E('nmrMoleculeImage');
+  if (!smiles) { imgDiv.style.backgroundImage = 'none'; imgDiv.textContent=''; return; }
+  imgDiv.textContent = 'Structure preview requires a server-side toolkit (e.g., RDKit).';
+  imgDiv.style.textAlign = 'center'; imgDiv.style.padding = '20px';
+}
+function predictNMR(type){
+  const smiles = E('nmrSmiles').value.trim(); const output = E('nmrPredictionOutput');
+  if (!smiles) { output.textContent = 'Please enter a SMILES string.'; return; }
+  let txt = `--- THEORETICAL ${type} PREDICTION FOR ${smiles} ---\n\n`;
+  if (smiles === 'CC(=O)Oc1ccccc1C(=O)O'){
+    if(type==='1H'){ txt += `Aspirin, CDCl3 (typical):\n- CH3 singlet ~2.3 ppm (3H)\n- Ar multiplet 7.1–8.2 ppm (4H)\n- COOH broad >10 ppm`; }
+    else if(type==='13C'){ txt += `9 carbons: CH3 ~21; C=O(ester) ~169; C=O(acid) ~171; ring 120–155 ppm`; }
+    else if(type==='COSY'){ txt += `Ortho ring couplings visible; CH3 isolated`; }
+    else if(type==='NOESY'){ txt += `NOE: CH3 ↔ ortho aryl possible; ring proximities`; }
+  } else { txt += 'Demo provides a detailed aspirin template. For others, interpret via analogy.'; }
+  output.textContent = txt;
 }
 
-/* Reset */
+/* OMICS ANALYZER (X5) */
+let lastOmics=null;
+function runOmicsAnalysis(){
+  E('omicsStatus').textContent='running...';
+  try{
+    const proteinPDB = (E('omicsProteinPDB').value||'').trim();
+    const lipidSmiles = (E('omicsLipidSmiles').value||'').trim().split(/\r?\n/).filter(Boolean);
+    const carbSmiles  = (E('omicsCarbSmiles').value||'').trim().split(/\r?\n/).filter(Boolean);
+    const dnaText     = (E('omicsDNA').value||'').trim();
+
+    const protAtoms = parsePDB(proteinPDB);
+    const aa = summarizeResidues(protAtoms);
+    const protDesc = {
+      residues: aa.total,
+      hydrophobic_fraction: round2(aa.hydrophobic/Math.max(1,aa.total)),
+      charged_fraction: round2((aa.acidic+aa.basic)/Math.max(1,aa.total)),
+      acidic: aa.acidic, basic: aa.basic, polar: aa.polar, hydrophobic: aa.hydrophobic
+    };
+
+    const lipDesc = summarizeSmilesSet(lipidSmiles);
+    const carbDesc = summarizeSmilesSet(carbSmiles);
+    const dnaDesc = summarizeDNA(dnaText);
+
+    const trends = inferTrends(protDesc, lipDesc, carbDesc, dnaDesc);
+
+    const rows = [];
+    const add = (k,v)=> rows.push(`<tr><td>${k}</td><td>${typeof v==='number'? (''+v): v}</td></tr>`);
+    add('Protein residues', protDesc.residues);
+    add('Protein hydrophobic fraction', protDesc.hydrophobic_fraction);
+    add('Protein charged fraction', protDesc.charged_fraction);
+
+    add('Lipids: count', lipDesc.count);
+    add('Lipids: avg heteroatom %', round3(lipDesc.avgHetPct));
+    add('Lipids: avg unsaturation idx', round3(lipDesc.avgUnsat));
+    add('Lipids: avg ring count', round3(lipDesc.avgRings));
+
+    add('Carbs: count', carbDesc.count);
+    add('Carbs: avg heteroatom %', round3(carbDesc.avgHetPct));
+    add('Carbs: avg unsaturation idx', round3(carbDesc.avgUnsat));
+    add('Carbs: avg ring count', round3(carbDesc.avgRings));
+
+    add('DNA: total bp', dnaDesc.total);
+    add('DNA: GC %', round2(dnaDesc.gc*100));
+    add('DNA: CpG / kb', round3(dnaDesc.cpgPerKb));
+    add('DNA: top 3-mers', dnaDesc.top3mers.map(x=>x[0]+':'+x[1]).join(', '));
+
+    E('omicsDescriptorBody').innerHTML = rows.join('');
+    E('omicsTrends').textContent = trends.join('\n');
+    lastOmics={protein:protDesc, lipids:lipDesc, carbs:carbDesc, dna:dnaDesc, trends};
+    E('omicsStatus').textContent='complete';
+  }catch(err){
+    alert('Omics analysis failed: '+err.message);
+    E('omicsStatus').textContent='error';
+  }
+}
+function summarizeResidues(atoms){
+  const byRes=new Map();
+  for(const a of atoms){ const key=(a.chain||'A')+':' +(a.resi||0); if(!byRes.has(key)) byRes.set(key,{resn:a.resn}); }
+  const names=[...byRes.values()].map(x=>x.resn||'UNK');
+  const acidic = names.filter(x=>x==='ASP'||x==='GLU').length;
+  const basic  = names.filter(x=>x==='LYS'||x==='ARG'||x==='HIS').length;
+  const hyd    = names.filter(x=>hydrophobic.has(x)).length;
+  const polar  = Math.max(0, names.length - acidic - basic - hyd);
+  return { total:names.length, acidic, basic, polar, hydrophobic:hyd };
+}
+function summarizeSmilesSet(list){
+  if(!list.length) return {count:0, avgHetPct:0, avgUnsat:0, avgRings:0};
+  let hetPct=0, unsat=0, rings=0;
+  for(const s of list){
+    const desc = smilesDescriptors(s);
+    hetPct += desc.hetPct; unsat += desc.unsaturation; rings += desc.rings;
+  }
+  return {count:list.length, avgHetPct:hetPct/list.length, avgUnsat:unsat/list.length, avgRings:rings/list.length};
+}
+function smilesDescriptors(s){
+  const atoms = (s.match(/[A-Z][a-z]?/g)||[]);
+  const het   = atoms.filter(a=>!/^C$/.test(a)).length;
+  const total = atoms.length||1;
+  const hetPct = het/total;
+  const unsaturation = (s.match(/=/g)||[]).length + (s.match(/#|\\\\|\\//g)||[]).length*0.5;
+  const rings = (s.match(/\d/g)||[]).length/2;
+  return {hetPct, unsaturation, rings};
+}
+function summarizeDNA(txt){
+  const seqs = parseFASTA(txt);
+  const seq = seqs.join('').toUpperCase().replace(/[^ACGT]/g,'');
+  const total = seq.length;
+  const gc = total? ((seq.match(/[GC]/g)||[]).length/total):0;
+  const cpg = (seq.match(/CG/g)||[]).length;
+  const cpgPerKb = total? (cpg/(total/1000)):0;
+  const km3 = kmerCounts(seq,3);
+  const top3 = Object.entries(km3).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  return {total, gc, cpgPerKb, top3mers: top3};
+}
+function parseFASTA(t){
+  if(!t) return [];
+  const lines=t.split(/\r?\n/);
+  const seqs=[]; let cur=[];
+  for(const ln of lines){
+    if(ln.startsWith('>')){ if(cur.length){ seqs.push(cur.join('')); cur=[]; } }
+    else { cur.push(ln.trim()); }
+  }
+  if(cur.length) seqs.push(cur.join(''));
+  return seqs.length?seqs:[''];
+}
+function kmerCounts(seq,k){
+  const out={}; if(seq.length<k) return out;
+  for(let i=0;i<=seq.length-k;i++){ const km=seq.slice(i,i+k); out[km]=(out[km]||0)+1; }
+  return out;
+}
+function inferTrends(prot, lip, carb, dna){
+  const trends=[];
+  if(prot.hydrophobic_fraction>0.45 && lip.avgUnsat<1) trends.push('Membrane-leaning protein hydrophobicity with low lipid unsaturation suggests tighter, ordered microdomains.');
+  if(carb.avgHetPct>0.35 && prot.charged_fraction>0.2) trends.push('High carbohydrate heteroatom% with higher protein charge hints at glycan-mediated recognition interfaces.');
+  if(dna.gc>0.55 && lip.avgRings>0.4) trends.push('GC-rich DNA with ring-rich lipids may correlate with raft-associated chromatin-proximal signaling (heuristic).');
+  if(!trends.length) trends.push('No strong cross-modal signals detected with the simple heuristics — consider richer toolkits (RDKit, proteomics ID, motif scans).');
+  return trends;
+}
+const round2=x=>Math.round(x*100)/100;
+const round3=x=>Math.round(x*1000)/1000;
+
 function resetAll(){
-  ["pdbAText","pdbBText"].forEach(id=>E(id).value='');
   pdbAAllAtoms=[]; pdbBAllAtoms=[]; combos=[]; currentComboIndex=-1;
-  E('comboSelect').innerHTML=''; E('comboSummaryBody').innerHTML=''; E('poseControls').innerHTML='';
-  viewer?.clear(); viewer?.render();
-  status('idle'); setProgress(0);
+  ['pdbAText','pdbBText'].forEach(id=>E(id).value='');
+  updateComboSelect(); E('poseControls').innerHTML=''; E('scoreBox').textContent=''; E('metricsDisplay').innerHTML='';
+  viewer?.clear(); viewerLig?.clear(); viewerScr?.clear(); viewerComp?.clear(); viewerCDR?.clear(); viewerDesign?.clear();
+  drawPlaceholder(viewer); drawPlaceholder(viewerDesign); status('idle'); setProgress(0);
 }
+
+/* ======================================================== */
+/* ===== START OF NAMESPACED AbDesigner SCRIPT ============ */
+/* ======================================================== */
+
+// Immunoglobulin Selection
+function abDesign_selectIg(igType) {
+  // Update selection
+  document.querySelectorAll('.ig-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  E('ig-' + igType).classList.add('selected');
+  
+  abDesign_selectedIg = igType;
+  
+  // Update CDRs based on selection
+  abDesign_updateCDRsForIg(igType);
+  
+  // Update predicted properties
+  abDesign_updatePredictions();
+}
+
+// CDR Templates for each Ig
+const abDesign_cdrTemplates = {
+  IgG: {
+    H1: 'GFTFSSY', H2: 'ISGSGGST', H3: 'AREGYCSSGSCYFD',
+    L1: 'QSISSY', L2: 'AAS', L3: 'QQYGSSPT'
+  },
+  IgA: {
+    H1: 'GYTFTNY', H2: 'INPSGGYT', H3: 'ARHGNYGYALDY',
+    L1: 'QSVSSN', L2: 'GAS', L3: 'QQYNNWPT'
+  },
+  IgM: {
+    H1: 'GFSLSTY', H2: 'IWWDGDK', H3: 'ARRGVYCSSTSCYFDY',
+    L1: 'QSLVHS', L2: 'KVS', L3: 'MQATQFPT'
+  },
+  IgE: {
+    H1: 'GFTFDDH', H2: 'ISWNSGSI', H3: 'AKDGYYDILTGYFDY',
+    L1: 'QGISSW', L2: 'AAS', L3: 'QQANSFPT'
+  },
+  IgD: {
+    H1: 'GYTFTSF', H2: 'INTNTGNP', H3: 'ARDLRTGPFDY',
+    L1: 'QNVGTN', L2: 'SAS', L3: 'QQYDNLPT'
+  }
+};
+
+function abDesign_updateCDRsForIg(igType) {
+  const cdrs = abDesign_cdrTemplates[igType];
+  E('cdr-h1').textContent = cdrs.H1;
+  E('cdr-h2').textContent = cdrs.H2;
+  E('cdr-h3').textContent = cdrs.H3;
+  E('cdr-l1').textContent = cdrs.L1;
+  E('cdr-l2').textContent = cdrs.L2;
+  E('cdr-l3').textContent = cdrs.L3;
+}
+
+// Generate Antibody
+function abDesign_generateAntibody() {
+  abDesign_antibodyCount++;
+  // E('antibody-count').textContent = abDesign_antibodyCount; // Header stats removed for simplicity
+  
+  const scaffoldType = E('scaffold-type').value;
+  
+  abDesign_currentAntibody = {
+    target: abDesign_selectedIg,
+    scaffold: scaffoldType,
+    cdrs: {
+      H1: E('cdr-h1').textContent,
+      H2: E('cdr-h2').textContent,
+      H3: E('cdr-h3').textContent,
+      L1: E('cdr-l1').textContent,
+      L2: E('cdr-l2').textContent,
+      L3: E('cdr-l3').textContent
+    },
+    affinity: Math.random() * 100 + 1,
+    specificity: Math.random() * 0.5 + 0.5
+  };
+  
+  // Update displays
+  abDesign_updatePredictions();
+  abDesign_updateVisualization();
+  abDesign_updateAnalysis();
+  
+  alert('Antibody generated successfully!');
+}
+
+// Optimize CDRs
+function abDesign_optimizeCDRs() {
+  const optimized = {
+    H3: abDesign_generateOptimizedCDR('H3'),
+    H2: abDesign_generateOptimizedCDR('H2')
+  };
+  
+  E('cdr-h3').textContent = optimized.H3;
+  E('cdr-h2').textContent = optimized.H2;
+  
+  abDesign_updatePredictions();
+  alert('CDRs optimized for ' + abDesign_selectedIg + ' targeting');
+}
+
+function abDesign_generateOptimizedCDR(cdrType) {
+  const aminoAcids = 'ACDEFGHIKLMNPQRSTVWY';
+  const lengths = { H3: 14, H2: 8 };
+  let cdr = 'AR';
+  
+  for (let i = 0; i < (lengths[cdrType] || 10) - 4; i++) {
+    cdr += aminoAcids[Math.floor(Math.random() * aminoAcids.length)];
+  }
+  
+  cdr += 'FDY';
+  return cdr;
+}
+
+// Update Predictions
+function abDesign_updatePredictions() {
+  const affinity = Math.random() * 50 + 1;
+  const affinityPercent = Math.max(10, 100 - affinity * 2);
+  
+  E('affinity-meter').style.width = affinityPercent + '%';
+  E('affinity-meter').querySelector('.meter-value').textContent = affinity.toFixed(1) + ' nM';
+  
+  // Update best affinity (header stats removed)
+  // const currentBest = E('affinity-best').textContent;
+  // if (currentBest === '-' || parseFloat(affinity) < parseFloat(currentBest)) {
+  //  E('affinity-best').textContent = affinity.toFixed(1) + ' nM';
+  // }
+  
+  E('specificity-score').textContent = (Math.random() * 0.4 + 0.6).toFixed(2);
+  E('stability-tm').textContent = (Math.random() * 10 + 68).toFixed(0) + '°C';
+  E('humanization').textContent = (Math.random() * 15 + 85).toFixed(0) + '%';
+  
+  // Update success rate (header stats removed)
+  // const successRate = (abDesign_antibodyCount > 0) ? 100 : 0;
+  // E('success-rate').textContent = successRate + '%';
+}
+
+// Epitope Database
+const abDesign_epitopeDatabase = [
+  { ig: 'IgG', region: 'CH2-CH3 interface', position: '233-267', accessibility: 0.85, conservation: 0.95, relevance: 'FcRn binding - half-life' },
+  { ig: 'IgG', region: 'Lower hinge', position: '226-236', accessibility: 0.95, conservation: 0.90, relevance: 'C1q binding - CDC' },
+  { ig: 'IgA', region: 'Tailpiece', position: '453-470', accessibility: 0.95, conservation: 0.90, relevance: 'Polymerization' },
+  { ig: 'IgM', region: 'Cμ4 domain', position: '440-475', accessibility: 0.65, conservation: 0.93, relevance: 'Complement activation' },
+  { ig: 'IgE', region: 'Cε3 FcεRI', position: '335-368', accessibility: 0.88, conservation: 0.96, relevance: 'Mast cell activation' },
+  { ig: 'IgD', region: 'Hinge region', position: '182-217', accessibility: 0.98, conservation: 0.75, relevance: 'B cell signaling' }
+];
+
+function abDesign_loadEpitopes() {
+  const tbody = E('epitope-tbody');
+  if (!tbody) return;
+  
+  abDesign_epitopeDatabase.forEach(epitope => {
+    const row = `
+      <tr>
+        <td><span class="pill">${epitope.ig}</span></td>
+        <td>${epitope.region}</td>
+        <td>${epitope.position}</td>
+        <td>${(epitope.accessibility * 100).toFixed(0)}%</td>
+        <td>${(epitope.conservation * 100).toFixed(0)}%</td>
+        <td>${epitope.relevance}</td>
+        <td><button class="btn" onclick="abDesign_targetEpitope('${epitope.ig}')">Target</button></td>
+      </tr>
+    `;
+    tbody.innerHTML += row;
+  });
+}
+
+function abDesign_targetEpitope(ig) {
+  abDesign_selectIg(ig);
+  // Activate the 'abDesignTab'
+  document.querySelector('.tabbtn[data-tab="abDesignTab"]').click();
+  alert('Targeting ' + ig + ' epitope. Switched to Ab Design tab.');
+}
+
+// 3D Visualization
+function abDesign_loadDemoStructure() {
+  if (!viewerDesign) return;
+  
+  const pdbData = abDesign_generateDemoPDB();
+  viewerDesign.clear();
+  viewerDesign.addModel(pdbData, 'pdb');
+  viewerDesign.setStyle({}, {cartoon: {color: 'spectrum'}});
+  viewerDesign.zoomTo();
+  viewerDesign.render();
+}
+
+function abDesign_generateDemoPDB() {
+  let pdb = 'HEADER    IMMUNOGLOBULIN SCFV\n';
+  let atomNum = 1;
+  
+  for (let i = 0; i < 252; i++) {
+    const x = Math.sin(i * 0.1) * 20;
+    const y = Math.cos(i * 0.1) * 20;
+    const z = i * 0.5;
+    
+    pdb += `ATOM  ${String(atomNum).padStart(5)} CA   GLY A ${String(i+1).padStart(3)}     `;
+    pdb += `${x.toFixed(3).padStart(8)}${y.toFixed(3).padStart(8)}${z.toFixed(3).padStart(8)}`;
+    pdb += '  1.00  0.00           C\n';
+    atomNum++;
+  }
+  
+  pdb += 'END\n';
+  return pdb;
+}
+
+function abDesign_updateVisualization() {
+  if (!viewerDesign) return;
+  
+  viewerDesign.clear();
+  const pdbData = abDesign_generateDemoPDB();
+  viewerDesign.addModel(pdbData, 'pdb');
+  viewerDesign.setStyle({}, {cartoon: {color: 'spectrum'}});
+  
+  // Highlight CDRs
+  viewerDesign.setStyle({resi: [26, 35]}, {cartoon: {color: 'blue'}}); // H1
+  viewerDesign.setStyle({resi: [50, 65]}, {cartoon: {color: 'green'}}); // H2
+  viewerDesign.setStyle({resi: [95, 102]}, {cartoon: {color: 'red'}}); // H3
+  
+  viewerDesign.zoomTo();
+  viewerDesign.render();
+}
+
+function abDesign_resetView() {
+  if (viewerDesign) {
+    viewerDesign.zoomTo();
+    viewerDesign.render();
+  }
+}
+
+function abDesign_toggleSpin() {
+  abDesign_spinning = !abDesign_spinning;
+  if (viewerDesign) {
+    if (abDesign_spinning) {
+      viewerDesign.spin('y');
+    } else {
+      viewerDesign.spin(false);
+    }
+  }
+}
+
+function abDesign_changeStyle(style) {
+  if (!viewerDesign) return;
+  
+  viewerDesign.setStyle({}, {[style]: {color: 'spectrum'}});
+  viewerDesign.render();
+}
+
+function abDesign_highlightCDR(cdr) {
+  if (!viewerDesign) return;
+  
+  const regions = {
+    H1: [26, 35], H2: [50, 65], H3: [95, 102],
+    L1: [150, 160], L2: [170, 177], L3: [210, 220]
+  };
+  
+  viewerDesign.setStyle({}, {cartoon: {color: 'grey'}});
+  viewerDesign.setStyle({resi: regions[cdr]}, {cartoon: {color: 'red', thickness: 1.5}});
+  viewerDesign.render();
+}
+
+// Charts
+function abDesign_initializeCharts() {
+  if (typeof Plotly === 'undefined') {
+    console.warn('Plotly not loaded, skipping chart initialization.');
+    return;
+  }
+  
+  // Affinity comparison chart
+  const affinityData = {
+    x: ['IgG', 'IgA', 'IgM', 'IgD', 'IgE'],
+    y: [15, 25, 45, 30, 8],
+    type: 'bar',
+    marker: {
+      color: ['#7dd3fc', '#34d399', '#a78bfa', '#fb923c', '#f87171']
+    }
+  };
+  
+  const layout = {
+    title: 'Predicted Affinity by Target (KD, nM)',
+    paper_bgcolor: 'var(--panel)',
+    plot_bgcolor: 'var(--panel)',
+    font: { color: 'var(--text)' },
+    xaxis: { gridcolor: 'var(--line)' },
+    yaxis: { gridcolor: 'var(--line)' }
+  };
+  
+  const affinityChartDiv = E('affinity-chart');
+  if (affinityChartDiv) {
+    Plotly.newPlot(affinityChartDiv, [affinityData], layout, {responsive: true});
+  }
+  
+  // CDR properties radar chart
+  const cdrData = {
+    type: 'scatterpolar',
+    r: [0.8, 0.6, 0.9, 0.7, 0.85],
+    theta: ['Hydrophobicity', 'Charge', 'Aromaticity', 'Size', 'Flexibility'],
+    fill: 'toself',
+    marker: { color: 'var(--green)' }
+  };
+  
+  const cdrLayout = {
+    title: 'CDR Property Analysis',
+    polar: {
+      radialaxis: {
+        visible: true,
+        range: [0, 1],
+        gridcolor: 'var(--line)',
+        tickfont: { color: 'var(--muted)' }
+      },
+      bgcolor: 'var(--panel)'
+    },
+    paper_bgcolor: 'var(--panel)',
+    font: { color: 'var(--text)' }
+  };
+  
+  const cdrPropsChartDiv = E('cdr-properties-chart');
+  if(cdrPropsChartDiv) {
+    Plotly.newPlot(cdrPropsChartDiv, [cdrData], cdrLayout, {responsive: true});
+  }
+}
+
+function abDesign_updateAnalysis() {
+  const apps = {
+    IgG: ['Fc engineering', 'Half-life extension', 'ADC development'],
+    IgA: ['Mucosal immunity', 'Secretory IgA', 'Microbiome modulation'],
+    IgM: ['Complement control', 'Primary response', 'Pentamer targeting'],
+    IgE: ['Allergy treatment', 'Asthma therapy', 'Mast cell blocking'],
+    IgD: ['B cell biology', 'Autoimmunity', 'BCR signaling']
+  };
+  
+  const appDiv = E('therapeutic-apps');
+  if (appDiv) {
+    appDiv.innerHTML = '<div class="infobox" style="background:var(--bg)">' +
+      (apps[abDesign_selectedIg] || []).map(app => 
+        `<div class="result-item" style="border-color:var(--line)">
+          <span class="result-label" style="color:var(--green)">✓</span>
+          <span class="result-value" style="color:var(--text); font-family:var(--sans)">${app}</span>
+        </div>`
+      ).join('') + '</div>';
+  }
+}
+
+// Export Functions
+function abDesign_exportPDB() {
+  const pdbData = abDesign_generateDemoPDB();
+  E('export-preview').value = pdbData;
+  downloadBlob(pdbData, `anti_${abDesign_selectedIg}_antibody.pdb`, 'text/plain');
+}
+
+function abDesign_exportFASTA() {
+  const cdrs = abDesign_cdrTemplates[abDesign_selectedIg];
+  const fasta = `>Anti-${abDesign_selectedIg}_Heavy_Chain
+${cdrs.H1}${cdrs.H2}${cdrs.H3}
+>Anti-${abDesign_selectedIg}_Light_Chain
+${cdrs.L1}${cdrs.L2}${cdrs.L3}`;
+  
+  E('export-preview').value = fasta;
+  downloadBlob(fasta, `anti_${abDesign_selectedIg}_sequences.fasta`, 'text/plain');
+}
+
+function abDesign_exportReport() {
+  const report = `IMMUNOGLOBULIN ANTIBODY DESIGN REPORT
+=====================================
+Date: ${new Date().toLocaleString()}
+
+TARGET: ${abDesign_selectedIg}
+SCAFFOLD: ${E('scaffold-type').value}
+
+CDR SEQUENCES:
+- H1: ${E('cdr-h1').textContent}
+- H2: ${E('cdr-h2').textContent}
+- H3: ${E('cdr-h3').textContent}
+- L1: ${E('cdr-l1').textContent}
+- L2: ${E'cdr-l2'.textContent}
+- L3: ${E('cdr-l3').textContent}
+
+PREDICTED PROPERTIES:
+- Affinity: ${E('affinity-meter').querySelector('.meter-value').textContent}
+- Specificity: ${E('specificity-score').textContent}
+- Stability: ${E('stability-tm').textContent}
+- Humanization: ${E('humanization').textContent}
+
+THERAPEUTIC APPLICATIONS:
+${abDesign_selectedIg === 'IgG' ? '- Fc engineering\n- Half-life modulation\n- ADC development' : ''}
+${abDesign_selectedIg === 'IgE' ? '- Allergy treatment (Omalizumab-like)\n- Asthma therapy\n- Mast cell inhibition' : ''}
+${abDesign_selectedIg === 'IgA' ? '- Mucosal immunity enhancement\n- Secretory IgA targeting' : ''}
+${abDesign_selectedIg === 'IgM' ? '- Complement cascade modulation\n- Pentamer-specific targeting' : ''}
+${abDesign_selectedIg === 'IgD' ? '- B cell signaling studies\n- Autoimmune research' : ''}
+`;
+  
+  E('export-preview').value = report;
+  downloadBlob(report, `anti_${abDesign_selectedIg}_report.txt`, 'text/plain');
+}
+
+// Utility Functions
+function abDesign_updateScaffoldInfo() {
+  const scaffoldType = E('scaffold-type').value;
+  const info = {
+    scFv: 'Smallest functional unit (27 kDa), easy E. coli production, good tissue penetration, short half-life (2-4 hours)',
+    Fab: 'Fragment antigen binding (50 kDa), better stability than scFv, no Fc functions, moderate half-life (12-24 hours)',
+    IgG: 'Full antibody (150 kDa), complete effector functions, long half-life (21 days), requires mammalian expression',
+    Bispecific: 'Dual targeting (150 kDa), simultaneous binding of two antigens, complex manufacturing, enhanced therapeutic potential'
+  };
+  
+  const infoEl = E('scaffold-info');
+  if(infoEl) {
+    infoEl.innerHTML = `
+      <p style="color: var(--muted);">
+        <strong>${scaffoldType}:</strong> ${info[scaffoldType]}
+      </p>
+    `;
+  }
+}
+
+// Fragment Processing
+function abDesign_loadFragments(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        abDesign_fragments = JSON.parse(e.target.result);
+        E('fragment-data').value = JSON.stringify(abDesign_fragments, null, 2);
+        abDesign_processFragments();
+      } catch (error) {
+        alert('Error loading fragments: ' + error.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+}
+
+function abDesign_processFragments() {
+  try {
+    const data = E('fragment-data').value;
+    if (data) {
+      abDesign_fragments = JSON.parse(data);
+    }
+    
+    const candidates = abDesign_analyzeFragments(abDesign_fragments);
+    abDesign_displayCandidates(candidates);
+    
+    alert(`Processed ${abDesign_fragments.length} fragments`);
+  } catch (error) {
+    alert('Error processing fragments: ' + error.message);
+  }
+}
+
+function abDesign_analyzeFragments(frags) {
+  // Simple scoring algorithm
+  const scored = frags.map(frag => {
+    let score = 0;
+    const seq = frag.sequence || '';
+    
+    if (seq.length >= 7 && seq.length <= 16) score += 20;
+    if (seq.includes('C')) score += 10;
+    const aromatics = (seq.match(/[FWY]/g) || []).length;
+    score += aromatics * 5;
+    const charged = (seq.match(/[RKDE]/g) || []).length;
+    score += charged * 3;
+    
+    return { ...frag, score };
+  });
+  
+  scored.sort((a, b) => b.score - a.score);
+  
+  return {
+    H3: scored[0] || {sequence:'-',score:0},
+    L1: scored[1] || {sequence:'-',score:0},
+    L3: scored[2] || {sequence:'-',score:0}
+  };
+}
+
+function abDesign_displayCandidates(candidates) {
+  const html = `
+    <div class="infobox" style="background:var(--bg)">
+      <div class="result-item" style="border-color:var(--line)">
+        <span class="result-label">Best H3:</span>
+        <span class="result-value">${candidates.H3.sequence} (Score: ${candidates.H3.score})</span>
+      </div>
+      <div class="result-item" style="border-color:var(--line)">
+        <span class="result-label">Best L1:</span>
+        <span class="result-value">${candidates.L1.sequence} (Score: ${candidates.L1.score})</span>
+      </div>
+      <div class="result-item" style="border-color:var(--line)">
+        <span class="result-label">Best L3:</span>
+        <span class="result-value">${candidates.L3.sequence} (Score: ${candidates.L3.score})</span>
+      </div>
+    </div>
+  `;
+  
+  E('fragment-candidates').innerHTML = html;
+}
+/* ======================================================== */
+/* ===== END OF NAMESPACED AbDesigner SCRIPT ============== */
+/* ======================================================== */
+
 </script>
 </body>
 </html>
