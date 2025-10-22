@@ -7,7 +7,6 @@
 <meta name="theme-color" content="#0f172a" />
 <meta name="description" content="Student-friendly in-browser docking: antibody–antigen docking, CDR mapping (Kabat/Chothia/IMGT), ligand docking, batch screening, clustering, consensus scoring, 3D viz, QA & registry — all local." />
 
-<!-- External libs (loaded once) -->
 <script defer src="https://unpkg.com/3dmol@2.4.2/build/3Dmol-min.js"></script>
 <script defer src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
 
@@ -111,6 +110,7 @@
       <button class="tabbtn active" data-tab="dockTab" role="tab" aria-selected="true">🧷 Antibody Docking</button>
       <button class="tabbtn" data-tab="cdrTab" role="tab">🔬 CDR Analysis</button>
       <button class="tabbtn" data-tab="fragmentTab" role="tab">📐 Fragment Generator</button>
+      <button class="tabbtn" data-tab="fragmentScoringTab" role="tab">📈 Fragment Scoring</button>
       <button class="tabbtn" data-tab="ligTab" role="tab">🧪 Ligand Docking</button>
       <button class="tabbtn" data-tab="screenTab" role="tab">📚 Batch Screening</button>
       <button class="tabbtn" data-tab="qaTab" role="tab">✅ QA & Registry</button>
@@ -129,7 +129,6 @@
   </div>
 </header>
 
-<!-- ===================== ANTIBODY DOCKING (X5 core) ===================== -->
 <section id="dockTab" class="tabsec active" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -269,7 +268,6 @@
   </div>
 </section>
 
-<!-- ===================== CDR ANALYSIS (merged) ===================== -->
 <section id="cdrTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -311,7 +309,6 @@
   </div>
 </section>
 
-<!-- ===================== FRAGMENT GENERATOR (merged) ===================== -->
 <section id="fragmentTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -338,7 +335,59 @@
   </div>
 </section>
 
-<!-- ===================== LIGAND DOCKING (X5) ===================== -->
+<section id="fragmentScoringTab" class="tabsec" data-tab-panel>
+  <div class="wrap">
+    <div class="card">
+      <h2>📈 Robust Antibody Fragment Analyzer & Optimizer</h2>
+      <p class="small">Based on the provided JS class. Input parameters and score a therapeutic candidate.</p>
+      <div class="grid two">
+        <div>
+          <h3>Parameters</h3>
+          <div class="row"><label>Name</label><input type="text" id="fragScoreName" value="Trastuzumab-FabX"></div>
+          <div class="row"><label>Affinity (KD, nM)</label><input type="number" id="fragScoreKD" value="0.5" step="0.1"></div>
+          <div class="row"><label>Internalization (0-1)</label><input type="number" id="fragScoreInternal" value="0.88" step="0.01" max="1" min="0"></div>
+          <div class="row"><label>Stability (0-1)</label><input type="number" id="fragScoreStable" value="0.95" step="0.01" max="1" min="0"></div>
+          <div class="row"><label>Aggregation (0-1)</label><input type="number" id="fragScoreAgg" value="0.1" step="0.01" max="1" min="0"></div>
+          <div class="row"><label>Glycosylation Sites</label><input type="number" id="fragScoreGlyco" value="2" step="1" min="0"></div>
+        </div>
+        <div>
+          <h3>Class & Engineering</h3>
+          <div class="row"><label>Epitope Class</label>
+            <select id="fragScoreEpitope">
+              <option value="synergistic" selected>synergistic</option>
+              <option value="non_overlapping">non_overlapping</option>
+              <option value="agonistic">agonistic</option>
+              <option value="inhibitory">inhibitory</option>
+              <option value="neutralizing">neutralizing</option>
+              <option value="other">other</option>
+            </select>
+          </div>
+          <div class="row"><label>Fc Subclass</label>
+            <select id="fragScoreSubclass">
+              <option value="IgG1" selected>IgG1</option>
+              <option value="IgG2">IgG2</option>
+              <option value="IgG3">IgG3</option>
+              <option value="IgG4">IgG4</option>
+              <option value="IgA">IgA</option>
+              <option value="IgM">IgM</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <label class="chip"><input type="checkbox" id="fragScoreFc" checked> Fc-Engineered</label>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" id="btnRunFragScore">▶️ Analyze Fragment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Analysis Output</h2>
+      <pre class="score" id="fragScoreOutput" style="min-height: 200px; white-space: pre-wrap;"></pre>
+    </div>
+  </div>
+</section>
+
 <section id="ligTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -378,7 +427,6 @@
   </div>
 </section>
 
-<!-- ===================== BATCH SCREENING (X5) ===================== -->
 <section id="screenTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -439,7 +487,6 @@
   </div>
 </section>
 
-<!-- ===================== QA & REGISTRY (X5) ===================== -->
 <section id="qaTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -472,7 +519,6 @@
   </div>
 </section>
 
-<!-- ===================== ANALYSIS (X5) ===================== -->
 <section id="analysisTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -519,7 +565,6 @@
   </div>
 </section>
 
-<!-- ===================== OMICS (X5) ===================== -->
 <section id="omicsTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -592,7 +637,6 @@
   </div>
 </section>
 
-<!-- ===================== NMR (X5) ===================== -->
 <section id="nmrTab" class="tabsec" data-tab-panel>
   <div class="wrap grid two">
     <div class="card">
@@ -616,7 +660,6 @@
   </div>
 </section>
 
-<!-- ===================== ABOUT + DISCLAIMERS ===================== -->
 <section id="aboutTab" class="tabsec" data-tab-panel>
   <div class="wrap">
     <div class="card">
@@ -643,7 +686,6 @@
   </div>
 </footer>
 
-<!-- ===================== APP SCRIPT (integrated) ===================== -->
 <script>
 /* ===== Shared state & helpers ===== */
 let viewer=null, viewerLig=null, viewerScr=null, viewerComp=null, viewerCDR=null;
@@ -765,6 +807,39 @@ function bindEvents(){
   E('btnScrCSV').addEventListener('click', downloadScreeningCSV);
   E('btnScrJSON').addEventListener('click', downloadScreeningJSON);
   E('btnScrTop10').addEventListener('click', showTop10Screening);
+
+  // Listener for new fragment scorer
+  E('btnRunFragScore').addEventListener('click', runFragmentScoring);
+}
+
+/* Handler for new fragment scorer */
+function runFragmentScoring() {
+  try {
+    const params = {
+      name: E('fragScoreName').value || 'Candidate',
+      affinityKD: parseFloat(E('fragScoreKD').value),
+      internalizationRate: parseFloat(E('fragScoreInternal').value),
+      stabilityScore: parseFloat(E('fragScoreStable').value),
+      aggregationRisk: parseFloat(E('fragScoreAgg').value),
+      epitopeClass: E('fragScoreEpitope').value,
+      subclass: E('fragScoreSubclass').value,
+      glycosylationSites: parseInt(E('fragScoreGlyco').value),
+      fcEngineering: E('fragScoreFc').checked,
+    };
+
+    // Basic validation
+    if (isNaN(params.affinityKD) || isNaN(params.internalizationRate) || isNaN(params.stabilityScore)) {
+      throw new Error('Please enter valid numbers for KD, Internalization, and Stability.');
+    }
+
+    const fragment = new AntibodyFragment(params);
+    const explanation = fragment.explainFragment();
+
+    E('fragScoreOutput').textContent = explanation;
+
+  } catch (e) {
+    E('fragScoreOutput').textContent = 'Error: ' + e.message;
+  }
 }
 
 /* Utils */
@@ -803,7 +878,7 @@ function formatPDB(atoms,chainShift=0){
     const x=isFinite(a.x)?a.x:0, y=isFinite(a.y)?a.y:0, z=isFinite(a.z)?a.z:0;
     const xs=x.toFixed(3).padStart(8,' '), ys=y.toFixed(3).padStart(8,' '), zs=z.toFixed(3).padStart(8,' ');
     const elem=(a.elem||'C').toString().padStart(2,' ');
-    lines.push(`ATOM  ${String(serial).padStart(5,' ')} ${name} ${resn} ${chainOut}${resi}    ${xs}${ys}${zs}  1.00  0.00          ${elem}`);
+    lines.push(`ATOM  ${String(serial).padStart(5,' ')} ${name} ${resn} ${chainOut}${resi}    ${xs}${ys}${zs}  1.00  0.00           ${elem}`);
     serial++;
   }
   lines.push('TER','ENDMDL','END'); return lines.join('\n');
@@ -1119,7 +1194,7 @@ function showPose(i){
 
   const hasBackboneA = combo.Aviz.some(a=>a.name==='N') && combo.Aviz.some(a=>a.name==='CA') && combo.Aviz.some(a=>a.name==='C');
   const hasBackboneB = TB.some(a=>a.name==='N') && TB.some(a=>a.name==='CA') && TB.some(a=>a.name==='C');
-  const canCartoon   = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
+  const canCartoon     = hasBackboneA && hasBackboneB && (rA>=8 && rB>=8);
 
   viewer.setStyle({}, {});
   if (wantRibbon && canCartoon) {
@@ -1258,7 +1333,7 @@ function updateComparisonDropdowns(poses){
   const s1=E('comparePose1'), s2=E('comparePose2');
   s1.innerHTML=''; s2.innerHTML='';
   poses.forEach((p,i)=>{ const o1=document.createElement('option'); o1.value=i; o1.textContent=`Pose ${i+1}`; s1.appendChild(o1);
-                         const o2=document.createElement('option'); o2.value=i; o2.textContent=`Pose ${i+1}`; s2.appendChild(o2); });
+                          const o2=document.createElement('option'); o2.value=i; o2.textContent=`Pose ${i+1}`; s2.appendChild(o2); });
   if(poses.length>=2){ s1.value=0; s2.value=1; }
 }
 function comparePoses(){
@@ -1293,7 +1368,7 @@ function exportResidueData(){
 /* Exports */
 function downloadAllPoses(){
   const combo=combos[currentComboIndex]; if(!combo||!combo.topPoses.length){alert('No poses.');return;}
-  const lines=[]; combo.topPoses.forEach((p,i)=>{lines.push(`MODEL     ${i+1}  ${combo.label}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL');});
+  const lines=[]; combo.topPoses.forEach((p,i)=>{lines.push(`MODEL      ${i+1}  ${combo.label}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL');});
   lines.push('END'); downloadBlob(lines.join('\n'),'all_poses_'+safe(combo.label)+'.pdb');
 }
 function safe(s){return s.replace(/[^a-z0-9]+/gi,'_');}
@@ -1317,17 +1392,17 @@ function downloadJSON(){
 function downloadAllComplexesPDB(){
   if(!combos.length){alert('No complexes');return;}
   const lines=[]; let model=1;
-  combos.forEach((combo)=>{ combo.topPoses.forEach((p,i)=>{ lines.push(`MODEL     ${model++}  ${combo.label}  pose ${i+1}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL'); }); });
+  combos.forEach((combo)=>{ combo.topPoses.forEach((p,i)=>{ lines.push(`MODEL      ${model++}  ${combo.label}  pose ${i+1}`); lines.push(formatPDB(combo.Aviz)); lines.push(formatPDB(applyTransform(combo.B0,p.q,p.t),1)); lines.push('ENDMDL'); }); });
   lines.push('END'); downloadBlob(lines.join('\n'),'all_complexes_all_poses.pdb');
 }
 
 /* Ligand docking (X5) */
 function loadLigandDemoReceptor(){
-  E('ligReceptorPDB').value=`ATOM      1  CA  ALA A   1      -8.000   0.000   0.000  1.00  0.00           C
-ATOM      2  CA  ALA A   2      -6.600   1.200   0.200  1.00  0.00           C
-ATOM      3  CA  ALA A   3      -5.200   0.100   1.200  1.00  0.00           C
-ATOM      4  CA  ALA A   4      -3.800   1.400   1.400  1.00  0.00           C
-ATOM      5  CA  ALA A   5      -2.400   0.500   2.200  1.00  0.00           C
+  E('ligReceptorPDB').value=`ATOM      1  CA  ALA A   1       -8.000   0.000   0.000  1.00  0.00           C
+ATOM      2  CA  ALA A   2       -6.600   1.200   0.200  1.00  0.00           C
+ATOM      3  CA  ALA A   3       -5.200   0.100   1.200  1.00  0.00           C
+ATOM      4  CA  ALA A   4       -3.800   1.400   1.400  1.00  0.00           C
+ATOM      5  CA  ALA A   5       -2.400   0.500   2.200  1.00  0.00           C
 END`;
 }
 function parseReceptorForLigand(){
@@ -1357,7 +1432,7 @@ async function runSingleLigandDock() {
     if (!receptorPDB || !smiles) throw new Error('Receptor PDB and Ligand SMILES are required.');
     const receptorAtoms = parsePDB(receptorPDB);
     if (!receptorAtoms.length) throw new Error('Receptor PDB failed to parse.');
-    const ligandAtoms   = embedSmilesTo3D(smiles, E('ligEmbedMethod').value, parseInt(E('ligSeed').value));
+    const ligandAtoms    = embedSmilesTo3D(smiles, E('ligEmbedMethod').value, parseInt(E('ligSeed').value));
 
     const cR = centroid(receptorAtoms);
     const receptorCentered = translate(receptorAtoms, {x: -cR.x, y: -cR.y, z: -cR.z});
@@ -1465,7 +1540,7 @@ function sortAndDisplayScreeningResults(){
   else if (sortBy === 'enthalpy') screenResults.sort((a,b) => a.dH - b.dH);
   else {
     const scoreRank = [...screenResults].sort((a,b) => b.score - a.score);
-    const dHRank   = [...screenResults].sort((a,b) => a.dH - b.dH);
+    const dHRank    = [...screenResults].sort((a,b) => a.dH - b.dH);
     const contactRank=[...screenResults].sort((a,b)=> a.contacts - b.contacts);
     const rankMap = new Map();
     const add=(arr)=>arr.forEach((r,i)=>{ const k=r.receptorId+'||'+r.smiles; rankMap.set(k,(rankMap.get(k)||0)+i);});
@@ -1582,11 +1657,11 @@ function loadSessionHistory(){ refreshRunRegistry(); }
 /* Demo */
 function useExample(which){
   if(which==='A'){
-    E('pdbAText').value=`ATOM      1  CA  GLY A   1      10.000  10.000  10.000  1.00  0.00           C
-ATOM      2  CA  ALA A   2      12.000  11.000  10.500  1.00  0.00           C`;
+    E('pdbAText').value=`ATOM      1  CA  GLY A   1       10.000  10.000  10.000  1.00  0.00           C
+ATOM      2  CA  ALA A   2       12.000  11.000  10.500  1.00  0.00           C`;
   } else {
-    E('pdbBText').value=`ATOM      1  CA  PRO B   1      15.000  15.000  15.000  1.00  0.00           C
-ATOM      2  CA  LEU B   2      17.000  14.000  15.500  1.00  0.00           C`;
+    E('pdbBText').value=`ATOM      1  CA  PRO B   1       15.000  15.000  15.000  1.00  0.00           C
+ATOM      2  CA  LEU B   2       17.000  14.000  15.500  1.00  0.00           C`;
   }
 }
 async function autoDemo(){ useExample('A'); useExample('B'); E('samples').value=2000; await runAntibodyDocking(); }
@@ -1671,7 +1746,7 @@ const AntibodyPDB = (function() {
     const offset = anchorAlignmentOffsets(seq, chainType);
     const cdrs = Object.entries(rangesForChain).map(([region,[s,e]])=>{
       const start = Math.max(0, Math.min(s + offset, seq.length - 1));
-      const end   = Math.max(0, Math.min(e + offset, seq.length - 1));
+      const end    = Math.max(0, Math.min(e + offset, seq.length - 1));
       return { region, start, end, sequence: seq.slice(start, end + 1) };
     });
     const frames = [];
@@ -1826,7 +1901,7 @@ function downloadFragments(){
   let pdbContent=''; let fragNum=1;
   window.generatedFragments.forEach(({chainId,fragments})=>{
     fragments.forEach(frag=>{
-      pdbContent += `MODEL     ${fragNum}\n`;
+      pdbContent += `MODEL      ${fragNum}\n`;
       frag.caCoords.forEach((coord,i)=>{
         pdbContent += `ATOM  ${String(i+1).padStart(5)} CA   ${coord.resName.padEnd(3)} ${chainId}${String(coord.resSeq).padStart(4)}    ${coord.x.toFixed(3).padStart(8)}${coord.y.toFixed(3).padStart(8)}${coord.z.toFixed(3).padStart(8)}  1.00  0.00           C\n`;
       });
@@ -1846,10 +1921,10 @@ function bindOmicsAndNMREvents(){
   E('btnPredictNOESY').addEventListener('click', () => predictNMR('NOESY'));
 
   const B=(id,fn)=>{ const el=E(id); if(el) el.addEventListener('click', fn); };
-  B('omicsLoadProteinDemo',()=>{E('omicsProteinPDB').value=`ATOM      1  CA  ALA A   1       0.000   0.000   0.000  1.00  0.00           C
-ATOM      2  CA  LEU A   2       1.500   1.200   0.200  1.00  0.00           C
-ATOM      3  CA  LYS A   3       3.000   0.100   1.000  1.00  0.00           C
-ATOM      4  CA  ASP A   4       4.300   1.400   1.400  1.00  0.00           C
+  B('omicsLoadProteinDemo',()=>{E('omicsProteinPDB').value=`ATOM      1  CA  ALA A   1        0.000   0.000   0.000  1.00  0.00           C
+ATOM      2  CA  LEU A   2        1.500   1.200   0.200  1.00  0.00           C
+ATOM      3  CA  LYS A   3        3.000   0.100   1.000  1.00  0.00           C
+ATOM      4  CA  ASP A   4        4.300   1.400   1.400  1.00  0.00           C
 END`;});
   B('omicsLoadLipidDemo',()=>{E('omicsLipidSmiles').value=`CCCCCCCCCCCC=CCCCCC(=O)OCCN(C)CH3
 CCOC(=O)CCCCCCCCCCCC
@@ -1988,7 +2063,7 @@ function parseFASTA(t){
 }
 function kmerCounts(seq,k){
   const out={}; if(seq.length<k) return out;
-  for(let i=0;i<=seq.length-k;i++){ const km=seq.slice(i,i+k); out[km]=(out[km]||0)+1; }
+  for(let i=0;i<seq.length-k;i++){ const km=seq.slice(i,i+k); out[km]=(out[km]||0)+1; }
   return out;
 }
 function inferTrends(prot, lip, carb, dna){
@@ -2009,6 +2084,112 @@ function resetAll(){
   viewer?.clear(); viewerLig?.clear(); viewerScr?.clear(); viewerComp?.clear(); viewerCDR?.clear();
   drawPlaceholder(viewer); status('idle'); setProgress(0);
 }
+
+/* ===== Integrated AntibodyFragment Class ===== */
+// Robust Antibody Fragment Analyzer & Optimizer
+// Inspired by Goulet & Atkins, 2020: "Design of Antibody-Based Therapeutics"
+
+class AntibodyFragment {
+  constructor({
+    name,
+    affinityKD, // nM
+    kon = null, // optional kinetic on-rate
+    koff = null, // optional kinetic off-rate
+    internalizationRate, // 0-1
+    stabilityScore, // 0-1
+    aggregationRisk = 0.5, // 0-1, default
+    epitopeClass,
+    subclass,
+    glycosylationSites = 1, // number of glycosylation sites (Asn297 etc.)
+    fcEngineering = false, // boolean if Fc-engineered
+  }) {
+    this.name = name;
+    this.affinityKD = affinityKD;
+    this.kon = kon;
+    this.koff = koff;
+    this.internalizationRate = internalizationRate;
+    this.stabilityScore = stabilityScore;
+    this.aggregationRisk = aggregationRisk;
+    this.epitopeClass = epitopeClass;
+    this.subclass = subclass;
+    this.glycosylationSites = glycosylationSites;
+    this.fcEngineering = fcEngineering;
+  }
+
+  getAffinityScore() {
+    if (this.affinityKD < 0.01) return 3; // too tight
+    if (this.affinityKD <= 1) return 10;
+    if (this.affinityKD <= 10) return 8;
+    return 5;
+  }
+
+  getDevelopabilityPenalty() {
+    return (1 - this.stabilityScore) + this.aggregationRisk;
+  }
+
+  getFcScore() {
+    const baseScores = {
+      IgG1: 10, IgG3: 9, IgG2: 5, IgG4: 3, IgA: 7, IgM: 8
+    };
+    let score = baseScores[this.subclass] || 5;
+    if (this.fcEngineering) score += 1.5; // engineered Fc for enhanced ADCC/CDC or half-life
+    return score;
+  }
+
+  getEpitopeBonus() {
+    const bonuses = {
+      synergistic: 10,
+      non_overlapping: 9,
+      agonistic: 8,
+      inhibitory: 7,
+      neutralizing: 6,
+    };
+    return bonuses[this.epitopeClass] || 5;
+  }
+
+  getInternalizationScore() {
+    // >0.7 is ideal for ADC delivery
+    if (this.internalizationRate >= 0.9) return 10;
+    if (this.internalizationRate >= 0.7) return 9;
+    if (this.internalizationRate >= 0.5) return 7;
+    return 4;
+  }
+
+  getTotalScore() {
+    const affinity = this.getAffinityScore();
+    const internalization = this.getInternalizationScore();
+    const stability = this.stabilityScore * 10;
+    const epitope = this.getEpitopeBonus();
+    const fc = this.getFcScore();
+    const penalty = this.getDevelopabilityPenalty();
+
+    // Weighted scoring
+    const raw = (
+      affinity * 0.25 +
+      internalization * 0.2 +
+      stability * 0.15 +
+      epitope * 0.2 +
+      fc * 0.2
+    ) - penalty * 1.2;
+
+    return Math.max(raw.toFixed(2), 0); // ensure no negative scores
+  }
+
+  explainFragment() {
+    return `🧬 Fragment: ${this.name}
+  Affinity (KD): ${this.affinityKD} nM → Score: ${this.getAffinityScore()} 
+  Internalization Rate: ${this.internalizationRate} → Score: ${this.getInternalizationScore()} 
+  Stability Score: ${this.stabilityScore} → Weighted: ${(this.stabilityScore * 10).toFixed(2)}
+  Aggregation Risk: ${this.aggregationRisk}
+  Epitope Type: ${this.epitopeClass} → Bonus: ${this.getEpitopeBonus()}
+  Fc Subclass: ${this.subclass} ${this.fcEngineering ? '(Fc-engineered)' : ''} → Score: ${this.getFcScore()}
+  Glycosylation Sites: ${this.glycosylationSites}
+  Developability Penalty: ${this.getDevelopabilityPenalty().toFixed(2)}
+  → 🧠 Total Score: ${this.getTotalScore()} / 10`;
+  }
+}
+/* ===== End Integrated Class ===== */
+
 </script>
 </body>
 </html>
